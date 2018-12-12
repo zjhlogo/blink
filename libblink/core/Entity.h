@@ -1,19 +1,37 @@
 #pragma once
 
+#include <Rtti.h>
 #include <vector>
 
-class Component;
-
-class Entity
+namespace blink
 {
-public:
-	typedef std::vector<Component*> ComponentVector;
+    class Component;
 
-public:
-	bool insertComponent(Component* component, int index = -1);
-	bool removeComponent(Component* component);
+    class Entity
+    {
+    public:
+        RTTI_ROOT(Entity);
 
-private:
-	ComponentVector m_componentList;
+        typedef std::vector<Component*> ComponentVector;
 
-};
+    public:
+        bool insertComponent(Component* component, int index = -1);
+        bool removeComponent(Component* component);
+
+        template <typename T> T* findComponent()
+        {
+            std::type_index baseTypeIndex = typeid(T);
+
+            for (auto component : m_componentList)
+            {
+                if (component->getRtti()->isDerivedFrom(baseTypeIndex)) return (T*)component;
+            }
+
+            return nullptr;
+        }
+
+    private:
+        ComponentVector m_componentList;
+
+    };
+}

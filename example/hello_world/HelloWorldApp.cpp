@@ -1,10 +1,10 @@
 #include "HelloWorldApp.h"
 #include <Framework.h>
 
-int IApp::mainEntry()
+int blink::IApp::mainEntry()
 {
-	if (!Framework::getInstance().initialize(new HelloWorldApp())) return -1;
-	return Framework::getInstance().start();
+	if (!blink::Framework::getInstance().initialize(new HelloWorldApp())) return -1;
+	return blink::Framework::getInstance().start();
 }
 
 bool HelloWorldApp::initialize()

@@ -1,6 +1,12 @@
 #include "Component.h"
 
-Entity* Component::getEntity() const
+namespace blink
 {
-	return m_entity;
+    Component::Component()
+    {
+    }
+
+    Component::~Component()
+    {
+    }
 }

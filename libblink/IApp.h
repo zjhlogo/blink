@@ -1,11 +1,14 @@
 #pragma once
 
-class IApp
+namespace blink
 {
-public:
-	virtual bool initialize() = 0;
-	virtual void terminate() = 0;
+    class IApp
+    {
+    public:
+        virtual bool initialize() = 0;
+        virtual void terminate() = 0;
 
-	static int mainEntry();
+        static int mainEntry();
 
-};
+    };
+}

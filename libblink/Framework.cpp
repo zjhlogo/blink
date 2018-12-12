@@ -2,42 +2,45 @@
 #include "IApp.h"
 #include "device/Device.h"
 
-Framework& Framework::getInstance()
+namespace blink
 {
-	static Framework s_instance;
-	return s_instance;
-}
+    Framework& Framework::getInstance()
+    {
+        static Framework s_instance;
+        return s_instance;
+    }
 
-bool Framework::initialize(IApp* app)
-{
-	m_app = app;
+    bool Framework::initialize(IApp* app)
+    {
+        m_app = app;
 
-	if (!Device::initialize()) return false;
+        if (!Device::initialize()) return false;
 
-	return m_app->initialize();
-}
+        return m_app->initialize();
+    }
 
-int Framework::start()
-{
-	int result = Device::start(std::bind(&Framework::step, this, std::placeholders::_1));
-	if (result) return result;
+    int Framework::start()
+    {
+        int result = Device::start(std::bind(&Framework::step, this, std::placeholders::_1));
+        if (result) return result;
 
-	m_app->terminate();
+        m_app->terminate();
 
-	Device::terminate();
+        Device::terminate();
 
-	return 0;
-}
+        return 0;
+    }
 
-void Framework::step(float dt)
-{
-	// TODO: 
-}
+    void Framework::step(float dt)
+    {
+        // TODO: 
+    }
 
-void Framework::resize()
-{
-}
+    void Framework::resize()
+    {
+    }
 
-void Framework::reload()
-{
+    void Framework::reload()
+    {
+    }
 }

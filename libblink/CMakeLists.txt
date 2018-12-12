@@ -4,6 +4,9 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../cmake/utils.cmake)
 project(libblink)
 
 find_package(glfw REQUIRED)
+find_package(glm REQUIRED)
+find_package(fmt REQUIRED)
+find_package(tinyxml2 REQUIRED)
 
 set(SOURCE_FILES
 core/Component.cpp
@@ -11,6 +14,20 @@ core/Component.h
 core/Entity.cpp
 core/Entity.h
 device/Device.h
+render/glad.c
+render/glad.h
+render/khrplatform.h
+render/GlConfig.h
+render/RenderBuffer.cpp
+render/RenderBuffer.h
+render/RenderModule.cpp
+render/RenderModule.h
+render/RenderState.cpp
+render/RenderState.h
+render/Shader.cpp
+render/Shader.h
+render/VertexAttributes.cpp
+render/VertexAttributes.h
 Framework.cpp
 Framework.h
 IApp.cpp
@@ -23,12 +40,13 @@ endif ()
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	target_include_directories(${PROJECT_NAME} PUBLIC
-		$<BUILD_INTERFACE:$<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>>
-	)
-	target_link_libraries(${PROJECT_NAME} glfw opengl32)
-endif ()
+target_include_directories(${PROJECT_NAME} PUBLIC
+	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:$<TARGET_PROPERTY:tinyxml2::tinyxml2,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../libfoundation>
+)
 
 group_sources("${SOURCE_FILES}")
 configure_project(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../bin)

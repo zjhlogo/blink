@@ -1,16 +1,28 @@
 #pragma once
+#include <Rtti.h>
 
-class Entity;
-
-class Component
+namespace blink
 {
-public:
-	friend class Entity;
+    class Entity;
 
-public:
-	Entity* getEntity() const;
+    class Component
+    {
+    public:
+        RTTI_ROOT(Component);
 
-private:
-	Entity* m_entity{};
+        friend class Entity;
 
-};
+    public:
+        Component();
+        virtual ~Component();
+
+        virtual bool initialize(Entity* pEntity) = 0;
+        virtual void terminate() = 0;
+
+        Entity* getEntity() const { return m_entity; };
+
+    private:
+        Entity* m_entity{};
+
+    };
+}

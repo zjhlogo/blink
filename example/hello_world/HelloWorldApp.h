@@ -1,7 +1,7 @@
 #pragma once
 #include <IApp.h>
 
-class HelloWorldApp : public IApp
+class HelloWorldApp : public blink::IApp
 {
 public:
 	virtual bool initialize() override;

@@ -1,7 +1,6 @@
 #include "../../Device.h"
 #include "../../../Framework.h"
 #include "../../../IApp.h"
-#include <Windows.h>
 #include <GLFW/glfw3.h>
 #include <chrono>
 
@@ -57,7 +56,7 @@ int Device::start(const UpdateCb& cb)
 	return 0;
 }
 
-int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int main(int argc, char** argv)
 {
-	return IApp::mainEntry();
+	return blink::IApp::mainEntry();
 }
