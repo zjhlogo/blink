@@ -3,12 +3,8 @@
 
 namespace blink
 {
-    class RenderModule;
-
-    class VertexAttributes
+    class BufferAttributes
     {
-        friend class RenderModule;
-
     public:
         static const int MAX_ATTR_SIZE = 128;
         static const int MAX_ATTRIBUTE_ITEMS = 8;
@@ -42,21 +38,20 @@ namespace blink
 
         const AttributeItem* getAttributeItem(int nIndex) const;
         const AttributeItem* getAttributeItemByName(const tstring& name) const;
-        bool isEqual(const VertexAttributes* pVertexAttrs) const;
+        bool isEqual(const BufferAttributes* pVertexAttrs) const;
 
     protected:
-        VertexAttributes(RenderModule* pRenderModule);
-        virtual ~VertexAttributes();
+        BufferAttributes();
+        virtual ~BufferAttributes();
 
     private:
         static uint32 getGlType(AttributeItemType eType);
         static uint32 getAttributeItemSize(uint32 nSize, AttributeItemType eType);
         static AttributeItemType getAttributeItemType(const tstring& strType);
 
-        bool createVertexAttribute(const AttributeItem* pAttrItems);
+        bool createBufferAttribute(const AttributeItem* pAttrItems);
 
     private:
-        RenderModule* m_pRenderModule{};
         int m_numItems{};
         AttributeItem m_attributeItems[MAX_ATTRIBUTE_ITEMS + 1];
 

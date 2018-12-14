@@ -1,7 +1,7 @@
 #include "HelloWorldApp.h"
 #include <Framework.h>
 
-int blink::IApp::mainEntry()
+int main(int argc, char** argv)
 {
 	if (!blink::Framework::getInstance().initialize(new HelloWorldApp())) return -1;
 	return blink::Framework::getInstance().start();

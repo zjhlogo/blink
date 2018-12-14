@@ -1,22 +1,20 @@
-#include "VertexAttributes.h"
-#include "RenderModule.h"
-#include "glad.h"
+#include "BufferAttributes.h"
+#include "glad/glad.h"
 #include <tinyxml2.h>
 
 namespace blink
 {
-    VertexAttributes::VertexAttributes(RenderModule* pRenderModule)
-        :m_pRenderModule(pRenderModule)
+    BufferAttributes::BufferAttributes()
     {
         // TODO: 
     }
 
-    VertexAttributes::~VertexAttributes()
+    BufferAttributes::~BufferAttributes()
     {
         // TODO: 
     }
 
-    bool VertexAttributes::loadFromFile(const tstring& filePath)
+    bool BufferAttributes::loadFromFile(const tstring& filePath)
     {
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) return false;
@@ -55,18 +53,18 @@ namespace blink
         attrItems[attrIndex].m_offset = 0;
         attrItems[attrIndex].m_name.clear();
 
-        if (createVertexAttribute(attrItems)) return true;
+        if (createBufferAttribute(attrItems)) return true;
 
         return false;
     }
 
-    const VertexAttributes::AttributeItem* VertexAttributes::getAttributeItem(int nIndex) const
+    const BufferAttributes::AttributeItem* BufferAttributes::getAttributeItem(int nIndex) const
     {
         if (nIndex < 0 || nIndex >= m_numItems) return nullptr;
         return &m_attributeItems[nIndex];
     }
 
-    const VertexAttributes::AttributeItem* VertexAttributes::getAttributeItemByName(const tstring& name) const
+    const BufferAttributes::AttributeItem* BufferAttributes::getAttributeItemByName(const tstring& name) const
     {
         for (int i = 0; i < m_numItems; ++i)
         {
@@ -79,7 +77,7 @@ namespace blink
         return nullptr;
     }
 
-    bool VertexAttributes::isEqual(const VertexAttributes* pVertexAttrs) const
+    bool BufferAttributes::isEqual(const BufferAttributes* pVertexAttrs) const
     {
         if (!pVertexAttrs) return false;
 
@@ -97,7 +95,7 @@ namespace blink
         return true;
     }
 
-    uint32 VertexAttributes::getGlType(AttributeItemType eType)
+    uint32 BufferAttributes::getGlType(AttributeItemType eType)
     {
         static const uint32 s_GlType[static_cast<int>(AttributeItemType::NumberOfAttributeItemType)] =
         {
@@ -113,7 +111,7 @@ namespace blink
         return s_GlType[static_cast<int>(eType)];
     }
 
-    uint32 VertexAttributes::getAttributeItemSize(uint32 nSize, AttributeItemType eType)
+    uint32 BufferAttributes::getAttributeItemSize(uint32 nSize, AttributeItemType eType)
     {
         static const int s_ItemSizes[static_cast<int>(AttributeItemType::NumberOfAttributeItemType)] =
         {
@@ -129,7 +127,7 @@ namespace blink
         return nSize * s_ItemSizes[static_cast<int>(eType)];
     }
 
-    VertexAttributes::AttributeItemType VertexAttributes::getAttributeItemType(const tstring& strType)
+    BufferAttributes::AttributeItemType BufferAttributes::getAttributeItemType(const tstring& strType)
     {
         if (strType == "Unknown") return AttributeItemType::Unknown;
         else if (strType == "Byte") return AttributeItemType::Byte;
@@ -140,7 +138,7 @@ namespace blink
         return AttributeItemType::Unknown;
     }
 
-    bool VertexAttributes::createVertexAttribute(const AttributeItem* pAttrItems)
+    bool BufferAttributes::createBufferAttribute(const AttributeItem* pAttrItems)
     {
         int nNumItems = 0;
         const AttributeItem* pCurrItem = pAttrItems;

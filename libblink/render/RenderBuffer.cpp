@@ -2,13 +2,12 @@
 #include "VertexAttributes.h"
 #include "RenderModule.h"
 #include "GlConfig.h"
-#include "glad.h"
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
 namespace blink
 {
-    RenderBuffer::RenderBuffer(RenderModule* pRenderModule)
-        :m_pRenderModule(pRenderModule)
+    RenderBuffer::RenderBuffer()
     {
 
     }
@@ -23,9 +22,8 @@ namespace blink
         return true;
     }
 
-    MemVertexBuffer::MemVertexBuffer(RenderModule* pRenderModule, const VertexAttributes* pVertAttrs)
-        :RenderBuffer(pRenderModule)
-        , m_pVertAttrs(pVertAttrs)
+    MemVertexBuffer::MemVertexBuffer(const BufferAttributes* pVertAttrs)
+        :m_pVertAttrs(pVertAttrs)
     {
 
     }
@@ -51,8 +49,8 @@ namespace blink
         return m_pVertAttrs->getStride();
     }
 
-    VMemVertexBuffer::VMemVertexBuffer(RenderModule* pRenderModule, const VertexAttributes* pVertAttrs)
-        :MemVertexBuffer(pRenderModule, pVertAttrs)
+    VMemVertexBuffer::VMemVertexBuffer(const BufferAttributes* pVertAttrs)
+        :MemVertexBuffer(pVertAttrs)
     {
 
     }
@@ -108,8 +106,7 @@ namespace blink
         return true;
     }
 
-    MemIndexBuffer::MemIndexBuffer(RenderModule* pRenderModule)
-        :RenderBuffer(pRenderModule)
+    MemIndexBuffer::MemIndexBuffer()
     {
 
     }
@@ -129,8 +126,7 @@ namespace blink
         return true;
     }
 
-    VMemIndexBuffer::VMemIndexBuffer(RenderModule* pRenderModule)
-        :MemIndexBuffer(pRenderModule)
+    VMemIndexBuffer::VMemIndexBuffer()
     {
 
     }
