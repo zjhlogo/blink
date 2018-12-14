@@ -1,8 +1,8 @@
 #include "../../Device.h"
 #include "../../../Framework.h"
 #include "../../../IApp.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <chrono>
 
 GLFWwindow* s_window = nullptr;
 
@@ -10,6 +10,9 @@ bool Device::initialize()
 {
 	/* Initialize the library */
 	if (!glfwInit()) return false;
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	/* Create a windowed mode window and its OpenGL context */
 	s_window = glfwCreateWindow(1280, 720, "BLINK", nullptr, nullptr);
@@ -22,6 +25,13 @@ bool Device::initialize()
 	/* Make the window's context current */
 	glfwMakeContextCurrent(s_window);
 
+    // access gl API after context created
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        glfwTerminate();
+        return false;
+    }
+
 	return true;
 }
 
@@ -32,7 +42,7 @@ void Device::terminate()
 
 int Device::start(const UpdateCb& cb)
 {
-	auto begin = std::chrono::high_resolution_clock::now();
+    double begin = glfwGetTime();
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(s_window))
@@ -40,11 +50,10 @@ int Device::start(const UpdateCb& cb)
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		auto end = std::chrono::high_resolution_clock::now();
-		auto duration = end - begin;
-		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        double end = glfwGetTime();
+		double duration = end - begin;
 		begin = end;
-		cb(ms / 1000.0f);
+		cb(static_cast<float>(duration));
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(s_window);
@@ -54,9 +63,4 @@ int Device::start(const UpdateCb& cb)
 	}
 
 	return 0;
-}
-
-int main(int argc, char** argv)
-{
-	return blink::IApp::mainEntry();
 }

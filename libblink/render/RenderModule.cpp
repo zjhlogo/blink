@@ -1,6 +1,6 @@
 #include "RenderModule.h"
 #include "GlConfig.h"
-#include "glad.h"
+#include "glad/glad.h"
 
 namespace blink
 {

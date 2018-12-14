@@ -1,8 +1,9 @@
 #pragma once
+#include <BaseType.h>
 
 namespace blink
 {
-    class Shader
+    class Geometry
     {
     public:
 

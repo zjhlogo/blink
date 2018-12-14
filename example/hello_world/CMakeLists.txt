@@ -3,7 +3,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 
 project(hello_world)
 
-find_package(glfw REQUIRED)
+find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(fmt REQUIRED)
 find_package(tinyxml2 REQUIRED)
@@ -21,6 +21,7 @@ endif()
 target_include_directories(${PROJECT_NAME} PUBLIC
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/glad/include>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libfoundation>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libblink>
 )
@@ -28,6 +29,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 set(ALL_LIBRARIES
 glfw
 tinyxml2::tinyxml2
+libglad
 libfoundation
 libblink
 )

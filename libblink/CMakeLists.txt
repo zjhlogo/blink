@@ -3,7 +3,7 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../cmake/utils.cmake)
 
 project(libblink)
 
-find_package(glfw REQUIRED)
+find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(fmt REQUIRED)
 find_package(tinyxml2 REQUIRED)
@@ -14,20 +14,25 @@ core/Component.h
 core/Entity.cpp
 core/Entity.h
 device/Device.h
-render/glad.c
-render/glad.h
-render/khrplatform.h
+render/geometry_list/BufferGeometry.cpp
+render/geometry_list/BufferGeometry.h
+render/BufferAttributes.cpp
+render/BufferAttributes.h
+render/Geometry.cpp
+render/Geometry.h
 render/GlConfig.h
-render/RenderBuffer.cpp
-render/RenderBuffer.h
+render/Material.cpp
+render/Material.h
+render/Mesh.cpp
+render/Mesh.h
 render/RenderModule.cpp
 render/RenderModule.h
 render/RenderState.cpp
 render/RenderState.h
 render/Shader.cpp
 render/Shader.h
-render/VertexAttributes.cpp
-render/VertexAttributes.h
+render/Texture.cpp
+render/Texture.h
 Framework.cpp
 Framework.h
 IApp.cpp
@@ -45,6 +50,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:tinyxml2::tinyxml2,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/glad/include>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../libfoundation>
 )
 
