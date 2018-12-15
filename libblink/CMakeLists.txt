@@ -3,10 +3,10 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../cmake/utils.cmake)
 
 project(libblink)
 
-find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
-find_package(fmt REQUIRED)
-find_package(tinyxml2 REQUIRED)
+find_package(glfw3 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+find_package(glm PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+find_package(tinyxml2 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 set(SOURCE_FILES
 core/Component.cpp
@@ -33,6 +33,9 @@ render/Shader.cpp
 render/Shader.h
 render/Texture.cpp
 render/Texture.h
+utils/ImageLoader.cpp
+utils/ImageLoader.h
+utils/stb_image.h
 Framework.cpp
 Framework.h
 IApp.cpp
@@ -45,7 +48,7 @@ endif ()
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>

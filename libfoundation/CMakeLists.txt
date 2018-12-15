@@ -3,24 +3,31 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../cmake/utils.cmake)
 
 project(libfoundation)
 
-find_package(glm REQUIRED)
-find_package(fmt REQUIRED)
+find_package(glm PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 set(SOURCE_FILES
 BaseType.cpp
 BaseType.h
 EventSystem.h
+File.h
 Log.h
+PathParser.cpp
+PathParser.h
 Rtti.h
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	set(SOURCE_FILES ${SOURCE_FILES} platform/windows/LogWindows.cpp)
+	set(SOURCE_FILES ${SOURCE_FILES}
+		platform/windows/dirent_windows.h
+		platform/windows/FileWindows.cpp
+		platform/windows/LogWindows.cpp
+	)
 endif ()
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 )

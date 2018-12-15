@@ -1,4 +1,5 @@
 ﻿#include "BaseType.h"
+#include <glm/gtc/quaternion.hpp>
 
 namespace blink
 {
