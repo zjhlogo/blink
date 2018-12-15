@@ -15,6 +15,8 @@ Log.h
 PathParser.cpp
 PathParser.h
 Rtti.h
+StringBuilder.cpp
+StringBuilder.h
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
