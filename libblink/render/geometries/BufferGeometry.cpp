@@ -1,4 +1,5 @@
 #include "BufferGeometry.h"
+#include "BufferAttributes.h"
 #include "../GlConfig.h"
 #include <glad/glad.h>
 

@@ -39,10 +39,12 @@ namespace blink
     extern const glm::vec3              VEC3_ONE;
     extern const glm::vec4              VEC4_ONE;
 
-    extern const glm::vec3              VEC3_UP;
-    extern const glm::vec3              VEC3_X;
-    extern const glm::vec3              VEC3_Y;
-    extern const glm::vec3              VEC3_Z;
+    extern const glm::vec3              VEC3_PX;
+    extern const glm::vec3              VEC3_NX;
+    extern const glm::vec3              VEC3_PY;
+    extern const glm::vec3              VEC3_NY;
+    extern const glm::vec3              VEC3_PZ;
+    extern const glm::vec3              VEC3_NZ;
 
     extern const glm::quat              QUAT_ZERO;
 

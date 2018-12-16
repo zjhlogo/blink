@@ -23,16 +23,24 @@ namespace blink
         class AttributeItem
         {
         public:
-            uint32 m_size{};
-            AttributeItemType m_attrType{ AttributeItemType::Unknown };
-            uint32 m_glType{};
-            uint32 m_offset{};
+            uint32 m_size;
+            AttributeItemType m_attrType;
+            uint32 m_glType;
+            uint32 m_offset;
             tstring m_name;
         };
 
-    public:
-        bool loadFromFile(const tstring& filePath);
+        enum class StockAttributes
+        {
+            Pos3 = 0,
+            Pos3Color,
+            Pos3Uv2,
+            Pos3Uv2Normal,
+            Pos3Uv2Color,
+            NumberOfStockAttributes,
+        };
 
+    public:
         inline uint32 getStride() const { return m_attributeItems[m_numItems].m_offset; };
         inline int getNumAttributeItems() const { return m_numItems; };
 
@@ -40,16 +48,18 @@ namespace blink
         const AttributeItem* getAttributeItemByName(const tstring& name) const;
         bool isEqual(const BufferAttributes* pVertexAttrs) const;
 
+        static BufferAttributes* fromFile(const tstring& filePath);
+        static BufferAttributes* fromStock(StockAttributes stockAttrs);
+        static BufferAttributes* fromAttributeItems(const AttributeItem* pAttrItems);
+
     protected:
-        BufferAttributes();
-        virtual ~BufferAttributes();
+        BufferAttributes() {};
+        virtual ~BufferAttributes() {};
 
     private:
         static uint32 getGlType(AttributeItemType eType);
         static uint32 getAttributeItemSize(uint32 nSize, AttributeItemType eType);
         static AttributeItemType getAttributeItemType(const tstring& strType);
-
-        bool createBufferAttribute(const AttributeItem* pAttrItems);
 
     private:
         int m_numItems{};
@@ -103,16 +113,6 @@ namespace blink
     };
 
     typedef std::vector<VertAttrPos3Uv2Color> VertAttrPos3Uv2ColorList;
-
-    class VertAttrPos3Uv4Color
-    {
-    public:
-        float x, y, z;			// pos3
-        float u, v, gs, dumy;	// uv2
-        float r, g, b, a;		// color
-    };
-
-    typedef std::vector<VertAttrPos3Uv4Color> VertAttrPos3Uv4ColorList;
 
     typedef std::vector<uint16> Uint16List;
 }

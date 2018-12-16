@@ -1,5 +1,5 @@
 #pragma once
-#include "../Geometry.h"
+#include "Geometry.h"
 
 namespace blink
 {
@@ -8,13 +8,15 @@ namespace blink
     class BufferGeometry : public Geometry
     {
     public:
-        BufferGeometry();
-        ~BufferGeometry();
+        RTTI_DEF(BufferGeometry, Geometry);
 
-        const BufferAttributes* getVertexBufferAttributes() const { return m_vertexBufferAttribute; };
+        BufferGeometry();
+        virtual ~BufferGeometry();
+
         uint32 getVertexBufferId() const { return m_vertexBufferId; };
         uint32 getIndexBufferId() const { return m_indexBufferId; };
 
+        const BufferAttributes* getBufferAttributes() const { return m_vertexBufferAttribute; };
         bool uploadVertexBuffer(const BufferAttributes* bufferAttribute, const void* bufferData, uint32 bufferSize);
         bool uploadIndexBuffer(const uint16* bufferData, uint32 numIndex);
 
