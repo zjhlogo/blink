@@ -13,6 +13,8 @@ namespace blink
         tstring getDirectory();
         tstring getFullPath();
 
+        static tstring getFileLowerExtension(const tstring& path);
+
     private:
         void appendSubDir(StringList& dirList, const tstring& subDir);
 

@@ -16,6 +16,8 @@ core/Entity.h
 device/Device.h
 render/geometry_list/BufferGeometry.cpp
 render/geometry_list/BufferGeometry.h
+render/texture_list/Texture2D.cpp
+render/texture_list/Texture2D.h
 render/BufferAttributes.cpp
 render/BufferAttributes.h
 render/Geometry.cpp

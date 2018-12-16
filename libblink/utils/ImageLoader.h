@@ -3,7 +3,7 @@
 
 namespace blink
 {
-    class ImageUtil
+    class ImageLoader
     {
     public:
         enum class ImageFileType
@@ -16,25 +16,26 @@ namespace blink
         class ImageInfo
         {
         public:
-            int m_width{};
-            int m_height{};
-            int m_channels{ 1 };
-            BufferData m_bufferData;
+            ~ImageInfo();
+
+            int width{};
+            int height{};
+            int channels{};
+            uint8* data{};
         };
 
         class TextureInfo
         {
         public:
-            uint32 m_textureId{};
-            glm::ivec2 m_texSize;
+            uint32 textureId{};
+            glm::ivec2 texSize;
         };
 
     public:
-        static ImageFileType getImageFileType(const tstring& filePath);
-        static bool loadTextureFromImage(ImageInfo& imageInfo, ImageFileType eImageFileType, const tstring& filePath);
-        static bool createTextureFromRawData(TextureInfo& textureInfo, int width, int height, int channels, const BufferData& buffer);
-
+        static ImageFileType getImageType(const tstring& filePath);
+        static bool loadTextureFromImage(ImageInfo& imageInfo, const tstring& filePath);
         static bool decodePngImage(ImageInfo& imageInfoOut, const tstring& filePath);
-        static bool savePngImage(const tstring& filePath, const ImageInfo& imageInfo);
+
+        static bool createTextureFromRawData(TextureInfo& textureInfo, int width, int height, int channels, const void* data);
     };
 }

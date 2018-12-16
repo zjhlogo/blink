@@ -11,8 +11,8 @@ namespace blink
         static int replace(tstring& strInOut, const tstring& strSearch, const tstring& strReplace);
         static bool trim(tstring& strOut, const tstring& strIn);
 
-        static void upper(tstring& strOut, const tstring& strIn);
-        static void lower(tstring& strOut, const tstring& strIn);
+        static tstring upper(const tstring& strIn);
+        static tstring lower(const tstring& strIn);
 
         static bool isSpace(const tstring& strIn);
         static bool hasSpace(const tstring& strIn);

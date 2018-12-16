@@ -1,4 +1,5 @@
 #include "PathParser.h"
+#include "StringBuilder.h"
 #include <algorithm>
 
 namespace blink
@@ -95,6 +96,13 @@ namespace blink
         }
 
         return fullPath;
+    }
+
+    tstring PathParser::getFileLowerExtension(const tstring & path)
+    {
+        PathParser pp;
+        pp.parse(path);
+        return StringBuilder::lower(pp.extension);
     }
 
     void PathParser::appendSubDir(StringList & dirList, const tstring & subDir)

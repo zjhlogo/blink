@@ -28,16 +28,18 @@ namespace blink
         return true;
     }
 
-    void StringBuilder::upper(tstring & strOut, const tstring & strIn)
+    tstring StringBuilder::upper(const tstring & strIn)
     {
-        strOut = strIn;
+        tstring strOut = strIn;
         std::transform(strOut.begin(), strOut.end(), strOut.begin(), ::toupper);
+        return strOut;
     }
 
-    void StringBuilder::lower(tstring & strOut, const tstring & strIn)
+    tstring StringBuilder::lower(const tstring & strIn)
     {
-        strOut = strIn;
+        tstring strOut = strIn;
         std::transform(strOut.begin(), strOut.end(), strOut.begin(), ::tolower);
+        return strOut;
     }
 
     bool StringBuilder::isSpace(const tstring & strIn)
