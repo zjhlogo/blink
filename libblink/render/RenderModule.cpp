@@ -1,6 +1,7 @@
 #include "RenderModule.h"
 #include "GlConfig.h"
 #include "glad/glad.h"
+#include <StringBuilder.h>
 
 namespace blink
 {
@@ -18,29 +19,41 @@ namespace blink
 
     bool RenderModule::initialize(Entity* pEntity)
     {
-        LOGI("Version: {0}", glGetString(GL_VERSION));
-        LOGI("Vendor: {0}", glGetString(GL_VENDOR));
-        LOGI("Renderer: {0}", glGetString(GL_RENDERER));
+        //LOGI("Version: {0}", glGetString(GL_VERSION));
+        //LOGI("Vendor: {0}", glGetString(GL_VENDOR));
+        //LOGI("Renderer: {0}", glGetString(GL_RENDERER));
 
         //const GLubyte* pszExtensions = glGetString(GL_EXTENSIONS);
-        //StringList extensionsArray;
-        //StringUtil::splitString(extensionsArray, reinterpret_cast<const char*>(pszExtensions), " ");
-        //for (const auto& ext : extensionsArray)
+        //if (pszExtensions)
         //{
-        //    LOGI("Extensions: {0}", ext);
+        //    StringList extensionsArray;
+        //    StringBuilder::split(extensionsArray, reinterpret_cast<const char*>(pszExtensions), " ");
+        //    for (const auto& ext : extensionsArray)
+        //    {
+        //        LOGI("Extensions: {0}", ext);
+        //    }
         //}
 
-        LOG_GL_INT_CAPACITY(GL_DEPTH_BITS);
-        LOG_GL_INT_CAPACITY(GL_STENCIL_BITS);
+        //LOG_GL_INT_CAPACITY(GL_DEPTH_BITS);
+        //LOG_GL_INT_CAPACITY(GL_STENCIL_BITS);
 
-        LOG_GL_INT_CAPACITY(GL_MAX_VERTEX_ATTRIBS);					// The value must be at least 8
-        LOG_GL_INT_CAPACITY(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS);		// The value may be 0
-        LOG_GL_INT_CAPACITY(GL_MAX_TEXTURE_IMAGE_UNITS);			// The value must be at least 8
+        //LOG_GL_INT_CAPACITY(GL_MAX_VERTEX_ATTRIBS);               // The value must be at least 8
+        //LOG_GL_INT_CAPACITY(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS);   // The value may be 0
+        //LOG_GL_INT_CAPACITY(GL_MAX_TEXTURE_IMAGE_UNITS);			// The value must be at least 8
 
-        LOG_GL_INT_CAPACITY(GL_MAX_TEXTURE_SIZE);					// The value must be at least 64
-        LOG_GL_INT_CAPACITY(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);	// The value must be at least 8
-        LOG_GL_INT_CAPACITY(GL_MAX_CUBE_MAP_TEXTURE_SIZE);			// The value must be at least 16
-        LOG_GL_INT_CAPACITY(GL_MAX_RENDERBUFFER_SIZE);				// The value must be at least 1
+        //LOG_GL_INT_CAPACITY(GL_MAX_TEXTURE_SIZE);					// The value must be at least 64
+        //LOG_GL_INT_CAPACITY(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);	// The value must be at least 8
+        //LOG_GL_INT_CAPACITY(GL_MAX_CUBE_MAP_TEXTURE_SIZE);        // The value must be at least 16
+        //LOG_GL_INT_CAPACITY(GL_MAX_RENDERBUFFER_SIZE);            // The value must be at least 1
+
+        //GL_ERROR_CHECK();
+
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
+        GL_ERROR_CHECK();
+
+        glBindVertexArray(vao);
+        GL_ERROR_CHECK();
 
         return true;
     }

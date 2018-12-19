@@ -27,8 +27,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 set(ALL_LIBRARIES
-$<TARGET_PROPERTY:glfw,IMPORTED_LOCATION_DEBUG>
-$<TARGET_PROPERTY:tinyxml2::tinyxml2,IMPORTED_IMPLIB_DEBUG>
+glfw
+fmt::fmt
+tinyxml2::tinyxml2
 libglad
 libfoundation
 libblink

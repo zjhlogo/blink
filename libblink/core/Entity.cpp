@@ -13,7 +13,13 @@ namespace blink
 
         m_componentList.insert(m_componentList.begin() + index, component);
         component->m_entity = this;
-        // TODO: initialize component
+
+        // initialize component
+        if (!component->initialize(this))
+        {
+            SAFE_DELETE_AND_TERMINATE(component);
+            return false;
+        }
 
         return true;
     }
@@ -24,10 +30,34 @@ namespace blink
         if (it != m_componentList.end())
         {
             m_componentList.erase(it);
-            // TODO: delete component
+
+            // terminate component
+            SAFE_DELETE_AND_TERMINATE(component);
+
             return true;
         }
 
         return false;
+    }
+
+    void Entity::removeAllComponents()
+    {
+        for (auto component : m_componentList)
+        {
+            // terminate component
+            SAFE_DELETE_AND_TERMINATE(component);
+        }
+
+        m_componentList.clear();
+    }
+
+    Entity::Entity()
+    {
+
+    }
+
+    Entity::~Entity()
+    {
+        removeAllComponents();
     }
 }

@@ -8,7 +8,17 @@ namespace blink
     class Shader
     {
     public:
-        bool loadFromFile(const tstring& filePath);
+        enum class StockShaders
+        {
+            Lamber = 0,
+            NumberOfStockShaders,
+        };
+
+    public:
+        static Shader* fromStock(StockShaders stockShader);
+        static Shader* fromFile(const tstring& filePath);
+
+        bool reload();
         bool setUniform(const char* pszName, int value);
         bool setUniform(const char* pszName, float value);
         bool setUniform(const char* pszName, const glm::vec2& v);
@@ -26,6 +36,9 @@ namespace blink
         bool setUniform(const char* pszName, const T(&v)[t_size]) { return setUniform(pszName, t_size, v); };
 
         bool setTexture(const char* pszName, const Texture* pTexture, uint32 slotIndex = 0);
+
+        uint32 getProgramId() const { return m_programId; };
+        void release();
 
     private:
         Shader();

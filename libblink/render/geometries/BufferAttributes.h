@@ -47,10 +47,11 @@ namespace blink
         const AttributeItem* getAttributeItem(int nIndex) const;
         const AttributeItem* getAttributeItemByName(const tstring& name) const;
         bool isEqual(const BufferAttributes* pVertexAttrs) const;
+        void release();
 
         static BufferAttributes* fromFile(const tstring& filePath);
         static BufferAttributes* fromStock(StockAttributes stockAttrs);
-        static BufferAttributes* fromAttributeItems(const AttributeItem* pAttrItems);
+        static BufferAttributes* fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems);
 
     protected:
         BufferAttributes() {};

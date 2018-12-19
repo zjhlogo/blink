@@ -47,9 +47,6 @@ int Device::start(const UpdateCb& cb)
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(s_window))
 	{
-		/* Render here */
-		glClear(GL_COLOR_BUFFER_BIT);
-
         double end = glfwGetTime();
 		double duration = end - begin;
 		begin = end;

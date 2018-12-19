@@ -1,9 +1,12 @@
 #include "BufferAttributes.h"
+#include <InstanceManager.h>
 #include <glad/glad.h>
 #include <tinyxml2.h>
 
 namespace blink
 {
+    static InstanceManager<tstring, BufferAttributes> s_instanceManager;
+
     const BufferAttributes::AttributeItem* BufferAttributes::getAttributeItem(int nIndex) const
     {
         if (nIndex < 0 || nIndex >= m_numItems) return nullptr;
@@ -39,6 +42,14 @@ namespace blink
         }
 
         return true;
+    }
+
+    void BufferAttributes::release()
+    {
+        if (s_instanceManager.removeInstance(this))
+        {
+            delete this;
+        }
     }
 
     uint32 BufferAttributes::getGlType(AttributeItemType eType)
@@ -86,6 +97,9 @@ namespace blink
 
     BufferAttributes * BufferAttributes::fromFile(const tstring & filePath)
     {
+        auto exitInst = s_instanceManager.insertInstance(filePath);
+        if (exitInst) return exitInst;
+
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) return nullptr;
 
@@ -123,11 +137,31 @@ namespace blink
         attrItems[attrIndex].m_offset = 0;
         attrItems[attrIndex].m_name.clear();
 
-        return fromAttributeItems(attrItems);
+        return fromAttributeItems("file::" + filePath, attrItems);
     }
 
     BufferAttributes * BufferAttributes::fromStock(StockAttributes stockAttrs)
     {
+        static AttributeItem s_attrPos3[] =
+        {
+            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
+            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+        };
+
+        static AttributeItem s_attrPos3Color[] =
+        {
+            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
+            {4, AttributeItemType::UnsignedByte, GL_UNSIGNED_BYTE, 12, "a_color"},
+            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+        };
+
+        static AttributeItem s_attrPos3Uv2[] =
+        {
+            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
+            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_uv"},
+            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+        };
+
         static AttributeItem s_attrPos3Uv2Normal[] = 
         {
             {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
@@ -136,20 +170,40 @@ namespace blink
             {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
         };
 
-        static AttributeItem* s_stockAttributeItems[static_cast<int>(StockAttributes::NumberOfStockAttributes)] = 
+        static AttributeItem s_attrPos3Uv2Color[] =
         {
-            nullptr,                     // Pos3
-            nullptr,                     // Pos3Color
-            nullptr,                     // Pos3Uv2
-            s_attrPos3Uv2Normal,         // Pos3Uv2Normal
-            nullptr,                     // Pos3Uv2Color
+            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
+            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_uv"},
+            {4, AttributeItemType::UnsignedByte, GL_UNSIGNED_BYTE, 20, "a_color"},
+            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
         };
 
-        return fromAttributeItems(s_stockAttributeItems[static_cast<int>(stockAttrs)]);
+        static AttributeItem* s_stockAttributeItems[static_cast<int>(StockAttributes::NumberOfStockAttributes)] = 
+        {
+            s_attrPos3,                  // Pos3
+            s_attrPos3Color,             // Pos3Color
+            s_attrPos3Uv2,               // Pos3Uv2
+            s_attrPos3Uv2Normal,         // Pos3Uv2Normal
+            s_attrPos3Uv2Color,          // Pos3Uv2Color
+        };
+
+        static const tstring s_stockAttributeId[static_cast<int>(StockAttributes::NumberOfStockAttributes)] =
+        {
+            "stock::Pos3",
+            "stock::Pos3Color",
+            "stock::Pos3Uv2",
+            "stock::Pos3Uv2Normal",
+            "stock::Pos3Uv2Color",
+        };
+
+        return fromAttributeItems(s_stockAttributeId[static_cast<int>(stockAttrs)], s_stockAttributeItems[static_cast<int>(stockAttrs)]);
     }
 
-    BufferAttributes * BufferAttributes::fromAttributeItems(const AttributeItem* pAttrItems)
+    BufferAttributes * BufferAttributes::fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems)
     {
+        auto exitInst = s_instanceManager.insertInstance(id);
+        if (exitInst) return exitInst;
+
         int nNumItems = 0;
         const AttributeItem* pCurrItem = pAttrItems;
         while (pCurrItem && pCurrItem->m_attrType != AttributeItemType::Unknown)
@@ -180,6 +234,6 @@ namespace blink
         pBufferAttributes->m_attributeItems[nNumItems].m_offset = currOffset;
         pBufferAttributes->m_attributeItems[nNumItems].m_name.clear();
 
-        return pBufferAttributes;
+        return s_instanceManager.insertInstance(id, pBufferAttributes);
     }
 }

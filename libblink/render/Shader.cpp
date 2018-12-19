@@ -1,11 +1,15 @@
 #include "Shader.h"
 #include "textures/Texture.h"
+#include "shaders/ShaderLib.h"
 #include "GlConfig.h"
+#include <InstanceManager.h>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace blink
 {
+    static InstanceManager<tstring, Shader> s_instanceManager;
+
     class AutoDeleteShaderObj
     {
     public:
@@ -17,7 +21,47 @@ namespace blink
 
     };
 
-    bool Shader::loadFromFile(const tstring& filePath)
+    Shader * Shader::fromStock(StockShaders stockShader)
+    {
+        static const char* s_stockVs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
+        {
+            LAMBER_VS,                  // Lamber
+        };
+
+        static const char* s_stockFs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
+        {
+            LAMBER_FS,                  // Lamber
+        };
+
+        static const tstring s_stockShaderIds[static_cast<int>(StockShaders::NumberOfStockShaders)] =
+        {
+            "stock::Lamber",
+        };
+
+        auto exitShader = s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)]);
+        if (exitShader) return exitShader;
+
+        Shader* shader = new Shader();
+
+        shader->m_vertexShaderData = s_stockVs[static_cast<int>(stockShader)];
+        shader->m_fragShaderData = s_stockFs[static_cast<int>(stockShader)];
+
+        if (!shader->reload())
+        {
+            SAFE_DELETE(shader);
+            return nullptr;
+        }
+
+        return s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)], shader);
+    }
+
+    Shader* Shader::fromFile(const tstring& filePath)
+    {
+        // TODO: not implement yet
+        return nullptr;
+    }
+
+    bool Shader::reload()
     {
         destroyProgram();
 
@@ -38,14 +82,6 @@ namespace blink
         glAttachShader(m_programId, vertexId);
         glAttachShader(m_programId, fragmentId);
 
-        //// bind attribute
-        //int numAttrs = m_pVertAttributes->getNumAttributeItems();
-        //for (int i = 0; i < numAttrs; ++i)
-        //{
-        //    const VertexAttributes::AttributeItem* pAttrItem = m_pVertAttributes->getAttributeItem(i);
-        //    glBindAttribLocation(m_programId, i, pAttrItem->m_name.c_str());
-        //}
-
         // link program
         glLinkProgram(m_programId);
         if (getProgramErrorLog(m_programId))
@@ -53,19 +89,6 @@ namespace blink
             LOGE("Link program failed with error log {0}", m_errorLog);
             return false;
         }
-
-        //// bind texture slot
-        //glUseProgram(m_programId);
-        //for (auto textureInfo : m_textureInfoMap)
-        //{
-        //    TextureInfo& info = textureInfo.second;
-        //    GLint loc = glGetUniformLocation(m_programId, info.m_name.c_str());
-        //    GL_ERROR_CHECK();
-
-        //    glUniform1i(loc, info.m_slotId);
-        //    GL_ERROR_CHECK();
-        //}
-        //glUseProgram(0);
 
         return true;
     }
@@ -247,6 +270,14 @@ namespace blink
         GL_ERROR_CHECK();
 
         return true;
+    }
+
+    void Shader::release()
+    {
+        if (s_instanceManager.removeInstance(this))
+        {
+            delete this;
+        }
     }
 
     Shader::Shader()

@@ -11,6 +11,7 @@ BaseType.cpp
 BaseType.h
 EventSystem.h
 File.h
+InstanceManager.h
 Log.h
 PathParser.cpp
 PathParser.h

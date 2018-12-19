@@ -12,11 +12,12 @@ namespace blink
 
     BufferGeometry::~BufferGeometry()
     {
+        SAFE_RELEASE(m_vertexBufferAttribute);
         destroyVertexBuffer();
         destroyIndexBuffer();
     }
 
-    bool BufferGeometry::uploadVertexBuffer(const BufferAttributes * bufferAttribute, const void * bufferData, uint32 bufferSize)
+    bool BufferGeometry::uploadVertexBuffer(BufferAttributes * bufferAttribute, const void * bufferData, uint32 bufferSize)
     {
         // create buffer object
         destroyVertexBuffer();
@@ -35,6 +36,7 @@ namespace blink
         // Unbind the VBO
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        m_vertexBufferAttribute = bufferAttribute;
         return true;
     }
 
@@ -57,6 +59,7 @@ namespace blink
 		// Unbind the VBO
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+        m_numIndex = numIndex;
 		return true;
 	}
     void BufferGeometry::destroyVertexBuffer()

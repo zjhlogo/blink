@@ -19,6 +19,12 @@ namespace blink
         return m_app->initialize();
     }
 
+    void Framework::terminate()
+    {
+        SAFE_DELETE(m_app);
+        removeAllComponents();
+    }
+
     int Framework::start()
     {
         int result = Device::start(std::bind(&Framework::step, this, std::placeholders::_1));
@@ -33,7 +39,8 @@ namespace blink
 
     void Framework::step(float dt)
     {
-        // TODO: 
+        m_app->update(dt);
+        m_app->render();
     }
 
     void Framework::resize()

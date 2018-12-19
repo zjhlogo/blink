@@ -17,6 +17,7 @@ namespace blink
     public:
         bool insertComponent(Component* component, int index = -1);
         bool removeComponent(Component* component);
+        void removeAllComponents();
 
         template <typename T> T* findComponent()
         {
@@ -29,6 +30,10 @@ namespace blink
 
             return nullptr;
         }
+
+    protected:
+        Entity();
+        virtual ~Entity();
 
     private:
         ComponentVector m_componentList;

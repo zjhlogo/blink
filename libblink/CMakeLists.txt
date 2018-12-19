@@ -32,6 +32,7 @@ render/objects/Mesh.cpp
 render/objects/Mesh.h
 render/objects/Object.cpp
 render/objects/Object.h
+render/shaders/ShaderLib.h
 render/GlConfig.h
 render/RenderModule.cpp
 render/RenderModule.h

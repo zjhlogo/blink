@@ -13,7 +13,6 @@ namespace blink
 
         VertAttrPos3Uv2NormalList verts;
         Uint16List indis;
-        BufferAttributes* pBufferAttributes = BufferAttributes::fromStock(BufferAttributes::StockAttributes::Pos3Uv2Normal);
 
         buildPlane(verts, indis, 2, 1, 0, depth, height, -1.0f, 1.0f, 0.5f * width, depthSegments, heightSegments, VEC3_PX);       // +x
         buildPlane(verts, indis, 2, 1, 0, depth, height, 1.0f, 1.0f, -0.5f * width, depthSegments, heightSegments, VEC3_NX);       // -x
@@ -24,7 +23,10 @@ namespace blink
         buildPlane(verts, indis, 0, 1, 2, width, height, 1.0f, 1.0f, 0.5f * depth, widthSegments, heightSegments, VEC3_PZ);        // +z
         buildPlane(verts, indis, 0, 1, 2, width, height, -1.0f, 1.0f, -0.5f * depth, widthSegments, heightSegments, VEC3_NZ);      // -z
 
-        uploadVertexBuffer(pBufferAttributes, verts.data(), sizeof(verts[0])*verts.size());
+        uploadVertexBuffer(BufferAttributes::fromStock(BufferAttributes::StockAttributes::Pos3Uv2Normal)
+            , verts.data()
+            , sizeof(verts[0])*verts.size());
+
         uploadIndexBuffer(indis.data(), indis.size());
     }
 
