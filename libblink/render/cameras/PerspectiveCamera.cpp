@@ -16,24 +16,6 @@ namespace blink
 
     }
 
-    void PerspectiveCamera::setPosition(const glm::vec3 & pos)
-    {
-        m_eye = pos;
-        m_transformDirty = true;
-    }
-
-    void PerspectiveCamera::setTargetPosition(const glm::vec3 & pos)
-    {
-        m_target = pos;
-        m_transformDirty = true;
-    }
-
-    void PerspectiveCamera::setUpDirection(const glm::vec3 & up)
-    {
-        m_up = up;
-        m_transformDirty = true;
-    }
-
     void PerspectiveCamera::setViewport(float width, float height)
     {
         m_width = width;

@@ -20,27 +20,30 @@ namespace blink
         bool remove(Object* object);
         void removeAll();
 
-        void update(float dt);
-
-        bool setPosition(const glm::vec3& pos) { m_position = pos; };
+        void setPosition(const glm::vec3& pos) { m_position = pos; m_transformDirty = true; };
         const glm::vec3& getPosition() const { return m_position; };
 
-        bool setRotation(const glm::quat& rot) { m_rotation = rot; };
+        void setRotation(const glm::quat& rot) { m_rotation = rot; m_transformDirty = true; };
         const glm::quat& getRotation() const { return m_rotation; };
 
-        bool setScale(const glm::vec3& scale) { m_scale = scale; };
+        void setScale(const glm::vec3& scale) { m_scale = scale; m_transformDirty = true; };
         const glm::vec3& getScale() const { return m_scale; };
 
         const glm::mat4& getLocalToParentTransform() const { return m_localToParent; };
+        const glm::mat4& getLocalToWorldTransform() const { return m_localToWorld; };
+
+        void updateWorldTransform(const glm::mat4& parentToWorld);
 
     private:
-        void updateTransform();
+        void updateLocalTransform();
 
     private:
-        glm::vec3 m_position;
-        glm::quat m_rotation;
+        glm::vec3 m_position{ VEC3_ZERO };
+        glm::quat m_rotation{ QUAT_ZERO };
         glm::vec3 m_scale{ 1.0f, 1.0f, 1.0f };
+
         glm::mat4 m_localToParent;
+        glm::mat4 m_localToWorld;
         bool m_transformDirty{ true };
 
         ObjectList m_children;

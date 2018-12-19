@@ -1,5 +1,9 @@
 #include "RenderModule.h"
 #include "GlConfig.h"
+#include "materials/Material.h"
+#include "geometries/BufferAttributes.h"
+#include "geometries/BufferGeometry.h"
+#include "objects/Mesh.h"
 #include "glad/glad.h"
 #include <StringBuilder.h>
 
@@ -55,6 +59,8 @@ namespace blink
         glBindVertexArray(vao);
         GL_ERROR_CHECK();
 
+        glEnable(GL_DEPTH_TEST);
+
         return true;
     }
 
@@ -65,11 +71,11 @@ namespace blink
 
     void RenderModule::reset()
     {
-        applyCurrentRenderState(true);
-        m_currentRenderState.m_viewport = glm::ivec4(0, 0, m_surfaceSize.x, m_surfaceSize.y);
+        //applyCurrentRenderState(true);
+        //m_currentRenderState.m_viewport = glm::ivec4(0, 0, m_surfaceSize.x, m_surfaceSize.y);
 
-        glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        //glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
     void RenderModule::applyCurrentRenderState(bool force /* = true */)
@@ -167,5 +173,70 @@ namespace blink
 
             m_deviceRenderState.m_cullMode = m_currentRenderState.m_cullMode;
         }
+    }
+
+    void RenderModule::renderObject(Object * object, Camera * camera)
+    {
+        Mesh* mesh = dynamic_cast<Mesh*>(object);
+        if (!mesh) return;
+
+        Material* material = mesh->getMaterial();
+        if (!material) return;
+
+        BufferGeometry* geometry = dynamic_cast<BufferGeometry*>(mesh->getGeometry());
+        if (!geometry) return;
+
+        Shader* shader = material->getShader();
+        if (!shader) return;
+
+        glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(shader->getProgramId());
+        GL_ERROR_CHECK();
+
+        shader->setUniform("u_worldToClip", camera->getWorldToClipTransform());
+        shader->setUniform("u_localToWorld", mesh->getLocalToWorldTransform());
+        shader->setUniform("u_localToClip", camera->getWorldToClipTransform() * mesh->getLocalToWorldTransform());
+        shader->setUniform("u_lightPos", glm::vec3(-3.0f, 0.0f, 3.0f));
+        shader->setUniform("u_ambientColor", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->setUniform("u_lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->setUniform("u_viewPos", camera->getPosition());
+
+        // TODO: apply render state
+
+        // Bind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, geometry->getVertexBufferId());
+        GL_ERROR_CHECK();
+
+        const blink::BufferAttributes* pVertAttributes = geometry->getBufferAttributes();
+        int numAttrs = pVertAttributes->getNumAttributeItems();
+        int stride = pVertAttributes->getStride();
+
+        // enable vertex attribute array
+        for (int i = 0; i < numAttrs; ++i)
+        {
+            const blink::BufferAttributes::AttributeItem* pAttrItem = pVertAttributes->getAttributeItem(i);
+
+            glEnableVertexAttribArray(i);
+            GL_ERROR_CHECK();
+
+            glVertexAttribPointer(i, pAttrItem->m_size, pAttrItem->m_glType, GL_FALSE, stride, (GLvoid*)((intptr_t)pAttrItem->m_offset));
+            GL_ERROR_CHECK();
+        }
+
+        // Bind the IBO
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->getIndexBufferId());
+        GL_ERROR_CHECK();
+
+        // Draws a indexed triangle array
+        glDrawElements(GL_TRIANGLES, geometry->getNumIndex(), GL_UNSIGNED_SHORT, 0);
+        GL_ERROR_CHECK();
+
+        // Unbind the IBO
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        // Unbind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }

@@ -1,26 +1,42 @@
 #pragma once
 
 const char* LAMBER_VS =
-"uniform  mat4 u_localToClip; \
-attribute vec3 a_position; \
-attribute vec2 a_texCoord; \
-attribute vec3 a_normal; \
-varying vec2 v_texCoord; \
-varying vec3 v_normal; \
+"#version 330 core\n\
+uniform mat4 u_worldToClip; \
+uniform mat4 u_localToWorld; \
+uniform mat4 u_localToClip; \
+layout (location = 0) in vec3 a_position; \
+layout (location = 1) in vec2 a_texCoord; \
+layout (location = 2) in vec3 a_normal; \
+out vec2 v_texCoord; \
+out vec3 v_normal; \
+out vec3 v_fragPos; \
 void main() \
 { \
     gl_Position = u_localToClip * vec4(a_position, 1.0); \
+    v_fragPos = vec3(u_localToWorld * vec4(a_position, 1.0)); \
     v_texCoord = a_texCoord; \
-    v_normal = a_normal; \
+    v_normal = mat3(transpose(inverse(u_localToWorld))) * a_normal; \
 }";
 
 const char* LAMBER_FS =
-"uniform vec3 u_lightDir; \
-varying vec2 v_texCoord; \
-varying vec3 v_normal; \
+"#version 330 core\n\
+uniform vec3 u_lightPos; \
+uniform vec3 u_viewPos; \
+uniform vec3 u_lightColor; \
+uniform vec3 u_ambientColor; \
+in vec2 v_texCoord; \
+in vec3 v_normal; \
+in vec3 v_fragPos; \
 void main () \
 { \
     vec3 fragNormal = normalize(v_normal); \
-    float diffuseComponent = clamp(dot(fragNormal, u_lightDir), 0.0, 1.0); \
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); \
+    vec3 lightDir = normalize(u_lightPos - v_fragPos); \
+    vec3 viewDir = normalize(u_viewPos - v_fragPos); \
+    float diffuseComponent = max(dot(fragNormal, lightDir), 0.0); \
+    vec3 diffuse = diffuseComponent * u_lightColor; \
+    vec3 reflectDir = reflect(-lightDir, fragNormal); \
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128); \
+    vec3 specular = 0.5 * spec * u_lightColor; \
+    gl_FragColor = vec4(u_ambientColor + diffuse + specular, 1.0); \
 }";

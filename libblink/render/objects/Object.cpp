@@ -42,21 +42,28 @@ namespace blink
         m_children.clear();
     }
 
-    void Object::update(float dt)
+    void Object::updateWorldTransform(const glm::mat4 & parentToWorld)
     {
-        if (m_transformDirty)
+        updateLocalTransform();
+        m_localToWorld = parentToWorld * m_localToParent;
+
+        for (auto child : m_children)
         {
-            updateTransform();
-            m_transformDirty = false;
+            child->updateWorldTransform(m_localToWorld);
         }
     }
 
-    void Object::updateTransform()
+    void Object::updateLocalTransform()
     {
-        glm::mat4 matRot = glm::mat4_cast(m_rotation);
-        glm::mat4 matScale = glm::scale(MAT4_IDENTITY, m_scale);
-        glm::mat4 matTransLocalPos = glm::translate(MAT4_IDENTITY, m_position);
+        if (m_transformDirty)
+        {
+            glm::mat4 matRot = glm::mat4_cast(m_rotation);
+            glm::mat4 matScale = glm::scale(MAT4_IDENTITY, m_scale);
+            glm::mat4 matTransLocalPos = glm::translate(MAT4_IDENTITY, m_position);
 
-        m_localToParent = matTransLocalPos * matRot * matScale;	// scale -> rotation -> translate
+            m_localToParent = matTransLocalPos * matRot * matScale;	// scale -> rotation -> translate
+
+            m_transformDirty = false;
+        }
     }
 }

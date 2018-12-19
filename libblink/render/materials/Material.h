@@ -1,5 +1,6 @@
 #pragma once
 #include <Rtti.h>
+#include "Shader.h"
 
 namespace blink
 {
@@ -10,6 +11,11 @@ namespace blink
 
         Material();
         virtual ~Material();
+
+        Shader* getShader() const { return m_shader; };
+
+    protected:
+        Shader* m_shader{};
 
     };
 }

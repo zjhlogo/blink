@@ -1,11 +1,11 @@
 #pragma once
 #include "../core/Component.h"
 #include "RenderState.h"
+#include "objects/Object.h"
+#include "cameras/Camera.h"
 
 namespace blink
 {
-    class RenderState;
-
     class RenderModule : public Component
     {
         friend RenderState;
@@ -20,14 +20,12 @@ namespace blink
         virtual bool initialize(Entity* pEntity) override;
         virtual void terminate() override;
 
-        const glm::ivec2& getSurfaceSize() const { return m_surfaceSize; };
-
         void reset();
         void applyCurrentRenderState(bool force = true);
 
-    private:
-        glm::ivec2 m_surfaceSize;
+        void renderObject(Object* object, Camera* camera);
 
+    private:
         RenderState::StateInfo m_currentRenderState;
         RenderState::StateInfo m_deviceRenderState;
     };

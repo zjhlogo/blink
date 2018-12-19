@@ -9,6 +9,6 @@ namespace blink
 
     LamberMaterial::~LamberMaterial()
     {
-        SAFE_RELEASE(m_shader);
+
     }
 }

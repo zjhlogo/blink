@@ -8,5 +8,6 @@ namespace blink
 
     Material::~Material()
     {
+        SAFE_RELEASE(m_shader);
     }
 }
