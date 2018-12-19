@@ -10,6 +10,7 @@ namespace blink
 
     Mesh::~Mesh()
     {
-
+        SAFE_DELETE(m_geometry);
+        SAFE_DELETE(m_material);
     }
 }

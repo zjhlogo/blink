@@ -2,5 +2,11 @@
 
 namespace blink
 {
+    Material::Material()
+    {
+    }
 
+    Material::~Material()
+    {
+    }
 }

@@ -2,12 +2,15 @@
 
 namespace blink
 {
-    void IApp::update(float dt)
+    IApp::IApp(int windowWidth, int windowHeight, const tstring & title)
+        :m_windowWidth(windowWidth)
+        , m_windowHeight(windowHeight)
+        , m_title(title)
     {
 
     }
 
-    void IApp::render()
+    IApp::~IApp()
     {
 
     }

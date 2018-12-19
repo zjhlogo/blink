@@ -1,12 +1,17 @@
 #pragma once
 #include <IApp.h>
-#include <glm/glm.hpp>
-#include <render/geometries/BufferGeometry.h>
-#include <render/Shader.h>
+#include <render/Scene.h>
+#include <render/cameras/PerspectiveCamera.h>
+#include <render/objects/Mesh.h>
 
 class HelloWorldApp : public blink::IApp
 {
 public:
+    RTTI_DEF(HelloWorldApp, blink::IApp);
+
+    HelloWorldApp();
+    virtual ~HelloWorldApp();
+
 	virtual bool initialize() override;
 	virtual void terminate() override;
 
@@ -14,11 +19,8 @@ public:
     virtual void render();
 
 private:
-    glm::mat4 m_matModel;
-    glm::mat4 m_worldToCamera;
-    glm::mat4 m_cameraToClip;
-
-    blink::BufferGeometry* m_boxGeometry{};
-    blink::Shader* m_shader{};
+    blink::Scene* m_rootScene{};
+    blink::PerspectiveCamera* m_camera{};
+    blink::Mesh* m_cube{};
 
 };

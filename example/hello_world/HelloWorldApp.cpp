@@ -2,7 +2,9 @@
 #include <Framework.h>
 #include <render/GlConfig.h>
 #include <render/geometries/BoxGeometry.h>
+#include <render/materials/LamberMaterial.h>
 #include <render/RenderModule.h>
+#include <render/objects/Mesh.h>
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -20,30 +22,42 @@ int main(int argc, char** argv)
     return result;
 }
 
+HelloWorldApp::HelloWorldApp()
+    :IApp(1280, 720, "Hello World")
+{
+
+}
+
+HelloWorldApp::~HelloWorldApp()
+{
+
+}
+
 bool HelloWorldApp::initialize()
 {
     blink::Framework::getInstance().insertComponent(new blink::RenderModule());
 
-    m_worldToCamera = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    m_cameraToClip = glm::perspectiveFov(45.0f, 1280.0f, 720.0f, 1.0f, 1000.0f);
+    m_rootScene = new blink::Scene();
 
-    m_boxGeometry = new blink::BoxGeometry(1.0f, 1.0f, 1.0f);
-    m_shader = blink::Shader::fromStock(blink::Shader::StockShaders::Lamber);
+    m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), new blink::LamberMaterial());
+    m_rootScene->add(m_cube);
 
-    m_matModel = blink::MAT4_IDENTITY;
+    m_camera = new blink::PerspectiveCamera();
+    m_camera->setPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+    m_camera->setTargetPosition(blink::VEC3_ZERO);
 
     return true;
 }
 
 void HelloWorldApp::terminate()
 {
-    SAFE_RELEASE(m_shader);
-    SAFE_DELETE(m_boxGeometry);
+    SAFE_DELETE(m_camera);
+    SAFE_DELETE(m_rootScene);
 }
 
 void HelloWorldApp::update(float dt)
 {
-    m_matModel = glm::rotate(m_matModel, 0.5f * dt, glm::vec3(1.0f, 0.5f, 0.7f));
+    m_cube->setRotation(glm::angleAxis(glm::radians(45.0f * dt), glm::vec3(0.0f, 1.0f, 0.0f)) * m_cube->getRotation());
 }
 
 void HelloWorldApp::render()

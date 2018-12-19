@@ -6,7 +6,7 @@
 
 GLFWwindow* s_window = nullptr;
 
-bool Device::initialize()
+bool Device::initialize(int width, int height, const char* title)
 {
 	/* Initialize the library */
 	if (!glfwInit()) return false;
@@ -15,7 +15,7 @@ bool Device::initialize()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	/* Create a windowed mode window and its OpenGL context */
-	s_window = glfwCreateWindow(1280, 720, "BLINK", nullptr, nullptr);
+	s_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 	if (!s_window)
 	{
 		glfwTerminate();

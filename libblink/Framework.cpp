@@ -14,7 +14,10 @@ namespace blink
     {
         m_app = app;
 
-        if (!Device::initialize()) return false;
+        if (!Device::initialize(m_app->getWindowWidth(), m_app->getWindowHeight(), m_app->getTitle().c_str())) return false;
+
+        m_windowSize.x = static_cast<float>(m_app->getWindowWidth());
+        m_windowSize.y = static_cast<float>(m_app->getWindowHeight());
 
         return m_app->initialize();
     }

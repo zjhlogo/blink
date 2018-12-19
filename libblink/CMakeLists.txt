@@ -14,6 +14,10 @@ core/Component.h
 core/Entity.cpp
 core/Entity.h
 device/Device.h
+render/cameras/Camera.cpp
+render/cameras/Camera.h
+render/cameras/PerspectiveCamera.cpp
+render/cameras/PerspectiveCamera.h
 render/geometries/BoxGeometry.cpp
 render/geometries/BoxGeometry.h
 render/geometries/BufferAttributes.cpp
@@ -22,8 +26,12 @@ render/geometries/BufferGeometry.cpp
 render/geometries/BufferGeometry.h
 render/geometries/Geometry.cpp
 render/geometries/Geometry.h
+render/materials/LamberMaterial.cpp
+render/materials/LamberMaterial.h
 render/materials/Material.cpp
 render/materials/Material.h
+render/materials/Shader.cpp
+render/materials/Shader.h
 render/textures/Texture.cpp
 render/textures/Texture.h
 render/textures/Texture2D.cpp
@@ -40,8 +48,6 @@ render/RenderState.cpp
 render/RenderState.h
 render/Scene.cpp
 render/Scene.h
-render/Shader.cpp
-render/Shader.h
 utils/ImageLoader.cpp
 utils/ImageLoader.h
 utils/stb_image.h
