@@ -1,8 +1,8 @@
 #pragma once
 #include <IApp.h>
-#include <render/Scene.h>
-#include <render/cameras/PerspectiveCamera.h>
-#include <render/objects/Mesh.h>
+#include <objects/Scene.h>
+#include <objects/Mesh.h>
+#include <cameras/PerspectiveCamera.h>
 
 class HelloWorldApp : public blink::IApp
 {

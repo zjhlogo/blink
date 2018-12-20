@@ -1,11 +1,10 @@
 #include "HelloWorldApp.h"
 #include <Framework.h>
-#include <render/geometries/BoxGeometry.h>
-#include <render/materials/LambertMaterial.h>
-#include <render/lights/AmbientLight.h>
-#include <render/lights/PointLight.h>
+#include <geometries/BoxGeometry.h>
+#include <materials/LambertMaterial.h>
+#include <lights/AmbientLight.h>
+#include <lights/PointLight.h>
 #include <render/RenderModule.h>
-#include <render/objects/Mesh.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 int main(int argc, char** argv)
