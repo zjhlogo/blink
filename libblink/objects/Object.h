@@ -1,5 +1,5 @@
 #pragma once
-#include "../../core/Entity.h"
+#include "../core/Entity.h"
 #include <BaseType.h>
 #include <glm/gtc/quaternion.hpp>
 

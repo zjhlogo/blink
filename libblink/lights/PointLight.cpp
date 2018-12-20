@@ -1,5 +1,5 @@
 #include "PointLight.h"
-#include "../materials/Shader.h"
+#include "../shaders/Shader.h"
 
 namespace blink
 {

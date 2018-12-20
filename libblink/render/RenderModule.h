@@ -1,9 +1,9 @@
 #pragma once
 #include "../core/Component.h"
+#include "../objects/Mesh.h"
+#include "../lights/Light.h"
+#include "../cameras/Camera.h"
 #include "RenderState.h"
-#include "objects/Mesh.h"
-#include "lights/Light.h"
-#include "cameras/Camera.h"
 
 namespace blink
 {
