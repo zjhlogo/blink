@@ -1,10 +1,11 @@
 #include "RenderModule.h"
 #include "GlConfig.h"
 #include "materials/Material.h"
+#include "shaders/Shader.h"
 #include "geometries/BufferAttributes.h"
 #include "geometries/BufferGeometry.h"
 #include "objects/Mesh.h"
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include <StringBuilder.h>
 
 namespace blink
@@ -212,15 +213,13 @@ namespace blink
         glUseProgram(shader->getProgramId());
         GL_ERROR_CHECK();
 
-        // TODO: find a place to setup shader uniforms
-        shader->setUniform("u_worldToClip", camera->getWorldToClipTransform());
-        shader->setUniform("u_localToWorld", mesh->getLocalToWorldTransform());
-        shader->setUniform("u_localToClip", camera->getWorldToClipTransform() * mesh->getLocalToWorldTransform());
-        shader->setUniform("u_lightPos", lights[0]->getPosition());     // TODO: support multiply lights
-        shader->setUniform("u_ambientColor", glm::vec3(0.0f, 0.0f, 0.0f));  // TODO: find a place to store it
-        shader->setUniform("u_diffuseColor", material->getDiffuseColor());
-        shader->setUniform("u_lightColor", lights[0]->getLightColor()); // TODO: support multiply lights
-        shader->setUniform("u_viewPos", camera->getPosition());
+        camera->setupShaderUniforms(mesh->getLocalToWorldTransform(), shader);
+        // TODO: support multiply lights
+        for (auto light : lights)
+        {
+            light->setupShaderUniforms(shader);
+        }
+        material->setupShaderUniforms(shader);
 
         // TODO: apply render state
 

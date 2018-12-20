@@ -1,9 +1,9 @@
 #pragma once
 #include <Rtti.h>
-#include "Shader.h"
 
 namespace blink
 {
+    class Shader;
     class Material
     {
     public:
@@ -16,6 +16,8 @@ namespace blink
 
         void setDiffuseColor(const glm::vec3& diffuseColor) { m_diffuseColor = diffuseColor; }
         const glm::vec3& getDiffuseColor() const { return m_diffuseColor; }
+
+        virtual void setupShaderUniforms(Shader* shader) = 0;
 
     protected:
         Shader* m_shader{};

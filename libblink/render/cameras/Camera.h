@@ -4,6 +4,8 @@
 
 namespace blink
 {
+    class Shader;
+
     class Camera
     {
     public:
@@ -23,6 +25,8 @@ namespace blink
         const glm::mat4& getWorldToCameraTransform();
         const glm::mat4& getCameraToClipTransform();
         const glm::mat4& getWorldToClipTransform();
+
+        virtual void setupShaderUniforms(const glm::mat4& localToWorld, Shader* shader) = 0;
 
     protected:
         virtual void updateTransform() = 0;

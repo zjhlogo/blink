@@ -38,6 +38,7 @@ namespace blink
         bool setTexture(const char* pszName, const Texture* pTexture, uint32 slotIndex = 0);
 
         uint32 getProgramId() const { return m_programId; };
+
         void release();
 
     private:

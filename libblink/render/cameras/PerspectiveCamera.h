@@ -3,6 +3,8 @@
 
 namespace blink
 {
+    class Shader;
+
     class PerspectiveCamera : public Camera
     {
     public:
@@ -20,6 +22,8 @@ namespace blink
         float getFov() const { return m_fov; }
         float getNearClipPlane() const { return m_near; }
         float getFarClipPlane() const { return m_far; }
+
+        virtual void setupShaderUniforms(const glm::mat4& localToWorld, Shader* shader) override;
 
     protected:
         virtual void updateTransform() override;

@@ -1,4 +1,5 @@
 #include "LambertMaterial.h"
+#include "../shaders/Shader.h"
 
 namespace blink
 {
@@ -10,5 +11,10 @@ namespace blink
     LambertMaterial::~LambertMaterial()
     {
 
+    }
+
+    void LambertMaterial::setupShaderUniforms(Shader * shader)
+    {
+        shader->setUniform("u_diffuseColor", getDiffuseColor());
     }
 }

@@ -1,5 +1,6 @@
 #include "PerspectiveCamera.h"
 #include "../../Framework.h"
+#include "../shaders/Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace blink
@@ -34,6 +35,16 @@ namespace blink
         m_near = near;
         m_far = far;
         m_transformDirty = true;
+    }
+
+    void PerspectiveCamera::setupShaderUniforms(const glm::mat4 & localToWorld, Shader* shader)
+    {
+        const glm::mat4& worldToClip = getWorldToClipTransform();
+        shader->setUniform("u_worldToClip", worldToClip);
+        shader->setUniform("u_localToWorld", localToWorld);
+        shader->setUniform("u_localToWorldTranInv", glm::transpose(glm::inverse(glm::mat3(localToWorld))));
+        shader->setUniform("u_localToClip", worldToClip * localToWorld);
+        shader->setUniform("u_viewPos", getPosition());
     }
 
     void PerspectiveCamera::updateTransform()

@@ -18,6 +18,8 @@ render/cameras/Camera.cpp
 render/cameras/Camera.h
 render/cameras/PerspectiveCamera.cpp
 render/cameras/PerspectiveCamera.h
+render/lights/AmbientLight.cpp
+render/lights/AmbientLight.h
 render/lights/Light.cpp
 render/lights/Light.h
 render/lights/PointLight.cpp
@@ -34,8 +36,6 @@ render/materials/LambertMaterial.cpp
 render/materials/LambertMaterial.h
 render/materials/Material.cpp
 render/materials/Material.h
-render/materials/Shader.cpp
-render/materials/Shader.h
 render/textures/Texture.cpp
 render/textures/Texture.h
 render/textures/Texture2D.cpp
@@ -44,6 +44,8 @@ render/objects/Mesh.cpp
 render/objects/Mesh.h
 render/objects/Object.cpp
 render/objects/Object.h
+render/shaders/Shader.cpp
+render/shaders/Shader.h
 render/shaders/ShaderLib.h
 render/GlConfig.h
 render/RenderModule.cpp

@@ -2,6 +2,7 @@
 #include <Framework.h>
 #include <render/geometries/BoxGeometry.h>
 #include <render/materials/LambertMaterial.h>
+#include <render/lights/AmbientLight.h>
 #include <render/lights/PointLight.h>
 #include <render/RenderModule.h>
 #include <render/objects/Mesh.h>
@@ -41,6 +42,7 @@ bool HelloWorldApp::initialize()
     m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), new blink::LambertMaterial());
     m_rootScene->add(m_cube);
 
+    m_rootScene->add(new blink::AmbientLight());
     blink::PointLight* light = new blink::PointLight();
     light->setPosition({ -3.0f, 0.0f, 3.0f });
     m_rootScene->add(light);

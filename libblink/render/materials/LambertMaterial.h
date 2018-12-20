@@ -11,5 +11,7 @@ namespace blink
         LambertMaterial();
         virtual ~LambertMaterial();
 
+        virtual void setupShaderUniforms(Shader* shader) override;
+
     };
 }

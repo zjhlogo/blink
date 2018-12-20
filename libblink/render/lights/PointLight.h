@@ -7,5 +7,7 @@ namespace blink
     public:
         RTTI_DEF(PointLight, Light);
 
+        virtual void setupShaderUniforms(Shader* shader) override;
+
     };
 }
