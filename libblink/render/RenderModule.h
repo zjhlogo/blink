@@ -1,7 +1,8 @@
 #pragma once
 #include "../core/Component.h"
 #include "RenderState.h"
-#include "objects/Object.h"
+#include "objects/Mesh.h"
+#include "lights/Light.h"
 #include "cameras/Camera.h"
 
 namespace blink
@@ -23,7 +24,10 @@ namespace blink
         void reset();
         void applyCurrentRenderState(bool force = true);
 
-        void renderObject(Object* object, Camera* camera);
+        void render(Object* rootObj, Camera* camera);
+
+    private:
+        void renderObject(Mesh* mesh, Camera* camera, const std::vector<Light*>& lights);
 
     private:
         RenderState::StateInfo m_currentRenderState;

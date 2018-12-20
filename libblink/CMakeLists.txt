@@ -18,6 +18,10 @@ render/cameras/Camera.cpp
 render/cameras/Camera.h
 render/cameras/PerspectiveCamera.cpp
 render/cameras/PerspectiveCamera.h
+render/lights/Light.cpp
+render/lights/Light.h
+render/lights/PointLight.cpp
+render/lights/PointLight.h
 render/geometries/BoxGeometry.cpp
 render/geometries/BoxGeometry.h
 render/geometries/BufferAttributes.cpp
@@ -26,8 +30,8 @@ render/geometries/BufferGeometry.cpp
 render/geometries/BufferGeometry.h
 render/geometries/Geometry.cpp
 render/geometries/Geometry.h
-render/materials/LamberMaterial.cpp
-render/materials/LamberMaterial.h
+render/materials/LambertMaterial.cpp
+render/materials/LambertMaterial.h
 render/materials/Material.cpp
 render/materials/Material.h
 render/materials/Shader.cpp

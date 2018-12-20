@@ -175,10 +175,30 @@ namespace blink
         }
     }
 
-    void RenderModule::renderObject(Object * object, Camera * camera)
+    void RenderModule::render(Object * rootObj, Camera * camera)
     {
-        Mesh* mesh = dynamic_cast<Mesh*>(object);
-        if (!mesh) return;
+        if (!rootObj || !camera) return;
+
+        glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // collect lights
+        std::vector<Light*> lights;
+        rootObj->collectChild<Light>(lights, false);
+
+        // collect renderable objects
+        std::vector<Mesh*> meshes;
+        rootObj->collectChild<Mesh>(meshes);
+
+        for (auto mesh : meshes)
+        {
+            renderObject(mesh, camera, lights);
+        }
+    }
+
+    void RenderModule::renderObject(Mesh* mesh, Camera* camera, const std::vector<Light*>& lights)
+    {
+        assert(lights.size() > 0);
 
         Material* material = mesh->getMaterial();
         if (!material) return;
@@ -189,18 +209,17 @@ namespace blink
         Shader* shader = material->getShader();
         if (!shader) return;
 
-        glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glUseProgram(shader->getProgramId());
         GL_ERROR_CHECK();
 
+        // TODO: find a place to setup shader uniforms
         shader->setUniform("u_worldToClip", camera->getWorldToClipTransform());
         shader->setUniform("u_localToWorld", mesh->getLocalToWorldTransform());
         shader->setUniform("u_localToClip", camera->getWorldToClipTransform() * mesh->getLocalToWorldTransform());
-        shader->setUniform("u_lightPos", glm::vec3(-3.0f, 0.0f, 3.0f));
-        shader->setUniform("u_ambientColor", glm::vec3(0.0f, 0.0f, 0.0f));
-        shader->setUniform("u_lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->setUniform("u_lightPos", lights[0]->getPosition());     // TODO: support multiply lights
+        shader->setUniform("u_ambientColor", glm::vec3(0.0f, 0.0f, 0.0f));  // TODO: find a place to store it
+        shader->setUniform("u_diffuseColor", material->getDiffuseColor());
+        shader->setUniform("u_lightColor", lights[0]->getLightColor()); // TODO: support multiply lights
         shader->setUniform("u_viewPos", camera->getPosition());
 
         // TODO: apply render state

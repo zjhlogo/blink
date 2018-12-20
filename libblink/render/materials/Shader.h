@@ -10,7 +10,7 @@ namespace blink
     public:
         enum class StockShaders
         {
-            Lamber = 0,
+            Lambert = 0,
             NumberOfStockShaders,
         };
 

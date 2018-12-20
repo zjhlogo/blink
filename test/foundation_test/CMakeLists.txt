@@ -21,8 +21,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 set(ALL_LIBRARIES
-$<TARGET_PROPERTY:fmt::fmt,IMPORTED_LOCATION_DEBUG>
-$<TARGET_PROPERTY:GTest::gtest,IMPORTED_LOCATION_DEBUG>
+fmt::fmt
+GTest::gtest
 libfoundation
 )
 target_link_libraries(${PROJECT_NAME} ${ALL_LIBRARIES})

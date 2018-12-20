@@ -20,6 +20,29 @@ namespace blink
         bool remove(Object* object);
         void removeAll();
 
+        template <typename T> T* findChild()
+        {
+            std::type_index baseTypeIndex = typeid(T);
+
+            for (auto child : m_children)
+            {
+                if (child->getRtti()->isDerivedFrom(baseTypeIndex)) return (T*)child;
+            }
+
+            return nullptr;
+        }
+
+        template <typename T> void collectChild(std::vector<T*>& listOut, bool recursive = true)
+        {
+            std::type_index baseTypeIndex = typeid(T);
+
+            for (auto child : m_children)
+            {
+                if (child->getRtti()->isDerivedFrom(baseTypeIndex)) listOut.push_back((T*)child);
+                if (recursive) child->collectChild<T>(listOut, recursive);
+            }
+        }
+
         void setPosition(const glm::vec3& pos) { m_position = pos; m_transformDirty = true; };
         const glm::vec3& getPosition() const { return m_position; };
 
