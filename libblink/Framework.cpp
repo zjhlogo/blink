@@ -1,6 +1,7 @@
 #include "Framework.h"
 #include "IApp.h"
 #include "device/Device.h"
+#include "render/RenderModule.h"
 
 namespace blink
 {
@@ -10,34 +11,41 @@ namespace blink
         return s_instance;
     }
 
-    bool Framework::initialize(IApp* app)
+    bool Framework::startup(IApp* app)
     {
         m_app = app;
 
-        if (!Device::initialize(m_app->getWindowWidth(), m_app->getWindowHeight(), m_app->getTitle().c_str())) return false;
+        if (!Device::initialize(m_app->getWindowWidth(), m_app->getWindowHeight(), m_app->getTitle().c_str()))
+        {
+            shutdown();
+            return false;
+        }
 
         m_windowSize.x = static_cast<float>(m_app->getWindowWidth());
         m_windowSize.y = static_cast<float>(m_app->getWindowHeight());
 
-        return m_app->initialize();
+        if (!insertComponent(new RenderModule()))
+        {
+            shutdown();
+            return false;
+        }
+
+        if (!m_app->initialize())
+        {
+            shutdown();
+            return false;
+        }
+
+        Device::start(std::bind(&Framework::step, this, std::placeholders::_1));
+        shutdown();
+        return true;
     }
 
-    void Framework::terminate()
+    void Framework::shutdown()
     {
-        SAFE_DELETE(m_app);
+        SAFE_DELETE_AND_TERMINATE(m_app);
         removeAllComponents();
-    }
-
-    int Framework::start()
-    {
-        int result = Device::start(std::bind(&Framework::step, this, std::placeholders::_1));
-        if (result) return result;
-
-        m_app->terminate();
-
         Device::terminate();
-
-        return 0;
     }
 
     void Framework::step(float dt)

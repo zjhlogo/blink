@@ -25,17 +25,17 @@ namespace blink
     {
         static const char* s_stockVs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            LAMBERT_VS,                  // Lamber
+            LAMBERT_VS,                  // Lambert
         };
 
         static const char* s_stockFs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            LAMBERT_FS,                  // Lamber
+            LAMBERT_FS,                  // Lambert
         };
 
         static const tstring s_stockShaderIds[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            "stock::Lamber",
+            "stock::Lambert",
         };
 
         auto exitShader = s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)]);
@@ -55,10 +55,25 @@ namespace blink
         return s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)], shader);
     }
 
-    Shader* Shader::fromFile(const tstring& filePath)
+    Shader * Shader::fromBuffer(const tstring & id, const tstring & vsBuffer, const tstring & fsBuffer)
     {
-        // TODO: not implement yet
-        return nullptr;
+        tstring formatedId = "buffer::" + id;
+
+        auto exitShader = s_instanceManager.insertInstance(formatedId);
+        if (exitShader) return exitShader;
+
+        Shader* shader = new Shader();
+
+        shader->m_vertexShaderData = vsBuffer;
+        shader->m_fragShaderData = fsBuffer;
+
+        if (!shader->reload())
+        {
+            SAFE_DELETE(shader);
+            return nullptr;
+        }
+
+        return s_instanceManager.insertInstance(formatedId, shader);
     }
 
     bool Shader::reload()

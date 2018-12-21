@@ -32,9 +32,9 @@ namespace blink
         virtual void updateTransform() = 0;
 
     protected:
-        glm::vec3 m_eye;
-        glm::vec3 m_target;
-        glm::vec3 m_up{ blink::VEC3_PY };
+        glm::vec3 m_eye{ VEC3_ZERO };
+        glm::vec3 m_target{ VEC3_ZERO };
+        glm::vec3 m_up{ VEC3_PY };
 
         glm::mat4 m_worldToCamera;
         glm::mat4 m_cameraToClip;

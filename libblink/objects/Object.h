@@ -49,6 +49,8 @@ namespace blink
         void setRotation(const glm::quat& rot) { m_rotation = rot; m_transformDirty = true; };
         const glm::quat& getRotation() const { return m_rotation; };
 
+        void applyRotation(float degrees, const glm::vec3& axis);
+
         void setScale(const glm::vec3& scale) { m_scale = scale; m_transformDirty = true; };
         const glm::vec3& getScale() const { return m_scale; };
 

@@ -199,8 +199,6 @@ namespace blink
 
     void RenderModule::renderObject(Mesh* mesh, Camera* camera, const std::vector<Light*>& lights)
     {
-        assert(lights.size() > 0);
-
         Material* material = mesh->getMaterial();
         if (!material) return;
 

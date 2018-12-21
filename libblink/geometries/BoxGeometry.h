@@ -13,9 +13,6 @@ namespace blink
         virtual ~BoxGeometry();
 
     private:
-        void buildPlane(VertAttrPos3Uv2NormalList& verts, Uint16List& indis, int ax, int ay, int az, float width, float height, float udir, float vdir, float posZ, int segmentX, int segmentY, const glm::vec3& normal);
-
-    private:
         float m_width{};
         float m_height{};
         float m_depth{};

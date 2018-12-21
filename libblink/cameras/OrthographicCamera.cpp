@@ -1,43 +1,41 @@
-#include "PerspectiveCamera.h"
+#include "OrthographicCamera.h"
 #include "../Framework.h"
 #include "../shaders/Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace blink
 {
-    PerspectiveCamera::PerspectiveCamera()
+    OrthographicCamera::OrthographicCamera()
     {
         const auto& windowSize = Framework::getInstance().getWindowSize();
-        m_width = windowSize.x;
-        m_height = windowSize.y;
+        m_left = -0.5f * windowSize.x;
+        m_right = 0.5f * windowSize.x;
+        m_bottom = -0.5f * windowSize.y;
+        m_top = 0.5f * windowSize.y;
     }
 
-    PerspectiveCamera::~PerspectiveCamera()
+    OrthographicCamera::~OrthographicCamera()
     {
 
     }
 
-    void PerspectiveCamera::setViewport(float width, float height)
+    void OrthographicCamera::setViewport(float left, float right, float bottom, float top)
     {
-        m_width = width;
-        m_height = height;
+        m_left = left;
+        m_right = right;
+        m_bottom = bottom;
+        m_top = top;
         m_transformDirty = true;
     }
 
-    void PerspectiveCamera::setFov(float fov)
-    {
-        m_fov = fov;
-        m_transformDirty = true;
-    }
-
-    void PerspectiveCamera::setClipPanel(float near, float far)
+    void OrthographicCamera::setClipPanel(float near, float far)
     {
         m_near = near;
         m_far = far;
         m_transformDirty = true;
     }
 
-    void PerspectiveCamera::setupShaderUniforms(const glm::mat4 & localToWorld, Shader* shader)
+    void OrthographicCamera::setupShaderUniforms(const glm::mat4 & localToWorld, Shader * shader)
     {
         const glm::mat4& worldToClip = getWorldToClipTransform();
         shader->setUniform("u_worldToClip", worldToClip);
@@ -47,10 +45,10 @@ namespace blink
         shader->setUniform("u_viewPos", getPosition());
     }
 
-    void PerspectiveCamera::updateTransform()
+    void OrthographicCamera::updateTransform()
     {
         m_worldToCamera = glm::lookAt(m_eye, m_target, m_up);
-        m_cameraToClip = glm::perspectiveFov(m_fov, m_width, m_height, m_near, m_far);
+        m_cameraToClip = glm::ortho(m_left, m_right, m_bottom, m_top, m_near, m_far);
         m_worldToClip = m_cameraToClip * m_worldToCamera;
     }
 }

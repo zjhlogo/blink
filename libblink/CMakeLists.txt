@@ -13,6 +13,8 @@ cameras/Camera.cpp
 cameras/Camera.h
 cameras/PerspectiveCamera.cpp
 cameras/PerspectiveCamera.h
+cameras/OrthographicCamera.cpp
+cameras/OrthographicCamera.h
 core/Component.cpp
 core/Component.h
 core/Entity.cpp
@@ -26,6 +28,10 @@ geometries/BufferGeometry.cpp
 geometries/BufferGeometry.h
 geometries/Geometry.cpp
 geometries/Geometry.h
+geometries/GeometryUtils.cpp
+geometries/GeometryUtils.h
+geometries/PlaneGeometry.cpp
+geometries/PlaneGeometry.h
 lights/AmbientLight.cpp
 lights/AmbientLight.h
 lights/Light.cpp

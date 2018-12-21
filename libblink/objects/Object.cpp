@@ -42,6 +42,12 @@ namespace blink
         m_children.clear();
     }
 
+    void Object::applyRotation(float degrees, const glm::vec3& axis)
+    {
+        m_rotation *= glm::angleAxis(glm::radians(degrees), axis);
+        m_transformDirty = true;
+    }
+
     void Object::updateWorldTransform(const glm::mat4 & parentToWorld)
     {
         updateLocalTransform();

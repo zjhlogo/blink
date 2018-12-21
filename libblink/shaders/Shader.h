@@ -16,7 +16,7 @@ namespace blink
 
     public:
         static Shader* fromStock(StockShaders stockShader);
-        static Shader* fromFile(const tstring& filePath);
+        static Shader* fromBuffer(const tstring& id, const tstring& vsBuffer, const tstring& fsBuffer);
 
         bool reload();
         bool setUniform(const char* pszName, int value);

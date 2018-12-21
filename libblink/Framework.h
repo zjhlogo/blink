@@ -9,10 +9,8 @@ namespace blink
     public:
         static Framework& getInstance();
 
-        bool initialize(IApp* app);
-        void terminate();
-
-        int start();
+        bool startup(IApp* app);
+        void shutdown();
 
         void step(float dt);
         void resize();
