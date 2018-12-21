@@ -7,15 +7,15 @@ uniform vec3 u_lightColor;
 uniform vec3 u_ambientColor;
 uniform vec3 u_diffuseColor;
 
-in vec2 v_texCoord;
-in vec3 v_normal;
-in vec3 v_fragPos;
+in vec2 f_texCoord;
+in vec3 f_normal;
+in vec3 f_fragPos;
 
 void main ()
 {
-    vec3 fragNormal = normalize(v_normal);
-    vec3 lightDir = normalize(u_lightPos - v_fragPos);
-    vec3 viewDir = normalize(u_viewPos - v_fragPos);
+    vec3 fragNormal = normalize(f_normal);
+    vec3 lightDir = normalize(u_lightPos - f_fragPos);
+    vec3 viewDir = normalize(u_viewPos - f_fragPos);
 	
 	// ambient
 	

@@ -11,12 +11,13 @@ namespace blink
         enum class StockShaders
         {
             Lambert = 0,
+            Wireframe,
             NumberOfStockShaders,
         };
 
     public:
         static Shader* fromStock(StockShaders stockShader);
-        static Shader* fromBuffer(const tstring& id, const tstring& vsBuffer, const tstring& fsBuffer);
+        static Shader* fromBuffer(const tstring& id, const char* vsBuffer, const char* gsBuffer, const char* fsBuffer);
 
         bool reload();
         bool setUniform(const char* pszName, int value);
@@ -54,6 +55,7 @@ namespace blink
         uint32 m_programId{};
 
         tstring m_vertexShaderData;
+        tstring m_geometryShaderData;
         tstring m_fragShaderData;
 
         tstring m_errorLog;

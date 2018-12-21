@@ -11,7 +11,7 @@ static const char* MANDELBROT_FS =
 
 MandelbrotMaterial::MandelbrotMaterial()
 {
-    m_shader = blink::Shader::fromBuffer("mandelbrot", MANDELBROT_VS, MANDELBROT_FS);
+    m_shader = blink::Shader::fromBuffer("mandelbrot", MANDELBROT_VS, nullptr, MANDELBROT_FS);
 }
 
 MandelbrotMaterial::~MandelbrotMaterial()

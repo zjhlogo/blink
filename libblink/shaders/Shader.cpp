@@ -25,17 +25,26 @@ namespace blink
     {
         static const char* s_stockVs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            LAMBERT_VS,                  // Lambert
+            LAMBERT_VS,                 // Lambert
+            WIREFRAME_VS,               // Wireframe
+        };
+
+        static const char* s_stockGs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
+        {
+            "",                         // Lambert
+            WIREFRAME_GS,               // Wireframe
         };
 
         static const char* s_stockFs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            LAMBERT_FS,                  // Lambert
+            LAMBERT_FS,                 // Lambert
+            WIREFRAME_FS,               // Wireframe
         };
 
         static const tstring s_stockShaderIds[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
             "stock::Lambert",
+            "stock::Wireframe",
         };
 
         auto exitShader = s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)]);
@@ -44,6 +53,7 @@ namespace blink
         Shader* shader = new Shader();
 
         shader->m_vertexShaderData = s_stockVs[static_cast<int>(stockShader)];
+        shader->m_geometryShaderData = s_stockGs[static_cast<int>(stockShader)];
         shader->m_fragShaderData = s_stockFs[static_cast<int>(stockShader)];
 
         if (!shader->reload())
@@ -55,7 +65,7 @@ namespace blink
         return s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)], shader);
     }
 
-    Shader * Shader::fromBuffer(const tstring & id, const tstring & vsBuffer, const tstring & fsBuffer)
+    Shader * Shader::fromBuffer(const tstring & id, const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
     {
         tstring formatedId = "buffer::" + id;
 
@@ -64,8 +74,9 @@ namespace blink
 
         Shader* shader = new Shader();
 
-        shader->m_vertexShaderData = vsBuffer;
-        shader->m_fragShaderData = fsBuffer;
+        if (vsBuffer) shader->m_vertexShaderData = vsBuffer;
+        if (gsBuffer) shader->m_geometryShaderData = gsBuffer;
+        if (fsBuffer) shader->m_fragShaderData = fsBuffer;
 
         if (!shader->reload())
         {
@@ -84,18 +95,31 @@ namespace blink
         if (m_programId == 0) return false;
 
         // create vertex shader
-        GLuint vertexId = compileShader(GL_VERTEX_SHADER, m_vertexShaderData);
-        AutoDeleteShaderObj vertexShaderObj(vertexId);
-        if (vertexId == 0) return false;
+        if (!m_vertexShaderData.empty())
+        {
+            GLuint vertexId = compileShader(GL_VERTEX_SHADER, m_vertexShaderData);
+            AutoDeleteShaderObj vertexShaderObj(vertexId);
+            if (vertexId == 0) return false;
+            glAttachShader(m_programId, vertexId);
+        }
+
+        // create geometry shader
+        if (!m_geometryShaderData.empty())
+        {
+            GLuint geometryId = compileShader(GL_GEOMETRY_SHADER, m_geometryShaderData);
+            AutoDeleteShaderObj geometryShaderObj(geometryId);
+            if (geometryId == 0) return false;
+            glAttachShader(m_programId, geometryId);
+        }
 
         // create fragment shader
-        GLuint fragmentId = compileShader(GL_FRAGMENT_SHADER, m_fragShaderData);
-        AutoDeleteShaderObj fragmentShaderObj(fragmentId);
-        if (fragmentId == 0) return false;
-
-        // attach shader
-        glAttachShader(m_programId, vertexId);
-        glAttachShader(m_programId, fragmentId);
+        if (!m_fragShaderData.empty())
+        {
+            GLuint fragmentId = compileShader(GL_FRAGMENT_SHADER, m_fragShaderData);
+            AutoDeleteShaderObj fragmentShaderObj(fragmentId);
+            if (fragmentId == 0) return false;
+            glAttachShader(m_programId, fragmentId);
+        }
 
         // link program
         glLinkProgram(m_programId);

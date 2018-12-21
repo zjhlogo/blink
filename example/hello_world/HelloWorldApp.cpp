@@ -3,6 +3,7 @@
 #include <geometries/BoxGeometry.h>
 #include <geometries/PlaneGeometry.h>
 #include <materials/LambertMaterial.h>
+#include <materials/WireframeMaterial.h>
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
 #include <render/RenderModule.h>

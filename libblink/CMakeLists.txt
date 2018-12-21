@@ -42,6 +42,8 @@ materials/LambertMaterial.cpp
 materials/LambertMaterial.h
 materials/Material.cpp
 materials/Material.h
+materials/WireframeMaterial.cpp
+materials/WireframeMaterial.h
 objects/Mesh.cpp
 objects/Mesh.h
 objects/Object.cpp
