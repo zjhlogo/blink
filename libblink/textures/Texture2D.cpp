@@ -1,5 +1,5 @@
 #include "Texture2D.h"
-#include "../../utils/ImageLoader.h"
+#include "../utils/ImageLoader.h"
 #include <Log.h>
 #include <glad/glad.h>
 

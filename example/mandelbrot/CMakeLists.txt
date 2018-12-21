@@ -43,4 +43,4 @@ endif ()
 target_link_libraries(${PROJECT_NAME} ${ALL_LIBRARIES})
 
 group_sources("${SOURCE_FILES}")
-configure_project(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../../bin)
+configure_runtime(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../../bin "example")
