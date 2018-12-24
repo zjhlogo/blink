@@ -15,15 +15,32 @@ namespace blink
         SAFE_RELEASE(m_vertexBufferAttribute);
         destroyVertexBuffer();
         destroyIndexBuffer();
+        destroyVertexArrayObject();
     }
 
     bool BufferGeometry::uploadVertexBuffer(BufferAttributes * bufferAttribute, const void * bufferData, uint32 bufferSize)
     {
+        if (!bufferAttribute) return false;
+
         // create buffer object
-        destroyVertexBuffer();
-        glGenBuffers(1, &m_vertexBufferId);
+        if (m_vertexBufferId == 0)
+        {
+            glGenBuffers(1, &m_vertexBufferId);
+            GL_ERROR_CHECK();
+            if (m_vertexBufferId == 0) return false;
+        }
+
+        // create vao
+        if (m_vertexArrayObjectId == 0)
+        {
+            glGenVertexArrays(1, &m_vertexArrayObjectId);
+            GL_ERROR_CHECK();
+            if (m_vertexArrayObjectId == 0) return false;
+        }
+
+        // bind vao
+        glBindVertexArray(m_vertexArrayObjectId);
         GL_ERROR_CHECK();
-        if (m_vertexBufferId == 0) return false;
 
         // Bind the VBO
         glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferId);
@@ -33,20 +50,31 @@ namespace blink
         glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferData, GL_STATIC_DRAW);
         GL_ERROR_CHECK();
 
-        // Unbind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+        // enable vertex attribute array
         m_vertexBufferAttribute = bufferAttribute;
+        for (int i = 0; i < m_vertexBufferAttribute->getNumAttributeItems(); ++i)
+        {
+            const blink::BufferAttributes::AttributeItem* pAttrItem = m_vertexBufferAttribute->getAttributeItem(i);
+
+            glEnableVertexAttribArray(i);
+            GL_ERROR_CHECK();
+
+            glVertexAttribPointer(i, pAttrItem->m_size, pAttrItem->m_glType, GL_FALSE, m_vertexBufferAttribute->getStride(), (GLvoid*)((intptr_t)pAttrItem->m_offset));
+            GL_ERROR_CHECK();
+        }
+
         return true;
     }
 
     bool BufferGeometry::uploadIndexBuffer(const uint16 * bufferData, uint32 numIndex)
     {
 		// create buffer object
-        destroyIndexBuffer();
-        glGenBuffers(1, &m_indexBufferId);
-        GL_ERROR_CHECK();
-        if (m_indexBufferId == 0) return false;
+        if (m_indexBufferId == 0)
+        {
+            glGenBuffers(1, &m_indexBufferId);
+            GL_ERROR_CHECK();
+            if (m_indexBufferId == 0) return false;
+        }
 
 		// Bind the VBO
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBufferId);
@@ -56,12 +84,19 @@ namespace blink
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndex*sizeof(uint16), bufferData, GL_STATIC_DRAW);
 		GL_ERROR_CHECK();
 
-		// Unbind the VBO
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
         m_numIndex = numIndex;
 		return true;
 	}
+
+    void BufferGeometry::destroyVertexArrayObject()
+    {
+        if (m_vertexArrayObjectId != 0)
+        {
+            glDeleteVertexArrays(1, &m_vertexArrayObjectId);
+            m_vertexArrayObjectId = 0;
+        }
+    }
+
     void BufferGeometry::destroyVertexBuffer()
     {
         if (m_vertexBufferId != 0)

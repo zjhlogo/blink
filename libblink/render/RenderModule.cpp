@@ -53,13 +53,6 @@ namespace blink
 
         //GL_ERROR_CHECK();
 
-        GLuint vao;
-        glGenVertexArrays(1, &vao);
-        GL_ERROR_CHECK();
-
-        glBindVertexArray(vao);
-        GL_ERROR_CHECK();
-
         glEnable(GL_DEPTH_TEST);
 
         return true;
@@ -221,25 +214,8 @@ namespace blink
 
         // TODO: apply render state
 
-        // Bind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, geometry->getVertexBufferId());
+        glBindVertexArray(geometry->getVertexArrayObjectId());
         GL_ERROR_CHECK();
-
-        const blink::BufferAttributes* pVertAttributes = geometry->getBufferAttributes();
-        int numAttrs = pVertAttributes->getNumAttributeItems();
-        int stride = pVertAttributes->getStride();
-
-        // enable vertex attribute array
-        for (int i = 0; i < numAttrs; ++i)
-        {
-            const blink::BufferAttributes::AttributeItem* pAttrItem = pVertAttributes->getAttributeItem(i);
-
-            glEnableVertexAttribArray(i);
-            GL_ERROR_CHECK();
-
-            glVertexAttribPointer(i, pAttrItem->m_size, pAttrItem->m_glType, GL_FALSE, stride, (GLvoid*)((intptr_t)pAttrItem->m_offset));
-            GL_ERROR_CHECK();
-        }
 
         // Bind the IBO
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->getIndexBufferId());
@@ -248,11 +224,5 @@ namespace blink
         // Draws a indexed triangle array
         glDrawElements(GL_TRIANGLES, geometry->getNumIndex(), GL_UNSIGNED_SHORT, 0);
         GL_ERROR_CHECK();
-
-        // Unbind the IBO
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        // Unbind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }
