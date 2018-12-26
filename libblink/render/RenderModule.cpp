@@ -54,6 +54,8 @@ namespace blink
         //GL_ERROR_CHECK();
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
         return true;
     }

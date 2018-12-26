@@ -10,6 +10,9 @@ namespace blink
     public:
         RTTI_DEF(Light, Object);
 
+        Light();
+        virtual ~Light();
+
         void setLightColor(const glm::vec3& color) { m_lightColor = color; };
         const glm::vec3& getLightColor() const { return m_lightColor; };
 

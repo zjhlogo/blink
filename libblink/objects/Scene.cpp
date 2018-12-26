@@ -2,5 +2,11 @@
 
 namespace blink
 {
+    Scene::Scene()
+    {
+    }
 
+    Scene::~Scene()
+    {
+    }
 }

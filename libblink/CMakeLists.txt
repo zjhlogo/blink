@@ -32,6 +32,8 @@ geometries/GeometryUtils.cpp
 geometries/GeometryUtils.h
 geometries/PlaneGeometry.cpp
 geometries/PlaneGeometry.h
+geometries/SphereGeometry.cpp
+geometries/SphereGeometry.h
 lights/AmbientLight.cpp
 lights/AmbientLight.h
 lights/Light.cpp

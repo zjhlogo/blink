@@ -26,7 +26,7 @@ bool HelloWorldApp::initialize()
     m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), new blink::LambertMaterial());
     m_rootScene->add(m_cube);
 
-    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::PlaneFaceDirection::PositiveY), new blink::LambertMaterial());
+    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), new blink::LambertMaterial());
     plane->setPosition({ 0.0f, -3.0f, 0.0f });
     m_rootScene->add(plane);
 

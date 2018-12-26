@@ -26,5 +26,9 @@ namespace blink
     public:
         virtual uint32 getTextureId() const = 0;
 
+    protected:
+        Texture();
+        virtual ~Texture();
+
     };
 }

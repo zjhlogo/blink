@@ -2,5 +2,11 @@
 
 namespace blink
 {
+    Light::Light()
+    {
+    }
 
+    Light::~Light()
+    {
+    }
 }

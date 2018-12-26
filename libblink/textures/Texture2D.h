@@ -27,7 +27,7 @@ namespace blink
 
     protected:
         Texture2D();
-        ~Texture2D();
+        virtual ~Texture2D();
 
         void destroyTexture();
 

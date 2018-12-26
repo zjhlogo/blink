@@ -17,7 +17,7 @@ bool MandelbrotApp::initialize()
 {
     m_rootScene = new blink::Scene();
 
-    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(1280, 720, blink::PlaneGeometry::PlaneFaceDirection::PositiveZ), new MandelbrotMaterial());
+    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(1280, 720, blink::PlaneGeometry::Facing::PositiveZ), new MandelbrotMaterial());
     m_rootScene->add(plane);
 
     m_camera = new blink::OrthographicCamera();

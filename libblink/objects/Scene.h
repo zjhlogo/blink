@@ -8,6 +8,8 @@ namespace blink
     public:
         RTTI_DEF(Scene, Object);
 
+        Scene();
+        virtual ~Scene();
 
     };
 }

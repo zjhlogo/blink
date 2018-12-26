@@ -3,35 +3,35 @@
 
 namespace blink
 {
-    PlaneGeometry::PlaneGeometry(float width, float height, PlaneFaceDirection dir, int widthSegments, int heightSegments)
+    PlaneGeometry::PlaneGeometry(float width, float height, Facing facing, int widthSegments, int heightSegments)
     {
         m_width = width;
         m_height = height;
-        m_dir = dir;
+        m_facing = facing;
         m_widthSegments = widthSegments;
         m_heightSegments = heightSegments;
 
         VertAttrPos3Uv2NormalList verts;
         Uint16List indis;
 
-        switch (m_dir)
+        switch (m_facing)
         {
-        case PlaneFaceDirection::PositiveX:
+        case Facing::PositiveX:
             GeometryUtils::buildPlane(verts, indis, 2, 1, 0, width, height, -1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_PX);     // +x
             break;
-        case PlaneFaceDirection::NegativeX:
+        case Facing::NegativeX:
             GeometryUtils::buildPlane(verts, indis, 2, 1, 0, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_NX);      // -x
             break;
-        case PlaneFaceDirection::PositiveY:
+        case Facing::PositiveY:
             GeometryUtils::buildPlane(verts, indis, 0, 2, 1, width, height, 1.0f, -1.0f, 0.0f, widthSegments, heightSegments, VEC3_PY);     // +y
             break;
-        case PlaneFaceDirection::NegativeY:
+        case Facing::NegativeY:
             GeometryUtils::buildPlane(verts, indis, 0, 2, 1, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_NY);      // -y
             break;
-        case PlaneFaceDirection::PositiveZ:
+        case Facing::PositiveZ:
             GeometryUtils::buildPlane(verts, indis, 0, 1, 2, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_PZ);      // +z
             break;
-        case PlaneFaceDirection::NegativeZ:
+        case Facing::NegativeZ:
             GeometryUtils::buildPlane(verts, indis, 0, 1, 2, width, height, -1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_NZ);     // -z
             break;
         }

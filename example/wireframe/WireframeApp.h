@@ -21,6 +21,6 @@ public:
 private:
     blink::Scene* m_rootScene{};
     blink::PerspectiveCamera* m_camera{};
-    blink::Mesh* m_cube{};
+    blink::Mesh* m_sphere{};
 
 };

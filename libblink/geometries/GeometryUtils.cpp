@@ -37,12 +37,12 @@ namespace blink
                 uint16 i2 = (y + 1) * (segmentX + 1) + x;
                 uint16 i3 = i2 + 1;
 
-                indis.push_back(numVerts + i0);
                 indis.push_back(numVerts + i2);
+                indis.push_back(numVerts + i0);
                 indis.push_back(numVerts + i1);
 
-                indis.push_back(numVerts + i1);
                 indis.push_back(numVerts + i2);
+                indis.push_back(numVerts + i1);
                 indis.push_back(numVerts + i3);
             }
         }

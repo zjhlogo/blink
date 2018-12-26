@@ -7,7 +7,7 @@ namespace blink
     class PlaneGeometry : public BufferGeometry
     {
     public:
-        enum class PlaneFaceDirection
+        enum class Facing
         {
             PositiveX,
             NegativeX,
@@ -20,13 +20,13 @@ namespace blink
     public:
         RTTI_DEF(PlaneGeometry, BufferGeometry);
 
-        PlaneGeometry(float width, float height, PlaneFaceDirection dir, int widthSegments = 1, int heightSegments = 1);
+        PlaneGeometry(float width, float height, Facing facing, int widthSegments = 1, int heightSegments = 1);
         virtual ~PlaneGeometry();
 
     private:
         float m_width{};
         float m_height{};
-        PlaneFaceDirection m_dir{ PlaneFaceDirection::PositiveX };
+        Facing m_facing{ Facing::PositiveX };
         int m_widthSegments{};
         int m_heightSegments{};
 
