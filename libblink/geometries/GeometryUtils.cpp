@@ -23,7 +23,7 @@ namespace blink
                 uv.x = x / divX - 0.5f;
                 vert[ax] = uv.x * width * udir;
 
-                verts.push_back({ vert.x, vert.y, vert.z, uv.x, uv.y, normal.x, normal.y, normal.z });
+                verts.push_back({ vert.x, vert.y, vert.z, uv.x + 0.5f, uv.y + 0.5f, normal.x, normal.y, normal.z });
             }
         }
 

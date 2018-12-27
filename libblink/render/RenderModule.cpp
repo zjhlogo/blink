@@ -213,6 +213,7 @@ namespace blink
             light->setupShaderUniforms(shader);
         }
         material->setupShaderUniforms(shader);
+        material->setupShaderSampler(shader);
 
         // TODO: apply render state
 

@@ -97,7 +97,7 @@ namespace blink
 
     BufferAttributes * BufferAttributes::fromFile(const tstring & filePath)
     {
-        auto exitInst = s_instanceManager.insertInstance(filePath);
+        auto exitInst = s_instanceManager.insertInstance("file::" + filePath);
         if (exitInst) return exitInst;
 
         tinyxml2::XMLDocument doc;

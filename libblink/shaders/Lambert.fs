@@ -7,6 +7,8 @@ uniform vec3 u_lightColor;
 uniform vec3 u_ambientColor;
 uniform vec3 u_diffuseColor;
 
+uniform sampler2D tex_diffuse;
+
 in vec2 f_texCoord;
 in vec3 f_normal;
 in vec3 f_fragPos;
@@ -20,8 +22,9 @@ void main ()
 	// ambient
 	
 	// diffuse
+	vec3 texDiffuse = texture(tex_diffuse, f_texCoord).xyz;
     float diffuseComponent = max(dot(fragNormal, lightDir), 0.0);
-    vec3 diffuseColor = diffuseComponent * u_diffuseColor * u_lightColor;
+    vec3 diffuseColor = diffuseComponent * u_diffuseColor * u_lightColor * texDiffuse;
 	
 	// specular
     vec3 reflectDir = reflect(-lightDir, fragNormal);

@@ -2,6 +2,7 @@
 #include <Framework.h>
 #include <geometries/BoxGeometry.h>
 #include <geometries/PlaneGeometry.h>
+#include <textures/Texture2D.h>
 #include <materials/LambertMaterial.h>
 #include <materials/WireframeMaterial.h>
 #include <lights/AmbientLight.h>
@@ -26,7 +27,9 @@ bool HelloWorldApp::initialize()
     m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), new blink::LambertMaterial());
     m_rootScene->add(m_cube);
 
-    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), new blink::LambertMaterial());
+    blink::Material* material = new blink::LambertMaterial();
+    material->setTexture(blink::Material::TextureType::Diffuse, blink::Texture2D::fromFile("grid16.png"));
+    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), material);
     plane->setPosition({ 0.0f, -3.0f, 0.0f });
     m_rootScene->add(plane);
 

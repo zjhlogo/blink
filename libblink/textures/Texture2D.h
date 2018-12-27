@@ -6,7 +6,7 @@ namespace blink
     class Texture2D : public Texture
     {
     public:
-        bool loadFromFile(const tstring& filePath);
+        static Texture2D* fromFile(const tstring& filePath);
 
         void setMinFilter(SampleFilter minFilter);
         SampleFilter getMinFilter() const { return m_minFilter; };
@@ -21,6 +21,8 @@ namespace blink
         WrapMethod getVWrap() const { return m_vWrap; };
 
         virtual uint32 getTextureId() const override { return m_textureId; }
+        virtual void release();
+
         const glm::ivec2& getTextureSize() const { return m_textureSize; }
 
         bool updateTextureData(int width, int height, int channel, const void* data);

@@ -1,10 +1,13 @@
 #include "Texture2D.h"
 #include "../utils/ImageLoader.h"
 #include <Log.h>
+#include <InstanceManager.h>
 #include <glad/glad.h>
 
 namespace blink
 {
+    static InstanceManager<tstring, Texture2D> s_instanceManager;
+
     Texture2D::Texture2D()
     {
 
@@ -15,17 +18,27 @@ namespace blink
         destroyTexture();
     }
 
-    bool Texture2D::loadFromFile(const tstring& filePath)
+    Texture2D* Texture2D::fromFile(const tstring& filePath)
     {
+        auto exitInst = s_instanceManager.insertInstance("file::" + filePath);
+        if (exitInst) return exitInst;
+
         ImageLoader::ImageInfo imageInfo;
         if (!ImageLoader::loadTextureFromImage(imageInfo, filePath))
         {
             LOGE("Load Texture2D failed '{0}'", filePath);
-            return false;
+            return nullptr;
         }
 
-        destroyTexture();
-        return updateTextureData(imageInfo.width, imageInfo.height, imageInfo.channels, imageInfo.data);
+        Texture2D* texture = new Texture2D();
+        if (!texture->updateTextureData(imageInfo.width, imageInfo.height, imageInfo.channels, imageInfo.data))
+        {
+            LOGE("Upload Texture2D data failed '{0}'", filePath);
+            SAFE_RELEASE(texture);
+            return nullptr;
+        }
+
+        return s_instanceManager.insertInstance("file::" + filePath, texture);
     }
 
     bool Texture2D::updateTextureData(int width, int height, int channel, const void* data)
@@ -109,6 +122,14 @@ namespace blink
             else if (m_vWrap == WrapMethod::MirrorRepeat) wrapParam = GL_MIRRORED_REPEAT;
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapParam);
+        }
+    }
+
+    void Texture2D::release()
+    {
+        if (s_instanceManager.removeInstance(this))
+        {
+            delete this;
         }
     }
 
