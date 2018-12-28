@@ -1,6 +1,4 @@
 R"===(
-#version 330 core
-
 uniform vec3 u_diffuseColor;
 
 in vec3 f_barycentric;

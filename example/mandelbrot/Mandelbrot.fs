@@ -1,6 +1,4 @@
 R"===(
-#version 330 core
-
 uniform float u_maxIterations;
 uniform float u_zoom;
 uniform float u_escapeRadius;

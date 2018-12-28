@@ -21,7 +21,7 @@ namespace blink
 
     };
 
-    Shader * Shader::fromStock(StockShaders stockShader)
+    Shader * Shader::fromStock(StockShaders stockShader, uint32 preprocessDefine)
     {
         static const char* s_stockVs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
@@ -41,20 +41,15 @@ namespace blink
             WIREFRAME_FS,               // Wireframe
         };
 
-        static const tstring s_stockShaderIds[static_cast<int>(StockShaders::NumberOfStockShaders)] =
-        {
-            "stock::Lambert",
-            "stock::Wireframe",
-        };
-
-        auto exitShader = s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)]);
+        tstring shaderId = makeId(stockShader, preprocessDefine);
+        auto exitShader = s_instanceManager.insertInstance(shaderId);
         if (exitShader) return exitShader;
 
         Shader* shader = new Shader();
 
-        shader->m_vertexShaderData = s_stockVs[static_cast<int>(stockShader)];
-        shader->m_geometryShaderData = s_stockGs[static_cast<int>(stockShader)];
-        shader->m_fragShaderData = s_stockFs[static_cast<int>(stockShader)];
+        concatShaderSources(shader->m_vertexShaderSources, preprocessDefine, s_stockVs[static_cast<int>(stockShader)]);
+        concatShaderSources(shader->m_geometryShaderSources, preprocessDefine, s_stockGs[static_cast<int>(stockShader)]);
+        concatShaderSources(shader->m_fragShaderSources, preprocessDefine, s_stockFs[static_cast<int>(stockShader)]);
 
         if (!shader->reload())
         {
@@ -62,7 +57,7 @@ namespace blink
             return nullptr;
         }
 
-        return s_instanceManager.insertInstance(s_stockShaderIds[static_cast<int>(stockShader)], shader);
+        return s_instanceManager.insertInstance(shaderId, shader);
     }
 
     Shader * Shader::fromBuffer(const tstring & id, const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
@@ -74,9 +69,9 @@ namespace blink
 
         Shader* shader = new Shader();
 
-        if (vsBuffer) shader->m_vertexShaderData = vsBuffer;
-        if (gsBuffer) shader->m_geometryShaderData = gsBuffer;
-        if (fsBuffer) shader->m_fragShaderData = fsBuffer;
+        if (vsBuffer) shader->m_vertexShaderSources.push_back(vsBuffer);
+        if (gsBuffer) shader->m_geometryShaderSources.push_back(gsBuffer);
+        if (fsBuffer) shader->m_fragShaderSources.push_back(fsBuffer);
 
         if (!shader->reload())
         {
@@ -95,27 +90,27 @@ namespace blink
         if (m_programId == 0) return false;
 
         // create vertex shader
-        if (!m_vertexShaderData.empty())
+        if (!m_vertexShaderSources.empty())
         {
-            GLuint vertexId = compileShader(GL_VERTEX_SHADER, m_vertexShaderData);
+            GLuint vertexId = compileShader(GL_VERTEX_SHADER, m_vertexShaderSources);
             AutoDeleteShaderObj vertexShaderObj(vertexId);
             if (vertexId == 0) return false;
             glAttachShader(m_programId, vertexId);
         }
 
         // create geometry shader
-        if (!m_geometryShaderData.empty())
+        if (!m_geometryShaderSources.empty())
         {
-            GLuint geometryId = compileShader(GL_GEOMETRY_SHADER, m_geometryShaderData);
+            GLuint geometryId = compileShader(GL_GEOMETRY_SHADER, m_geometryShaderSources);
             AutoDeleteShaderObj geometryShaderObj(geometryId);
             if (geometryId == 0) return false;
             glAttachShader(m_programId, geometryId);
         }
 
         // create fragment shader
-        if (!m_fragShaderData.empty())
+        if (!m_fragShaderSources.empty())
         {
-            GLuint fragmentId = compileShader(GL_FRAGMENT_SHADER, m_fragShaderData);
+            GLuint fragmentId = compileShader(GL_FRAGMENT_SHADER, m_fragShaderSources);
             AutoDeleteShaderObj fragmentShaderObj(fragmentId);
             if (fragmentId == 0) return false;
             glAttachShader(m_programId, fragmentId);
@@ -329,6 +324,35 @@ namespace blink
         destroyProgram();
     }
 
+    tstring Shader::makeId(StockShaders stockShader, uint32 preprocessDefine)
+    {
+        static const tstring s_stockShaderIds[static_cast<int>(StockShaders::NumberOfStockShaders)] =
+        {
+            "stock::Lambert",
+            "stock::Wireframe",
+        };
+
+        return fmt::format("{0}_{1}", s_stockShaderIds[static_cast<int>(stockShader)], preprocessDefine);
+    }
+
+    tstring Shader::makePreprocessDefine(uint32 preprocessDefine)
+    {
+        tstring defineStr = "#version 330 core\n";
+
+        if (preprocessDefine & USE_DIFFUSE_TEXTURE) defineStr += "#define USE_DIFFUSE_TEXTURE\n";
+
+        return defineStr;
+    }
+
+    void Shader::concatShaderSources(StringList & shaderSources, uint32 preprocessDefine, const tstring & shaderSource)
+    {
+        if (shaderSource.empty()) return;
+
+        tstring defineStr = makePreprocessDefine(preprocessDefine);
+        shaderSources.push_back(defineStr);
+        shaderSources.push_back(shaderSource);
+    }
+
     void Shader::destroyProgram()
     {
         if (m_programId != 0)
@@ -338,15 +362,23 @@ namespace blink
         }
     }
 
-    uint32 Shader::compileShader(uint32 shaderType, const tstring & shaderData)
+    uint32 Shader::compileShader(uint32 shaderType, const StringList& shaderSources)
     {
-        if (shaderData.length() <= 0) return 0;
+        if (shaderSources.empty()) return 0;
 
         int shaderId = glCreateShader(shaderType);
         if (shaderId == 0) return 0;
 
-        const char* pszShader = shaderData.c_str();
-        glShaderSource(shaderId, 1, &pszShader, nullptr);
+        std::vector<const char*> shaderSourcesPtr;
+        for (const auto& source : shaderSources)
+        {
+            if (!source.empty())
+            {
+                shaderSourcesPtr.push_back(source.c_str());
+            }
+        }
+
+        glShaderSource(shaderId, shaderSourcesPtr.size(), shaderSourcesPtr.data(), nullptr);
         glCompileShader(shaderId);
 
         if (getShaderErrorLog(shaderId))

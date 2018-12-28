@@ -1,5 +1,4 @@
 R"===(
-#version 330 core
 uniform mat4 u_worldToClip;
 uniform mat4 u_localToWorld;
 uniform mat3 u_localToWorldTranInv;

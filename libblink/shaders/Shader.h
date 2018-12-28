@@ -15,8 +15,10 @@ namespace blink
             NumberOfStockShaders,
         };
 
+        static const uint32 USE_DIFFUSE_TEXTURE = 1 << 0;
+
     public:
-        static Shader* fromStock(StockShaders stockShader);
+        static Shader* fromStock(StockShaders stockShader, uint32 preprocessDefine);
         static Shader* fromBuffer(const tstring& id, const char* vsBuffer, const char* gsBuffer, const char* fsBuffer);
 
         bool reload();
@@ -46,17 +48,21 @@ namespace blink
         Shader();
         ~Shader();
 
+        static tstring makeId(StockShaders stockShader, uint32 preprocessDefine);
+        static tstring makePreprocessDefine(uint32 preprocessDefine);
+        static void concatShaderSources(StringList& shaderSources, uint32 preprocessDefine, const tstring& shaderSource);
+
         void destroyProgram();
-        uint32 compileShader(uint32 shaderType, const tstring& shaderData);
+        uint32 compileShader(uint32 shaderType, const StringList& shaderSources);
         bool getShaderErrorLog(uint32 shaderId);
         bool getProgramErrorLog(uint32 programId);
 
     private:
         uint32 m_programId{};
 
-        tstring m_vertexShaderData;
-        tstring m_geometryShaderData;
-        tstring m_fragShaderData;
+        StringList m_vertexShaderSources;
+        StringList m_geometryShaderSources;
+        StringList m_fragShaderSources;
 
         tstring m_errorLog;
 

@@ -5,7 +5,7 @@ namespace blink
 {
     WireframeMaterial::WireframeMaterial()
     {
-        m_shader = Shader::fromStock(Shader::StockShaders::Wireframe);
+        m_shader = Shader::fromStock(Shader::StockShaders::Wireframe, 0);
     }
 
     WireframeMaterial::~WireframeMaterial()

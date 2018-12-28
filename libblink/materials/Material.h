@@ -25,7 +25,7 @@ namespace blink
         Material();
         virtual ~Material();
 
-        Shader* getShader() const { return m_shader; };
+        virtual Shader* getShader() { return m_shader; };
 
         void setDiffuseColor(const glm::vec3& diffuseColor) { m_diffuseColor = diffuseColor; }
         const glm::vec3& getDiffuseColor() const { return m_diffuseColor; }
