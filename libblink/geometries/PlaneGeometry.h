@@ -21,6 +21,8 @@ namespace blink
         RTTI_DEF(PlaneGeometry, BufferGeometry);
 
         PlaneGeometry(float width, float height, Facing facing, int widthSegments = 1, int heightSegments = 1);
+
+    protected:
         virtual ~PlaneGeometry();
 
     private:

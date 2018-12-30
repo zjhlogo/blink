@@ -1,11 +1,8 @@
 #include "WireframeApp.h"
 #include <Framework.h>
 #include <geometries/SphereGeometry.h>
-#include <geometries/PlaneGeometry.h>
-#include <materials/LambertMaterial.h>
+#include <geometries/BoxGeometry.h>
 #include <materials/WireframeMaterial.h>
-#include <lights/AmbientLight.h>
-#include <lights/PointLight.h>
 #include <render/RenderModule.h>
 
 WireframeApp::WireframeApp()
@@ -23,8 +20,17 @@ bool WireframeApp::initialize()
 {
     m_rootScene = new blink::Scene();
 
-    m_sphere = new blink::Mesh(new blink::SphereGeometry(1.0f, 20, 20), new blink::WireframeMaterial());
+    auto wireframeMaterial = new blink::WireframeMaterial();
+
+    // add sphere
+    m_sphere = new blink::Mesh(new blink::SphereGeometry(0.5f, 8, 15), wireframeMaterial);
+    m_sphere->setPosition({ -1.0f, 0.0f, 0.0f });
     m_rootScene->add(m_sphere);
+
+    // add cube
+    m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), wireframeMaterial);
+    m_cube->setPosition({ 1.0f, 0.0f, 0.0f });
+    m_rootScene->add(m_cube);
 
     m_camera = new blink::PerspectiveCamera();
     m_camera->setPosition({ 0.0f, 3.0f, 3.0f });
@@ -43,6 +49,10 @@ void WireframeApp::update(float dt)
 {
     m_sphere->applyRotation(4.9f * dt, blink::VEC3_PX);
     m_sphere->applyRotation(6.9f * dt, blink::VEC3_PY);
+
+    m_cube->applyRotation(-4.9f * dt, blink::VEC3_PX);
+    m_cube->applyRotation(6.9f * dt, blink::VEC3_PY);
+
     m_rootScene->updateWorldTransform(blink::MAT4_IDENTITY);
 }
 

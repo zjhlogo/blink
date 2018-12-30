@@ -1,6 +1,7 @@
 #include "HatchingApp.h"
 #include "HatchingMaterial.h"
 #include <Framework.h>
+#include <geometries/SphereGeometry.h>
 #include <geometries/BoxGeometry.h>
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
@@ -21,11 +22,19 @@ bool HatchingApp::initialize()
 {
     m_rootScene = new blink::Scene();
 
-    auto material = new HatchingMaterial();
-    material->setTexture("tex_diffuse", "resource/hatching.png", 0);
-    material->setTexture("tex_hatchingLevel", "resource/hatchinglevel.png", 1);
-    m_sphere = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), material);
+    HatchingMaterial* hatchingMaterial = new HatchingMaterial();
+    hatchingMaterial->setTexture("tex_diffuse", "resource/hatching.png", 0);
+    hatchingMaterial->setTexture("tex_hatchingLevel", "resource/hatchinglevel.png", 1);
+
+    // add sphere
+    m_sphere = new blink::Mesh(new blink::SphereGeometry(0.5f, 10, 20), hatchingMaterial);
+    m_sphere->setPosition({ -1.0f, 0.0f, 0.0f });
     m_rootScene->add(m_sphere);
+
+    // add cube
+    m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), hatchingMaterial);
+    m_cube->setPosition({ 1.0f, 0.0f, 0.0f });
+    m_rootScene->add(m_cube);
 
     m_rootScene->add(new blink::AmbientLight());
 
@@ -50,6 +59,10 @@ void HatchingApp::update(float dt)
 {
     m_sphere->applyRotation(4.9f * dt, blink::VEC3_PX);
     m_sphere->applyRotation(6.9f * dt, blink::VEC3_PY);
+
+    m_cube->applyRotation(-4.9f * dt, blink::VEC3_PX);
+    m_cube->applyRotation(-6.9f * dt, blink::VEC3_PY);
+
     m_rootScene->updateWorldTransform(blink::MAT4_IDENTITY);
 }
 

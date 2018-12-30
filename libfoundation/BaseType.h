@@ -74,3 +74,4 @@ namespace blink
 #define SAFE_DELETE_AND_TERMINATE(x) if (x) {x->terminate(); delete x; x=nullptr;}
 
 #define SAFE_RELEASE(x) if (x) {x->release(); x=nullptr;}
+#define SAFE_OBTAIN(dst, src) if (src) { src->incReference(); dst = src;}

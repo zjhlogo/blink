@@ -24,12 +24,13 @@ bool HelloWorldApp::initialize()
 {
     m_rootScene = new blink::Scene();
 
-    m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), new blink::LambertMaterial());
+    auto colorMaterial = new blink::LambertMaterial();
+    m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), colorMaterial);
     m_rootScene->add(m_cube);
 
-    blink::Material* material = new blink::LambertMaterial();
-    material->setTexture("tex_diffuse", "resource/grid16.png", 0);
-    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), material);
+    blink::Material* textureMaterial = new blink::LambertMaterial();
+    textureMaterial->setTexture("tex_diffuse", "resource/grid16.png", 0);
+    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), textureMaterial);
     plane->setPosition({ 0.0f, -3.0f, 0.0f });
     m_rootScene->add(plane);
 

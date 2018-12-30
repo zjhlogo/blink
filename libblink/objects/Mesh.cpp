@@ -4,13 +4,13 @@ namespace blink
 {
     Mesh::Mesh(Geometry * geometry, Material * material)
     {
-        m_geometry = geometry;
-        m_material = material;
+        SAFE_OBTAIN(m_geometry, geometry);
+        SAFE_OBTAIN(m_material, material);
     }
 
     Mesh::~Mesh()
     {
-        SAFE_DELETE(m_geometry);
-        SAFE_DELETE(m_material);
+        SAFE_RELEASE(m_geometry);
+        SAFE_RELEASE(m_material);
     }
 }

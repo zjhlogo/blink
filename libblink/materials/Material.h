@@ -24,7 +24,6 @@ namespace blink
         RTTI_ROOT(Material);
 
         Material();
-        virtual ~Material();
 
         virtual Shader* getShader() { return m_shader; };
 
@@ -38,10 +37,20 @@ namespace blink
         virtual void setupShaderUniforms(Shader* shader) = 0;
         virtual void setupShaderSampler(Shader* shader);
 
+        void release();
+        int incReference() { return ++m_reference; };
+        int decReference() { return --m_reference; };
+
+    protected:
+        virtual ~Material();
+
     protected:
         Shader* m_shader{};
         glm::vec3 m_diffuseColor{ VEC3_ONE };
         TexInfoMap m_texInfoMap;
+
+    private:
+        int m_reference{};
 
     };
 }

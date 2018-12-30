@@ -6,9 +6,11 @@ public:
     RTTI_DEF(MandelbrotMaterial, blink::Material);
 
     MandelbrotMaterial();
-    virtual ~MandelbrotMaterial();
 
     virtual void setupShaderUniforms(blink::Shader* shader) override;
+
+protected:
+    virtual ~MandelbrotMaterial();
 
 private:
     float m_maxIterations{ 50.0f };

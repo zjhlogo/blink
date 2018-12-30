@@ -56,4 +56,12 @@ namespace blink
             shader->setTexture(texInfo.second.name.c_str(), texInfo.second.texture, texInfo.first);
         }
     }
+
+    void Material::release()
+    {
+        if (decReference() <= 0)
+        {
+            delete this;
+        }
+    }
 }
