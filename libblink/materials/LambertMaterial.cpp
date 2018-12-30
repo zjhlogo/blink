@@ -18,7 +18,8 @@ namespace blink
         if (!m_shader)
         {
             uint32 defineFlag = 0;
-            if (m_textureMap.find(TextureType::Diffuse) != m_textureMap.end()) defineFlag |= Shader::USE_DIFFUSE_TEXTURE;
+
+            if (getTexture("tex_diffuse")) defineFlag |= Shader::USE_DIFFUSE_TEXTURE;
 
             m_shader = Shader::fromStock(Shader::StockShaders::Lambert, defineFlag);
         }

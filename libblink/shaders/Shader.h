@@ -50,7 +50,7 @@ namespace blink
 
         static tstring makeId(StockShaders stockShader, uint32 preprocessDefine);
         static tstring makePreprocessDefine(uint32 preprocessDefine);
-        static void concatShaderSources(StringList& shaderSources, uint32 preprocessDefine, const tstring& shaderSource);
+        static void concatShaderSources(StringList& shaderSources, uint32 preprocessDefine, const char* shaderSource);
 
         void destroyProgram();
         uint32 compileShader(uint32 shaderType, const StringList& shaderSources);

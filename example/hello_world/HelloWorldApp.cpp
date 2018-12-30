@@ -28,7 +28,7 @@ bool HelloWorldApp::initialize()
     m_rootScene->add(m_cube);
 
     blink::Material* material = new blink::LambertMaterial();
-    material->setTexture(blink::Material::TextureType::Diffuse, blink::Texture2D::fromFile("grid16.png"));
+    material->setTexture("tex_diffuse", "resource/grid16.png", 0);
     blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), material);
     plane->setPosition({ 0.0f, -3.0f, 0.0f });
     m_rootScene->add(plane);
@@ -53,8 +53,8 @@ void HelloWorldApp::terminate()
 
 void HelloWorldApp::update(float dt)
 {
-    m_cube->applyRotation(29.0f * dt, blink::VEC3_PX);
-    m_cube->applyRotation(39.0f * dt, blink::VEC3_PY);
+    m_cube->applyRotation(4.9f * dt, blink::VEC3_PX);
+    m_cube->applyRotation(6.9f * dt, blink::VEC3_PY);
     m_rootScene->updateWorldTransform(blink::MAT4_IDENTITY);
 }
 

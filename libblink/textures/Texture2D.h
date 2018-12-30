@@ -37,8 +37,8 @@ namespace blink
         uint32 m_textureId{};
         glm::ivec2 m_textureSize;
 
-        SampleFilter m_minFilter{ SampleFilter::Nearest };
-        SampleFilter m_magFilter{ SampleFilter::Nearest };
+        SampleFilter m_minFilter{ SampleFilter::LinearMipmapLinear };
+        SampleFilter m_magFilter{ SampleFilter::Linear };
 
         WrapMethod m_uWrap{ WrapMethod::Clamp };
         WrapMethod m_vWrap{ WrapMethod::Clamp };

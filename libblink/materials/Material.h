@@ -10,14 +10,15 @@ namespace blink
     class Material
     {
     public:
-        enum class TextureType
+        class TexInfo
         {
-            Diffuse,
-            Normal,
-            NumTextureType,
+        public:
+            tstring name;
+            Texture* texture{};
+            uint32 index{};
         };
 
-        typedef std::map<TextureType, const Texture*> textureMap;
+        typedef std::map<uint32, TexInfo> TexInfoMap;
 
     public:
         RTTI_ROOT(Material);
@@ -30,8 +31,9 @@ namespace blink
         void setDiffuseColor(const glm::vec3& diffuseColor) { m_diffuseColor = diffuseColor; }
         const glm::vec3& getDiffuseColor() const { return m_diffuseColor; }
 
-        void setTexture(TextureType type, const Texture* texture);
-        const Texture* getTexture(TextureType type);
+        bool setTexture(const tstring& name, const tstring& filePath, uint32 index);
+        const Texture* getTexture(uint32 index);
+        const Texture* getTexture(const tstring& name);
 
         virtual void setupShaderUniforms(Shader* shader) = 0;
         virtual void setupShaderSampler(Shader* shader);
@@ -39,7 +41,7 @@ namespace blink
     protected:
         Shader* m_shader{};
         glm::vec3 m_diffuseColor{ VEC3_ONE };
-        textureMap m_textureMap;
+        TexInfoMap m_texInfoMap;
 
     };
 }

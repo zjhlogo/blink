@@ -1,30 +1,37 @@
-#include "WireframeApp.h"
+#include "HatchingApp.h"
+#include "HatchingMaterial.h"
 #include <Framework.h>
-#include <geometries/SphereGeometry.h>
-#include <geometries/PlaneGeometry.h>
-#include <materials/LambertMaterial.h>
-#include <materials/WireframeMaterial.h>
+#include <geometries/BoxGeometry.h>
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
 #include <render/RenderModule.h>
 
-WireframeApp::WireframeApp()
-    :IApp(1280, 720, "Wireframe")
+HatchingApp::HatchingApp()
+    :IApp(1280, 720, "Hello World")
 {
 
 }
 
-WireframeApp::~WireframeApp()
+HatchingApp::~HatchingApp()
 {
 
 }
 
-bool WireframeApp::initialize()
+bool HatchingApp::initialize()
 {
     m_rootScene = new blink::Scene();
 
-    m_sphere = new blink::Mesh(new blink::SphereGeometry(1.0f, 20, 20), new blink::WireframeMaterial());
+    auto material = new HatchingMaterial();
+    material->setTexture("tex_diffuse", "resource/hatching.png", 0);
+    material->setTexture("tex_hatchingLevel", "resource/hatchinglevel.png", 1);
+    m_sphere = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), material);
     m_rootScene->add(m_sphere);
+
+    m_rootScene->add(new blink::AmbientLight());
+
+    blink::PointLight* light = new blink::PointLight();
+    light->setPosition({ 0.0f, 5.0f, 1.0f });
+    m_rootScene->add(light);
 
     m_camera = new blink::PerspectiveCamera();
     m_camera->setPosition({ 0.0f, 3.0f, 3.0f });
@@ -33,20 +40,20 @@ bool WireframeApp::initialize()
     return true;
 }
 
-void WireframeApp::terminate()
+void HatchingApp::terminate()
 {
     SAFE_DELETE(m_camera);
     SAFE_DELETE(m_rootScene);
 }
 
-void WireframeApp::update(float dt)
+void HatchingApp::update(float dt)
 {
     m_sphere->applyRotation(4.9f * dt, blink::VEC3_PX);
     m_sphere->applyRotation(6.9f * dt, blink::VEC3_PY);
     m_rootScene->updateWorldTransform(blink::MAT4_IDENTITY);
 }
 
-void WireframeApp::render()
+void HatchingApp::render()
 {
     blink::RenderModule* pRenderModule = blink::Framework::getInstance().findComponent<blink::RenderModule>();
     if (!pRenderModule) return;
@@ -56,5 +63,5 @@ void WireframeApp::render()
 
 int main(int argc, char** argv)
 {
-    return blink::Framework::getInstance().startup(new WireframeApp());
+    return blink::Framework::getInstance().startup(new HatchingApp());
 }

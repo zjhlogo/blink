@@ -31,7 +31,7 @@ namespace blink
 
         static const char* s_stockGs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            "",                         // Lambert
+            nullptr,                    // Lambert
             WIREFRAME_GS,               // Wireframe
         };
 
@@ -69,9 +69,9 @@ namespace blink
 
         Shader* shader = new Shader();
 
-        if (vsBuffer) shader->m_vertexShaderSources.push_back(vsBuffer);
-        if (gsBuffer) shader->m_geometryShaderSources.push_back(gsBuffer);
-        if (fsBuffer) shader->m_fragShaderSources.push_back(fsBuffer);
+        concatShaderSources(shader->m_vertexShaderSources, 0, vsBuffer);
+        concatShaderSources(shader->m_geometryShaderSources, 0, gsBuffer);
+        concatShaderSources(shader->m_fragShaderSources, 0, fsBuffer);
 
         if (!shader->reload())
         {
@@ -299,6 +299,13 @@ namespace blink
     {
         if (!pszName || !pTexture) return false;
 
+        // TODO: optimize it by cache the operation, do not perform it everytime
+        int loc = glGetUniformLocation(m_programId, pszName);
+        GL_ERROR_CHECK();
+        if (loc == -1) return false;
+
+        glUniform1i(loc, slotIndex);
+
         glActiveTexture(GL_TEXTURE0 + slotIndex);
         glBindTexture(GL_TEXTURE_2D, pTexture->getTextureId());
         GL_ERROR_CHECK();
@@ -344,9 +351,9 @@ namespace blink
         return defineStr;
     }
 
-    void Shader::concatShaderSources(StringList & shaderSources, uint32 preprocessDefine, const tstring & shaderSource)
+    void Shader::concatShaderSources(StringList & shaderSources, uint32 preprocessDefine, const char* shaderSource)
     {
-        if (shaderSource.empty()) return;
+        if (!shaderSource) return;
 
         tstring defineStr = makePreprocessDefine(preprocessDefine);
         shaderSources.push_back(defineStr);

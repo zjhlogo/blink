@@ -1,5 +1,6 @@
 #include "Material.h"
 #include "../shaders/Shader.h"
+#include "../textures/Texture2D.h"
 
 namespace blink
 {
@@ -9,30 +10,50 @@ namespace blink
 
     Material::~Material()
     {
+        for (auto& texInfo : m_texInfoMap)
+        {
+            SAFE_RELEASE(texInfo.second.texture);
+        }
+        m_texInfoMap.clear();
+
         SAFE_RELEASE(m_shader);
     }
 
-    void Material::setTexture(TextureType type, const Texture * texture)
+    bool Material::setTexture(const tstring& name, const tstring& filePath, uint32 index)
     {
-        m_textureMap[type] = texture;
+        auto texture = Texture2D::fromFile(filePath);
+        if (!texture) return false;
+
+        m_texInfoMap[index] = { name, texture, index };
+        return true;
     }
 
-    const Texture * Material::getTexture(TextureType type)
+    const Texture * Material::getTexture(uint32 index)
     {
-        return m_textureMap[type];
+        auto it = m_texInfoMap.find(index);
+        if (it == m_texInfoMap.end()) return nullptr;
+
+        return it->second.texture;
+    }
+
+    const Texture * Material::getTexture(const tstring & name)
+    {
+        for (const auto& texInfo : m_texInfoMap)
+        {
+            if (texInfo.second.name == name)
+            {
+                return texInfo.second.texture;
+            }
+        }
+
+        return nullptr;
     }
 
     void Material::setupShaderSampler(Shader * shader)
     {
-        static const char* s_textureNameList[static_cast<int>(TextureType::NumTextureType)] =
+        for (const auto& texInfo : m_texInfoMap)
         {
-            "tex_diffuse",
-            "tex_normal",
-        };
-
-        for (const auto& texture : m_textureMap)
-        {
-            shader->setTexture(s_textureNameList[static_cast<int>(texture.first)], texture.second, static_cast<int>(texture.first));
+            shader->setTexture(texInfo.second.name.c_str(), texInfo.second.texture, texInfo.first);
         }
     }
 }

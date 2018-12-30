@@ -89,6 +89,10 @@ namespace blink
 
             GLint glSampleFilter = GL_NEAREST;
             if (m_magFilter == SampleFilter::Linear) glSampleFilter = GL_LINEAR;
+            else if (m_magFilter == SampleFilter::LinearMipmapLinear) glSampleFilter = GL_LINEAR_MIPMAP_LINEAR;
+            else if (m_magFilter == SampleFilter::NearestMipmapNearest) glSampleFilter = GL_NEAREST_MIPMAP_NEAREST;
+            else if (m_magFilter == SampleFilter::LinearMipmapNearest) glSampleFilter = GL_LINEAR_MIPMAP_NEAREST;
+            else if (m_magFilter == SampleFilter::NearestMipmapLinear) glSampleFilter = GL_NEAREST_MIPMAP_LINEAR;
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glSampleFilter);
         }
     }
