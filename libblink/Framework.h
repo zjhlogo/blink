@@ -13,10 +13,11 @@ namespace blink
         void shutdown();
 
         void step(float dt);
-        void resize();
-        void reload();
 
         const glm::vec2& getWindowSize() const { return m_windowSize; };
+
+    private:
+        bool initComponents();
 
     private:
         IApp* m_app{};

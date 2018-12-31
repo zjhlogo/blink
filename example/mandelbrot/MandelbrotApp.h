@@ -2,7 +2,7 @@
 #include <IApp.h>
 #include <objects/Scene.h>
 #include <objects/Mesh.h>
-#include <cameras/OrthographicCamera.h>
+#include <cameras/TargetCamera.h>
 
 class MandelbrotApp : public blink::IApp
 {
@@ -20,6 +20,6 @@ public:
 
 private:
     blink::Scene* m_rootScene{};
-    blink::OrthographicCamera* m_camera{};
+    blink::TargetCamera* m_camera{};
 
 };

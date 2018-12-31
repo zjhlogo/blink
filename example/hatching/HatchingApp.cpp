@@ -8,7 +8,7 @@
 #include <render/RenderModule.h>
 
 HatchingApp::HatchingApp()
-    :IApp(1280, 720, "Hello World")
+    :IApp(1280, 720, "Hatching")
 {
 
 }
@@ -42,7 +42,7 @@ bool HatchingApp::initialize()
     light->setPosition({ 0.0f, 5.0f, 1.0f });
     m_rootScene->add(light);
 
-    m_camera = new blink::PerspectiveCamera();
+    m_camera = new blink::TargetCamera();
     m_camera->setPosition({ 0.0f, 3.0f, 3.0f });
     m_camera->setTargetPosition(blink::VEC3_ZERO);
 

@@ -32,7 +32,7 @@ bool WireframeApp::initialize()
     m_cube->setPosition({ 1.0f, 0.0f, 0.0f });
     m_rootScene->add(m_cube);
 
-    m_camera = new blink::PerspectiveCamera();
+    m_camera = new blink::TargetCamera();
     m_camera->setPosition({ 0.0f, 3.0f, 3.0f });
     m_camera->setTargetPosition(blink::VEC3_ZERO);
 

@@ -8,6 +8,7 @@
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
 #include <render/RenderModule.h>
+#include <Log.h>
 
 HelloWorldApp::HelloWorldApp()
     :IApp(1280, 720, "Hello World")
@@ -39,9 +40,12 @@ bool HelloWorldApp::initialize()
     light->setPosition({ 0.0f, 5.0f, 1.0f });
     m_rootScene->add(light);
 
-    m_camera = new blink::PerspectiveCamera();
+    m_camera = new blink::TargetCamera();
     m_camera->setPosition({ 0.0f, 3.0f, 3.0f });
     m_camera->setTargetPosition(blink::VEC3_ZERO);
+
+    auto mouseComponent = blink::Framework::getInstance().findComponent<blink::MouseComponent>();
+    REGISTER_EVENT(mouseComponent, blink::MouseEvent, &HelloWorldApp::onMouseEvent);
 
     return true;
 }
@@ -65,6 +69,11 @@ void HelloWorldApp::render()
     if (!pRenderModule) return;
 
     pRenderModule->render(m_rootScene, m_camera);
+}
+
+void HelloWorldApp::onMouseEvent(blink::MouseEvent & evt)
+{
+    LOGI("mouse event");
 }
 
 int main(int argc, char** argv)

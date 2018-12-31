@@ -11,10 +11,8 @@ find_package(tinyxml2 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 set(SOURCE_FILES
 cameras/Camera.cpp
 cameras/Camera.h
-cameras/PerspectiveCamera.cpp
-cameras/PerspectiveCamera.h
-cameras/OrthographicCamera.cpp
-cameras/OrthographicCamera.h
+cameras/TargetCamera.cpp
+cameras/TargetCamera.h
 core/Component.cpp
 core/Component.h
 core/Entity.cpp
@@ -34,6 +32,8 @@ geometries/PlaneGeometry.cpp
 geometries/PlaneGeometry.h
 geometries/SphereGeometry.cpp
 geometries/SphereGeometry.h
+input/MouseComponent.cpp
+input/MouseComponent.h
 lights/AmbientLight.cpp
 lights/AmbientLight.h
 lights/Light.cpp

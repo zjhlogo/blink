@@ -20,7 +20,8 @@ bool MandelbrotApp::initialize()
     blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(1280, 720, blink::PlaneGeometry::Facing::PositiveZ), new MandelbrotMaterial());
     m_rootScene->add(plane);
 
-    m_camera = new blink::OrthographicCamera();
+    m_camera = new blink::TargetCamera();
+    m_camera->useDefaultProjection(blink::Camera::DefaultProjection::Orthographic);
     m_camera->setPosition({ 0.0f, 0.0f, 3.0f });
     m_camera->setTargetPosition(blink::VEC3_ZERO);
 

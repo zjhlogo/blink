@@ -2,7 +2,7 @@
 #include <IApp.h>
 #include <objects/Scene.h>
 #include <objects/Mesh.h>
-#include <cameras/PerspectiveCamera.h>
+#include <cameras/TargetCamera.h>
 
 class HatchingApp : public blink::IApp
 {
@@ -20,7 +20,7 @@ public:
 
 private:
     blink::Scene* m_rootScene{};
-    blink::PerspectiveCamera* m_camera{};
+    blink::TargetCamera* m_camera{};
 
     blink::Mesh* m_cube{};
     blink::Mesh* m_sphere{};

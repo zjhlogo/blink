@@ -1,11 +1,12 @@
 #pragma once
 #include <Rtti.h>
+#include <EventSystem.h>
 
 namespace blink
 {
     class Entity;
 
-    class Component
+    class Component : public EventHandler
     {
     public:
         RTTI_ROOT(Component);

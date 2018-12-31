@@ -9,32 +9,36 @@ namespace blink
     class Camera
     {
     public:
+        enum class DefaultProjection
+        {
+            Perspective,
+            Orthographic,
+        };
+
+    public:
         RTTI_ROOT(Camera);
 
         Camera();
         virtual ~Camera();
 
-        void setPosition(const glm::vec3& pos);
-        void setTargetPosition(const glm::vec3& pos);
-        void setUpDirection(const glm::vec3& up);
+        void useDefaultProjection(DefaultProjection projection);
+        void setOrthographicProjection(float left, float right, float bottom, float top, float near, float far);
+        void setPerspectiveProjection(float fov, float width, float height, float near, float far);
 
-        const glm::vec3& getPosition() const { return m_eye; }
-        const glm::vec3& getTargetPosition() const { return m_target; }
-        const glm::vec3& getUpDirection() const { return m_up; }
+        void setPosition(const glm::vec3& pos);
+        const glm::vec3& getPosition() const { return m_position; }
 
         const glm::mat4& getWorldToCameraTransform();
         const glm::mat4& getCameraToClipTransform();
         const glm::mat4& getWorldToClipTransform();
 
-        virtual void setupShaderUniforms(const glm::mat4& localToWorld, Shader* shader) = 0;
+        virtual void setupShaderUniforms(const glm::mat4& localToWorld, Shader* shader);
 
     protected:
         virtual void updateTransform() = 0;
 
     protected:
-        glm::vec3 m_eye{ VEC3_ZERO };
-        glm::vec3 m_target{ VEC3_ZERO };
-        glm::vec3 m_up{ VEC3_PY };
+        glm::vec3 m_position{ VEC3_ZERO };
 
         glm::mat4 m_worldToCamera;
         glm::mat4 m_cameraToClip;
