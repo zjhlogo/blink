@@ -9,6 +9,7 @@
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
 #include <render/RenderModule.h>
+#include <cameras/TargetCamera.h>
 #include <Log.h>
 
 HelloWorldApp::HelloWorldApp()
@@ -45,8 +46,9 @@ bool HelloWorldApp::initialize()
     lightGeo->setPosition(light->getPosition());
     m_rootScene->add(lightGeo);
 
-    m_camera = new blink::TargetCamera();
-    m_camera->lookAt({ -3.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    auto camera = new blink::TargetCamera();
+    camera->lookAt({ -3.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    m_camera = camera;
 
     return true;
 }

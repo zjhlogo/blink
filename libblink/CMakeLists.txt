@@ -11,6 +11,8 @@ find_package(tinyxml2 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 set(SOURCE_FILES
 cameras/Camera.cpp
 cameras/Camera.h
+cameras/FixCamera.cpp
+cameras/FixCamera.h
 cameras/TargetCamera.cpp
 cameras/TargetCamera.h
 core/Component.cpp

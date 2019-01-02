@@ -6,6 +6,7 @@
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
 #include <render/RenderModule.h>
+#include <cameras/TargetCamera.h>
 
 HatchingApp::HatchingApp()
     :IApp(1280, 720, "Hatching")
@@ -42,8 +43,9 @@ bool HatchingApp::initialize()
     light->setPosition({ 0.0f, 5.0f, 1.0f });
     m_rootScene->add(light);
 
-    m_camera = new blink::TargetCamera();
-    m_camera->lookAt({ 0.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    auto camera = new blink::TargetCamera();
+    camera->lookAt({ 0.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    m_camera = camera;
 
     return true;
 }

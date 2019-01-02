@@ -18,9 +18,7 @@ namespace blink
 
     void TargetCamera::lookAt(const glm::vec3 & pos, const glm::vec3 & target, const glm::vec3 & up)
     {
-        m_position = pos;
-        m_target = target;
-        m_up = up;
+        FixCamera::lookAt(pos, target, up);
 
         glm::vec3 distance = pos - target;
         m_radius = glm::length(distance);
@@ -29,14 +27,6 @@ namespace blink
         m_offset.t = acos(distance.y / m_radius);
         clampOffset(m_offset);
         m_offset.s = asin(distance.x / (m_radius * sin(m_offset.t)));
-
-        m_transformDirty = true;
-    }
-
-    void TargetCamera::updateTransform()
-    {
-        m_worldToCamera = glm::lookAt(m_position, m_target, m_up);
-        m_worldToClip = m_cameraToClip * m_worldToCamera;
     }
 
     void TargetCamera::onMouseEvent(MouseEvent & evt)

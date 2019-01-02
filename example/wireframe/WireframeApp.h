@@ -2,7 +2,7 @@
 #include <IApp.h>
 #include <objects/Scene.h>
 #include <objects/Mesh.h>
-#include <cameras/TargetCamera.h>
+#include <cameras/Camera.h>
 
 class WireframeApp : public blink::IApp
 {
@@ -20,7 +20,7 @@ public:
 
 private:
     blink::Scene* m_rootScene{};
-    blink::TargetCamera* m_camera{};
+    blink::Camera* m_camera{};
 
     blink::Mesh* m_sphere{};
     blink::Mesh* m_cube{};

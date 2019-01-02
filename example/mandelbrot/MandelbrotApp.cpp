@@ -3,6 +3,7 @@
 #include <geometries/PlaneGeometry.h>
 #include <Framework.h>
 #include <render/RenderModule.h>
+#include <cameras/FixCamera.h>
 
 MandelbrotApp::MandelbrotApp()
     :IApp(1280, 720, "Mandelbrot")
@@ -20,9 +21,10 @@ bool MandelbrotApp::initialize()
     blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(1280, 720, blink::PlaneGeometry::Facing::PositiveZ), new MandelbrotMaterial());
     m_rootScene->add(plane);
 
-    m_camera = new blink::TargetCamera();
-    m_camera->useDefaultProjection(blink::Camera::DefaultProjection::Orthographic);
-    m_camera->lookAt({ 0.0f, 0.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    auto camera = new blink::FixCamera();
+    camera->useDefaultProjection(blink::Camera::DefaultProjection::Orthographic);
+    camera->lookAt({ 0.0f, 0.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    m_camera = camera;
 
     return true;
 }

@@ -4,6 +4,7 @@
 #include <geometries/BoxGeometry.h>
 #include <materials/WireframeMaterial.h>
 #include <render/RenderModule.h>
+#include <cameras/TargetCamera.h>
 
 WireframeApp::WireframeApp()
     :IApp(1280, 720, "Wireframe")
@@ -32,8 +33,9 @@ bool WireframeApp::initialize()
     m_cube->setPosition({ 1.0f, 0.0f, 0.0f });
     m_rootScene->add(m_cube);
 
-    m_camera = new blink::TargetCamera();
-    m_camera->lookAt({ 0.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    auto camera = new blink::TargetCamera();
+    camera->lookAt({ 0.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
+    m_camera = camera;
 
     return true;
 }
