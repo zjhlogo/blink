@@ -16,6 +16,8 @@ namespace blink
     bool Object::add(Object * object)
     {
         assert(object);
+        assert(std::find(m_children.begin(), m_children.end(), object) == m_children.end());
+
         m_children.push_back(object);
         return true;
     }
@@ -23,6 +25,8 @@ namespace blink
     bool Object::remove(Object * object)
     {
         auto it = std::find(m_children.begin(), m_children.end(), object);
+        assert(it != m_children.end());
+
         if (it != m_children.end())
         {
             SAFE_DELETE(object);

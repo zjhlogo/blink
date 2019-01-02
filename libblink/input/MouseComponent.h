@@ -11,6 +11,7 @@ namespace blink
             Move,
             ButtonDown,
             ButtonUp,
+            Scroll,
         };
 
         enum MouseButton
@@ -40,7 +41,8 @@ namespace blink
     public:
         Action action{ Action::Move };
         MouseButton mouseButton{};
-        glm::ivec2 mousePos;
+        glm::vec2 mousePos{};
+        glm::vec2 mouseScroll{};
         uint32 modifyKey{};
 
     };

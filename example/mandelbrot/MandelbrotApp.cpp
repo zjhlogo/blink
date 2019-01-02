@@ -22,8 +22,7 @@ bool MandelbrotApp::initialize()
 
     m_camera = new blink::TargetCamera();
     m_camera->useDefaultProjection(blink::Camera::DefaultProjection::Orthographic);
-    m_camera->setPosition({ 0.0f, 0.0f, 3.0f });
-    m_camera->setTargetPosition(blink::VEC3_ZERO);
+    m_camera->lookAt({ 0.0f, 0.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
 
     return true;
 }

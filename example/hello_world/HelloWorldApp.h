@@ -3,12 +3,9 @@
 #include <objects/Scene.h>
 #include <objects/Mesh.h>
 #include <cameras/TargetCamera.h>
-#include <input/MouseComponent.h>
 
 class HelloWorldApp : public blink::IApp
 {
-    DECLARE_EVENT_HOST();
-
 public:
     RTTI_DEF(HelloWorldApp, blink::IApp);
 
@@ -20,9 +17,6 @@ public:
 
     virtual void update(float dt);
     virtual void render();
-
-private:
-    void onMouseEvent(blink::MouseEvent& evt);
 
 private:
     blink::Scene* m_rootScene{};

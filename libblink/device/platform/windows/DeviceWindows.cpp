@@ -2,6 +2,7 @@
 #include "../../../input/MouseComponent.h"
 #include "../../../Framework.h"
 #include "../../../IApp.h"
+#include <Log.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -16,8 +17,8 @@ namespace blink
         if (mouseComponent)
         {
             MouseEvent evt(MouseEvent::Action::Move);
-            evt.mousePos.x = static_cast<int>(xpos);
-            evt.mousePos.y = static_cast<int>(ypos);
+            evt.mousePos.x = static_cast<float>(xpos);
+            evt.mousePos.y = static_cast<float>(ypos);
             mouseComponent->postEvent(evt);
         }
     }
@@ -34,6 +35,17 @@ namespace blink
             MouseEvent evt(act);
             evt.mouseButton = static_cast<MouseEvent::MouseButton>(button);
             evt.modifyKey = mods;
+            mouseComponent->postEvent(evt);
+        }
+    }
+
+    void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        MouseComponent* mouseComponent = Framework::getInstance().findComponent<MouseComponent>();
+        if (mouseComponent)
+        {
+            MouseEvent evt(MouseEvent::Action::Scroll);
+            evt.mouseScroll = { static_cast<float>(xoffset), static_cast<float>(yoffset) };
             mouseComponent->postEvent(evt);
         }
     }
@@ -57,6 +69,7 @@ namespace blink
         glfwSetInputMode(s_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSetCursorPosCallback(s_window, mousePositionCallback);
         glfwSetMouseButtonCallback(s_window, mouseButtonCallback);
+        glfwSetScrollCallback(s_window, mouseScrollCallback);
 
         /* Make the window's context current */
         glfwMakeContextCurrent(s_window);

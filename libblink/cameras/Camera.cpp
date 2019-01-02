@@ -45,12 +45,6 @@ namespace blink
         m_transformDirty = true;
     }
 
-    void Camera::setPosition(const glm::vec3 & pos)
-    {
-        m_position = pos;
-        m_transformDirty = true;
-    }
-
     const glm::mat4 & Camera::getWorldToCameraTransform()
     {
         if (m_transformDirty)
@@ -91,6 +85,6 @@ namespace blink
         shader->setUniform("u_localToWorld", localToWorld);
         shader->setUniform("u_localToWorldTranInv", glm::transpose(glm::inverse(glm::mat3(localToWorld))));
         shader->setUniform("u_localToClip", worldToClip * localToWorld);
-        shader->setUniform("u_viewPos", m_position);
+        shader->setUniform("u_viewPos", getPosition());
     }
 }

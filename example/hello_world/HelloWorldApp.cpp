@@ -2,6 +2,7 @@
 #include <Framework.h>
 #include <geometries/BoxGeometry.h>
 #include <geometries/PlaneGeometry.h>
+#include <geometries/SphereGeometry.h>
 #include <textures/Texture2D.h>
 #include <materials/LambertMaterial.h>
 #include <materials/WireframeMaterial.h>
@@ -37,15 +38,15 @@ bool HelloWorldApp::initialize()
 
     m_rootScene->add(new blink::AmbientLight());
     blink::PointLight* light = new blink::PointLight();
-    light->setPosition({ 0.0f, 5.0f, 1.0f });
+    light->setPosition({ 2.0f, 2.0f, 2.0f });
     m_rootScene->add(light);
 
-    m_camera = new blink::TargetCamera();
-    m_camera->setPosition({ 0.0f, 3.0f, 3.0f });
-    m_camera->setTargetPosition(blink::VEC3_ZERO);
+    auto lightGeo = new blink::Mesh(new blink::SphereGeometry(0.1f, 5, 10), colorMaterial);
+    lightGeo->setPosition(light->getPosition());
+    m_rootScene->add(lightGeo);
 
-    auto mouseComponent = blink::Framework::getInstance().findComponent<blink::MouseComponent>();
-    REGISTER_EVENT(mouseComponent, blink::MouseEvent, &HelloWorldApp::onMouseEvent);
+    m_camera = new blink::TargetCamera();
+    m_camera->lookAt({ -3.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
 
     return true;
 }
@@ -69,11 +70,6 @@ void HelloWorldApp::render()
     if (!pRenderModule) return;
 
     pRenderModule->render(m_rootScene, m_camera);
-}
-
-void HelloWorldApp::onMouseEvent(blink::MouseEvent & evt)
-{
-    LOGI("mouse event");
 }
 
 int main(int argc, char** argv)

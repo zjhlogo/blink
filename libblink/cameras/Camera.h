@@ -25,8 +25,7 @@ namespace blink
         void setOrthographicProjection(float left, float right, float bottom, float top, float near, float far);
         void setPerspectiveProjection(float fov, float width, float height, float near, float far);
 
-        void setPosition(const glm::vec3& pos);
-        const glm::vec3& getPosition() const { return m_position; }
+        virtual const glm::vec3& getPosition() const = 0;
 
         const glm::mat4& getWorldToCameraTransform();
         const glm::mat4& getCameraToClipTransform();
@@ -38,8 +37,6 @@ namespace blink
         virtual void updateTransform() = 0;
 
     protected:
-        glm::vec3 m_position{ VEC3_ZERO };
-
         glm::mat4 m_worldToCamera;
         glm::mat4 m_cameraToClip;
         glm::mat4 m_worldToClip;
