@@ -13,8 +13,7 @@ namespace blink
         m_rings = rings;
         m_sections = sections;
 
-        VertAttrPos3Uv2NormalList verts;
-        Uint16List indis;
+        std::vector<VertexPos3Uv2Normal> verts;
 
         float const R = 1.0f / (float)(rings - 1);
         float const S = 1.0f / (float)(sections - 1);
@@ -37,17 +36,18 @@ namespace blink
         // case rings - 1
         verts.push_back({ 0.0f, radius, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f });
 
+        std::vector<uint16> indis;
         // case rings 0
         {
             for (int s = 0; s < sections - 1; ++s)
             {
-                indis.push_back(s + 1);
                 indis.push_back(s + 2);
+                indis.push_back(s + 1);
                 indis.push_back(s + 0);
             }
 
-            indis.push_back(sections);
             indis.push_back(1);
+            indis.push_back(sections);
             indis.push_back(0);
         }
 
@@ -59,21 +59,21 @@ namespace blink
 
             for (int s = 0; s < sections - 1; ++s)
             {
-                indis.push_back(prevRingIndex + s);
                 indis.push_back(currRingIndex + s);
+                indis.push_back(prevRingIndex + s);
                 indis.push_back(currRingIndex + s + 1);
 
-                indis.push_back(prevRingIndex + s);
                 indis.push_back(currRingIndex + s + 1);
+                indis.push_back(prevRingIndex + s);
                 indis.push_back(prevRingIndex + s + 1);
             }
 
-            indis.push_back(currRingIndex + sections - 1);
             indis.push_back(currRingIndex);
+            indis.push_back(currRingIndex + sections - 1);
             indis.push_back(prevRingIndex + sections - 1);
 
-            indis.push_back(prevRingIndex + sections - 1);
             indis.push_back(currRingIndex);
+            indis.push_back(prevRingIndex + sections - 1);
             indis.push_back(prevRingIndex);
         }
 
@@ -84,13 +84,13 @@ namespace blink
 
             for (int s = 0; s < sections - 1; ++s)
             {
-                indis.push_back(prevRingIndex + s + 1);
                 indis.push_back(prevRingIndex + s);
+                indis.push_back(prevRingIndex + s + 1);
                 indis.push_back(currRingIndex);
             }
 
-            indis.push_back(currRingIndex);
             indis.push_back(prevRingIndex);
+            indis.push_back(currRingIndex);
             indis.push_back(prevRingIndex + sections - 1);
         }
 

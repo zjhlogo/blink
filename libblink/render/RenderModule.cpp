@@ -53,9 +53,13 @@ namespace blink
 
         //GL_ERROR_CHECK();
 
+        // depth test setup
         glEnable(GL_DEPTH_TEST);
+
+        // cull face setup
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        glFrontFace(GL_CW);
 
         return true;
     }

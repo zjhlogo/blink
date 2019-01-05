@@ -11,28 +11,35 @@ namespace blink
         m_widthSegments = widthSegments;
         m_heightSegments = heightSegments;
 
-        VertAttrPos3Uv2NormalList verts;
-        Uint16List indis;
+        // build vertex
+        std::vector<VertexPos3Uv2Normal> verts;
+        int count = 0;
 
         switch (m_facing)
         {
         case Facing::PositiveX:
-            GeometryUtils::buildPlane(verts, indis, 2, 1, 0, width, height, -1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_PX);     // +x
+            count = GeometryUtils::buildPlaneVertexPos3Uv2(verts, 2, 1, 0, width, height, -1.0f, 1.0f, 0.0f, widthSegments, heightSegments);
+            GeometryUtils::buildNormal(verts, 0, count, VEC3_PX);   // +x
             break;
         case Facing::NegativeX:
-            GeometryUtils::buildPlane(verts, indis, 2, 1, 0, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_NX);      // -x
+            count = GeometryUtils::buildPlaneVertexPos3Uv2(verts, 2, 1, 0, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments);
+            GeometryUtils::buildNormal(verts, 0, count, VEC3_NX);   // -x
             break;
         case Facing::PositiveY:
-            GeometryUtils::buildPlane(verts, indis, 0, 2, 1, width, height, 1.0f, -1.0f, 0.0f, widthSegments, heightSegments, VEC3_PY);     // +y
+            count = GeometryUtils::buildPlaneVertexPos3Uv2(verts, 0, 2, 1, width, height, 1.0f, -1.0f, 0.0f, widthSegments, heightSegments);
+            GeometryUtils::buildNormal(verts, 0, count, VEC3_PY);   // +y
             break;
         case Facing::NegativeY:
-            GeometryUtils::buildPlane(verts, indis, 0, 2, 1, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_NY);      // -y
+            count = GeometryUtils::buildPlaneVertexPos3Uv2(verts, 0, 2, 1, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments);
+            GeometryUtils::buildNormal(verts, 0, count, VEC3_NY);   // -y
             break;
         case Facing::PositiveZ:
-            GeometryUtils::buildPlane(verts, indis, 0, 1, 2, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_PZ);      // +z
+            count = GeometryUtils::buildPlaneVertexPos3Uv2(verts, 0, 1, 2, width, height, 1.0f, 1.0f, 0.0f, widthSegments, heightSegments);
+            GeometryUtils::buildNormal(verts, 0, count, VEC3_PZ);   // +z
             break;
         case Facing::NegativeZ:
-            GeometryUtils::buildPlane(verts, indis, 0, 1, 2, width, height, -1.0f, 1.0f, 0.0f, widthSegments, heightSegments, VEC3_NZ);     // -z
+            count = GeometryUtils::buildPlaneVertexPos3Uv2(verts, 0, 1, 2, width, height, -1.0f, 1.0f, 0.0f, widthSegments, heightSegments);
+            GeometryUtils::buildNormal(verts, 0, count, VEC3_NZ);   // -z
             break;
         }
 
@@ -40,6 +47,9 @@ namespace blink
             , verts.data()
             , sizeof(verts[0])*verts.size());
 
+        // build face index
+        std::vector<uint16> indis;
+        GeometryUtils::buildPlaneFaceIndex(indis, 0, widthSegments, heightSegments);
         uploadIndexBuffer(indis.data(), indis.size());
     }
 

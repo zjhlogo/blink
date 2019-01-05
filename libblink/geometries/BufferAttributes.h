@@ -69,51 +69,39 @@ namespace blink
     };
 
     // pre-define vertex attributes
-    class VertAttrPos3
+    class VertexPos3
     {
     public:
-        float x, y, z;		// pos3
+        float x, y, z;      // pos3
     };
 
-    typedef std::vector<VertAttrPos3> VertAttrPos3List;
-
-    class VertAttrPos3Color
+    class VertexPos3Color
     {
     public:
-        float x, y, z;		// pos3
-        float r, g, b, a;	// color
+        float x, y, z;      // pos3
+        uint32 color;       // color
     };
 
-    typedef std::vector<VertAttrPos3Color> VertAttrPos3ColorList;
-
-    class VertAttrPos3Uv2
+    class VertexPos3Uv2
     {
     public:
-        float x, y, z;		// pos3
-        float u, v;			// uv2
+        float x, y, z;      // pos3
+        float u, v;         // uv2
     };
 
-    typedef std::vector<VertAttrPos3Uv2> VertAttrPos3Uv2List;
-
-    class VertAttrPos3Uv2Normal
+    class VertexPos3Uv2Normal
     {
     public:
-        float x, y, z;		// pos3
-        float u, v;			// uv2
-        float nx, ny, nz;	// normal
+        float x, y, z;      // pos3
+        float u, v;         // uv2
+        float nx, ny, nz;   // normal
     };
 
-    typedef std::vector<VertAttrPos3Uv2Normal> VertAttrPos3Uv2NormalList;
-
-    class VertAttrPos3Uv2Color
+    class VertexPos3Uv2Color
     {
     public:
-        float x, y, z;		// pos3
-        float u, v;			// uv2
-        float r, g, b, a;	// color
+        float x, y, z;      // pos3
+        float u, v;         // uv2
+        uint32 color;       // color
     };
-
-    typedef std::vector<VertAttrPos3Uv2Color> VertAttrPos3Uv2ColorList;
-
-    typedef std::vector<uint16> Uint16List;
 }
