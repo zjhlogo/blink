@@ -10,6 +10,7 @@ namespace blink
         {
             Unknown = 0,
             Png,
+            Jpg,
             Pvr,
         };
 
@@ -34,7 +35,7 @@ namespace blink
     public:
         static ImageFileType getImageType(const tstring& filePath);
         static bool loadTextureFromImage(ImageInfo& imageInfo, const tstring& filePath);
-        static bool decodePngImage(ImageInfo& imageInfoOut, const tstring& filePath);
+        static bool decodeRegularImage(ImageInfo& imageInfoOut, const tstring& filePath);
 
         static bool createTextureFromRawData(TextureInfo& textureInfo, int width, int height, int channels, const void* data);
     };

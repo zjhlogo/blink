@@ -5,6 +5,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
+#define STBI_ONLY_JPEG
 #include "stb_image.h"
 
 namespace blink
@@ -22,11 +23,12 @@ namespace blink
     {
         tstring strExt = PathParser::getFileLowerExtension(filePath);
         if (strExt == "png") return ImageFileType::Png;
+        if (strExt == "jpg" || strExt == "jpeg") return ImageFileType::Jpg;
         if (strExt == "pvr") return ImageFileType::Pvr;
         return ImageFileType::Unknown;
     }
 
-    bool ImageLoader::decodePngImage(ImageInfo& imageInfoOut, const tstring& filePath)
+    bool ImageLoader::decodeRegularImage(ImageInfo& imageInfoOut, const tstring& filePath)
     {
         imageInfoOut.data = stbi_load(filePath.c_str(), &imageInfoOut.width, &imageInfoOut.height, &imageInfoOut.channels, 0);
         if (!imageInfoOut.data) return false;
@@ -75,8 +77,9 @@ namespace blink
         switch (eImageFileType)
         {
         case ImageFileType::Png:
+        case ImageFileType::Jpg:
         {
-            if (!decodePngImage(imageInfo, filePath)) return false;
+            if (!decodeRegularImage(imageInfo, filePath)) return false;
         }
         break;
         case ImageFileType::Pvr:

@@ -5,7 +5,6 @@
 #include <geometries/SphereGeometry.h>
 #include <textures/Texture2D.h>
 #include <materials/LambertMaterial.h>
-#include <materials/WireframeMaterial.h>
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
 #include <render/RenderModule.h>
