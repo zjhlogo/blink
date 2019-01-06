@@ -21,7 +21,7 @@ namespace blink
 
             if (getTexture("tex_diffuse")) defineFlag |= Shader::USE_DIFFUSE_TEXTURE;
 
-            m_shader = Shader::fromStock(Shader::StockShaders::Lambert, defineFlag);
+            m_shader = Shader::fromStock(Shader::StockShaders::Phong, defineFlag);
         }
         return m_shader;
     }

@@ -178,6 +178,15 @@ namespace blink
             {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
         };
 
+        static AttributeItem s_attrPos3Uv2NormalTangent[] =
+        {
+            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
+            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_uv"},
+            {3, AttributeItemType::Float, GL_FLOAT, 20, "a_normal"},
+            {3, AttributeItemType::Float, GL_FLOAT, 32, "a_tangent"},
+            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+        };
+
         static AttributeItem* s_stockAttributeItems[static_cast<int>(StockAttributes::NumberOfStockAttributes)] = 
         {
             s_attrPos3,                  // Pos3
@@ -185,6 +194,7 @@ namespace blink
             s_attrPos3Uv2,               // Pos3Uv2
             s_attrPos3Uv2Normal,         // Pos3Uv2Normal
             s_attrPos3Uv2Color,          // Pos3Uv2Color
+            s_attrPos3Uv2NormalTangent,  // Pos3Uv2Color
         };
 
         static const tstring s_stockAttributeId[static_cast<int>(StockAttributes::NumberOfStockAttributes)] =
@@ -194,6 +204,7 @@ namespace blink
             "stock::Pos3Uv2",
             "stock::Pos3Uv2Normal",
             "stock::Pos3Uv2Color",
+            "stock::Pos3Uv2NormalTangent",
         };
 
         return fromAttributeItems(s_stockAttributeId[static_cast<int>(stockAttrs)], s_stockAttributeItems[static_cast<int>(stockAttrs)]);

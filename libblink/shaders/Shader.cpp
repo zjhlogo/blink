@@ -25,19 +25,19 @@ namespace blink
     {
         static const char* s_stockVs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            LAMBERT_VS,                 // Lambert
+            PHONG_VS,                 // Phong
             WIREFRAME_VS,               // Wireframe
         };
 
         static const char* s_stockGs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            nullptr,                    // Lambert
+            nullptr,                    // Phong
             WIREFRAME_GS,               // Wireframe
         };
 
         static const char* s_stockFs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            LAMBERT_FS,                 // Lambert
+            PHONG_FS,                 // Phong
             WIREFRAME_FS,               // Wireframe
         };
 
@@ -335,7 +335,7 @@ namespace blink
     {
         static const tstring s_stockShaderIds[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
-            "stock::Lambert",
+            "stock::Phong",
             "stock::Wireframe",
         };
 

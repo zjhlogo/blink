@@ -1,11 +1,11 @@
 #pragma once
 
-const char* LAMBERT_VS =
-#include "Lambert.vs"
+const char* PHONG_VS =
+#include "Phong.vs"
 ;
 
-const char* LAMBERT_FS =
-#include "Lambert.fs"
+const char* PHONG_FS =
+#include "Phong.fs"
 ;
 
 const char* WIREFRAME_VS =

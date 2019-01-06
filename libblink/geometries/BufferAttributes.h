@@ -37,6 +37,7 @@ namespace blink
             Pos3Uv2,
             Pos3Uv2Normal,
             Pos3Uv2Color,
+            Pos3Uv2NormalTangent,
             NumberOfStockAttributes,
         };
 
@@ -103,5 +104,14 @@ namespace blink
         float x, y, z;      // pos3
         float u, v;         // uv2
         uint32 color;       // color
+    };
+
+    class VertexPos3Uv2NormalTangent
+    {
+    public:
+        float x, y, z;      // pos3
+        float u, v;         // uv2
+        float nx, ny, nz;   // normal
+        float tx, ty, tz;   // tangent
     };
 }

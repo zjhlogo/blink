@@ -2,6 +2,7 @@
 #include "NormalMappingMaterial.h"
 #include <Framework.h>
 #include <geometries/PlaneGeometry.h>
+#include <geometries/BoxGeometry.h>
 #include <lights/PointLight.h>
 #include <textures/Texture2D.h>
 #include <render/RenderModule.h>
@@ -26,8 +27,21 @@ bool NormalMappingApp::initialize()
     auto material = new NormalMappingMaterial();
     material->setTexture("tex_diffuse", "resource/brickwall.jpg", 0);
     material->setTexture("tex_normal", "resource/brickwall_normal.jpg", 1);
-    m_plane = new blink::Mesh(new blink::PlaneGeometry(2.0f, 2.0f, blink::PlaneGeometry::Facing::PositiveZ), material);
+
+    auto planeGeo = new blink::PlaneGeometry(
+        1.0f, 1.0f,
+        blink::PlaneGeometry::Facing::PositiveZ,
+        1, 1,
+        blink::BufferAttributes::StockAttributes::Pos3Uv2NormalTangent);
+
+    m_plane = new blink::Mesh(planeGeo, material);
+    m_plane->setPosition({ -1.0f, 0.0f, 0.0f });
     m_rootScene->add(m_plane);
+
+    auto cubeGeo = new blink::BoxGeometry(1.0f, 1.0f, 1.0f, 1, 1, 1, blink::BufferAttributes::StockAttributes::Pos3Uv2NormalTangent);
+    auto cubeMesh = new blink::Mesh(cubeGeo, material);
+    cubeMesh->setPosition({ 1.0f, 0.0f, 0.0f });
+    m_rootScene->add(cubeMesh);
 
     auto light = new blink::PointLight();
     light->setPosition({ 2.0f, 2.0f, 2.0f });
