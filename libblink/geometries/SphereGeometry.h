@@ -1,5 +1,6 @@
 #pragma once
 #include "BufferGeometry.h"
+#include "BufferAttributes.h"
 
 namespace blink
 {
@@ -8,7 +9,7 @@ namespace blink
     public:
         RTTI_DEF(SphereGeometry, BufferGeometry);
 
-        SphereGeometry(float radius, int rings = 3, int segments = 3);
+        SphereGeometry(float radius, int rings = 8, int segments = 16, BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
 
     protected:
         virtual ~SphereGeometry();

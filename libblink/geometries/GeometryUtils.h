@@ -1,6 +1,7 @@
 #pragma once
 #include "BufferAttributes.h"
 #include <vector>
+#include <glm/gtc/constants.hpp>
 
 namespace blink
 {
@@ -17,9 +18,9 @@ namespace blink
             vertTemp[az] = posZ;
 
             // build vertex list
-            uint16 startIndex = static_cast<uint16>(verts.size());
+            int startIndex = static_cast<int>(verts.size());
             verts.resize(startIndex + (segmentX + 1) * (segmentY + 1));
-            uint16 currIndex = startIndex;
+            int currIndex = startIndex;
 
             for (int y = 0; y < (segmentY + 1); ++y)
             {
@@ -51,9 +52,9 @@ namespace blink
             vertTemp[az] = posZ;
 
             // build vertex list
-            uint16 startIndex = static_cast<uint16>(verts.size());
+            int startIndex = static_cast<int>(verts.size());
             verts.resize(startIndex + (segmentX + 1) * (segmentY + 1));
-            uint16 currIndex = startIndex;
+            int currIndex = startIndex;
 
             for (int y = 0; y < (segmentY + 1); ++y)
             {
@@ -72,6 +73,69 @@ namespace blink
 
                     vertex.u = uvTemp.x + 0.5f;
                     vertex.v = uvTemp.y + 0.5f;
+                }
+            }
+
+            return currIndex - startIndex;
+        }
+
+        template <typename T> static int buildSphereVertexPos3(std::vector<T>& verts, float radius, int rings, int sections)
+        {
+            // build vertex list
+            int startIndex = static_cast<int>(verts.size());
+            verts.resize(startIndex + rings * (sections + 1));
+            int currIndex = startIndex;
+
+            float const R = 1.0f / (rings - 1);
+            float const S = 1.0f / sections;
+
+            // calculate the vertex position
+            for (int r = 0; r < rings; ++r)
+            {
+                float const y = sin(-glm::half_pi<float>() + glm::pi<float>() * r * R);
+                for (int s = 0; s < sections + 1; ++s)
+                {
+                    float const x = cos(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+                    float const z = sin(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+
+                    T& vertex = verts[currIndex++];
+
+                    vertex.x = x * radius;
+                    vertex.y = y * radius;
+                    vertex.z = z * radius;
+                }
+            }
+
+            return currIndex - startIndex;
+        }
+
+        template <typename T> static int buildSphereVertexPos3Uv2(std::vector<T>& verts, float radius, int rings, int sections)
+        {
+            // build vertex list
+            int startIndex = static_cast<int>(verts.size());
+            verts.resize(startIndex + rings * (sections + 1));
+            int currIndex = startIndex;
+
+            float const R = 1.0f / (rings - 1);
+            float const S = 1.0f / sections;
+
+            // calculate the vertex position
+            for (int r = 0; r < rings; ++r)
+            {
+                float const y = sin(-glm::half_pi<float>() + glm::pi<float>() * r * R);
+                for (int s = 0; s < sections + 1; ++s)
+                {
+                    float const x = cos(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+                    float const z = sin(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+
+                    T& vertex = verts[currIndex++];
+
+                    vertex.x = x * radius;
+                    vertex.y = y * radius;
+                    vertex.z = z * radius;
+
+                    vertex.u = s * S;
+                    vertex.v = r * R;
                 }
             }
 
@@ -197,5 +261,7 @@ namespace blink
         }
 
         static void buildPlaneFaceIndex(std::vector<uint16>& indis, uint16 startIndex, int segmentX, int segmentY);
+        static void buildSphereFaceIndex(std::vector<uint16>& indis, int rings, int sections);
+
     };
 }

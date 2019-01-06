@@ -9,7 +9,13 @@ namespace blink
     public:
         RTTI_DEF(BoxGeometry, BufferGeometry);
 
-        BoxGeometry(float width, float height, float depth, int widthSegments = 1, int heightSegments = 1, int depthSegments = 1, BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
+        BoxGeometry(float width,
+            float height,
+            float depth,
+            int widthSegments = 1,
+            int heightSegments = 1,
+            int depthSegments = 1,
+            BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
 
     protected:
         virtual ~BoxGeometry();

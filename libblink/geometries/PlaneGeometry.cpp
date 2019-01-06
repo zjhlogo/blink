@@ -45,26 +45,25 @@ namespace blink
         m_widthSegments = widthSegments;
         m_heightSegments = heightSegments;
 
-        // build face index
+        // setup index buffer
         std::vector<uint16> indis;
         GeometryUtils::buildPlaneFaceIndex(indis, 0, widthSegments, heightSegments);
         uploadIndexBuffer(indis.data(), indis.size());
 
-        int count = 0;
-        // build vertex
+        // setup vertex buffer
         switch (vertexAttribute)
         {
         case BufferAttributes::StockAttributes::Pos3Uv2Normal:
         {
             std::vector<VertexPos3Uv2Normal> verts;
-            count = buildPlane(verts, width, height, facing, widthSegments, heightSegments);
+            buildPlane(verts, width, height, facing, widthSegments, heightSegments);
             uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), sizeof(verts[0])*verts.size());
         }
         break;
         case BufferAttributes::StockAttributes::Pos3Uv2NormalTangent:
         {
             std::vector<VertexPos3Uv2NormalTangent> verts;
-            count = buildPlane(verts, width, height, facing, widthSegments, heightSegments);
+            buildPlane(verts, width, height, facing, widthSegments, heightSegments);
             GeometryUtils::buildTangent(verts, indis);
             uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), sizeof(verts[0])*verts.size());
         }

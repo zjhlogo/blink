@@ -28,6 +28,7 @@ bool HelloWorldApp::initialize()
 
     auto colorMaterial = new blink::LambertMaterial();
     m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), colorMaterial);
+    m_cube->setPosition({ -1.0f, 0.0f, 0.0f });
     m_rootScene->add(m_cube);
 
     blink::Material* textureMaterial = new blink::LambertMaterial();
@@ -36,14 +37,14 @@ bool HelloWorldApp::initialize()
     plane->setPosition({ 0.0f, -3.0f, 0.0f });
     m_rootScene->add(plane);
 
+    auto sphere = new blink::Mesh(new blink::SphereGeometry(0.5f), textureMaterial);
+    sphere->setPosition({ 1.0f, 0.0f, 0.0f });
+    m_rootScene->add(sphere);
+
     m_rootScene->add(new blink::AmbientLight());
     blink::PointLight* light = new blink::PointLight();
     light->setPosition({ 2.0f, 2.0f, 2.0f });
     m_rootScene->add(light);
-
-    auto lightGeo = new blink::Mesh(new blink::SphereGeometry(0.1f, 5, 10), colorMaterial);
-    lightGeo->setPosition(light->getPosition());
-    m_rootScene->add(lightGeo);
 
     auto camera = new blink::TargetCamera();
     camera->lookAt({ -3.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);

@@ -24,4 +24,25 @@ namespace blink
             }
         }
     }
+
+    void GeometryUtils::buildSphereFaceIndex(std::vector<uint16>& indis, int rings, int sections)
+    {
+        // setup face index
+        for (int r = 0; r < rings; ++r)
+        {
+            int prevRingIndex = r * (sections + 1);
+            int currRingIndex = prevRingIndex + sections + 1;
+
+            for (int s = 0; s < sections; ++s)
+            {
+                indis.push_back(currRingIndex + s);
+                indis.push_back(prevRingIndex + s);
+                indis.push_back(currRingIndex + s + 1);
+
+                indis.push_back(currRingIndex + s + 1);
+                indis.push_back(prevRingIndex + s);
+                indis.push_back(prevRingIndex + s + 1);
+            }
+        }
+    }
 }
