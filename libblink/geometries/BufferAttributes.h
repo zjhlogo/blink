@@ -35,9 +35,12 @@ namespace blink
             Pos3 = 0,
             Pos3Color,
             Pos3Uv2,
+            Pos3Normal,
+
             Pos3Uv2Normal,
             Pos3Uv2Color,
             Pos3Uv2NormalTangent,
+
             NumberOfStockAttributes,
         };
 

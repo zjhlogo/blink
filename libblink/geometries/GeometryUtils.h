@@ -79,7 +79,7 @@ namespace blink
             return currIndex - startIndex;
         }
 
-        template <typename T> static int buildSphereVertexPos3(std::vector<T>& verts, float radius, int rings, int sections)
+        template <typename T> static int buildSphereVertexPos3Normal(std::vector<T>& verts, float radius, int rings, int sections)
         {
             // build vertex list
             int startIndex = static_cast<int>(verts.size());
@@ -103,13 +103,17 @@ namespace blink
                     vertex.x = x * radius;
                     vertex.y = y * radius;
                     vertex.z = z * radius;
+
+                    vertex.nx = x;
+                    vertex.ny = y;
+                    vertex.nz = z;
                 }
             }
 
             return currIndex - startIndex;
         }
 
-        template <typename T> static int buildSphereVertexPos3Uv2(std::vector<T>& verts, float radius, int rings, int sections)
+        template <typename T> static int buildSphereVertexPos3Uv2Normal(std::vector<T>& verts, float radius, int rings, int sections)
         {
             // build vertex list
             int startIndex = static_cast<int>(verts.size());
@@ -136,6 +140,10 @@ namespace blink
 
                     vertex.u = s * S;
                     vertex.v = r * R;
+
+                    vertex.nx = x;
+                    vertex.ny = y;
+                    vertex.nz = z;
                 }
             }
 

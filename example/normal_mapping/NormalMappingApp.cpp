@@ -4,7 +4,6 @@
 #include <geometries/PlaneGeometry.h>
 #include <geometries/BoxGeometry.h>
 #include <lights/PointLight.h>
-#include <textures/Texture2D.h>
 #include <render/RenderModule.h>
 #include <cameras/TargetCamera.h>
 #include <Log.h>

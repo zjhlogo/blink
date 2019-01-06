@@ -1,3 +1,4 @@
+#pragma once
 #include <materials/Material.h>
 
 class NormalMappingMaterial : public blink::Material

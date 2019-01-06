@@ -24,14 +24,14 @@ namespace blink
         case blink::BufferAttributes::StockAttributes::Pos3Uv2Normal:
         {
             std::vector<VertexPos3Uv2Normal> verts;
-            GeometryUtils::buildSphereVertexPos3Uv2(verts, radius, rings, sections);
+            GeometryUtils::buildSphereVertexPos3Uv2Normal(verts, radius, rings, sections);
             uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), sizeof(verts[0])*verts.size());
         }
         break;
         case blink::BufferAttributes::StockAttributes::Pos3Uv2NormalTangent:
         {
             std::vector<VertexPos3Uv2NormalTangent> verts;
-            GeometryUtils::buildSphereVertexPos3Uv2(verts, radius, rings, sections);
+            GeometryUtils::buildSphereVertexPos3Uv2Normal(verts, radius, rings, sections);
             GeometryUtils::buildTangent(verts, indis);
             uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), sizeof(verts[0])*verts.size());
         }

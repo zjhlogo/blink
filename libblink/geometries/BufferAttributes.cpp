@@ -162,6 +162,13 @@ namespace blink
             {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
         };
 
+        static AttributeItem s_attrPos3Normal[] =
+        {
+            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
+            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_normal"},
+            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+        };
+
         static AttributeItem s_attrPos3Uv2Normal[] = 
         {
             {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
@@ -192,6 +199,7 @@ namespace blink
             s_attrPos3,                  // Pos3
             s_attrPos3Color,             // Pos3Color
             s_attrPos3Uv2,               // Pos3Uv2
+            s_attrPos3Normal,            // Pos3Normal
             s_attrPos3Uv2Normal,         // Pos3Uv2Normal
             s_attrPos3Uv2Color,          // Pos3Uv2Color
             s_attrPos3Uv2NormalTangent,  // Pos3Uv2Color
@@ -202,6 +210,7 @@ namespace blink
             "stock::Pos3",
             "stock::Pos3Color",
             "stock::Pos3Uv2",
+            "stock::Pos3Normal",
             "stock::Pos3Uv2Normal",
             "stock::Pos3Uv2Color",
             "stock::Pos3Uv2NormalTangent",
