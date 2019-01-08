@@ -3,18 +3,18 @@
 
 namespace blink
 {
-    class LambertMaterial : public Material
+    class PhongMaterial : public Material
     {
     public:
-        RTTI_DEF(LambertMaterial, Material);
+        RTTI_DEF(PhongMaterial, Material);
 
-        LambertMaterial();
+        PhongMaterial();
 
         virtual Shader* getShader() override;
         virtual void setupShaderUniforms(Shader* shader) override;
 
     protected:
-        virtual ~LambertMaterial();
+        virtual ~PhongMaterial();
 
     };
 }

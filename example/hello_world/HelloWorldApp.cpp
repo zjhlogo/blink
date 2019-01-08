@@ -3,7 +3,7 @@
 #include <geometries/BoxGeometry.h>
 #include <geometries/PlaneGeometry.h>
 #include <geometries/SphereGeometry.h>
-#include <materials/LambertMaterial.h>
+#include <materials/PhongMaterial.h>
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
 #include <render/RenderModule.h>
@@ -25,12 +25,12 @@ bool HelloWorldApp::initialize()
 {
     m_rootScene = new blink::Scene();
 
-    auto colorMaterial = new blink::LambertMaterial();
+    auto colorMaterial = new blink::PhongMaterial();
     m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), colorMaterial);
     m_cube->setPosition({ -1.0f, 0.0f, 0.0f });
     m_rootScene->add(m_cube);
 
-    blink::Material* textureMaterial = new blink::LambertMaterial();
+    blink::Material* textureMaterial = new blink::PhongMaterial();
     textureMaterial->setTexture("tex_diffuse", "resource/grid16.png", 0);
     blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), textureMaterial);
     plane->setPosition({ 0.0f, -3.0f, 0.0f });

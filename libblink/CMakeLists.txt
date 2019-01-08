@@ -42,10 +42,10 @@ lights/Light.cpp
 lights/Light.h
 lights/PointLight.cpp
 lights/PointLight.h
-materials/LambertMaterial.cpp
-materials/LambertMaterial.h
 materials/Material.cpp
 materials/Material.h
+materials/PhongMaterial.cpp
+materials/PhongMaterial.h
 materials/WireframeMaterial.cpp
 materials/WireframeMaterial.h
 objects/Mesh.cpp

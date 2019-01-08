@@ -1,19 +1,19 @@
-#include "LambertMaterial.h"
+#include "PhongMaterial.h"
 #include "../shaders/Shader.h"
 
 namespace blink
 {
-    LambertMaterial::LambertMaterial()
+    PhongMaterial::PhongMaterial()
     {
 
     }
 
-    LambertMaterial::~LambertMaterial()
+    PhongMaterial::~PhongMaterial()
     {
 
     }
 
-    Shader * LambertMaterial::getShader()
+    Shader * PhongMaterial::getShader()
     {
         if (!m_shader)
         {
@@ -26,7 +26,7 @@ namespace blink
         return m_shader;
     }
 
-    void LambertMaterial::setupShaderUniforms(Shader * shader)
+    void PhongMaterial::setupShaderUniforms(Shader * shader)
     {
         shader->setUniform("u_diffuseColor", getDiffuseColor());
     }
