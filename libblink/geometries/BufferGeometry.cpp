@@ -47,8 +47,11 @@ namespace blink
         GL_ERROR_CHECK();
 
         // Set the buffer's data
-        glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferData, GL_STATIC_DRAW);
-        GL_ERROR_CHECK();
+        if (bufferSize > 0 && bufferData)
+        {
+            glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferData, GL_STATIC_DRAW);
+            GL_ERROR_CHECK();
+        }
 
         // enable vertex attribute array
         m_vertexBufferAttribute = bufferAttribute;

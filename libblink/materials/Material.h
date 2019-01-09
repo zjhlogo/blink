@@ -18,7 +18,7 @@ namespace blink
             uint32 index{};
         };
 
-        typedef std::map<uint32, TexInfo> TexInfoMap;
+        static const int MAX_TEXTURES = 8;
 
     public:
         RTTI_ROOT(Material);
@@ -47,7 +47,7 @@ namespace blink
     protected:
         Shader* m_shader{};
         glm::vec3 m_diffuseColor{ VEC3_ONE };
-        TexInfoMap m_texInfoMap;
+        TexInfo m_texInfos[MAX_TEXTURES];
 
     private:
         int m_reference{};

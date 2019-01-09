@@ -9,12 +9,18 @@ find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 find_package(tinyxml2 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 set(SOURCE_FILES
+Sprite.cpp
+Sprite.h
 SpriteApp.cpp
 SpriteApp.h
 SpriteGeometry.cpp
 SpriteGeometry.h
 SpriteMaterial.cpp
 SpriteMaterial.h
+SpriteRenderBlock.cpp
+SpriteRenderBlock.h
+SpriteRenderModule.cpp
+SpriteRenderModule.h
 )
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")

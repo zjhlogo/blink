@@ -1,42 +1,51 @@
 #include "SpriteGeometry.h"
 #include <geometries/BufferAttributes.h>
+#include <render/GlConfig.h>
+#include <glad/glad.h>
 
-SpriteGeometry::SpriteGeometry(const glm::vec2 & spriteSize, int row, int col)
+SpriteGeometry::SpriteGeometry()
 {
-    m_spriteSize = spriteSize;
-    m_row = row;
-    m_col = col;
 
-    float S = 1.0f / col;
-    float T = 1.0f / row;
-
-    // setup vertex buffer
-    std::vector<blink::VertexPos3Uv2> verts;
-    for (int y = 0; y < row; ++y)
-    {
-        for (int x = 0; x < col; ++x)
-        {
-            verts.push_back({ -0.5f*spriteSize.x, -0.5f*spriteSize.y, 0.0f, x*S, y*T });
-            verts.push_back({ +0.5f*spriteSize.x, -0.5f*spriteSize.y, 0.0f, (x + 1)*S, y*T });
-            verts.push_back({ -0.5f*spriteSize.x, +0.5f*spriteSize.y, 0.0f, x*S, (y + 1)*T });
-            verts.push_back({ +0.5f*spriteSize.x, +0.5f*spriteSize.y, 0.0f, (x + 1)*S, (y + 1)*T });
-        }
-    }
-
-    uploadVertexBuffer(blink::BufferAttributes::fromStock(blink::BufferAttributes::StockAttributes::Pos3Uv2), verts.data(), sizeof(verts[0]) * verts.size());
-
-    // setup index buffer
-    std::vector<blink::uint16> indis;
-    indis.push_back(0);
-    indis.push_back(2);
-    indis.push_back(1);
-    indis.push_back(1);
-    indis.push_back(2);
-    indis.push_back(3);
-    uploadIndexBuffer(indis.data(), indis.size());
 }
 
 SpriteGeometry::~SpriteGeometry()
 {
 
+}
+
+bool SpriteGeometry::initialize()
+{
+    // setup index buffer
+    std::vector<blink::uint16> indis;
+    for (int i = 0; i < MAX_TRIANGLE; ++i)
+    {
+        blink::uint16 baseIndex = i * 4;
+        indis.push_back(baseIndex + 0);
+        indis.push_back(baseIndex + 2);
+        indis.push_back(baseIndex + 1);
+        indis.push_back(baseIndex + 1);
+        indis.push_back(baseIndex + 2);
+        indis.push_back(baseIndex + 3);
+    }
+
+    uploadIndexBuffer(indis.data(), indis.size());
+
+    // setup vertex buffer
+    uploadVertexBuffer(blink::BufferAttributes::fromStock(blink::BufferAttributes::StockAttributes::Pos3Uv2), nullptr, 0);
+
+    return true;
+}
+
+void SpriteGeometry::updateVertex(const void* bufferData, blink::uint32 bufferSize)
+{
+    // Bind the VBO
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferId);
+    GL_ERROR_CHECK();
+
+    // Set the buffer's data
+    if (bufferSize > 0 && bufferData)
+    {
+        glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferData, GL_DYNAMIC_DRAW);
+        GL_ERROR_CHECK();
+    }
 }

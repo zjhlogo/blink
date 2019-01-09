@@ -24,12 +24,11 @@ namespace blink
     protected:
         virtual ~BufferGeometry();
 
-    private:
         void destroyVertexArrayObject();
         void destroyVertexBuffer();
         void destroyIndexBuffer();
 
-    private:
+    protected:
         BufferAttributes* m_vertexBufferAttribute{};
 
         uint32 m_vertexArrayObjectId{};

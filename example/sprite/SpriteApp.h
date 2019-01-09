@@ -1,8 +1,7 @@
 #pragma once
 #include <IApp.h>
 #include <objects/Scene.h>
-#include <objects/Mesh.h>
-#include <cameras/Camera.h>
+#include "Sprite.h"
 
 class SpriteApp : public blink::IApp
 {
@@ -24,5 +23,7 @@ private:
 private:
     blink::Scene* m_rootScene{};
     blink::Camera* m_camera{};
+
+    Sprite* m_sprite{};
 
 };

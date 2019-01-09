@@ -6,15 +6,19 @@ namespace blink
 {
     Material::Material()
     {
+        for (int i = 0; i < MAX_TEXTURES; ++i)
+        {
+            m_texInfos[i].index = i;
+        }
     }
 
     Material::~Material()
     {
-        for (auto& texInfo : m_texInfoMap)
+        for (int i = 0; i < MAX_TEXTURES; ++i)
         {
-            SAFE_RELEASE(texInfo.second.texture);
+            SAFE_RELEASE(m_texInfos[i].texture);
+            m_texInfos[i].name.clear();
         }
-        m_texInfoMap.clear();
 
         SAFE_RELEASE(m_shader);
     }
@@ -24,25 +28,32 @@ namespace blink
         auto texture = Texture2D::fromFile(filePath);
         if (!texture) return false;
 
-        m_texInfoMap[index] = { name, texture, index };
+        if (m_texInfos[index].texture)
+        {
+            SAFE_RELEASE(m_texInfos[index].texture);
+            m_texInfos[index].name.clear();
+        }
+
+        m_texInfos[index].name = name;
+        m_texInfos[index].texture = texture;
+
         return true;
     }
 
     const Texture * Material::getTexture(uint32 index)
     {
-        auto it = m_texInfoMap.find(index);
-        if (it == m_texInfoMap.end()) return nullptr;
+        if (index < 0 || index >= MAX_TEXTURES) return nullptr;
 
-        return it->second.texture;
+        return m_texInfos[index].texture;
     }
 
     const Texture * Material::getTexture(const tstring & name)
     {
-        for (const auto& texInfo : m_texInfoMap)
+        for (int i = 0; i < MAX_TEXTURES; ++i)
         {
-            if (texInfo.second.name == name)
+            if (m_texInfos[i].name == name)
             {
-                return texInfo.second.texture;
+                return m_texInfos[i].texture;
             }
         }
 
@@ -51,9 +62,12 @@ namespace blink
 
     void Material::setupShaderSampler(Shader * shader)
     {
-        for (const auto& texInfo : m_texInfoMap)
+        for (int i = 0; i < MAX_TEXTURES; ++i)
         {
-            shader->setTexture(texInfo.second.name.c_str(), texInfo.second.texture, texInfo.first);
+            if (m_texInfos[i].texture)
+            {
+                shader->setTexture(m_texInfos[i].name.c_str(), m_texInfos[i].texture, m_texInfos[i].index);
+            }
         }
     }
 

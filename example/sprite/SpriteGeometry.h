@@ -5,8 +5,14 @@
 class SpriteGeometry : public blink::BufferGeometry
 {
 public:
-    SpriteGeometry(const glm::vec2& spriteSize, int row, int col);
+    static const int MAX_TRIANGLE = 100;
+
+public:
+    SpriteGeometry();
     virtual ~SpriteGeometry();
+
+    bool initialize();
+    void updateVertex(const void* bufferData, blink::uint32 bufferSize);
 
 private:
     glm::vec2 m_spriteSize;
