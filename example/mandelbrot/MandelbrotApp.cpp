@@ -2,7 +2,6 @@
 #include "MandelbrotMaterial.h"
 #include <geometries/PlaneGeometry.h>
 #include <Framework.h>
-#include <render/RenderModule.h>
 #include <cameras/FixCamera.h>
 
 MandelbrotApp::MandelbrotApp()
@@ -42,10 +41,7 @@ void MandelbrotApp::update(float dt)
 
 void MandelbrotApp::render()
 {
-    blink::RenderModule* pRenderModule = blink::Framework::getInstance().findComponent<blink::RenderModule>();
-    if (!pRenderModule) return;
-
-    pRenderModule->render(m_rootScene, m_camera);
+    renderObject(m_rootScene, m_camera);
 }
 
 int main(int argc, char** argv)

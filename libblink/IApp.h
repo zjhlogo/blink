@@ -3,6 +3,10 @@
 
 namespace blink
 {
+    class Object;
+    class Camera;
+    class RenderModule;
+
     class IApp
     {
     public:
@@ -14,12 +18,18 @@ namespace blink
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
 
+        virtual bool initializeComponents();
+
         virtual void update(float dt) {};
         virtual void render() {};
 
         int getWindowWidth() const { return m_windowWidth; }
         int getWindowHeight() const { return m_windowHeight; }
         const tstring& getTitle() const { return m_title; }
+
+    protected:
+        virtual void renderObject(Object* rootObj, Camera* camera);
+        virtual RenderModule* createRenderer();
 
     private:
         int m_windowWidth;

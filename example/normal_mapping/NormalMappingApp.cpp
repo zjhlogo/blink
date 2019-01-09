@@ -66,10 +66,7 @@ void NormalMappingApp::update(float dt)
 
 void NormalMappingApp::render()
 {
-    blink::RenderModule* pRenderModule = blink::Framework::getInstance().findComponent<blink::RenderModule>();
-    if (!pRenderModule) return;
-
-    pRenderModule->render(m_rootScene, m_camera);
+    renderObject(m_rootScene, m_camera);
 }
 
 int main(int argc, char** argv)

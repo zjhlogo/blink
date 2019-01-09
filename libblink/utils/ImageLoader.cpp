@@ -30,6 +30,7 @@ namespace blink
 
     bool ImageLoader::decodeRegularImage(ImageInfo& imageInfoOut, const tstring& filePath)
     {
+        stbi_set_flip_vertically_on_load(true);
         imageInfoOut.data = stbi_load(filePath.c_str(), &imageInfoOut.width, &imageInfoOut.height, &imageInfoOut.channels, 0);
         if (!imageInfoOut.data) return false;
 

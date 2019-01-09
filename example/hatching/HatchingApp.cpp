@@ -5,7 +5,6 @@
 #include <geometries/BoxGeometry.h>
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
-#include <render/RenderModule.h>
 #include <cameras/TargetCamera.h>
 
 HatchingApp::HatchingApp()
@@ -69,10 +68,7 @@ void HatchingApp::update(float dt)
 
 void HatchingApp::render()
 {
-    blink::RenderModule* pRenderModule = blink::Framework::getInstance().findComponent<blink::RenderModule>();
-    if (!pRenderModule) return;
-
-    pRenderModule->render(m_rootScene, m_camera);
+    renderObject(m_rootScene, m_camera);
 }
 
 int main(int argc, char** argv)

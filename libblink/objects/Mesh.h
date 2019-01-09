@@ -16,7 +16,7 @@ namespace blink
         Geometry* getGeometry() const { return m_geometry; }
         Material* getMaterial() const { return m_material; }
 
-    private:
+    protected:
         Geometry* m_geometry{};
         Material* m_material{};
 

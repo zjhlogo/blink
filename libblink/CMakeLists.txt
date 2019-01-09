@@ -54,11 +54,11 @@ objects/Object.cpp
 objects/Object.h
 objects/Scene.cpp
 objects/Scene.h
+render/opengl3/OpenGL3RenderModule.cpp
+render/opengl3/OpenGL3RenderModule.h
 render/GlConfig.h
 render/RenderModule.cpp
 render/RenderModule.h
-render/RenderState.cpp
-render/RenderState.h
 shaders/Shader.cpp
 shaders/Shader.h
 shaders/ShaderLib.h

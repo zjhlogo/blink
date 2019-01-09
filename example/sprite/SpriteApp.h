@@ -4,23 +4,25 @@
 #include <objects/Mesh.h>
 #include <cameras/Camera.h>
 
-class NormalMappingApp : public blink::IApp
+class SpriteApp : public blink::IApp
 {
 public:
-    RTTI_DEF(NormalMappingApp, blink::IApp);
+    RTTI_DEF(SpriteApp, blink::IApp);
 
-    NormalMappingApp();
-    virtual ~NormalMappingApp();
+    SpriteApp();
+    virtual ~SpriteApp();
 
-	virtual bool initialize() override;
-	virtual void terminate() override;
+    virtual bool initialize() override;
+    virtual void terminate() override;
 
     virtual void update(float dt) override;
     virtual void render() override;
 
 private:
+    virtual blink::RenderModule* createRenderer() override;
+
+private:
     blink::Scene* m_rootScene{};
     blink::Camera* m_camera{};
-    blink::Mesh* m_plane{};
 
 };

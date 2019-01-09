@@ -15,8 +15,8 @@ public:
 	virtual bool initialize() override;
 	virtual void terminate() override;
 
-    virtual void update(float dt);
-    virtual void render();
+    virtual void update(float dt) override;
+    virtual void render() override;
 
 private:
     blink::Scene* m_rootScene{};

@@ -4,7 +4,6 @@
 #include <geometries/SphereGeometry.h>
 #include <geometries/BoxGeometry.h>
 #include <lights/PointLight.h>
-#include <render/RenderModule.h>
 #include <cameras/TargetCamera.h>
 #include <Log.h>
 
@@ -58,10 +57,7 @@ void CartoonApp::update(float dt)
 
 void CartoonApp::render()
 {
-    blink::RenderModule* pRenderModule = blink::Framework::getInstance().findComponent<blink::RenderModule>();
-    if (!pRenderModule) return;
-
-    pRenderModule->render(m_rootScene, m_camera);
+    renderObject(m_rootScene, m_camera);
 }
 
 int main(int argc, char** argv)

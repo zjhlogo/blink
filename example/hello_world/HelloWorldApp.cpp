@@ -6,7 +6,6 @@
 #include <materials/PhongMaterial.h>
 #include <lights/AmbientLight.h>
 #include <lights/PointLight.h>
-#include <render/RenderModule.h>
 #include <cameras/TargetCamera.h>
 #include <Log.h>
 
@@ -67,10 +66,7 @@ void HelloWorldApp::update(float dt)
 
 void HelloWorldApp::render()
 {
-    blink::RenderModule* pRenderModule = blink::Framework::getInstance().findComponent<blink::RenderModule>();
-    if (!pRenderModule) return;
-
-    pRenderModule->render(m_rootScene, m_camera);
+    renderObject(m_rootScene, m_camera);
 }
 
 int main(int argc, char** argv)

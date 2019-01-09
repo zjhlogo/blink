@@ -1,8 +1,6 @@
 #include "Framework.h"
 #include "IApp.h"
 #include "device/Device.h"
-#include "render/RenderModule.h"
-#include "input/MouseComponent.h"
 
 namespace blink
 {
@@ -25,7 +23,7 @@ namespace blink
         m_windowSize.x = static_cast<float>(m_app->getWindowWidth());
         m_windowSize.y = static_cast<float>(m_app->getWindowHeight());
 
-        if (!initComponents())
+        if (!m_app->initializeComponents())
         {
             shutdown();
             return false;
@@ -53,13 +51,5 @@ namespace blink
     {
         m_app->update(dt);
         m_app->render();
-    }
-
-    bool Framework::initComponents()
-    {
-        if (!insertComponent(new RenderModule())) return false;
-        if (!insertComponent(new MouseComponent())) return false;
-
-        return true;
     }
 }

@@ -17,9 +17,6 @@ namespace blink
         const glm::vec2& getWindowSize() const { return m_windowSize; };
 
     private:
-        bool initComponents();
-
-    private:
         IApp* m_app{};
         glm::vec2 m_windowSize;
 
