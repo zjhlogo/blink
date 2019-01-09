@@ -16,4 +16,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 group_sources("${SOURCE_FILES}")
-configure_library(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../../bin)
+configure_library(${PROJECT_NAME} "external")

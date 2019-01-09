@@ -42,9 +42,6 @@ void SpriteRenderModule::terminate()
 
 void SpriteRenderModule::render(blink::Object * rootObj, blink::Camera * camera)
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     // collect all sprites
     std::vector<Sprite*> sprites;
     rootObj->collectChild<Sprite>(sprites);

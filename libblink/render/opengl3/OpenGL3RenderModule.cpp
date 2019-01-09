@@ -77,9 +77,6 @@ namespace blink
     {
         if (!rootObj || !camera) return;
 
-        glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         // collect lights
         std::vector<Light*> lights;
         rootObj->collectChild<Light>(lights, false);

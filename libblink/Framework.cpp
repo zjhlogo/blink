@@ -50,6 +50,9 @@ namespace blink
     void Framework::step(float dt)
     {
         m_app->update(dt);
+
+        m_app->beginRender();
         m_app->render();
+        m_app->endRender();
     }
 }

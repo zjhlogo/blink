@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 
-project(hatching)
+project(ui)
 
 set(SOURCE_FILES
-HatchingApp.cpp
-HatchingApp.h
-HatchingMaterial.cpp
-HatchingMaterial.h
+UiApp.cpp
+UiApp.h
 )
 
 group_sources("${SOURCE_FILES}")

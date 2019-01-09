@@ -66,6 +66,8 @@ textures/Texture.cpp
 textures/Texture.h
 textures/Texture2D.cpp
 textures/Texture2D.h
+ui/UiModule.cpp
+ui/UiModule.h
 utils/ImageLoader.cpp
 utils/ImageLoader.h
 utils/stb_image.h
@@ -87,8 +89,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:tinyxml2::tinyxml2,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/glad/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/imgui>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../libfoundation>
 )
 
 group_sources("${SOURCE_FILES}")
-configure_library(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
+configure_library(${PROJECT_NAME} "")

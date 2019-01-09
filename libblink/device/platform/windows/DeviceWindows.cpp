@@ -8,7 +8,7 @@
 
 namespace blink
 {
-    static GLFWwindow* s_window = nullptr;
+    GLFWwindow* g_window = nullptr;
     static glm::ivec2 s_mousePos;
 
     void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -59,20 +59,20 @@ namespace blink
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
         /* Create a windowed mode window and its OpenGL context */
-        s_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-        if (!s_window)
+        g_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+        if (!g_window)
         {
             glfwTerminate();
             return false;
         }
 
-        glfwSetInputMode(s_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        glfwSetCursorPosCallback(s_window, mousePositionCallback);
-        glfwSetMouseButtonCallback(s_window, mouseButtonCallback);
-        glfwSetScrollCallback(s_window, mouseScrollCallback);
+        glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetCursorPosCallback(g_window, mousePositionCallback);
+        glfwSetMouseButtonCallback(g_window, mouseButtonCallback);
+        glfwSetScrollCallback(g_window, mouseScrollCallback);
 
         /* Make the window's context current */
-        glfwMakeContextCurrent(s_window);
+        glfwMakeContextCurrent(g_window);
 
         // access gl API after context created
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -94,8 +94,11 @@ namespace blink
         double begin = glfwGetTime();
 
         /* Loop until the user closes the window */
-        while (!glfwWindowShouldClose(s_window))
+        while (!glfwWindowShouldClose(g_window))
         {
+            /* Poll for and process events */
+            glfwPollEvents();
+
             double end = glfwGetTime();
             double duration = end - begin;
             begin = end;
@@ -103,13 +106,9 @@ namespace blink
             Framework::getInstance().step(static_cast<float>(duration));
 
             /* Swap front and back buffers */
-            glfwSwapBuffers(s_window);
-
-            /* Poll for and process events */
-            glfwPollEvents();
+            glfwSwapBuffers(g_window);
         }
 
         return 0;
     }
 }
-

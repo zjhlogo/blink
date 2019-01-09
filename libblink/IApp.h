@@ -21,7 +21,10 @@ namespace blink
         virtual bool initializeComponents();
 
         virtual void update(float dt) {};
+
+        virtual void beginRender();
         virtual void render() {};
+        virtual void endRender() {};
 
         int getWindowWidth() const { return m_windowWidth; }
         int getWindowHeight() const { return m_windowHeight; }
