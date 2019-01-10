@@ -12,19 +12,30 @@ public:
 
     void update(float dt);
 
-    void setHead(int head) { m_head = head; };
-    void setBody(int body) { m_body = body; };
-    void setLeg(int leg) { m_leg = leg; };
-    void setArm(int arm) { m_arm = arm; };
-
     int generateRenderBlock(SpriteRenderBlock& renderBlock, int depth);
 
-private:
-    int m_head{};
-    int m_body{};
-    int m_leg{};
-    int m_arm{};
+public:
+    bool m_male{ true };
+    int m_headId{ 1 };
+    int m_bodyId{ 1 };
+    int m_legId{ 1 };
+    int m_armId{ 1 };
 
+    int m_handsOffId{};
+    int m_handsOnId{};
+
+    int m_backId{};
+    int m_frontId{};
+
+    int m_shoeId{};
+    int m_waistId{};
+    int m_wingId{};
+    int m_shieldId{};
+    int m_neckId{};
+    int m_faceId{};
+    int m_balloonId{};
+
+private:
     int m_frameIndex{};
     float m_elapseTime{};
 

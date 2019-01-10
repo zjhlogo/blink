@@ -1,4 +1,6 @@
 #include "UiModule.h"
+#include "../render/GlConfig.h"
+#include <glad/glad.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -58,5 +60,7 @@ namespace blink
         // Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glGetError();
+        //GL_ERROR_CHECK();
     }
 }
