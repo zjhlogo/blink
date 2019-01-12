@@ -75,6 +75,7 @@ void SpriteApp::render()
     drawCombo("face", m_sprite->m_faceId, m_faceMap, [&](int id) { m_sprite->m_faceId = id; });
     drawCombo("balloon", m_sprite->m_balloonId, m_balloonMap, [&](int id) { m_sprite->m_balloonId = id; });
 
+    drawCombo("weapon", m_sprite->m_weaponId, m_weaponMap, [&](int id) { m_sprite->m_weaponId = id; });
     //drawItemsMap();
 
     pUiModule->end();
@@ -183,6 +184,8 @@ bool SpriteApp::parseItems(ItemMap& itemMap, const blink::tstring & filePath)
         if (item.neckSlot != -1) m_neckMap.insert(std::make_pair(item.neckSlot, item.type));
         if (item.faceSlot != -1) m_faceMap.insert(std::make_pair(item.faceSlot, item.type));
         if (item.balloonSlot != -1) m_balloonMap.insert(std::make_pair(item.balloonSlot, item.type));
+
+        if (item.damage != -1) m_weaponMap.insert(std::make_pair(item.type, item.type));
 
         m_itemsMap.insert(std::make_pair(item.type, item));
     }

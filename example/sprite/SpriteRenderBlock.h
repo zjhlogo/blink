@@ -15,6 +15,7 @@ class SpriteQuadGroup
 {
 public:
     void addQuad(float width, float height, int row, int col, int index, const glm::mat4& transform);
+    void addQuad(const blink::tstring& texFile, const glm::mat4& transform);
 
 public:
     blink::tstring texFile;

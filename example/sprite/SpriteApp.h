@@ -40,16 +40,15 @@ private:
     ItemMap m_itemsMap;
     int m_selectedItemId{};
 
+    // armor
     IntMap m_headItemMap;
     IntMap m_bodyItemMap;
     IntMap m_legItemMap;
 
     IntMap m_handsOffMap;
     IntMap m_handsOnMap;
-
     IntMap m_backMap;
     IntMap m_frontMap;
-
     IntMap m_shoeMap;
     IntMap m_waistMap;
     IntMap m_wingMap;
@@ -57,5 +56,8 @@ private:
     IntMap m_neckMap;
     IntMap m_faceMap;
     IntMap m_balloonMap;
+
+    // weapon
+    IntMap m_weaponMap;
 
 };

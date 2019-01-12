@@ -134,5 +134,13 @@ int Sprite::generateRenderBlock(SpriteRenderBlock& renderBlock, int depth)
         group->addQuad(40.0f, 56.0f, 20, 1, m_frameIndex, transform);
     }
 
+    // weapon
+    if (m_weaponId > 0)
+    {
+        blink::tstring texFile = fmt::format("resource/item/Item_{0}.png", m_weaponId);
+        auto group = renderBlock.checkOut(texFile);
+        group->addQuad(texFile, transform);
+    }
+
     return depth + 1;
 }

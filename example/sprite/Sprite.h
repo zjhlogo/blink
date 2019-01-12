@@ -35,6 +35,8 @@ public:
     int m_faceId{};
     int m_balloonId{};
 
+    int m_weaponId{};
+
 private:
     int m_frameIndex{};
     float m_elapseTime{};

@@ -1,5 +1,9 @@
 #include "SpriteRenderBlock.h"
 
+#define STBI_ONLY_PNG
+#define STBI_ONLY_JPEG
+#include <utils/stb_image.h>
+
 void SpriteQuadGroup::addQuad(float width, float height, int row, int col, int index, const glm::mat4& transform)
 {
     float texWidth = col * width;
@@ -18,6 +22,27 @@ void SpriteQuadGroup::addQuad(float width, float height, int row, int col, int i
     quad.uvs[1] = { (x + 1) * ds, (row - y - 1) * dt };
     quad.uvs[2] = { x * ds, (row - y) * dt };
     quad.uvs[3] = { (x + 1) * ds, (row - y) * dt };
+
+    quad.verts[0] = transform * glm::vec4(-0.5f * width, -0.5f * height, 0.0f, 1.0f);
+    quad.verts[1] = transform * glm::vec4(+0.5f * width, -0.5f * height, 0.0f, 1.0f);
+    quad.verts[2] = transform * glm::vec4(-0.5f * width, +0.5f * height, 0.0f, 1.0f);
+    quad.verts[3] = transform * glm::vec4(+0.5f * width, +0.5f * height, 0.0f, 1.0f);
+}
+
+void SpriteQuadGroup::addQuad(const blink::tstring & texFile, const glm::mat4 & transform)
+{
+    int width = 0;
+    int height = 0;
+    int components = 0;
+    stbi_info(texFile.c_str(), &width, &height, &components);
+
+    quads.resize(quads.size() + 1);
+    auto& quad = *quads.rbegin();
+
+    quad.uvs[0] = { 0.0f, 0.0f };
+    quad.uvs[1] = { 1.0f, 0.0f };
+    quad.uvs[2] = { 0.0f, 1.0f };
+    quad.uvs[3] = { 1.0f, 1.0f };
 
     quad.verts[0] = transform * glm::vec4(-0.5f * width, -0.5f * height, 0.0f, 1.0f);
     quad.verts[1] = transform * glm::vec4(+0.5f * width, -0.5f * height, 0.0f, 1.0f);
