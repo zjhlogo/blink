@@ -11,12 +11,12 @@ Sprite::~Sprite()
 
 void Sprite::update(float dt)
 {
-    m_elapseTime += dt;
-    if (m_elapseTime > 0.1f)
-    {
-        m_frameIndex = (m_frameIndex + 1) % 20;
-        m_elapseTime -= 0.1f;
-    }
+    //m_elapseTime += dt;
+    //if (m_elapseTime > 0.1f)
+    //{
+    //    m_frameIndex = (m_frameIndex + 1) % 20;
+    //    m_elapseTime -= 0.1f;
+    //}
 }
 
 int Sprite::generateRenderBlock(SpriteRenderBlock& renderBlock, int depth)

@@ -16,6 +16,8 @@ public:
 
 public:
     bool m_male{ true };
+    int m_frameIndex{};
+
     int m_headId{ 1 };
     int m_bodyId{ 1 };
     int m_legId{ 1 };
@@ -38,7 +40,6 @@ public:
     int m_weaponId{};
 
 private:
-    int m_frameIndex{};
     float m_elapseTime{};
 
 };

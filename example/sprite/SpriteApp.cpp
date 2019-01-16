@@ -58,6 +58,11 @@ void SpriteApp::render()
     pUiModule->begin();
 
     ImGui::Checkbox("male", &m_sprite->m_male);
+
+    ImGui::InputInt("frame index", &m_sprite->m_frameIndex);
+    if (m_sprite->m_frameIndex < 0) m_sprite->m_frameIndex = 19;
+    if (m_sprite->m_frameIndex > 19) m_sprite->m_frameIndex = 0;
+
     drawCombo("head", m_sprite->m_headId, m_headItemMap, [&](int id) { m_sprite->m_headId = id; });
     drawCombo("body", m_sprite->m_bodyId, m_bodyItemMap, [&](int id) { m_sprite->m_bodyId = id; m_sprite->m_armId = id; });
     drawCombo("leg", m_sprite->m_legId, m_legItemMap, [&](int id) { m_sprite->m_legId = id; });
