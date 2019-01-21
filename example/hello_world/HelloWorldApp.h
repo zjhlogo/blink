@@ -1,26 +1,13 @@
 #pragma once
-#include <IApp.h>
-#include <objects/Scene.h>
-#include <objects/Mesh.h>
-#include <cameras/Camera.h>
+#include <blink.h>
 
-class HelloWorldApp : public blink::IApp
+class HelloWorldApp : public blink::App
 {
 public:
-    RTTI_DEF(HelloWorldApp, blink::IApp);
+    HelloWorldApp() {};
+    virtual ~HelloWorldApp() {};
 
-    HelloWorldApp();
-    virtual ~HelloWorldApp();
-
-	virtual bool initialize() override;
-	virtual void terminate() override;
-
-    virtual void update(float dt) override;
-    virtual void render() override;
-
-private:
-    blink::Scene* m_rootScene{};
-    blink::Camera* m_camera{};
-    blink::Mesh* m_cube{};
+	bool initialize() override;
+	void terminate() override;
 
 };

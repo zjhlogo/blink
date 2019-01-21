@@ -22,6 +22,7 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	find_package(glm PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 	find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 	find_package(tinyxml2 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+	find_package(entityx PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 	if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 		add_executable(${PROJ_NAME} WIN32 ${SOURCE_FILES})
@@ -31,6 +32,7 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	target_include_directories(${PROJ_NAME} PRIVATE
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
+		$<BUILD_INTERFACE:$<TARGET_PROPERTY:entityx,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/glad/include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/imgui>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libfoundation>
@@ -41,6 +43,7 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	glfw
 	fmt::fmt
 	tinyxml2::tinyxml2
+	entityx
 	libglad
 	libimgui
 	libfoundation

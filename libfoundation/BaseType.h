@@ -67,6 +67,22 @@ namespace blink
         }
     };
 
+    template <typename T> class AutoDelete
+    {
+    public:
+        AutoDelete(T* pointer) { m_pointer = pointer; };
+        ~AutoDelete()
+        {
+            if (m_pointer)
+            {
+                delete m_pointer;
+                m_pointer = nullptr;
+            }
+        };
+
+    private:
+        T* m_pointer{};
+    };
 }
 
 #define SAFE_DELETE(x) if (x) {delete x; x=nullptr;}

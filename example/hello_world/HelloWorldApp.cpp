@@ -1,75 +1,37 @@
 #include "HelloWorldApp.h"
-#include <Framework.h>
-#include <geometries/BoxGeometry.h>
-#include <geometries/PlaneGeometry.h>
-#include <geometries/SphereGeometry.h>
-#include <materials/PhongMaterial.h>
-#include <lights/AmbientLight.h>
-#include <lights/PointLight.h>
-#include <cameras/TargetCamera.h>
-#include <Log.h>
-
-HelloWorldApp::HelloWorldApp()
-    :IApp(1280, 720, "Hello World")
-{
-
-}
-
-HelloWorldApp::~HelloWorldApp()
-{
-
-}
+#include <systems/OpenGL3RenderSystem.h>
+#include <systems/SceneSystem.h>
+#include <Components.h>
+#include <Materials.h>
+#include <GeometryBuilder.h>
 
 bool HelloWorldApp::initialize()
 {
-    m_rootScene = new blink::Scene();
+    auto scene = m_ex.systems.add<blink::SceneSystem>();
+    m_ex.systems.add<blink::OpenGL3RenderSystem>();
+    m_ex.systems.configure();
 
-    auto colorMaterial = new blink::PhongMaterial();
-    m_cube = new blink::Mesh(new blink::BoxGeometry(1.0f, 1.0f, 1.0f), colorMaterial);
-    m_cube->setPosition({ -1.0f, 0.0f, 0.0f });
-    m_rootScene->add(m_cube);
+    entityx::Entity cube = m_ex.entities.create();
 
-    blink::Material* textureMaterial = new blink::PhongMaterial();
-    textureMaterial->setTexture("tex_diffuse", "resource/grid16.png", 0);
-    blink::Mesh* plane = new blink::Mesh(new blink::PlaneGeometry(10.0f, 10.0f, blink::PlaneGeometry::Facing::PositiveY), textureMaterial);
-    plane->setPosition({ 0.0f, -3.0f, 0.0f });
-    m_rootScene->add(plane);
+    cube.assign<blink::Transform>();
 
-    auto sphere = new blink::Mesh(new blink::SphereGeometry(0.5f), textureMaterial);
-    sphere->setPosition({ 1.0f, 0.0f, 0.0f });
-    m_rootScene->add(sphere);
+    auto geometry = cube.assign<blink::BufferGeometry>();
+    blink::GeometryBuilder::buildBox(*geometry.get(), 1.0f, 1.0f, 1.0f);
 
-    m_rootScene->add(new blink::AmbientLight());
-    blink::PointLight* light = new blink::PointLight();
-    light->setPosition({ 2.0f, 2.0f, 2.0f });
-    m_rootScene->add(light);
+    auto material = cube.assign<blink::PhongMaterial>();
 
-    auto camera = new blink::TargetCamera();
-    camera->lookAt({ -3.0f, 3.0f, 3.0f }, blink::VEC3_ZERO, blink::VEC3_PY);
-    m_camera = camera;
+    scene->add(cube, nullptr);
 
     return true;
 }
 
 void HelloWorldApp::terminate()
 {
-    SAFE_DELETE(m_camera);
-    SAFE_DELETE(m_rootScene);
-}
 
-void HelloWorldApp::update(float dt)
-{
-    m_cube->applyRotation(4.9f * dt, blink::VEC3_PX);
-    m_cube->applyRotation(6.9f * dt, blink::VEC3_PY);
-    m_rootScene->updateWorldTransform(blink::MAT4_IDENTITY);
-}
-
-void HelloWorldApp::render()
-{
-    renderObject(m_rootScene, m_camera);
 }
 
 int main(int argc, char** argv)
 {
-    return blink::Framework::getInstance().startup(new HelloWorldApp());
+    HelloWorldApp app;
+    return blink::run(&app);
 }
