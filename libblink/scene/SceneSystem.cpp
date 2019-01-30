@@ -1,5 +1,4 @@
 #include "SceneSystem.h"
-#include "../Components.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace blink
@@ -71,7 +70,7 @@ namespace blink
     {
         auto transform = node.entity.component<Transform>().get();
 
-        if (transform->bitFlag & TransformFlag::TRANSFORM_LOCAL_DIRTY)
+        if (transform->bitFlag & Transform::BF_DIRTY)
         {
             // TODO: can be optimize by build matrix without multiple
 
@@ -80,7 +79,7 @@ namespace blink
             glm::mat4 matTransLocalPos = glm::translate(MAT4_IDENTITY, transform->position);
 
             transform->localToParentTransform = matTransLocalPos * matRot * matScale;	// scale -> rotation -> translate
-            transform->bitFlag &= (~TransformFlag::TRANSFORM_LOCAL_DIRTY);
+            transform->bitFlag &= (~Transform::BF_DIRTY);
             node.transformChanged = true;
         }
 

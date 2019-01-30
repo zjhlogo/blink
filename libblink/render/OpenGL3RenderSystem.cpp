@@ -1,7 +1,7 @@
 #include "OpenGL3RenderSystem.h"
-#include "../Components.h"
-#include "../Materials.h"
-#include "../Shader.h"
+#include "Shader.h"
+#include "../camera/CameraData.h"
+#include "../scene/TransformData.h"
 #include "GlConfig.h"
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -46,7 +46,6 @@ namespace blink
             glUseProgram(m_shader->getProgramId());
             GL_ERROR_CHECK();
 
-            //camera->setupShaderUniforms(transform.localToWorldTransform, m_shader);
             //material->setupShaderUniforms(m_shader);
             //material->setupShaderSampler(m_shader);
 
@@ -59,15 +58,15 @@ namespace blink
 
             // TODO: apply render state
 
-            glBindVertexArray(geometry.m_vertexArrayObjectId);
+            glBindVertexArray(geometry.vertexArrayObjectId);
             GL_ERROR_CHECK();
 
             // Bind the IBO
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.m_indexBufferId);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBufferId);
             GL_ERROR_CHECK();
 
             // Draws a indexed triangle array
-            glDrawElements(GL_TRIANGLES, geometry.m_numIndex, GL_UNSIGNED_SHORT, 0);
+            glDrawElements(GL_TRIANGLES, geometry.numIndex, GL_UNSIGNED_SHORT, 0);
             GL_ERROR_CHECK();
         });
     }

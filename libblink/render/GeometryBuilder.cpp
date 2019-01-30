@@ -1,6 +1,6 @@
 #include "GeometryBuilder.h"
-#include "GeometryUtils.h"
-#include "systems/GlConfig.h"
+#include "util/GeometryUtils.h"
+#include "GlConfig.h"
 #include <glad/glad.h>
 
 namespace blink
@@ -98,27 +98,27 @@ namespace blink
         };
 
         // create buffer object
-        if (bufferGeo.m_vertexBufferId == 0)
+        if (bufferGeo.vertexBufferId == 0)
         {
-            glGenBuffers(1, &bufferGeo.m_vertexBufferId);
+            glGenBuffers(1, &bufferGeo.vertexBufferId);
             GL_ERROR_CHECK();
-            if (bufferGeo.m_vertexBufferId == 0) return false;
+            if (bufferGeo.vertexBufferId == 0) return false;
         }
 
         // create vao
-        if (bufferGeo.m_vertexArrayObjectId == 0)
+        if (bufferGeo.vertexArrayObjectId == 0)
         {
-            glGenVertexArrays(1, &bufferGeo.m_vertexArrayObjectId);
+            glGenVertexArrays(1, &bufferGeo.vertexArrayObjectId);
             GL_ERROR_CHECK();
-            if (bufferGeo.m_vertexArrayObjectId == 0) return false;
+            if (bufferGeo.vertexArrayObjectId == 0) return false;
         }
 
         // bind vao
-        glBindVertexArray(bufferGeo.m_vertexArrayObjectId);
+        glBindVertexArray(bufferGeo.vertexArrayObjectId);
         GL_ERROR_CHECK();
 
         // Bind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, bufferGeo.m_vertexBufferId);
+        glBindBuffer(GL_ARRAY_BUFFER, bufferGeo.vertexBufferId);
         GL_ERROR_CHECK();
 
         // Set the buffer's data
@@ -138,7 +138,7 @@ namespace blink
             glEnableVertexAttribArray(i);
             GL_ERROR_CHECK();
 
-            glVertexAttribPointer(i, attrItem.m_size, attrItem.m_glType, GL_FALSE, 32, (GLvoid*)((intptr_t)attrItem.m_offset));
+            glVertexAttribPointer(i, attrItem.size, attrItem.glType, GL_FALSE, 32, (GLvoid*)((intptr_t)attrItem.offset));
             GL_ERROR_CHECK();
         }
 
@@ -148,22 +148,22 @@ namespace blink
     bool uploadIndexBuffer(BufferGeometry& bufferGeo, const uint16 * bufferData, uint32 numIndex)
     {
         // create buffer object
-        if (bufferGeo.m_indexBufferId == 0)
+        if (bufferGeo.indexBufferId == 0)
         {
-            glGenBuffers(1, &bufferGeo.m_indexBufferId);
+            glGenBuffers(1, &bufferGeo.indexBufferId);
             GL_ERROR_CHECK();
-            if (bufferGeo.m_indexBufferId == 0) return false;
+            if (bufferGeo.indexBufferId == 0) return false;
         }
 
         // Bind the VBO
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferGeo.m_indexBufferId);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferGeo.indexBufferId);
         GL_ERROR_CHECK();
 
         // Set the buffer's data
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndex * sizeof(uint16), bufferData, GL_STATIC_DRAW);
         GL_ERROR_CHECK();
 
-        bufferGeo.m_numIndex = numIndex;
+        bufferGeo.numIndex = numIndex;
         return true;
     }
 

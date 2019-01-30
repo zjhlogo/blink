@@ -1,5 +1,5 @@
 #include "CameraSystem.h"
-#include "../Components.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace blink
 {
@@ -18,12 +18,12 @@ namespace blink
         if (!m_camera.valid()) return;
 
         auto cameraData = m_camera.component<CameraData>().get();
-        if (cameraData->bitFlag & TransformFlag::TRANSFORM_LOCAL_DIRTY)
+        if (cameraData->bitFlag & CameraData::BF_DIRTY)
         {
             cameraData->cameraToClip = glm::perspectiveFov(45.0f, 1280.0f, 720.0f, 0.1f, 100.0f);
             cameraData->worldToCamera = glm::lookAt(cameraData->cameraPos, cameraData->cameraTarget, cameraData->cameraUp);
             cameraData->worldToClip = cameraData->cameraToClip * cameraData->worldToCamera;
-            cameraData->bitFlag &= (~TransformFlag::TRANSFORM_LOCAL_DIRTY);
+            cameraData->bitFlag &= (~CameraData::BF_DIRTY);
         }
     }
 
@@ -32,7 +32,7 @@ namespace blink
         m_camera = camera;
         if (!m_camera.valid()) return;
 
-        auto cameraData = m_camera.component<CameraData>();
+        auto cameraData = m_camera.component<CameraData>().get();
 
         glm::vec3 distance = cameraData->cameraPos - cameraData->cameraTarget;
         m_radius = glm::length(distance);
@@ -47,7 +47,7 @@ namespace blink
     {
         if (!m_camera.valid()) return;
 
-        auto cameraData = m_camera.component<CameraData>();
+        auto cameraData = m_camera.component<CameraData>().get();
 
         switch (evt.action)
         {
@@ -66,7 +66,7 @@ namespace blink
                 distance.y = m_radius * cos(m_offset.t);
                 distance.z = m_radius * cos(m_offset.s) * sin(m_offset.t);
                 cameraData->cameraPos = cameraData->cameraTarget + distance;
-                cameraData->bitFlag |= TransformFlag::TRANSFORM_LOCAL_DIRTY;
+                cameraData->bitFlag |= CameraData::BF_DIRTY;
             }
 
             m_lastMousePos = evt.mousePos;
@@ -88,7 +88,7 @@ namespace blink
             m_radius += m_scrollSensitivity * evt.mousePos.y;
             if (m_radius < 0.1f) m_radius = 0.1f;
             cameraData->cameraPos = cameraData->cameraTarget + glm::normalize(distance) * m_radius;
-            cameraData->bitFlag |= TransformFlag::TRANSFORM_LOCAL_DIRTY;
+            cameraData->bitFlag |= CameraData::BF_DIRTY;
         }
         break;
         default:

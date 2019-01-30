@@ -1,6 +1,6 @@
 #pragma once
 #include "RenderSystem.h"
-#include <glm/glm.hpp>
+#include "RenderData.h"
 
 namespace blink
 {

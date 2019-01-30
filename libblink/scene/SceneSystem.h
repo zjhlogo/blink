@@ -1,6 +1,6 @@
 #pragma once
-#include <BaseType.h>
 #include <entityx/entityx.h>
+#include "TransformData.h"
 
 namespace blink
 {

@@ -1,6 +1,6 @@
 #pragma once
 #include <entityx/entityx.h>
-#include "../Components.h"
+#include "InputData.h"
 
 namespace blink
 {

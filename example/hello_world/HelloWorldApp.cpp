@@ -1,11 +1,9 @@
 #include "HelloWorldApp.h"
-#include <systems/OpenGL3RenderSystem.h>
-#include <systems/SceneSystem.h>
-#include <systems/CameraSystem.h>
-#include <systems/InputSystem.h>
-#include <Components.h>
-#include <Materials.h>
-#include <GeometryBuilder.h>
+#include <render/OpenGL3RenderSystem.h>
+#include <scene/SceneSystem.h>
+#include <camera/CameraSystem.h>
+#include <input/InputSystem.h>
+#include <render/GeometryBuilder.h>
 
 entityx::Entity createBox(entityx::EntityManager& entities, float width, float height, float depth, entityx::Entity& parentEntity)
 {
