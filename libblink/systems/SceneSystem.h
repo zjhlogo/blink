@@ -7,11 +7,13 @@ namespace blink
     class SceneSystem : public entityx::System<SceneSystem>
     {
     public:
-        class SceneNode
+        class Node
         {
         public:
+            int id;
+            int parentId;
             entityx::Entity entity;
-            std::vector<SceneNode*> children;
+            bool transformChanged;
         };
 
     public:
@@ -20,13 +22,8 @@ namespace blink
         void configure(entityx::EventManager &events) override;
         void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
-        SceneNode* add(entityx::Entity& entity, SceneNode* parent);
-
     private:
-        void updateTransformRecruite(SceneNode* node, const glm::mat4& parentToWorldTransform, bool localChanged = false);
-
-    private:
-        std::vector<SceneNode*> m_nodes;
+        void updateNodeTransform(Node& node, const glm::mat4& parentToWorldTransform, bool parentTransformChanged);
 
     };
 }

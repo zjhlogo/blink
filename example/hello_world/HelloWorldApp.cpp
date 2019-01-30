@@ -1,26 +1,54 @@
 #include "HelloWorldApp.h"
 #include <systems/OpenGL3RenderSystem.h>
 #include <systems/SceneSystem.h>
+#include <systems/CameraSystem.h>
+#include <systems/InputSystem.h>
 #include <Components.h>
 #include <Materials.h>
 #include <GeometryBuilder.h>
 
+entityx::Entity createBox(entityx::EntityManager& entities, float width, float height, float depth, entityx::Entity& parentEntity)
+{
+    static int s_currentId = 1;
+
+    entityx::Entity box = entities.create();
+
+    box.assign<blink::Transform>();
+
+    auto geometry = box.assign<blink::BufferGeometry>();
+    blink::GeometryBuilder::buildBox(*geometry.get(), width, height, depth);
+
+    box.assign<blink::PhongMaterial>();
+
+    if (parentEntity.valid() && parentEntity.has_component<blink::Hierarchy>())
+    {
+        box.assign<blink::Hierarchy>(s_currentId++, parentEntity.component<blink::Hierarchy>()->id);
+    }
+    else
+    {
+        box.assign<blink::Hierarchy>(s_currentId++, -1);
+    }
+
+    return box;
+}
+
 bool HelloWorldApp::initialize()
 {
-    auto scene = m_ex.systems.add<blink::SceneSystem>();
-    m_ex.systems.add<blink::OpenGL3RenderSystem>();
+    auto cameraSystem = m_ex.systems.add<blink::CameraSystem>();
+    m_ex.systems.add<blink::SceneSystem>();
+    auto renderSystem = m_ex.systems.add<blink::OpenGL3RenderSystem>();
+    m_ex.systems.add<blink::InputSystem>();
     m_ex.systems.configure();
 
-    entityx::Entity cube = m_ex.entities.create();
+    // add cubes
+    entityx::Entity cube = createBox(m_ex.entities, 1.0f, 1.0f, 1.0f, entityx::Entity());
 
-    cube.assign<blink::Transform>();
+    // add a camera
+    entityx::Entity camera = m_ex.entities.create();
+    camera.assign<blink::CameraData>(glm::vec3(0.0f, 0.0f, 3.0f), blink::VEC3_ZERO, blink::VEC3_PY);
 
-    auto geometry = cube.assign<blink::BufferGeometry>();
-    blink::GeometryBuilder::buildBox(*geometry.get(), 1.0f, 1.0f, 1.0f);
-
-    auto material = cube.assign<blink::PhongMaterial>();
-
-    scene->add(cube, nullptr);
+    cameraSystem->setCamera(camera);
+    renderSystem->setCamera(camera);
 
     return true;
 }

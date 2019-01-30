@@ -1,21 +1,18 @@
 #pragma once
-#include "RenderSystem.h"
-#include <glm/glm.hpp>
+#include <entityx/entityx.h>
+#include "../Components.h"
 
 namespace blink
 {
-    class Shader;
-
-    class OpenGL3RenderSystem: public RenderSystem
+    class InputSystem : public entityx::System<InputSystem>, public entityx::Receiver<InputSystem>
     {
     public:
-        virtual ~OpenGL3RenderSystem();
+        virtual ~InputSystem() {};
 
         void configure(entityx::EventManager &events) override;
         void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
-    private:
-        Shader* m_shader{};
+        void receive(const MouseEvent& evt);
 
     };
 }

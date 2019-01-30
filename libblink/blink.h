@@ -11,7 +11,7 @@ namespace blink
 
         virtual void step(double dt);
 
-    protected:
+    public:
         entityx::EntityX m_ex;
 
     };

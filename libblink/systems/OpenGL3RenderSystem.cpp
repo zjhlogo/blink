@@ -28,10 +28,6 @@ namespace blink
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         m_shader = Shader::fromStock(Shader::StockShaders::Wireframe, 0);
-        m_cameraPos = { 0.0f, 0.0f, 3.0f };
-        m_worldToCamera = glm::lookAt(m_cameraPos, VEC3_ZERO, VEC3_PY);
-        m_cameraToClip = glm::perspectiveFov(45.0f, 1280.0f, 720.0f, 0.1f, 100.0f);
-        m_worldToClip = m_cameraToClip * m_worldToCamera;
     }
 
     void OpenGL3RenderSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
@@ -39,9 +35,14 @@ namespace blink
         glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // select camera
+        if (!m_camera.valid()) return;
+
+        auto cameraData = m_camera.component<CameraData>().get();
+
         entities.each<Transform, BufferGeometry, PhongMaterial>([&](entityx::Entity entity, Transform& transform, BufferGeometry& geometry, PhongMaterial& material)
         {
-            // TODO: render the geometry
+            // render the geometry
             glUseProgram(m_shader->getProgramId());
             GL_ERROR_CHECK();
 
@@ -49,11 +50,11 @@ namespace blink
             //material->setupShaderUniforms(m_shader);
             //material->setupShaderSampler(m_shader);
 
-            m_shader->setUniform("u_worldToClip", m_worldToClip);
+            m_shader->setUniform("u_worldToClip", cameraData->worldToClip);
             m_shader->setUniform("u_localToWorld", transform.localToWorldTransform);
             m_shader->setUniform("u_localToWorldTranInv", glm::transpose(glm::inverse(glm::mat3(transform.localToWorldTransform))));
-            m_shader->setUniform("u_localToClip", m_worldToClip * transform.localToWorldTransform);
-            m_shader->setUniform("u_viewPos", m_cameraPos);
+            m_shader->setUniform("u_localToClip", cameraData->worldToClip * transform.localToWorldTransform);
+            m_shader->setUniform("u_viewPos", cameraData->cameraPos);
             m_shader->setUniform("u_diffuseColor", material.diffuseColor);
 
             // TODO: apply render state

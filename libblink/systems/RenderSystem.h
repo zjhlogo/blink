@@ -8,5 +8,10 @@ namespace blink
     public:
         virtual ~RenderSystem() {};
 
+        void setCamera(entityx::Entity& camera) { m_camera = camera; };
+
+    protected:
+        entityx::Entity m_camera;
+
     };
 }

@@ -11,55 +11,83 @@ namespace blink
 
     void SceneSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
     {
-        for (auto node : m_nodes)
+        std::vector<Node> nodes;
+
+        // collect all nodes
+        uint32 index = 0;
+        entities.each<Transform, Hierarchy>([&](entityx::Entity entity, Transform& transform, Hierarchy& hierarchy)
         {
-            updateTransformRecruite(node, blink::MAT4_IDENTITY);
+            Node node;
+            node.entity = entity;
+            node.id = hierarchy.id;
+            node.parentId = hierarchy.parentId;
+
+            nodes.push_back(node);
+        });
+
+        // sort node by id
+        std::sort(nodes.begin(), nodes.end(), [](Node& a, Node& b)
+        {
+            return a.id < b.id;
+        });
+
+        // remap id/parentId to 0 based index
+        std::unordered_map<uint32, uint32> idsMap;
+        idsMap[-1] = -1;
+
+        index = 0;
+        for (auto& node : nodes)
+        {
+            if (node.id != index)
+            {
+                idsMap[node.id] = index;
+                node.id = index;
+            }
+
+            auto itNewParent = idsMap.find(node.parentId);
+            assert(itNewParent != idsMap.end() && "must found parent id for sorted nodes");
+            node.parentId = itNewParent->second;
+            node.transformChanged = false;
+
+            ++index;
+        }
+
+        // update node transform
+        for (auto& node : nodes)
+        {
+            const glm::mat4* parentToWorldTransform = &MAT4_IDENTITY;
+            bool parentTransformChanged = false;
+            if (node.parentId != -1)
+            {
+                parentToWorldTransform = &(nodes[node.parentId].entity.component<Transform>()->localToWorldTransform);
+                parentTransformChanged = nodes[node.parentId].transformChanged;
+            }
+
+            updateNodeTransform(node, *parentToWorldTransform, parentTransformChanged);
         }
     }
 
-    SceneSystem::SceneNode* SceneSystem::add(entityx::Entity& entity, SceneNode* parent)
+    void SceneSystem::updateNodeTransform(Node& node, const glm::mat4& parentToWorldTransform, bool parentTransformChanged)
     {
-        SceneNode* node = new SceneNode();
-        node->entity = entity;
-
-        if (!parent)
-        {
-            m_nodes.push_back(node);
-        }
-        else
-        {
-            parent->children.push_back(node);
-        }
-
-        return node;
-    }
-
-    void SceneSystem::updateTransformRecruite(SceneNode * node, const glm::mat4& parentToWorldTransform, bool localChanged)
-    {
-        if (!node->entity.valid()) return;
-
-        auto transform = node->entity.component<Transform>().get();
+        auto transform = node.entity.component<Transform>().get();
 
         if (transform->bitFlag & TransformFlag::TRANSFORM_LOCAL_DIRTY)
         {
+            // TODO: can be optimize by build matrix without multiple
+
             glm::mat4 matRot = glm::mat4_cast(transform->rotation);
             glm::mat4 matScale = glm::scale(MAT4_IDENTITY, transform->scale);
             glm::mat4 matTransLocalPos = glm::translate(MAT4_IDENTITY, transform->position);
 
             transform->localToParentTransform = matTransLocalPos * matRot * matScale;	// scale -> rotation -> translate
             transform->bitFlag &= (~TransformFlag::TRANSFORM_LOCAL_DIRTY);
-            localChanged = true;
+            node.transformChanged = true;
         }
 
-        if (localChanged || transform->bitFlag & TransformFlag::TRANSFORM_PARENT_DIRTY)
+        if (node.transformChanged || parentTransformChanged)
         {
             transform->localToWorldTransform = parentToWorldTransform * transform->localToParentTransform;
-            transform->bitFlag &= (~TransformFlag::TRANSFORM_PARENT_DIRTY);
-        }
-
-        for (auto child : node->children)
-        {
-            updateTransformRecruite(child, transform->localToWorldTransform, localChanged);
+            node.transformChanged = true;
         }
     }
 }

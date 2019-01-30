@@ -1,4 +1,5 @@
 #include "blink.h"
+#include "Components.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -12,17 +13,25 @@ namespace blink
 
     GLFWwindow* g_window = nullptr;
     static glm::ivec2 s_mousePos;
+    App* g_app = nullptr;
 
     void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
     {
+        g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Move, glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
     }
 
     void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     {
+        MouseEvent::Action act = MouseEvent::Action::ButtonDown;
+        if (action == GLFW_PRESS) act = MouseEvent::Action::ButtonDown;
+        else if (action == GLFW_RELEASE) act = MouseEvent::Action::ButtonUp;
+
+        g_app->m_ex.events.emit<MouseEvent>(act, static_cast<MouseEvent::MouseButton>(button), static_cast<uint32>(mods));
     }
 
     void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     {
+        g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Scroll, glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
     }
 
     int run(App * app)
@@ -57,6 +66,7 @@ namespace blink
         }
 
         app->initialize();
+        g_app = app;
 
         double begin = glfwGetTime();
 
