@@ -4,7 +4,7 @@
 
 namespace blink
 {
-    struct Transform
+    struct TransformData
     {
         enum BitFlag
         {
@@ -20,9 +20,14 @@ namespace blink
         uint32 bitFlag{ BF_DIRTY };
     };
 
-    struct Hierarchy
+    struct HierarchyData
     {
-        Hierarchy(int id_, int parentId_) : id(id_), parentId(parentId_) {};
+        explicit HierarchyData(int _id, int parent)
+            : id(_id)
+            , parentId(parent)
+        {
+
+        };
 
         int id;
         int parentId;

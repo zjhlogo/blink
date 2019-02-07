@@ -13,8 +13,8 @@ namespace blink
         void configure(entityx::EventManager &events) override;
         void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
-        void setCamera(entityx::Entity& camera);
         void receive(const MouseEvent& evt);
+        void receive(const entityx::ComponentAddedEvent<CameraData>& evt);
 
     private:
         void clampOffset(glm::vec2 & offset);

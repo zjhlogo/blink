@@ -1,5 +1,6 @@
 #pragma once
-#include <BaseType.h>
+#include "BufferAttributes.h"
+#include <vector>
 #include <glm/gtc/constants.hpp>
 
 namespace blink

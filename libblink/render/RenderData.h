@@ -1,60 +1,43 @@
 #pragma once
-#include <BaseType.h>
+#include "geometry/BufferGeometry.h"
+#include "material/Material.h"
+#include "light/Light.h"
 
 namespace blink
 {
-    enum AttributeConst
+    struct MeshData
     {
-        MaxAttributeSize = 128,
-        MaxAttributeItem = 8,
+        MeshData(BufferGeometry* geo, Material* mat)
+            :geometry(geo)
+            , material(mat)
+        {
+            SAFE_OBTAIN(geometry);
+            SAFE_OBTAIN(material);
+        }
+
+        ~MeshData()
+        {
+            SAFE_RELEASE(geometry);
+            SAFE_RELEASE(material);
+        }
+
+        BufferGeometry* geometry;
+        Material* material;
     };
 
-    enum AttributeItemType
+    struct LightData
     {
-        Unknown = 0,
-        Byte,
-        UnsignedByte,
-        Short,
-        UnsignedShort,
-        Float,
-        NumberOfAttributeItemType,
-    };
+        LightData(Light* lt)
+            : light(lt)
+        {
+            SAFE_OBTAIN(light);
+        }
 
-    struct AttributeItem
-    {
-        uint32 size;
-        AttributeItemType attrType;
-        uint32 glType;
-        uint32 offset;
-        tstring name;
-    };
+        ~LightData()
+        {
+            SAFE_RELEASE(light);
+        }
 
-    enum StockAttributes
-    {
-        Pos3 = 0,
-        Pos3Color,
-        Pos3Uv2,
-        Pos3Normal,
-
-        Pos3Uv2Normal,
-        Pos3Uv2Color,
-        Pos3Uv2NormalTangent,
-
-        NumberOfStockAttributes,
-    };
-
-    struct BufferGeometry
-    {
-        int numAttributes{};
-        AttributeItem* attributeItems{};
-        uint32 vertexArrayObjectId{};
-        uint32 vertexBufferId{};
-        uint32 indexBufferId{};
-        uint32 numIndex{};
-    };
-
-    struct PhongMaterial
-    {
-        glm::vec3 diffuseColor{ 1.0f, 1.0f, 1.0f };
+        Light* light;
     };
 }

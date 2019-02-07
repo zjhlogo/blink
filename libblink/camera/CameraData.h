@@ -3,6 +3,8 @@
 
 namespace blink
 {
+    class Shader;
+
 	struct CameraData
     {
         enum BitFlag
@@ -10,7 +12,16 @@ namespace blink
             BF_DIRTY = 1 << 0,
         };
 
-        CameraData(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& up) : cameraPos(pos), cameraTarget(target), cameraUp(up) {};
+        explicit CameraData(const glm::vec3& pos, const glm::vec3& target, const glm::vec3& up)
+            : cameraPos(pos)
+            , cameraTarget(target)
+            , cameraUp(up)
+            , bitFlag(BF_DIRTY)
+        {
+
+        };
+
+        void setupShaderUniforms(const glm::mat4& localToWorld, Shader* shader);
 
         glm::vec3 cameraPos;
         glm::vec3 cameraTarget;
@@ -20,6 +31,6 @@ namespace blink
         glm::mat4 cameraToClip;
         glm::mat4 worldToClip;
 
-        uint32 bitFlag{ BF_DIRTY };
+        uint32 bitFlag;
     };
 }

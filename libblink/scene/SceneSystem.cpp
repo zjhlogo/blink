@@ -5,7 +5,8 @@ namespace blink
 {
     void SceneSystem::configure(entityx::EventManager & events)
     {
-
+        events.subscribe<entityx::ComponentAddedEvent<HierarchyData>>(*this);
+        events.subscribe<entityx::ComponentRemovedEvent<HierarchyData>>(*this);
     }
 
     void SceneSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
@@ -14,7 +15,7 @@ namespace blink
 
         // collect all nodes
         uint32 index = 0;
-        entities.each<Transform, Hierarchy>([&](entityx::Entity entity, Transform& transform, Hierarchy& hierarchy)
+        entities.each<TransformData, HierarchyData>([&](entityx::Entity entity, TransformData& transform, HierarchyData& hierarchy)
         {
             Node node;
             node.entity = entity;
@@ -58,7 +59,7 @@ namespace blink
             bool parentTransformChanged = false;
             if (node.parentId != -1)
             {
-                parentToWorldTransform = &(nodes[node.parentId].entity.component<Transform>()->localToWorldTransform);
+                parentToWorldTransform = &(nodes[node.parentId].entity.component<TransformData>()->localToWorldTransform);
                 parentTransformChanged = nodes[node.parentId].transformChanged;
             }
 
@@ -66,11 +67,21 @@ namespace blink
         }
     }
 
+    void SceneSystem::receive(const entityx::ComponentAddedEvent<HierarchyData>& evt)
+    {
+        // TODO: 
+    }
+
+    void SceneSystem::receive(const entityx::ComponentRemovedEvent<HierarchyData>& evt)
+    {
+        // TODO: 
+    }
+
     void SceneSystem::updateNodeTransform(Node& node, const glm::mat4& parentToWorldTransform, bool parentTransformChanged)
     {
-        auto transform = node.entity.component<Transform>().get();
+        auto transform = node.entity.component<TransformData>().get();
 
-        if (transform->bitFlag & Transform::BF_DIRTY)
+        if (transform->bitFlag & TransformData::BF_DIRTY)
         {
             // TODO: can be optimize by build matrix without multiple
 
@@ -79,7 +90,7 @@ namespace blink
             glm::mat4 matTransLocalPos = glm::translate(MAT4_IDENTITY, transform->position);
 
             transform->localToParentTransform = matTransLocalPos * matRot * matScale;	// scale -> rotation -> translate
-            transform->bitFlag &= (~Transform::BF_DIRTY);
+            transform->bitFlag &= (~TransformData::BF_DIRTY);
             node.transformChanged = true;
         }
 

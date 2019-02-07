@@ -1,14 +1,17 @@
 #pragma once
 #include <entityx/entityx.h>
+#include "../camera/CameraData.h"
 
 namespace blink
 {
-    class RenderSystem : public entityx::System<RenderSystem>
+    class RenderSystem : public entityx::System<RenderSystem>, public entityx::Receiver<RenderSystem>
     {
     public:
         virtual ~RenderSystem() {};
 
-        void setCamera(entityx::Entity& camera) { m_camera = camera; };
+        void configure(entityx::EventManager &events) override;
+
+        void receive(const entityx::ComponentAddedEvent<CameraData>& evt);
 
     protected:
         entityx::Entity m_camera;

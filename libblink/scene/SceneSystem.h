@@ -4,7 +4,7 @@
 
 namespace blink
 {
-    class SceneSystem : public entityx::System<SceneSystem>
+    class SceneSystem : public entityx::System<SceneSystem>, public entityx::Receiver<SceneSystem>
     {
     public:
         class Node
@@ -22,8 +22,12 @@ namespace blink
         void configure(entityx::EventManager &events) override;
         void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
+        void receive(const entityx::ComponentAddedEvent<HierarchyData>& evt);
+        void receive(const entityx::ComponentRemovedEvent<HierarchyData>& evt);
+
     private:
         void updateNodeTransform(Node& node, const glm::mat4& parentToWorldTransform, bool parentTransformChanged);
+        void updateHierarchy();
 
     };
 }

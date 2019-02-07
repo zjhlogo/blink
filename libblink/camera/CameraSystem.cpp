@@ -11,6 +11,7 @@ namespace blink
     void CameraSystem::configure(entityx::EventManager & events)
     {
         events.subscribe<MouseEvent>(*this);
+        events.subscribe<entityx::ComponentAddedEvent<CameraData>>(*this);
     }
 
     void CameraSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
@@ -25,22 +26,6 @@ namespace blink
             cameraData->worldToClip = cameraData->cameraToClip * cameraData->worldToCamera;
             cameraData->bitFlag &= (~CameraData::BF_DIRTY);
         }
-    }
-
-    void CameraSystem::setCamera(entityx::Entity & camera)
-    {
-        m_camera = camera;
-        if (!m_camera.valid()) return;
-
-        auto cameraData = m_camera.component<CameraData>().get();
-
-        glm::vec3 distance = cameraData->cameraPos - cameraData->cameraTarget;
-        m_radius = glm::length(distance);
-
-        // calculate offset from position
-        m_offset.t = acos(distance.y / m_radius);
-        clampOffset(m_offset);
-        m_offset.s = asin(distance.x / (m_radius * sin(m_offset.t)));
     }
 
     void CameraSystem::receive(const MouseEvent & evt)
@@ -94,6 +79,20 @@ namespace blink
         default:
             break;
         }
+    }
+
+    void CameraSystem::receive(const entityx::ComponentAddedEvent<CameraData>& evt)
+    {
+        m_camera = evt.entity;
+        auto cameraData = evt.component.get();
+
+        glm::vec3 distance = cameraData->cameraPos - cameraData->cameraTarget;
+        m_radius = glm::length(distance);
+
+        // calculate offset from position
+        m_offset.t = acos(distance.y / m_radius);
+        clampOffset(m_offset);
+        m_offset.s = asin(distance.x / (m_radius * sin(m_offset.t)));
     }
 
     void CameraSystem::clampOffset(glm::vec2 & offset)

@@ -1,52 +1,45 @@
 #include "HelloWorldApp.h"
+#include <render/geometry/BoxGeometry.h>
+#include <render/material/PhongMaterial.h>
+#include <render/light/PointLight.h>
 #include <render/OpenGL3RenderSystem.h>
 #include <scene/SceneSystem.h>
 #include <camera/CameraSystem.h>
-#include <input/InputSystem.h>
-#include <render/GeometryBuilder.h>
 
-entityx::Entity createBox(entityx::EntityManager& entities, float width, float height, float depth, entityx::Entity& parentEntity)
+entityx::Entity createBox(entityx::EntityManager& entities, blink::BufferGeometry* geometry, blink::Material* material, int id)
 {
     static int s_currentId = 1;
 
     entityx::Entity box = entities.create();
 
-    box.assign<blink::Transform>();
+    box.assign<blink::TransformData>();
 
-    auto geometry = box.assign<blink::BufferGeometry>();
-    blink::GeometryBuilder::buildBox(*geometry.get(), width, height, depth);
-
-    box.assign<blink::PhongMaterial>();
-
-    if (parentEntity.valid() && parentEntity.has_component<blink::Hierarchy>())
-    {
-        box.assign<blink::Hierarchy>(s_currentId++, parentEntity.component<blink::Hierarchy>()->id);
-    }
-    else
-    {
-        box.assign<blink::Hierarchy>(s_currentId++, -1);
-    }
+    box.assign<blink::MeshData>(geometry, material);
+    box.assign<blink::HierarchyData>(s_currentId++, id);
 
     return box;
 }
 
 bool HelloWorldApp::initialize()
 {
-    auto cameraSystem = m_ex.systems.add<blink::CameraSystem>();
+    m_ex.systems.add<blink::CameraSystem>();
     m_ex.systems.add<blink::SceneSystem>();
-    auto renderSystem = m_ex.systems.add<blink::OpenGL3RenderSystem>();
-    m_ex.systems.add<blink::InputSystem>();
+    m_ex.systems.add<blink::OpenGL3RenderSystem>();
     m_ex.systems.configure();
 
     // add cubes
-    entityx::Entity cube = createBox(m_ex.entities, 1.0f, 1.0f, 1.0f, entityx::Entity());
+    auto material = new blink::PhongMaterial();
+    material->setTexture("tex_diffuse", "resource/grid16.png", 0);
+    createBox(m_ex.entities, new blink::BoxGeometry(1.0f, 1.0f, 1.0f), material, -1);
+
+    // add light
+    auto lightEntity = m_ex.entities.create();
+    lightEntity.assign<blink::TransformData>()->position = glm::vec3(3.0f, 3.0f, 3.0f);
+    lightEntity.assign<blink::LightData>(new blink::PointLight());
 
     // add a camera
     entityx::Entity camera = m_ex.entities.create();
     camera.assign<blink::CameraData>(glm::vec3(0.0f, 0.0f, 3.0f), blink::VEC3_ZERO, blink::VEC3_PY);
-
-    cameraSystem->setCamera(camera);
-    renderSystem->setCamera(camera);
 
     return true;
 }

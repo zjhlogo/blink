@@ -1,7 +1,7 @@
 #include "Shader.h"
-#include "ShaderLib.h"
-#include "Texture.h"
-#include "systems/GlConfig.h"
+#include "shader_lib/ShaderLib.h"
+#include "../texture/Texture.h"
+#include "../GlConfig.h"
 #include <InstanceManager.h>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>

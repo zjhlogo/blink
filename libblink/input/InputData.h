@@ -37,12 +37,34 @@ namespace blink
             ModifySuper = 1 << 3,
         };
 
-        MouseEvent(Action act, const glm::vec2& pos) :action(act), mousePos(pos) {};
-        MouseEvent(Action act, MouseButton button, uint32 modKey) :action(act), mouseButton(button), modifyKey(modKey) {};
+        explicit MouseEvent(Action act, const glm::vec2& pos)
+            :action(act)
+            , mouseButton(MouseButtonLeft)
+            , mousePos(pos)
+            , modifyKey(0)
+        {
 
-        Action action{ Action::Move };
-        MouseButton mouseButton{};
-        glm::vec2 mousePos{};
-        uint32 modifyKey{};
+        };
+
+        explicit MouseEvent(Action act, MouseButton button, uint32 modKey)
+            :action(act)
+            , mouseButton(button)
+            , mousePos()
+            , modifyKey(modKey)
+        {
+
+        };
+
+        Action action;
+        MouseButton mouseButton;
+
+        /// When mouse is moving, this is storing the mouse position
+        ///
+        /// When mouse is scrolling (using mouse wheel), this is storing
+        /// the mouse wheel detail on mousePos.y. negative for backward 
+        /// positive for foreword
+        glm::vec2 mousePos;
+
+        uint32 modifyKey;
     };
 }
