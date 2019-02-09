@@ -1,5 +1,4 @@
 #include "BufferGeometry.h"
-#include "BufferAttributes.h"
 #include "../GlConfig.h"
 #include <glad/glad.h>
 
@@ -11,6 +10,12 @@ namespace blink
         destroyVertexBuffer();
         destroyIndexBuffer();
         destroyVertexArrayObject();
+    }
+
+    bool BufferGeometry::uploadVertexBuffer(BufferAttributes::StockAttributes stockAttr, const void * bufferData, uint32 bufferSize)
+    {
+        auto bufferAttributes = blink::BufferAttributes::fromStock(stockAttr);
+        return uploadVertexBuffer(bufferAttributes, bufferData, bufferSize);
     }
 
     bool BufferGeometry::uploadVertexBuffer(BufferAttributes * bufferAttribute, const void * bufferData, uint32 bufferSize)

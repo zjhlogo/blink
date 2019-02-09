@@ -20,9 +20,8 @@ private:
     glm::vec2 m_lastMousePos{};
 
     float m_zoom{ 1.0f };
-
-    float m_moveSensitivity{ 0.01f };
-    float m_scrollSensitivity{ 0.5f };
+    float m_moveSensitivity{ 1.0f };
+    float m_zoomSensitivity{ 0.5f };
     bool m_enableMove{};
 
 };

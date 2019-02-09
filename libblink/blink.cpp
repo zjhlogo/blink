@@ -6,7 +6,7 @@
 
 namespace blink
 {
-    void App::step(double dt)
+    void App::step(float dt)
     {
         m_ex.systems.update_all(dt);
     }
@@ -80,7 +80,7 @@ namespace blink
             double duration = end - begin;
             begin = end;
 
-            app->step(duration);
+            app->step(static_cast<float>(duration));
 
             /* Swap front and back buffers */
             glfwSwapBuffers(g_window);

@@ -18,7 +18,7 @@ void SideViewCameraSystem::update(entityx::EntityManager & entities, entityx::Ev
     auto cameraData = m_camera.component<blink::CameraData>().get();
     if (cameraData->bitFlag & blink::CameraData::BF_DIRTY)
     {
-        cameraData->cameraToClip = glm::perspectiveFov(45.0f, 1280.0f, 720.0f, 0.1f, 100.0f);
+        cameraData->cameraToClip = glm::ortho(-640.0f, 640.0f, -360.0f, 360.0f, 1.0f, 100.0f);
 
         glm::mat4 matScale = glm::scale(blink::MAT4_IDENTITY, glm::vec3(m_zoom, m_zoom, m_zoom));
         cameraData->worldToCamera = glm::lookAt(cameraData->cameraPos, cameraData->cameraTarget, cameraData->cameraUp) * matScale;
@@ -66,11 +66,11 @@ void SideViewCameraSystem::receive(const blink::MouseEvent & evt)
     {
         if (evt.mousePos.y < 0.0f)
         {
-            m_zoom *= (m_scrollSensitivity * -evt.mousePos.y);
+            m_zoom *= (m_zoomSensitivity * -evt.mousePos.y);
         }
         else
         {
-            m_zoom /= (m_scrollSensitivity * evt.mousePos.y);
+            m_zoom /= (m_zoomSensitivity * evt.mousePos.y);
         }
 
         cameraData->bitFlag |= blink::CameraData::BF_DIRTY;
