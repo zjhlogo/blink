@@ -7,6 +7,8 @@ set(SOURCE_FILES
 MapData.h
 MapSystem.cpp
 MapSystem.h
+MapRenderBlock.cpp
+MapRenderBlock.h
 MapRenderSystem.cpp
 MapRenderSystem.h
 RandomMapApp.cpp

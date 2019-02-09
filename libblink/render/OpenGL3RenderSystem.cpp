@@ -62,7 +62,7 @@ namespace blink
 
             // setup shader uniforms for camera
             cameraData->setupShaderUniforms(transform.localToWorldTransform, shader);
-
+            
             // setup shader uniforms for lights
             for (auto& lightEntity : lightEntities)
             {

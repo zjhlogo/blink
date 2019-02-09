@@ -9,7 +9,7 @@ namespace blink
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
 
-        virtual void step(double dt);
+        virtual void step(float dt);
 
     public:
         entityx::EntityX m_ex;
