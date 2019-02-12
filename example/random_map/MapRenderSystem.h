@@ -3,6 +3,7 @@
 #include <camera/CameraData.h>
 #include "MapRenderBlock.h"
 #include "MapTileMaterial.h"
+#include "MapRenderBlock.h"
 
 class MapRenderSystem : public entityx::System<MapRenderSystem>, public entityx::Receiver<MapRenderSystem>
 {
