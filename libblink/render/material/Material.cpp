@@ -23,10 +23,10 @@ namespace blink
         SAFE_RELEASE(m_shader);
     }
 
-    bool Material::setTexture(const tstring& name, const tstring& filePath, uint32 index)
+    Texture* Material::setTexture(const tstring& name, const tstring& filePath, uint32 index)
     {
         auto texture = Texture2D::fromFile(filePath);
-        if (!texture) return false;
+        if (!texture) return nullptr;
 
         if (m_texInfos[index].texture)
         {
@@ -37,17 +37,17 @@ namespace blink
         m_texInfos[index].name = name;
         m_texInfos[index].texture = texture;
 
-        return true;
+        return texture;
     }
 
-    const Texture * Material::getTexture(uint32 index)
+    Texture * Material::getTexture(uint32 index)
     {
         if (index < 0 || index >= MAX_TEXTURES) return nullptr;
 
         return m_texInfos[index].texture;
     }
 
-    const Texture * Material::getTexture(const tstring & name)
+    Texture * Material::getTexture(const tstring & name)
     {
         for (int i = 0; i < MAX_TEXTURES; ++i)
         {

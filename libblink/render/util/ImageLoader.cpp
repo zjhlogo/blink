@@ -28,9 +28,9 @@ namespace blink
         return ImageFileType::Unknown;
     }
 
-    bool ImageLoader::decodeRegularImage(ImageInfo& imageInfoOut, const tstring& filePath)
+    bool ImageLoader::decodeRegularImage(ImageInfo& imageInfoOut, const tstring& filePath, bool flipY)
     {
-        stbi_set_flip_vertically_on_load(true);
+        stbi_set_flip_vertically_on_load(flipY);
         imageInfoOut.data = stbi_load(filePath.c_str(), &imageInfoOut.width, &imageInfoOut.height, &imageInfoOut.channels, 0);
         if (!imageInfoOut.data) return false;
 
@@ -64,14 +64,14 @@ namespace blink
 
         glBindTexture(GL_TEXTURE_2D, textureId);
         glTexImage2D(GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        //glGenerateMipmap(GL_TEXTURE_2D);
 
         textureInfo.textureId = textureId;
         textureInfo.texSize = glm::ivec2(width, height);
         return true;
     }
 
-    bool ImageLoader::loadTextureFromImage(ImageInfo& imageInfo, const tstring& filePath)
+    bool ImageLoader::loadTextureFromImage(ImageInfo& imageInfo, const tstring& filePath, bool flipY)
     {
         auto eImageFileType = getImageType(filePath);
 
@@ -80,7 +80,7 @@ namespace blink
         case ImageFileType::Png:
         case ImageFileType::Jpg:
         {
-            if (!decodeRegularImage(imageInfo, filePath)) return false;
+            if (!decodeRegularImage(imageInfo, filePath, flipY)) return false;
         }
         break;
         case ImageFileType::Pvr:

@@ -24,7 +24,7 @@ namespace blink
         if (exitInst) return exitInst;
 
         ImageLoader::ImageInfo imageInfo;
-        if (!ImageLoader::loadTextureFromImage(imageInfo, filePath))
+        if (!ImageLoader::loadTextureFromImage(imageInfo, filePath, true))
         {
             LOGE("Load Texture2D failed '{0}'", filePath);
             return nullptr;

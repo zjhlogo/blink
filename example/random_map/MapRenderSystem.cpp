@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <render/GlConfig.h>
 #include <render/shader/Shader.h>
+#include <render/texture/Texture2D.h>
 
 MapRenderSystem::MapRenderSystem()
 {
@@ -31,6 +32,9 @@ void MapRenderSystem::configure(entityx::EventManager & events)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_material = new MapTileMaterial();
+    blink::Texture2D* texture = dynamic_cast<blink::Texture2D*>(m_material->setTexture("tex_diffuse", "resource/rock.png", 0));
+    texture->setMinFilter(blink::Texture::SampleFilter::Nearest);
+    texture->setMagFilter(blink::Texture::SampleFilter::Nearest);
 }
 
 void MapRenderSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
@@ -72,7 +76,7 @@ void MapRenderSystem::receive(const MapDataUpdateEvent & evt)
 {
     // rebuild map render block
     SAFE_DELETE(m_renderBlock);
-    m_renderBlock = new MapRenderBlock(evt.mapData, glm::ivec2(0, 0), glm::ivec2(evt.mapData->width, evt.mapData->height));
+    m_renderBlock = new MapRenderBlock(evt.mapData, glm::ivec2(1, 1), glm::ivec2(evt.mapData->width - 1, evt.mapData->height - 1));
     m_renderBlock->generateGeometry();
 }
 

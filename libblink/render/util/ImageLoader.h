@@ -34,8 +34,8 @@ namespace blink
 
     public:
         static ImageFileType getImageType(const tstring& filePath);
-        static bool loadTextureFromImage(ImageInfo& imageInfo, const tstring& filePath);
-        static bool decodeRegularImage(ImageInfo& imageInfoOut, const tstring& filePath);
+        static bool loadTextureFromImage(ImageInfo& imageInfo, const tstring& filePath, bool flipY = false);
+        static bool decodeRegularImage(ImageInfo& imageInfoOut, const tstring& filePath, bool flipY);
 
         static bool createTextureFromRawData(TextureInfo& textureInfo, int width, int height, int channels, const void* data);
     };

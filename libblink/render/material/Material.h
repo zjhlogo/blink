@@ -28,9 +28,9 @@ namespace blink
         void setDiffuseColor(const glm::vec3& diffuseColor) { m_diffuseColor = diffuseColor; }
         const glm::vec3& getDiffuseColor() const { return m_diffuseColor; }
 
-        bool setTexture(const tstring& name, const tstring& filePath, uint32 index);
-        const Texture* getTexture(uint32 index);
-        const Texture* getTexture(const tstring& name);
+        Texture* setTexture(const tstring& name, const tstring& filePath, uint32 index);
+        Texture* getTexture(uint32 index);
+        Texture* getTexture(const tstring& name);
 
         virtual void setupShaderUniforms(Shader* shader) = 0;
         virtual void setupShaderSampler(Shader* shader);
