@@ -7,12 +7,10 @@ namespace blink
     {
     public:
         RTTI_DEF(WireframeMaterial, Material);
-
-        virtual void setupShaderUniforms(Shader* shader) override;
-
-    protected:
         WireframeMaterial();
         virtual ~WireframeMaterial();
+
+        virtual void setupShaderUniforms(std::shared_ptr<Shader> shader) override;
 
     };
 }

@@ -4,9 +4,14 @@
 #include "MapRenderBlock.h"
 #include "MapTileMaterial.h"
 #include "MapRenderBlock.h"
+#include "TileAtlas.h"
 
 class MapRenderSystem : public entityx::System<MapRenderSystem>, public entityx::Receiver<MapRenderSystem>
 {
+public:
+    typedef std::vector<MapRenderBlock*> MapRenderBlockList;
+    static const int MAX_RENDER_BLOCKS = 32;
+
 public:
     MapRenderSystem();
     virtual ~MapRenderSystem();
@@ -18,8 +23,23 @@ public:
     void receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt);
 
 private:
-    MapRenderBlock* m_renderBlock{};
+    MapRenderBlock* checkOutBlock();
+    void checkInBlock(MapRenderBlock* renderBlock);
+
+    void checkInBlocksOutOfRange(const glm::ivec2& blockIndex);
+    void generateBlocksInRange(const glm::ivec2& blockIndex);
+
+private:
+    MapRenderBlockList m_renderBlockInUsed;
+    MapRenderBlockList m_renderBlockAvailable;
+    int m_numBlocks{};
+
     entityx::Entity m_camera;
     MapTileMaterial* m_material{};
+    const MapData* m_mapData{};
+    TileAtlas* m_atlas{};
+
+    glm::ivec2 m_lastBlockIndex{ -1, -1 };
+    glm::ivec2 m_blockRadius{ 3, 2 };
 
 };

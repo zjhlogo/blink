@@ -10,7 +10,7 @@ namespace blink
         AmbientLight();
         virtual ~AmbientLight();
 
-        virtual void setupShaderUniforms(Shader* shader, const TransformData& transform) override;
+        virtual void setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform) override;
 
     };
 }

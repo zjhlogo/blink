@@ -2,11 +2,13 @@
 
 namespace blink
 {
-    void Geometry::release()
+    Geometry::Geometry()
     {
-        if (decReference() <= 0)
-        {
-            delete this;
-        }
+
+    }
+
+    Geometry::~Geometry()
+    {
+
     }
 }

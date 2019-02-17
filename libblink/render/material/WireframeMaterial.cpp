@@ -12,7 +12,7 @@ namespace blink
     {
     }
 
-    void WireframeMaterial::setupShaderUniforms(Shader * shader)
+    void WireframeMaterial::setupShaderUniforms(std::shared_ptr<Shader> shader)
     {
         shader->setUniform("u_diffuseColor", getDiffuseColor());
     }

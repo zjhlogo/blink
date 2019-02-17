@@ -2,7 +2,8 @@
 
 namespace blink
 {
-    Texture::Texture()
+    Texture::Texture(const tstring& id)
+        :m_id(id)
     {
     }
 

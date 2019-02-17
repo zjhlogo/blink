@@ -11,7 +11,7 @@ entityx::Entity createMap(entityx::EntityManager& entities, const blink::tstring
 
     // load map from file
     blink::ImageLoader::ImageInfo imageInfo;
-    blink::ImageLoader::loadTextureFromImage(imageInfo, filePath);
+    blink::ImageLoader::loadTextureFromImage(imageInfo, filePath, true);
 
     map.assign<MapData>(imageInfo.width, imageInfo.height, imageInfo.data);
 
@@ -27,7 +27,7 @@ bool RandomMapApp::initialize()
     m_ex.systems.configure();
 
     // add map data
-    createMap(m_ex.entities, "resource/random_map.png");
+    createMap(m_ex.entities, "resource/random_map_big.png");
 
     // add a camera
     entityx::Entity camera = m_ex.entities.create();

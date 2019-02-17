@@ -13,7 +13,7 @@ namespace blink
 
     }
 
-    Shader * PhongMaterial::getShader()
+    std::shared_ptr<Shader> PhongMaterial::getShader()
     {
         if (!m_shader)
         {
@@ -26,7 +26,7 @@ namespace blink
         return m_shader;
     }
 
-    void PhongMaterial::setupShaderUniforms(Shader * shader)
+    void PhongMaterial::setupShaderUniforms(std::shared_ptr<Shader> shader)
     {
         shader->setUniform("u_diffuseColor", getDiffuseColor());
     }

@@ -1,5 +1,6 @@
 #pragma once
 #include <BaseType.h>
+#include <Rtti.h>
 
 namespace blink
 {
@@ -24,12 +25,16 @@ namespace blink
         };
 
     public:
-        virtual uint32 getTextureId() const = 0;
-        virtual void release() = 0;
+        RTTI_ROOT(Texture);
 
-    protected:
-        Texture();
+        Texture(const tstring& id);
         virtual ~Texture();
+        const tstring& getId() const { return m_id; };
+
+        virtual uint32 getTextureId() const = 0;
+
+    private:
+        tstring m_id;
 
     };
 }

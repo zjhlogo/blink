@@ -26,7 +26,7 @@ namespace blink
         return nullptr;
     }
 
-    bool BufferAttributes::isEqual(const BufferAttributes* pVertexAttrs) const
+    bool BufferAttributes::isEqual(const std::shared_ptr<BufferAttributes> pVertexAttrs) const
     {
         if (!pVertexAttrs) return false;
 
@@ -42,14 +42,6 @@ namespace blink
         }
 
         return true;
-    }
-
-    void BufferAttributes::release()
-    {
-        if (s_instanceManager.removeInstance(this))
-        {
-            delete this;
-        }
     }
 
     uint32 BufferAttributes::getGlType(AttributeItemType eType)
@@ -95,7 +87,7 @@ namespace blink
         return AttributeItemType::Unknown;
     }
 
-    BufferAttributes * BufferAttributes::fromFile(const tstring & filePath)
+    std::shared_ptr<BufferAttributes> BufferAttributes::fromFile(const tstring & filePath)
     {
         auto exitInst = s_instanceManager.insertInstance("file::" + filePath);
         if (exitInst) return exitInst;
@@ -140,7 +132,7 @@ namespace blink
         return fromAttributeItems("file::" + filePath, attrItems);
     }
 
-    BufferAttributes * BufferAttributes::fromStock(StockAttributes stockAttrs)
+    std::shared_ptr<BufferAttributes> BufferAttributes::fromStock(StockAttributes stockAttrs)
     {
         static AttributeItem s_attrPos3[] =
         {
@@ -219,7 +211,7 @@ namespace blink
         return fromAttributeItems(s_stockAttributeId[static_cast<int>(stockAttrs)], s_stockAttributeItems[static_cast<int>(stockAttrs)]);
     }
 
-    BufferAttributes * BufferAttributes::fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems)
+    std::shared_ptr<BufferAttributes> BufferAttributes::fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems)
     {
         auto exitInst = s_instanceManager.insertInstance(id);
         if (exitInst) return exitInst;
@@ -234,26 +226,26 @@ namespace blink
 
         if (nNumItems <= 0 || nNumItems > MAX_ATTRIBUTE_ITEMS) return nullptr;
 
-        BufferAttributes* pBufferAttributes = new BufferAttributes();
-        pBufferAttributes->m_numItems = nNumItems;
+        std::shared_ptr<BufferAttributes> bufferAttributes = std::make_shared<BufferAttributes>();
+        bufferAttributes->m_numItems = nNumItems;
 
         uint32 currOffset = 0;
         for (int i = 0; i < nNumItems; ++i)
         {
-            pBufferAttributes->m_attributeItems[i].m_size = pAttrItems[i].m_size;
-            pBufferAttributes->m_attributeItems[i].m_attrType = pAttrItems[i].m_attrType;
-            pBufferAttributes->m_attributeItems[i].m_glType = pAttrItems[i].m_glType;
-            pBufferAttributes->m_attributeItems[i].m_offset = currOffset;
-            pBufferAttributes->m_attributeItems[i].m_name = pAttrItems[i].m_name;
-            currOffset += getAttributeItemSize(pBufferAttributes->m_attributeItems[i].m_size, pBufferAttributes->m_attributeItems[i].m_attrType);
+            bufferAttributes->m_attributeItems[i].m_size = pAttrItems[i].m_size;
+            bufferAttributes->m_attributeItems[i].m_attrType = pAttrItems[i].m_attrType;
+            bufferAttributes->m_attributeItems[i].m_glType = pAttrItems[i].m_glType;
+            bufferAttributes->m_attributeItems[i].m_offset = currOffset;
+            bufferAttributes->m_attributeItems[i].m_name = pAttrItems[i].m_name;
+            currOffset += getAttributeItemSize(bufferAttributes->m_attributeItems[i].m_size, bufferAttributes->m_attributeItems[i].m_attrType);
         }
 
-        pBufferAttributes->m_attributeItems[nNumItems].m_size = 0;
-        pBufferAttributes->m_attributeItems[nNumItems].m_attrType = AttributeItemType::Unknown;
-        pBufferAttributes->m_attributeItems[nNumItems].m_glType = getGlType(AttributeItemType::Unknown);
-        pBufferAttributes->m_attributeItems[nNumItems].m_offset = currOffset;
-        pBufferAttributes->m_attributeItems[nNumItems].m_name.clear();
+        bufferAttributes->m_attributeItems[nNumItems].m_size = 0;
+        bufferAttributes->m_attributeItems[nNumItems].m_attrType = AttributeItemType::Unknown;
+        bufferAttributes->m_attributeItems[nNumItems].m_glType = getGlType(AttributeItemType::Unknown);
+        bufferAttributes->m_attributeItems[nNumItems].m_offset = currOffset;
+        bufferAttributes->m_attributeItems[nNumItems].m_name.clear();
 
-        return s_instanceManager.insertInstance(id, pBufferAttributes);
+        return s_instanceManager.insertInstance(id, bufferAttributes);
     }
 }

@@ -45,21 +45,19 @@ namespace blink
         };
 
     public:
+        BufferAttributes() {};
+        virtual ~BufferAttributes() {};
+
         inline uint32 getStride() const { return m_attributeItems[m_numItems].m_offset; };
         inline int getNumAttributeItems() const { return m_numItems; };
 
         const AttributeItem* getAttributeItem(int nIndex) const;
         const AttributeItem* getAttributeItemByName(const tstring& name) const;
-        bool isEqual(const BufferAttributes* pVertexAttrs) const;
-        void release();
+        bool isEqual(const std::shared_ptr<BufferAttributes> pVertexAttrs) const;
 
-        static BufferAttributes* fromFile(const tstring& filePath);
-        static BufferAttributes* fromStock(StockAttributes stockAttrs);
-        static BufferAttributes* fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems);
-
-    protected:
-        BufferAttributes() {};
-        virtual ~BufferAttributes() {};
+        static std::shared_ptr<BufferAttributes> fromFile(const tstring& filePath);
+        static std::shared_ptr<BufferAttributes> fromStock(StockAttributes stockAttrs);
+        static std::shared_ptr<BufferAttributes> fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems);
 
     private:
         static uint32 getGlType(AttributeItemType eType);

@@ -6,7 +6,12 @@ namespace blink
     class Texture2D : public Texture
     {
     public:
-        static Texture2D* fromFile(const tstring& filePath);
+        RTTI_DEF(Texture2D, Texture);
+
+        Texture2D(const tstring& id);
+        virtual ~Texture2D();
+
+        static std::shared_ptr<Texture2D> fromFile(const tstring& filePath);
 
         void setMinFilter(SampleFilter minFilter);
         SampleFilter getMinFilter() const { return m_minFilter; };
@@ -20,17 +25,12 @@ namespace blink
         void setVWrap(WrapMethod vWrap);
         WrapMethod getVWrap() const { return m_vWrap; };
 
-        virtual uint32 getTextureId() const override { return m_textureId; }
-        virtual void release();
+        uint32 getTextureId() const override { return m_textureId; }
 
         const glm::ivec2& getTextureSize() const { return m_textureSize; }
-
         bool updateTextureData(int width, int height, int channel, const void* data);
 
     protected:
-        Texture2D();
-        virtual ~Texture2D();
-
         void destroyTexture();
 
     private:

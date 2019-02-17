@@ -16,8 +16,6 @@ namespace blink
             int heightSegments = 1,
             int depthSegments = 1,
             BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
-
-    protected:
         virtual ~BoxGeometry();
 
     private:

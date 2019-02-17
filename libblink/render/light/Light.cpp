@@ -2,11 +2,13 @@
 
 namespace blink
 {
-    void Light::release()
+    Light::Light()
     {
-        if (decReference() <= 0)
-        {
-            delete this;
-        }
+
+    }
+
+    Light::~Light()
+    {
+
     }
 }

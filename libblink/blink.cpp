@@ -1,5 +1,6 @@
 #include "blink.h"
 #include "input/InputData.h"
+#include <InstanceManager.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -87,6 +88,10 @@ namespace blink
         }
 
         app->terminate();
+
+        // clean up resources
+        InstanceManagerBase::globalRelease();
+
         glfwTerminate();
 
         return 0;

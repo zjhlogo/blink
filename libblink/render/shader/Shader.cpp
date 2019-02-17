@@ -21,7 +21,7 @@ namespace blink
 
     };
 
-    Shader * Shader::fromStock(StockShaders stockShader, uint32 preprocessDefine)
+    std::shared_ptr<Shader> Shader::fromStock(StockShaders stockShader, uint32 preprocessDefine)
     {
         static const char* s_stockVs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
         {
@@ -45,7 +45,7 @@ namespace blink
         auto exitShader = s_instanceManager.insertInstance(shaderId);
         if (exitShader) return exitShader;
 
-        Shader* shader = new Shader();
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>();
 
         concatShaderSources(shader->m_vertexShaderSources, preprocessDefine, s_stockVs[static_cast<int>(stockShader)]);
         concatShaderSources(shader->m_geometryShaderSources, preprocessDefine, s_stockGs[static_cast<int>(stockShader)]);
@@ -53,21 +53,20 @@ namespace blink
 
         if (!shader->reload())
         {
-            SAFE_DELETE(shader);
             return nullptr;
         }
 
         return s_instanceManager.insertInstance(shaderId, shader);
     }
 
-    Shader * Shader::fromBuffer(const tstring & id, const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
+    std::shared_ptr<Shader> Shader::fromBuffer(const tstring & id, const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
     {
         tstring formatedId = "buffer::" + id;
 
         auto exitShader = s_instanceManager.insertInstance(formatedId);
         if (exitShader) return exitShader;
 
-        Shader* shader = new Shader();
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>();
 
         concatShaderSources(shader->m_vertexShaderSources, 0, vsBuffer);
         concatShaderSources(shader->m_geometryShaderSources, 0, gsBuffer);
@@ -75,7 +74,6 @@ namespace blink
 
         if (!shader->reload())
         {
-            SAFE_DELETE(shader);
             return nullptr;
         }
 
@@ -295,9 +293,9 @@ namespace blink
         return true;
     }
 
-    bool Shader::setTexture(const char * pszName, const Texture * pTexture, uint32 slotIndex/* = 0 */)
+    bool Shader::setTexture(const char * pszName, std::shared_ptr<Texture> texture, uint32 slotIndex/* = 0 */)
     {
-        if (!pszName || !pTexture) return false;
+        if (!pszName || !texture) return false;
 
         // TODO: optimize it by cache the operation, do not perform it everytime
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -307,18 +305,10 @@ namespace blink
         glUniform1i(loc, slotIndex);
 
         glActiveTexture(GL_TEXTURE0 + slotIndex);
-        glBindTexture(GL_TEXTURE_2D, pTexture->getTextureId());
+        glBindTexture(GL_TEXTURE_2D, texture->getTextureId());
         GL_ERROR_CHECK();
 
         return true;
-    }
-
-    void Shader::release()
-    {
-        if (s_instanceManager.removeInstance(this))
-        {
-            delete this;
-        }
     }
 
     Shader::Shader()

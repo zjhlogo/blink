@@ -7,37 +7,31 @@ namespace blink
 {
     struct MeshData
     {
-        MeshData(BufferGeometry* geo, Material* mat)
+        MeshData(std::shared_ptr<BufferGeometry> geo, std::shared_ptr<Material> mat)
             :geometry(geo)
             , material(mat)
         {
-            SAFE_OBTAIN(geometry);
-            SAFE_OBTAIN(material);
         }
 
         ~MeshData()
         {
-            SAFE_RELEASE(geometry);
-            SAFE_RELEASE(material);
         }
 
-        BufferGeometry* geometry;
-        Material* material;
+        std::shared_ptr<BufferGeometry> geometry;
+        std::shared_ptr<Material> material;
     };
 
     struct LightData
     {
-        LightData(Light* lt)
+        LightData(std::shared_ptr<Light> lt)
             : light(lt)
         {
-            SAFE_OBTAIN(light);
         }
 
         ~LightData()
         {
-            SAFE_RELEASE(light);
         }
 
-        Light* light;
+        std::shared_ptr<Light> light;
     };
 }

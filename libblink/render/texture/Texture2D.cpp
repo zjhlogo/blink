@@ -8,7 +8,8 @@ namespace blink
 {
     static InstanceManager<tstring, Texture2D> s_instanceManager;
 
-    Texture2D::Texture2D()
+    Texture2D::Texture2D(const tstring& id)
+        :Texture(id)
     {
 
     }
@@ -18,7 +19,7 @@ namespace blink
         destroyTexture();
     }
 
-    Texture2D* Texture2D::fromFile(const tstring& filePath)
+    std::shared_ptr<Texture2D> Texture2D::fromFile(const tstring& filePath)
     {
         auto exitInst = s_instanceManager.insertInstance("file::" + filePath);
         if (exitInst) return exitInst;
@@ -30,11 +31,10 @@ namespace blink
             return nullptr;
         }
 
-        Texture2D* texture = new Texture2D();
+        std::shared_ptr<Texture2D> texture = std::make_shared<Texture2D>(filePath);
         if (!texture->updateTextureData(imageInfo.width, imageInfo.height, imageInfo.channels, imageInfo.data))
         {
             LOGE("Upload Texture2D data failed '{0}'", filePath);
-            SAFE_RELEASE(texture);
             return nullptr;
         }
 
@@ -126,14 +126,6 @@ namespace blink
             else if (m_vWrap == WrapMethod::MirrorRepeat) wrapParam = GL_MIRRORED_REPEAT;
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapParam);
-        }
-    }
-
-    void Texture2D::release()
-    {
-        if (s_instanceManager.removeInstance(this))
-        {
-            delete this;
         }
     }
 

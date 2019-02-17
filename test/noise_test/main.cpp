@@ -21,6 +21,7 @@ int main(int argc, char** argv)
     perlin.SetFrequency(3.0);
     Step step;
     step.SetSourceModule(0, perlin);
+    step.AddStep(-0.2, 1.0);
 
     Crop crop2;
     crop2.SetSourceModule(0, srcBlack);
@@ -36,9 +37,23 @@ int main(int argc, char** argv)
     turbulence.SetFrequency(4);
     turbulence.SetPower(0.05);
 
+    noise::module::Perlin perlin2;
+    perlin2.SetFrequency(2.0);
+
+    noise::module::Select select;
+    select.SetSourceModule(0, srcBlack);
+    select.SetSourceModule(1, perlin2);
+    select.SetControlModule(turbulence);
+    select.SetBounds(0.9, 1.0);
+
+    Step step2;
+    step2.SetSourceModule(0, select);
+    step2.AddStep(-0.5, 0.0);
+    step2.AddStep(0.5, 1.0);
+
     noise::utils::NoiseMap heightMap;
     noise::utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule(turbulence);
+    heightMapBuilder.SetSourceModule(step2);
     heightMapBuilder.SetDestNoiseMap(heightMap);
     heightMapBuilder.SetDestSize(512*4, 128*4);
     heightMapBuilder.SetBounds(0.0, 16.0, 0.0, 4.0);
@@ -48,6 +63,7 @@ int main(int argc, char** argv)
     noise::utils::Image image;
     renderer.SetSourceNoiseMap(heightMap);
     renderer.SetDestImage(image);
+    renderer.BuildGrayscaleGradient();
     renderer.Render();
 
     noise::utils::WriterBMP writer;

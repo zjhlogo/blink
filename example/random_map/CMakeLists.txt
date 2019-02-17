@@ -4,6 +4,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(random_map)
 
 set(SOURCE_FILES
+Atlas.cpp
+Atlas.h
 MapData.h
 MapSystem.cpp
 MapSystem.h
@@ -17,6 +19,8 @@ RandomMapApp.cpp
 RandomMapApp.h
 SideViewCameraSystem.cpp
 SideViewCameraSystem.h
+TileAtlas.cpp
+TileAtlas.h
 )
 
 group_sources("${SOURCE_FILES}")

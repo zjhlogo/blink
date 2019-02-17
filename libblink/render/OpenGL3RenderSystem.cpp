@@ -47,7 +47,7 @@ namespace blink
 
         entities.each<TransformData, MeshData>([&](entityx::Entity entity, TransformData& transform, MeshData& mesh)
         {
-            Shader* shader = mesh.material->getShader();
+            auto shader = mesh.material->getShader();
             if (!shader) return;
 
             // TODO: apply render state
@@ -61,8 +61,14 @@ namespace blink
             mesh.material->setupShaderSampler(shader);
 
             // setup shader uniforms for camera
-            cameraData->setupShaderUniforms(transform.localToWorldTransform, shader);
-            
+            {
+                shader->setUniform("u_worldToClip", cameraData->worldToClip);
+                shader->setUniform("u_localToWorld", transform.localToWorldTransform);
+                shader->setUniform("u_localToWorldTranInv", glm::transpose(glm::inverse(glm::mat3(transform.localToWorldTransform))));
+                shader->setUniform("u_localToClip", cameraData->worldToClip * transform.localToWorldTransform);
+                shader->setUniform("u_viewPos", cameraData->cameraPos);
+            }
+
             // setup shader uniforms for lights
             for (auto& lightEntity : lightEntities)
             {

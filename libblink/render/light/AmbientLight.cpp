@@ -13,7 +13,7 @@ namespace blink
 
     }
 
-    void AmbientLight::setupShaderUniforms(Shader * shader, const TransformData& transform)
+    void AmbientLight::setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform)
     {
         shader->setUniform("u_ambientColor", getLightColor());
     }

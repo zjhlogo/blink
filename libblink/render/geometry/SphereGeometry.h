@@ -10,8 +10,6 @@ namespace blink
         RTTI_DEF(SphereGeometry, BufferGeometry);
 
         SphereGeometry(float radius, int rings = 8, int segments = 16, BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
-
-    protected:
         virtual ~SphereGeometry();
 
     private:

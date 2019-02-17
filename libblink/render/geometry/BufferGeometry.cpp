@@ -4,9 +4,13 @@
 
 namespace blink
 {
+    BufferGeometry::BufferGeometry()
+    {
+
+    }
+
     BufferGeometry::~BufferGeometry()
     {
-        SAFE_RELEASE(m_vertexBufferAttribute);
         destroyVertexBuffer();
         destroyIndexBuffer();
         destroyVertexArrayObject();
@@ -18,7 +22,7 @@ namespace blink
         return uploadVertexBuffer(bufferAttributes, bufferData, bufferSize);
     }
 
-    bool BufferGeometry::uploadVertexBuffer(BufferAttributes * bufferAttribute, const void * bufferData, uint32 bufferSize)
+    bool BufferGeometry::uploadVertexBuffer(std::shared_ptr<BufferAttributes> bufferAttribute, const void * bufferData, uint32 bufferSize)
     {
         if (!bufferAttribute) return false;
 

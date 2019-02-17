@@ -1,60 +1,63 @@
 #include "MapRenderBlock.h"
 #include <render/geometry/BufferAttributes.h>
+#include <algorithm>
 
 const float MapRenderBlock::TILE_SIZE = 16.0f;
 
-MapRenderBlock::MapRenderBlock(const MapData * mapData, const glm::ivec2 & topLeft, const glm::ivec2 & bottomRight)
-    :m_mapData(mapData)
-    , m_topLeft(topLeft)
-    , m_bottomRight(bottomRight)
+MapRenderBlock::MapRenderBlock()
 {
-    // TODO: move it to a better place
-    for (int i = 0; i < NUM_SET; ++i)
-    {
-        m_rockUvs[i].s = (m_rockUvs[i].s * 18 + 8) / 288;
-        m_rockUvs[i].t = (270.0f - m_rockUvs[i].t * 18 - 8) / 270.0f;
-    }
+
 }
 
-void MapRenderBlock::generateGeometry()
+MapRenderBlock::~MapRenderBlock()
 {
+
+}
+
+void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, const glm::ivec2& blockIndex)
+{
+    m_blockIndex = blockIndex;
+
     std::vector<blink::VertexPos3Uv2> verts;
     std::vector<blink::uint16> indis;
 
-    float hu = 16.0f / 288.0f * 0.5f;
-    float hv = 16.0f / 270.0f * 0.5f;
-    float mapHeight = m_mapData->height * TILE_SIZE;
+    glm::ivec2 lb{ blockIndex.x * BLOCK_SIZE, blockIndex.y * BLOCK_SIZE };
+    glm::ivec2 rt{ std::min(lb.x + BLOCK_SIZE, mapData->width - 1), std::min(lb.y + BLOCK_SIZE, mapData->height - 1) };
+
+    if (lb.x == 0) ++lb.x;
+    if (lb.y == 0) ++lb.y;
 
     int numVerts = 0;
-    for (int y = m_topLeft.y; y < m_bottomRight.y; ++y)
+    for (int y = lb.y; y < rt.y; ++y)
     {
-        for (int x = m_topLeft.x; x < m_bottomRight.x; ++x)
+        for (int x = lb.x; x < rt.x; ++x)
         {
-            int index = y * m_mapData->width + x;
+            int index = y * mapData->width + x;
+            auto tileValue = mapData->buffer[index];
 
-            // TODO: use index to get tile type
-            if (m_mapData->buffer[index] > 0)
+            if (tileValue > 0)
             {
-                int indexTop = (y - 1) * m_mapData->width + x;
-                int indexBottom = (y + 1) * m_mapData->width + x;
-                int indexLeft = y * m_mapData->width + x - 1;
-                int indexRight = y * m_mapData->width + x + 1;
+                int indexTop = (y + 1) * mapData->width + x;
+                int indexBottom = (y - 1) * mapData->width + x;
+                int indexLeft = y * mapData->width + x - 1;
+                int indexRight = y * mapData->width + x + 1;
 
                 int uvIndex = 0;
-                if (m_mapData->buffer[indexTop] == 0) uvIndex |= TOP;
-                if (m_mapData->buffer[indexRight] == 0) uvIndex |= RIGHT;
-                if (m_mapData->buffer[indexBottom] == 0) uvIndex |= BOTTOM;
-                if (m_mapData->buffer[indexLeft] == 0) uvIndex |= LEFT;
+                if (mapData->buffer[indexTop] != tileValue) uvIndex |= TOP;
+                if (mapData->buffer[indexRight] != tileValue) uvIndex |= RIGHT;
+                if (mapData->buffer[indexBottom] != tileValue) uvIndex |= BOTTOM;
+                if (mapData->buffer[indexLeft] != tileValue) uvIndex |= LEFT;
 
-                //verts.push_back({ x * TILE_SIZE, y * TILE_SIZE, 0.0f, 0.0f, 0.0f });
-                //verts.push_back({ x * TILE_SIZE + TILE_SIZE, y * TILE_SIZE, 0.0f, 1.0f, 0.0f });
-                //verts.push_back({ x * TILE_SIZE, y * TILE_SIZE + TILE_SIZE, 0.0f, 0.0f, 1.0f });
-                //verts.push_back({ x * TILE_SIZE + TILE_SIZE, y * TILE_SIZE + TILE_SIZE, 0.0f, 1.0f, 1.0f });
+                // calculate tile index
+                int tileIndex = 1;
+                if (mapData->buffer[index] < 128) tileIndex = 0;
+                tileIndex = tileIndex * 16 + uvIndex;
+                auto piece = atlas->getPiece(tileIndex);
 
-                verts.push_back({ x * TILE_SIZE, mapHeight - y * TILE_SIZE - TILE_SIZE, 0.0f, m_rockUvs[uvIndex].s - hu, m_rockUvs[uvIndex].t - hv });
-                verts.push_back({ x * TILE_SIZE + TILE_SIZE, mapHeight - y * TILE_SIZE - TILE_SIZE, 0.0f, m_rockUvs[uvIndex].s + hu, m_rockUvs[uvIndex].t - hv });
-                verts.push_back({ x * TILE_SIZE, mapHeight - y * TILE_SIZE + TILE_SIZE - TILE_SIZE, 0.0f, m_rockUvs[uvIndex].s - hu, m_rockUvs[uvIndex].t + hv });
-                verts.push_back({ x * TILE_SIZE + TILE_SIZE, mapHeight - y * TILE_SIZE + TILE_SIZE - TILE_SIZE, 0.0f, m_rockUvs[uvIndex].s + hu, m_rockUvs[uvIndex].t + hv });
+                verts.push_back({ x * TILE_SIZE,             y * TILE_SIZE,             0.0f, piece->uvs[0].s, piece->uvs[0].t });
+                verts.push_back({ x * TILE_SIZE + TILE_SIZE, y * TILE_SIZE,             0.0f, piece->uvs[1].s, piece->uvs[1].t });
+                verts.push_back({ x * TILE_SIZE,             y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[2].s, piece->uvs[2].t });
+                verts.push_back({ x * TILE_SIZE + TILE_SIZE, y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[3].s, piece->uvs[3].t });
 
                 indis.push_back(numVerts + 0);
                 indis.push_back(numVerts + 2);

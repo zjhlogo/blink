@@ -1,63 +1,71 @@
 #pragma once
 #include <unordered_map>
+#include <memory>
 
 namespace blink
 {
-    template <class ID_TYPE, class INSTANCE_TYPE> class InstanceManager
+    class InstanceManagerBase
+    {
+    public:
+        InstanceManagerBase()
+        {
+            m_managers.push_back(this);
+        }
+
+        virtual void releaseInstances() = 0;
+
+        static void globalRelease()
+        {
+            for (auto& manager : m_managers)
+            {
+                manager->releaseInstances();
+            }
+        }
+
+    private:
+        static std::vector<InstanceManagerBase*> m_managers;
+
+    };
+
+    template <class ID_TYPE, class INSTANCE_TYPE> class InstanceManager : public InstanceManagerBase
     {
     private:
-        class InstanceInfo
-        {
-        public:
-            ID_TYPE id;
-            int ref{};
-        };
-
-        typedef std::unordered_map<ID_TYPE, INSTANCE_TYPE*> IdInstanceMap;
-        typedef std::unordered_map<INSTANCE_TYPE*, InstanceInfo> InstanceInfoMap;
+        typedef std::unordered_map<ID_TYPE, std::shared_ptr<INSTANCE_TYPE>> IdInstanceMap;
 
     public:
-        INSTANCE_TYPE* insertInstance(const ID_TYPE& id, INSTANCE_TYPE* instance = nullptr)
+        std::shared_ptr<INSTANCE_TYPE> insertInstance(const ID_TYPE& id, std::shared_ptr<INSTANCE_TYPE> instance = nullptr)
         {
             auto it = m_idInstanceMap.find(id);
             if (it != m_idInstanceMap.end())
             {
                 assert(instance == nullptr);
-                ++m_instanceInfoMap[it->second].ref;
                 return it->second;
             }
 
             if (instance == nullptr) return nullptr;
 
             m_idInstanceMap.insert(std::make_pair(id, instance));
-
-            InstanceInfo info;
-            info.id = id;
-            info.ref = 1;
-
-            m_instanceInfoMap.insert(std::make_pair(instance, info));
             return instance;
         }
 
-        bool removeInstance(INSTANCE_TYPE* instance)
+        virtual void releaseInstances() override
         {
-            auto it = m_instanceInfoMap.find(instance);
-            if (it == m_instanceInfoMap.end()) return false;
-
-            --it->second.ref;
-            if (it->second.ref <= 0)
+            for (auto& it : m_idInstanceMap)
             {
-                m_idInstanceMap.erase(m_idInstanceMap.find(it->second.id));
-                m_instanceInfoMap.erase(it);
-                return true;
+                if (it.second.use_count() > 1)
+                {
+                    // TODO: logout
+                }
             }
 
-            return false;
+            m_idInstanceMap.clear();
         }
 
+        uint32 genUniqueId() { return m_nextGenId++; };
+
     private:
+        uint32 m_nextGenId{ 1001 };
         IdInstanceMap m_idInstanceMap;
-        InstanceInfoMap m_instanceInfoMap;
 
     };
 }

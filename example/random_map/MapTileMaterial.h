@@ -7,11 +7,9 @@ public:
     RTTI_DEF(MapTileMaterial, blink::Material);
 
     MapTileMaterial();
-
-    virtual blink::Shader* getShader() override;
-    virtual void setupShaderUniforms(blink::Shader* shader) override;
-
-protected:
     virtual ~MapTileMaterial();
+
+    virtual std::shared_ptr<blink::Shader> getShader() override;
+    virtual void setupShaderUniforms(std::shared_ptr<blink::Shader> shader) override;
 
 };

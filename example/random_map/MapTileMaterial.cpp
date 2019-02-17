@@ -17,7 +17,7 @@ MapTileMaterial::~MapTileMaterial()
 {
 }
 
-blink::Shader * MapTileMaterial::getShader()
+std::shared_ptr<blink::Shader> MapTileMaterial::getShader()
 {
     if (!m_shader)
     {
@@ -26,7 +26,7 @@ blink::Shader * MapTileMaterial::getShader()
     return m_shader;
 }
 
-void MapTileMaterial::setupShaderUniforms(blink::Shader * shader)
+void MapTileMaterial::setupShaderUniforms(std::shared_ptr<blink::Shader> shader)
 {
 
 }

@@ -55,6 +55,7 @@ namespace blink
     extern const glm::vec4              VEC4_GREEN;
     extern const glm::vec4              VEC4_BLUE;
 
+    extern const glm::mat3              MAT3_IDENTITY;
     extern const glm::mat4              MAT4_IDENTITY;
 
     class EnumClassHash

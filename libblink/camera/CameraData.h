@@ -21,8 +21,6 @@ namespace blink
 
         };
 
-        void setupShaderUniforms(const glm::mat4& localToWorld, Shader* shader);
-
         glm::vec3 cameraPos;
         glm::vec3 cameraTarget;
         glm::vec3 cameraUp;

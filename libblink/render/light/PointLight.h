@@ -7,7 +7,10 @@ namespace blink
     public:
         RTTI_DEF(PointLight, Light);
 
-        virtual void setupShaderUniforms(Shader* shader, const TransformData& transform) override;
+        PointLight();
+        virtual ~PointLight();
+
+        virtual void setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform) override;
 
     };
 }
