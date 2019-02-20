@@ -4,17 +4,22 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(random_map)
 
 set(SOURCE_FILES
+ArmorAtlas.cpp
+ArmorAtlas.h
 Atlas.cpp
 Atlas.h
+DiffuseMaterial.cpp
+DiffuseMaterial.h
 MapData.h
-MapSystem.cpp
-MapSystem.h
-MapTileMaterial.cpp
-MapTileMaterial.h
 MapRenderBlock.cpp
 MapRenderBlock.h
 MapRenderSystem.cpp
 MapRenderSystem.h
+MapSystem.cpp
+MapSystem.h
+PlayerData.h
+PlayerRenderSystem.cpp
+PlayerRenderSystem.h
 RandomMapApp.cpp
 RandomMapApp.h
 SideViewCameraSystem.cpp

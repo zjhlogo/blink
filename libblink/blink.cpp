@@ -66,6 +66,18 @@ namespace blink
             return -1;
         }
 
+        // depth test setup
+        glEnable(GL_DEPTH_TEST);
+
+        // cull face setup
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CW);
+
+        // blend mode setup
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         app->initialize();
         g_app = app;
 
@@ -80,6 +92,9 @@ namespace blink
             double end = glfwGetTime();
             double duration = end - begin;
             begin = end;
+
+            glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             app->step(static_cast<float>(duration));
 

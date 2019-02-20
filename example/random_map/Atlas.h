@@ -10,6 +10,8 @@ public:
     public:
         const char* id;
         glm::vec2 size;
+        glm::vec2 trimSize;
+        glm::vec2 offset;
         glm::vec2 uvs[4];
     };
 

@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     noise::utils::NoiseMapBuilderPlane heightMapBuilder;
     heightMapBuilder.SetSourceModule(step2);
     heightMapBuilder.SetDestNoiseMap(heightMap);
-    heightMapBuilder.SetDestSize(512*4, 128*4);
+    heightMapBuilder.SetDestSize(512, 128);
     heightMapBuilder.SetBounds(0.0, 16.0, 0.0, 4.0);
     heightMapBuilder.Build();
 

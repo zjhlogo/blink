@@ -2,10 +2,10 @@
 #include <entityx/entityx.h>
 #include <camera/CameraData.h>
 #include "MapRenderBlock.h"
-#include "MapTileMaterial.h"
+#include "DiffuseMaterial.h"
 #include "MapRenderBlock.h"
-#include "TileAtlas.h"
 
+class Atlas;
 class MapRenderSystem : public entityx::System<MapRenderSystem>, public entityx::Receiver<MapRenderSystem>
 {
 public:
@@ -35,9 +35,9 @@ private:
     int m_numBlocks{};
 
     entityx::Entity m_camera;
-    MapTileMaterial* m_material{};
+    DiffuseMaterial* m_material{};
     const MapData* m_mapData{};
-    TileAtlas* m_atlas{};
+    Atlas* m_atlas{};
 
     glm::ivec2 m_lastBlockIndex{ -1, -1 };
     glm::ivec2 m_blockRadius{ 3, 2 };

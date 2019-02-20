@@ -27,6 +27,9 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
     if (lb.x == 0) ++lb.x;
     if (lb.y == 0) ++lb.y;
 
+    float offsetX = -mapData->originX * TILE_SIZE;
+    float offsetY = -mapData->originY * TILE_SIZE;
+
     int numVerts = 0;
     for (int y = lb.y; y < rt.y; ++y)
     {
@@ -54,10 +57,10 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
                 tileIndex = tileIndex * 16 + uvIndex;
                 auto piece = atlas->getPiece(tileIndex);
 
-                verts.push_back({ x * TILE_SIZE,             y * TILE_SIZE,             0.0f, piece->uvs[0].s, piece->uvs[0].t });
-                verts.push_back({ x * TILE_SIZE + TILE_SIZE, y * TILE_SIZE,             0.0f, piece->uvs[1].s, piece->uvs[1].t });
-                verts.push_back({ x * TILE_SIZE,             y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[2].s, piece->uvs[2].t });
-                verts.push_back({ x * TILE_SIZE + TILE_SIZE, y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[3].s, piece->uvs[3].t });
+                verts.push_back({ offsetX + x * TILE_SIZE,             offsetY + y * TILE_SIZE,             0.0f, piece->uvs[0].s, piece->uvs[0].t });
+                verts.push_back({ offsetX + x * TILE_SIZE + TILE_SIZE, offsetY + y * TILE_SIZE,             0.0f, piece->uvs[1].s, piece->uvs[1].t });
+                verts.push_back({ offsetX + x * TILE_SIZE,             offsetY + y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[2].s, piece->uvs[2].t });
+                verts.push_back({ offsetX + x * TILE_SIZE + TILE_SIZE, offsetY + y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[3].s, piece->uvs[3].t });
 
                 indis.push_back(numVerts + 0);
                 indis.push_back(numVerts + 2);

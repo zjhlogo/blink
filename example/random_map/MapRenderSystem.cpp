@@ -1,4 +1,5 @@
 #include "MapRenderSystem.h"
+#include "TileAtlas.h"
 #include <glad/glad.h>
 #include <render/GlConfig.h>
 #include <render/shader/Shader.h>
@@ -20,38 +21,24 @@ void MapRenderSystem::configure(entityx::EventManager & events)
     events.subscribe<MapDataUpdateEvent>(*this);
     events.subscribe<entityx::ComponentAddedEvent<blink::CameraData>>(*this);
 
-    // depth test setup
-    glEnable(GL_DEPTH_TEST);
-
-    // cull face setup
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CW);
-
-    // blend mode setup
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     m_atlas = new TileAtlas();
     m_atlas->initialize();
 
-    m_material = new MapTileMaterial();
+    m_material = new DiffuseMaterial();
     m_material->setTexture("tex_diffuse", m_atlas->getTexture(), 0);
 }
 
 void MapRenderSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
 {
-    glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // select camera
     if (!m_camera.valid()) return;
     auto cameraData = m_camera.component<blink::CameraData>().get();
 
     // calculate block index
     glm::ivec2 blockIndex;
-    blockIndex.x = static_cast<int>(cameraData->cameraPos.x / (MapRenderBlock::BLOCK_SIZE * MapRenderBlock::TILE_SIZE));
-    blockIndex.y = static_cast<int>(cameraData->cameraPos.y / (MapRenderBlock::BLOCK_SIZE * MapRenderBlock::TILE_SIZE));
+    blockIndex.x = static_cast<int>((cameraData->cameraPos.x + m_mapData->originX * MapRenderBlock::TILE_SIZE) / (MapRenderBlock::BLOCK_SIZE * MapRenderBlock::TILE_SIZE));
+    blockIndex.y = static_cast<int>((cameraData->cameraPos.y + m_mapData->originY * MapRenderBlock::TILE_SIZE) / (MapRenderBlock::BLOCK_SIZE * MapRenderBlock::TILE_SIZE));
+
     int maxX = (m_mapData->width + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
     int maxY = (m_mapData->height + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
     if (blockIndex.x < 0) blockIndex.x = 0;

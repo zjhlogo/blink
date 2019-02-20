@@ -19,6 +19,8 @@ struct MapData
 
     int width;
     int height;
+    int originX;
+    int originY;
     blink::BufferData buffer;
     blink::uint32 bitFlag;
 };
@@ -32,9 +34,4 @@ struct MapDataUpdateEvent
     };
 
     const MapData* mapData;
-};
-
-struct MapRenderData
-{
-
 };

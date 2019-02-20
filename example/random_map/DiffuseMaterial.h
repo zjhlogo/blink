@@ -1,13 +1,13 @@
 #pragma once
 #include <render/material/Material.h>
 
-class MapTileMaterial : public blink::Material
+class DiffuseMaterial : public blink::Material
 {
 public:
-    RTTI_DEF(MapTileMaterial, blink::Material);
+    RTTI_DEF(DiffuseMaterial, blink::Material);
 
-    MapTileMaterial();
-    virtual ~MapTileMaterial();
+    DiffuseMaterial();
+    virtual ~DiffuseMaterial();
 
     virtual std::shared_ptr<blink::Shader> getShader() override;
     virtual void setupShaderUniforms(std::shared_ptr<blink::Shader> shader) override;
