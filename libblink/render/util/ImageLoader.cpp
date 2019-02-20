@@ -64,7 +64,7 @@ namespace blink
 
         glBindTexture(GL_TEXTURE_2D, textureId);
         glTexImage2D(GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
-        //glGenerateMipmap(GL_TEXTURE_2D);
+        glGenerateMipmap(GL_TEXTURE_2D);
 
         textureInfo.textureId = textureId;
         textureInfo.texSize = glm::ivec2(width, height);

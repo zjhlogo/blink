@@ -39,7 +39,7 @@ bool RandomMapApp::initialize()
 
     // add a camera
     entityx::Entity camera = m_ex.entities.create();
-    camera.assign<blink::CameraData>(glm::vec3(0.0f, 0.0f, 3.0f), blink::VEC3_ZERO, blink::VEC3_PY);
+    camera.assign<blink::CameraData>(glm::vec3(0.0f, 0.0f, 30.0f), blink::VEC3_ZERO, blink::VEC3_PY);
 
     return true;
 }

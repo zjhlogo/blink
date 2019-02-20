@@ -97,6 +97,8 @@ bool ArmorAtlas::initialize()
     }
     // create texture
     m_texture = blink::Texture2D::fromFile("resource/ArmorAtlas.png");
-	
+    m_texture->setMinFilter(blink::Texture::SampleFilter::Nearest);
+    m_texture->setMagFilter(blink::Texture::SampleFilter::Nearest);
+
     return true;
 }

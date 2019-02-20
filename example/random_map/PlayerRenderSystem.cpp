@@ -25,19 +25,9 @@ void PlayerRenderSystem::configure(entityx::EventManager & events)
     m_atlas->initialize();
 
     m_material = new DiffuseMaterial();
-    m_material->setTexture("tex_diffuse", "resource/grid16.png", 0);
+    m_material->setTexture("tex_diffuse", m_atlas->getTexture(), 0);
 
     m_geometry = new blink::BufferGeometry();
-
-    // add leg render data
-    addPiece("Armor_Legs_1_00_00", blink::VEC3_ZERO);
-    if (!m_verts.empty())
-    {
-        m_geometry->uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, m_verts.data(), sizeof(m_verts[0])* m_verts.size());
-        m_geometry->uploadIndexBuffer(m_indis.data(), m_indis.size());
-        m_verts.clear();
-        m_indis.clear();
-    }
 }
 
 void PlayerRenderSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
@@ -47,20 +37,27 @@ void PlayerRenderSystem::update(entityx::EntityManager & entities, entityx::Even
 
     auto playerData = m_player.component<PlayerData>().get();
 
-    //// add leg render data
-    //addPiece("Armor_Legs_1_00_00", playerData->position);
+    // add leg render data
+    addPiece("Armor_Legs_1_00_00", playerData->position);
 
-    //// add body render data
-    //addPiece("Armor_Body_1_00_00", playerData->position);
+    // add body render data
+    addPiece("Armor_Body_1_00_00", playerData->position);
 
-    //// add head render data
-    //addPiece("Armor_Head_1_00_00", playerData->position);
+    // add head render data
+    addPiece("Armor_Head_1_00_00", playerData->position);
 
-    //// add arm render data
-    //addPiece("Armor_Arm_1_00_00", playerData->position);
+    // add arm render data
+    addPiece("Armor_Arm_1_00_00", playerData->position);
 
-    // render
-    render();
+    if (!m_verts.empty())
+    {
+        m_geometry->uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, m_verts.data(), sizeof(m_verts[0])* m_verts.size());
+        m_geometry->uploadIndexBuffer(m_indis.data(), m_indis.size());
+        m_verts.clear();
+        m_indis.clear();
+
+        render();
+    }
 }
 
 void PlayerRenderSystem::receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt)
@@ -82,10 +79,10 @@ void PlayerRenderSystem::addPiece(const blink::tstring & name, const glm::vec3 &
     float offsetY = pos.y + piece->offset.y;
 
     int numVerts = static_cast<int>(m_verts.size());
-    m_verts.push_back({ offsetX,                     offsetY,                     0.0f, piece->uvs[0].s, piece->uvs[0].t });
-    m_verts.push_back({ offsetX + piece->trimSize.x, offsetY,                     0.0f, piece->uvs[1].s, piece->uvs[1].t });
-    m_verts.push_back({ offsetX,                     offsetY + piece->trimSize.y, 0.0f, piece->uvs[2].s, piece->uvs[2].t });
-    m_verts.push_back({ offsetX + piece->trimSize.x, offsetY + piece->trimSize.y, 0.0f, piece->uvs[3].s, piece->uvs[3].t });
+    m_verts.push_back({ offsetX,                     offsetY,                     1.0f, piece->uvs[0].s, piece->uvs[0].t });
+    m_verts.push_back({ offsetX + piece->trimSize.x, offsetY,                     1.0f, piece->uvs[1].s, piece->uvs[1].t });
+    m_verts.push_back({ offsetX,                     offsetY + piece->trimSize.y, 1.0f, piece->uvs[2].s, piece->uvs[2].t });
+    m_verts.push_back({ offsetX + piece->trimSize.x, offsetY + piece->trimSize.y, 1.0f, piece->uvs[3].s, piece->uvs[3].t });
 
     m_indis.push_back(numVerts + 0);
     m_indis.push_back(numVerts + 2);
