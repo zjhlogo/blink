@@ -18,9 +18,9 @@ namespace blink
         uint32 getNumIndex() const { return m_numIndex; };
 
         const std::shared_ptr<BufferAttributes> getBufferAttributes() const { return m_vertexBufferAttribute; };
-        bool uploadVertexBuffer(BufferAttributes::StockAttributes stockAttr, const void* bufferData, uint32 bufferSize);
-        bool uploadVertexBuffer(std::shared_ptr<BufferAttributes> bufferAttribute, const void* bufferData, uint32 bufferSize);
-        bool uploadIndexBuffer(const uint16* bufferData, uint32 numIndex);
+        bool uploadVertexBuffer(BufferAttributes::StockAttributes stockAttr, const void* bufferData, uint32 bufferSize, uint32 usage);
+        bool uploadVertexBuffer(std::shared_ptr<BufferAttributes> bufferAttribute, const void* bufferData, uint32 bufferSize, uint32 usage);
+        bool uploadIndexBuffer(const uint16* bufferData, uint32 numIndex, uint32 usage);
 
     protected:
         void destroyVertexArrayObject();

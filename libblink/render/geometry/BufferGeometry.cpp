@@ -16,13 +16,13 @@ namespace blink
         destroyVertexArrayObject();
     }
 
-    bool BufferGeometry::uploadVertexBuffer(BufferAttributes::StockAttributes stockAttr, const void * bufferData, uint32 bufferSize)
+    bool BufferGeometry::uploadVertexBuffer(BufferAttributes::StockAttributes stockAttr, const void * bufferData, uint32 bufferSize, uint32 usage)
     {
         auto bufferAttributes = blink::BufferAttributes::fromStock(stockAttr);
-        return uploadVertexBuffer(bufferAttributes, bufferData, bufferSize);
+        return uploadVertexBuffer(bufferAttributes, bufferData, bufferSize, usage);
     }
 
-    bool BufferGeometry::uploadVertexBuffer(std::shared_ptr<BufferAttributes> bufferAttribute, const void * bufferData, uint32 bufferSize)
+    bool BufferGeometry::uploadVertexBuffer(std::shared_ptr<BufferAttributes> bufferAttribute, const void * bufferData, uint32 bufferSize, uint32 usage)
     {
         if (!bufferAttribute) return false;
 
@@ -53,7 +53,7 @@ namespace blink
         // Set the buffer's data
         if (bufferSize > 0 && bufferData)
         {
-            glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferData, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferData, usage);
             GL_ERROR_CHECK();
         }
 
@@ -73,7 +73,7 @@ namespace blink
         return true;
     }
 
-    bool BufferGeometry::uploadIndexBuffer(const uint16 * bufferData, uint32 numIndex)
+    bool BufferGeometry::uploadIndexBuffer(const uint16 * bufferData, uint32 numIndex, uint32 usage)
     {
 		// create buffer object
         if (m_indexBufferId == 0)
@@ -88,7 +88,7 @@ namespace blink
 		GL_ERROR_CHECK();
 
 		// Set the buffer's data
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndex*sizeof(uint16), bufferData, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndex*sizeof(uint16), bufferData, usage);
 		GL_ERROR_CHECK();
 
         m_numIndex = numIndex;

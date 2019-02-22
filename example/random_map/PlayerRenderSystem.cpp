@@ -51,8 +51,8 @@ void PlayerRenderSystem::update(entityx::EntityManager & entities, entityx::Even
 
     if (!m_verts.empty())
     {
-        m_geometry->uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, m_verts.data(), sizeof(m_verts[0])* m_verts.size());
-        m_geometry->uploadIndexBuffer(m_indis.data(), m_indis.size());
+        m_geometry->uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, m_verts.data(), sizeof(m_verts[0])* m_verts.size(), GL_DYNAMIC_DRAW);
+        m_geometry->uploadIndexBuffer(m_indis.data(), m_indis.size(), GL_DYNAMIC_DRAW);
         m_verts.clear();
         m_indis.clear();
 

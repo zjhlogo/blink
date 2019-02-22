@@ -1,4 +1,5 @@
 #include "MapRenderBlock.h"
+#include <glad/glad.h>
 #include <render/geometry/BufferAttributes.h>
 #include <algorithm>
 
@@ -74,6 +75,6 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
         }
     }
 
-    uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, verts.data(), sizeof(verts[0])* numVerts);
-    uploadIndexBuffer(indis.data(), indis.size());
+    uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, verts.data(), sizeof(verts[0])* numVerts, GL_STATIC_DRAW);
+    uploadIndexBuffer(indis.data(), indis.size(), GL_STATIC_DRAW);
 }
