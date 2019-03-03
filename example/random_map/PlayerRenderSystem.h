@@ -3,9 +3,9 @@
 #include <camera/CameraData.h>
 #include "PlayerData.h"
 #include "DiffuseMaterial.h"
+#include "Atlas.h"
 #include <render/geometry/BufferGeometry.h>
 
-class Atlas;
 class PlayerRenderSystem : public entityx::System<PlayerRenderSystem>, public entityx::Receiver<PlayerRenderSystem>
 {
 public:
@@ -19,7 +19,7 @@ public:
     void receive(const entityx::ComponentAddedEvent<PlayerData>& evt);
 
 private:
-    void addPiece(const blink::tstring& name, const glm::vec3& pos);
+    void addPiece(const Atlas::Piece* piece, const glm::vec3& pos, bool flip = false);
     void render();
 
 private:
@@ -31,5 +31,12 @@ private:
     blink::BufferGeometry* m_geometry{};
     std::vector<blink::VertexPos3Uv2> m_verts;
     std::vector<blink::uint16> m_indis;
+
+    int m_frameIndex{};
+
+    const Atlas::Piece* m_legs[20]{};
+    const Atlas::Piece* m_body[20]{};
+    const Atlas::Piece* m_head[20]{};
+    const Atlas::Piece* m_arms[20]{};
 
 };

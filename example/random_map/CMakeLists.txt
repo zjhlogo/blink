@@ -17,6 +17,10 @@ MapRenderSystem.cpp
 MapRenderSystem.h
 MapSystem.cpp
 MapSystem.h
+PlayerCameraSystem.cpp
+PlayerCameraSystem.h
+PlayerControlSystem.cpp
+PlayerControlSystem.h
 PlayerData.h
 PlayerRenderSystem.cpp
 PlayerRenderSystem.h

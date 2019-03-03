@@ -35,6 +35,11 @@ namespace blink
         g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Scroll, glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
     }
 
+    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        g_app->m_ex.events.emit<KeyboardEvent>(key, scancode, action, mods);
+    }
+
     int run(App * app)
     {
         /* Initialize the library */
@@ -55,6 +60,7 @@ namespace blink
         glfwSetCursorPosCallback(g_window, mousePositionCallback);
         glfwSetMouseButtonCallback(g_window, mouseButtonCallback);
         glfwSetScrollCallback(g_window, mouseScrollCallback);
+        glfwSetKeyCallback(g_window, keyCallback);
 
         /* Make the window's context current */
         glfwMakeContextCurrent(g_window);

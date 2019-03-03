@@ -1,8 +1,10 @@
 #include "RandomMapApp.h"
 #include "SideViewCameraSystem.h"
+#include "PlayerCameraSystem.h"
 #include "MapSystem.h"
 #include "MapRenderSystem.h"
 #include "PlayerRenderSystem.h"
+#include "PlayerControlSystem.h"
 #include <scene/SceneSystem.h>
 #include <render/util/ImageLoader.h>
 
@@ -23,7 +25,9 @@ entityx::Entity createMap(entityx::EntityManager& entities, const blink::tstring
 
 bool RandomMapApp::initialize()
 {
-    m_ex.systems.add<SideViewCameraSystem>();
+    m_ex.systems.add<PlayerControlSystem>();
+    //m_ex.systems.add<SideViewCameraSystem>();
+    m_ex.systems.add<PlayerCameraSystem>();
     m_ex.systems.add<blink::SceneSystem>();
     m_ex.systems.add<MapSystem>();
     m_ex.systems.add<MapRenderSystem>();
@@ -35,7 +39,7 @@ bool RandomMapApp::initialize()
 
     // add player
     entityx::Entity player = m_ex.entities.create();
-    player.assign<PlayerData>()->position = blink::VEC3_ZERO;
+    player.assign<PlayerData>();
 
     // add a camera
     entityx::Entity camera = m_ex.entities.create();

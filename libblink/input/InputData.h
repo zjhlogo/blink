@@ -67,4 +67,21 @@ namespace blink
 
         uint32 modifyKey;
     };
+
+    struct KeyboardEvent
+    {
+        explicit KeyboardEvent(int key_, int scancode_, int action_, int mods_)
+            :key(key_)
+            , scancode(scancode_)
+            , action(action_)
+            , mods(mods_)
+        {
+
+        }
+
+        int key;
+        int scancode;
+        int action;
+        int mods;
+    };
 }
