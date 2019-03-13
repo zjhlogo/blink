@@ -9,18 +9,15 @@ struct MapData
     };
 
     explicit MapData(int w, int h, blink::uint8* data)
-        :width(w)
-        , height(h)
+        :size(w, h)
         , bitFlag(BF_DIRTY)
     {
         buffer.resize(w*h);
         std::memcpy(buffer.data(), data, w*h);
     }
 
-    int width;
-    int height;
-    int originX;
-    int originY;
+    glm::ivec2 size;
+    glm::ivec2 origin;
     blink::BufferData buffer;
     blink::uint32 bitFlag;
 };

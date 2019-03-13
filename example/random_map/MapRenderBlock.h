@@ -6,7 +6,6 @@
 class MapRenderBlock : public blink::BufferGeometry
 {
 public:
-    static const float TILE_SIZE;
     static const int BLOCK_SIZE = 32;
 
     enum TileBorder

@@ -1,9 +1,8 @@
 #include "MapRenderBlock.h"
+#include "MapUtilities.h"
 #include <glad/glad.h>
 #include <render/geometry/BufferAttributes.h>
 #include <algorithm>
-
-const float MapRenderBlock::TILE_SIZE = 16.0f;
 
 MapRenderBlock::MapRenderBlock()
 {
@@ -23,28 +22,28 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
     std::vector<blink::uint16> indis;
 
     glm::ivec2 lb{ blockIndex.x * BLOCK_SIZE, blockIndex.y * BLOCK_SIZE };
-    glm::ivec2 rt{ std::min(lb.x + BLOCK_SIZE, mapData->width - 1), std::min(lb.y + BLOCK_SIZE, mapData->height - 1) };
+    glm::ivec2 rt{ std::min(lb.x + BLOCK_SIZE, mapData->size.x - 1), std::min(lb.y + BLOCK_SIZE, mapData->size.y - 1) };
 
     if (lb.x == 0) ++lb.x;
     if (lb.y == 0) ++lb.y;
 
-    float offsetX = -mapData->originX * TILE_SIZE;
-    float offsetY = -mapData->originY * TILE_SIZE;
+    float offsetX = -mapData->origin.x * MapUtilities::TILE_SIZE;
+    float offsetY = -mapData->origin.y * MapUtilities::TILE_SIZE;
 
     int numVerts = 0;
     for (int y = lb.y; y < rt.y; ++y)
     {
         for (int x = lb.x; x < rt.x; ++x)
         {
-            int index = y * mapData->width + x;
+            int index = y * mapData->size.x + x;
             auto tileValue = mapData->buffer[index];
 
             if (tileValue > 0)
             {
-                int indexTop = (y + 1) * mapData->width + x;
-                int indexBottom = (y - 1) * mapData->width + x;
-                int indexLeft = y * mapData->width + x - 1;
-                int indexRight = y * mapData->width + x + 1;
+                int indexTop = (y + 1) * mapData->size.x + x;
+                int indexBottom = (y - 1) * mapData->size.x + x;
+                int indexLeft = y * mapData->size.x + x - 1;
+                int indexRight = y * mapData->size.x + x + 1;
 
                 int uvIndex = 0;
                 if (mapData->buffer[indexTop] != tileValue) uvIndex |= TOP;
@@ -58,10 +57,10 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
                 tileIndex = tileIndex * 16 + uvIndex;
                 auto piece = atlas->getPiece(tileIndex);
 
-                verts.push_back({ offsetX + x * TILE_SIZE,             offsetY + y * TILE_SIZE,             0.0f, piece->uvs[0].s, piece->uvs[0].t });
-                verts.push_back({ offsetX + x * TILE_SIZE + TILE_SIZE, offsetY + y * TILE_SIZE,             0.0f, piece->uvs[1].s, piece->uvs[1].t });
-                verts.push_back({ offsetX + x * TILE_SIZE,             offsetY + y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[2].s, piece->uvs[2].t });
-                verts.push_back({ offsetX + x * TILE_SIZE + TILE_SIZE, offsetY + y * TILE_SIZE + TILE_SIZE, 0.0f, piece->uvs[3].s, piece->uvs[3].t });
+                verts.push_back({ offsetX + x * MapUtilities::TILE_SIZE, offsetY + y * MapUtilities::TILE_SIZE, 0.0f, piece->uvs[0].s, piece->uvs[0].t });
+                verts.push_back({ offsetX + x * MapUtilities::TILE_SIZE + MapUtilities::TILE_SIZE, offsetY + y * MapUtilities::TILE_SIZE, 0.0f, piece->uvs[1].s, piece->uvs[1].t });
+                verts.push_back({ offsetX + x * MapUtilities::TILE_SIZE, offsetY + y * MapUtilities::TILE_SIZE + MapUtilities::TILE_SIZE, 0.0f, piece->uvs[2].s, piece->uvs[2].t });
+                verts.push_back({ offsetX + x * MapUtilities::TILE_SIZE + MapUtilities::TILE_SIZE, offsetY + y * MapUtilities::TILE_SIZE + MapUtilities::TILE_SIZE, 0.0f, piece->uvs[3].s, piece->uvs[3].t });
 
                 indis.push_back(numVerts + 0);
                 indis.push_back(numVerts + 2);

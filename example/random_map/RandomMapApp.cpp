@@ -17,8 +17,8 @@ entityx::Entity createMap(entityx::EntityManager& entities, const blink::tstring
     blink::ImageLoader::loadTextureFromImage(imageInfo, filePath, true);
 
     auto mapData = map.assign<MapData>(imageInfo.width, imageInfo.height, imageInfo.data);
-    mapData->originX = imageInfo.width / 2;
-    mapData->originY = imageInfo.height / 4 * 3;
+    mapData->origin.x = imageInfo.width / 2;
+    mapData->origin.y = imageInfo.height / 4 * 3;
 
     return map;
 }

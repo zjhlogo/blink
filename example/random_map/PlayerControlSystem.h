@@ -2,17 +2,18 @@
 #include <entityx/entityx.h>
 #include <input/InputData.h>
 #include "PlayerData.h"
+#include "MapData.h"
 
 class PlayerControlSystem : public entityx::System<PlayerControlSystem>, public entityx::Receiver<PlayerControlSystem>
 {
 public:
-    enum KEY_CODE
+    enum MOVEMENT
     {
-        KEY_UP,
-        KEY_DOWN,
-        KEY_LEFT,
-        KEY_RIGHT,
-        NUM_KEYS,
+        MOVE_UP,
+        MOVE_DOWN,
+        MOVE_LEFT,
+        MOVE_RIGHT,
+        NUM_MOVES,
     };
 
 public:
@@ -24,13 +25,16 @@ public:
 
     void receive(const blink::KeyboardEvent& evt);
     void receive(const entityx::ComponentAddedEvent<PlayerData>& evt);
+    void receive(const entityx::ComponentAddedEvent<MapData>& evt);
 
 private:
     int getMovingFrameIndex(int frameIndex, entityx::TimeDelta dt);
+    glm::vec3 calculatePosition(const MapData* mapData, const glm::vec3& oldPos, float speed, float dt);
 
 private:
-    bool m_keys[NUM_KEYS]{};
+    bool m_keys[NUM_MOVES]{};
     entityx::Entity m_player;
+    entityx::Entity m_mapData;
     float m_speed{ 60.0f };
 
     float m_elapseTime{};

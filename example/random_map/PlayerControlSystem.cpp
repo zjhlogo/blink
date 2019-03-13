@@ -1,4 +1,5 @@
 #include "PlayerControlSystem.h"
+#include "MapUtilities.h"
 #include <GLFW/glfw3.h>
 
 PlayerControlSystem::PlayerControlSystem()
@@ -13,6 +14,7 @@ void PlayerControlSystem::configure(entityx::EventManager & events)
 {
     events.subscribe<blink::KeyboardEvent>(*this);
     events.subscribe<entityx::ComponentAddedEvent<PlayerData>>(*this);
+    events.subscribe<entityx::ComponentAddedEvent<MapData>>(*this);
 }
 
 void PlayerControlSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
@@ -21,17 +23,18 @@ void PlayerControlSystem::update(entityx::EntityManager & entities, entityx::Eve
     if (!m_player.valid()) return;
 
     auto playerData = m_player.component<PlayerData>().get();
+    auto mapData = m_mapData.component<MapData>().get();
 
-    if (m_keys[KEY_RIGHT])
+    if (m_keys[MOVE_RIGHT])
     {
-        playerData->position.x += (dt * m_speed);
+        playerData->position = calculatePosition(mapData, playerData->position, m_speed, dt);
         playerData->facingRight = true;
         playerData->status = PlayerData::STATUS_MOVING;
         playerData->frameIndex = getMovingFrameIndex(playerData->frameIndex, dt);
     }
-    else if (m_keys[KEY_LEFT])
+    else if (m_keys[MOVE_LEFT])
     {
-        playerData->position.x -= (dt * m_speed);
+        playerData->position = calculatePosition(mapData, playerData->position, -m_speed, dt);
         playerData->facingRight = false;
         playerData->status = PlayerData::STATUS_MOVING;
         playerData->frameIndex = getMovingFrameIndex(playerData->frameIndex, dt);
@@ -45,20 +48,20 @@ void PlayerControlSystem::update(entityx::EntityManager & entities, entityx::Eve
 
 void PlayerControlSystem::receive(const blink::KeyboardEvent & evt)
 {
-    KEY_CODE index = KEY_UP;
+    MOVEMENT index = MOVE_UP;
     switch (evt.key)
     {
     case GLFW_KEY_W:
-        index = KEY_UP;
+        index = MOVE_UP;
         break;
     case GLFW_KEY_A:
-        index = KEY_LEFT;
+        index = MOVE_LEFT;
         break;
     case GLFW_KEY_S:
-        index = KEY_DOWN;
+        index = MOVE_DOWN;
         break;
     case GLFW_KEY_D:
-        index = KEY_RIGHT;
+        index = MOVE_RIGHT;
         break;
     default:
         return;
@@ -71,6 +74,11 @@ void PlayerControlSystem::receive(const blink::KeyboardEvent & evt)
 void PlayerControlSystem::receive(const entityx::ComponentAddedEvent<PlayerData>& evt)
 {
     m_player = evt.entity;
+}
+
+void PlayerControlSystem::receive(const entityx::ComponentAddedEvent<MapData>& evt)
+{
+    m_mapData = evt.entity;
 }
 
 int PlayerControlSystem::getMovingFrameIndex(int frameIndex, entityx::TimeDelta dt)
@@ -91,4 +99,32 @@ int PlayerControlSystem::getMovingFrameIndex(int frameIndex, entityx::TimeDelta 
     if (frameIndex > 19) frameIndex = 6;
 
     return frameIndex;
+}
+
+glm::vec3 PlayerControlSystem::calculatePosition(const MapData* mapData, const glm::vec3 & oldPos, float speed, float dt)
+{
+    glm::ivec2 oldGridPos = MapUtilities::getGridPos(mapData, oldPos);
+
+    // calculate newPos
+    glm::vec3 newPos = oldPos;
+    newPos.x += speed * dt;
+
+    // get grid pos for newPos
+    glm::ivec2 newGridPos = MapUtilities::getGridPos(mapData, newPos);
+    glm::vec3 newWorldPos = MapUtilities::getWorldPos(mapData, newGridPos);
+
+    if (oldGridPos == newGridPos) return newPos;
+
+    // crossable
+    if (MapUtilities::crossable(mapData, oldGridPos, newGridPos))
+    {
+        glm::ivec2 groundGridPos = MapUtilities::findGroundGridPos(mapData, newGridPos);
+        newWorldPos = MapUtilities::getWorldPos(mapData, groundGridPos);
+        newPos.y = newWorldPos.y;
+        return newPos;
+    }
+
+    // not crossable
+    newPos.x = newWorldPos.x;
+    return newPos;
 }

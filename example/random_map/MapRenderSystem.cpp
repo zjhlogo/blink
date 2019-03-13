@@ -1,5 +1,6 @@
 #include "MapRenderSystem.h"
 #include "TileAtlas.h"
+#include "MapUtilities.h"
 #include <glad/glad.h>
 #include <render/GlConfig.h>
 #include <render/shader/Shader.h>
@@ -36,11 +37,11 @@ void MapRenderSystem::update(entityx::EntityManager & entities, entityx::EventMa
 
     // calculate block index
     glm::ivec2 blockIndex;
-    blockIndex.x = static_cast<int>((cameraData->cameraPos.x + m_mapData->originX * MapRenderBlock::TILE_SIZE) / (MapRenderBlock::BLOCK_SIZE * MapRenderBlock::TILE_SIZE));
-    blockIndex.y = static_cast<int>((cameraData->cameraPos.y + m_mapData->originY * MapRenderBlock::TILE_SIZE) / (MapRenderBlock::BLOCK_SIZE * MapRenderBlock::TILE_SIZE));
+    blockIndex.x = static_cast<int>((cameraData->cameraPos.x + m_mapData->origin.x * MapUtilities::TILE_SIZE) / (MapRenderBlock::BLOCK_SIZE * MapUtilities::TILE_SIZE));
+    blockIndex.y = static_cast<int>((cameraData->cameraPos.y + m_mapData->origin.y * MapUtilities::TILE_SIZE) / (MapRenderBlock::BLOCK_SIZE * MapUtilities::TILE_SIZE));
 
-    int maxX = (m_mapData->width + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
-    int maxY = (m_mapData->height + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
+    int maxX = (m_mapData->size.x + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
+    int maxY = (m_mapData->size.y + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
     if (blockIndex.x < 0) blockIndex.x = 0;
     if (blockIndex.y < 0) blockIndex.y = 0;
     if (blockIndex.x >= maxX) blockIndex.x = maxX - 1;
@@ -138,8 +139,8 @@ void MapRenderSystem::checkInBlocksOutOfRange(const glm::ivec2& blockIndex)
     glm::ivec2 lb = blockIndex - m_blockRadius;
     glm::ivec2 rt = blockIndex + m_blockRadius;
 
-    int maxX = (m_mapData->width + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
-    int maxY = (m_mapData->height + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
+    int maxX = (m_mapData->size.x + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
+    int maxY = (m_mapData->size.y + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
 
     if (lb.x < 0) lb.x = 0;
     if (lb.y < 0) lb.y = 0;
@@ -169,8 +170,8 @@ void MapRenderSystem::generateBlocksInRange(const glm::ivec2& blockIndex)
     glm::ivec2 lb = blockIndex - m_blockRadius;
     glm::ivec2 rt = blockIndex + m_blockRadius;
 
-    int maxX = (m_mapData->width + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
-    int maxY = (m_mapData->height + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
+    int maxX = (m_mapData->size.x + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
+    int maxY = (m_mapData->size.y + MapRenderBlock::BLOCK_SIZE - 1) / MapRenderBlock::BLOCK_SIZE;
 
     if (lb.x < 0) lb.x = 0;
     if (lb.y < 0) lb.y = 0;

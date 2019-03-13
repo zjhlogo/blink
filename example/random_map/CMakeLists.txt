@@ -17,11 +17,15 @@ MapRenderSystem.cpp
 MapRenderSystem.h
 MapSystem.cpp
 MapSystem.h
+MapUtilities.cpp
+MapUtilities.h
 PlayerCameraSystem.cpp
 PlayerCameraSystem.h
 PlayerControlSystem.cpp
 PlayerControlSystem.h
 PlayerData.h
+PlayerMovementSystem.cpp
+PlayerMovementSystem.h
 PlayerRenderSystem.cpp
 PlayerRenderSystem.h
 RandomMapApp.cpp
