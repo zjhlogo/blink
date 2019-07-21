@@ -75,5 +75,5 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
     }
 
     uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, verts.data(), sizeof(verts[0])* numVerts, GL_STATIC_DRAW);
-    uploadIndexBuffer(indis.data(), indis.size(), GL_STATIC_DRAW);
+    uploadIndexBuffer(indis.data(), static_cast<blink::uint32>(indis.size()), GL_STATIC_DRAW);
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <Rtti.h>
 #include "../../scene/TransformData.h"
+#include <memory>
 
 namespace blink
 {

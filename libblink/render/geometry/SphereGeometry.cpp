@@ -17,7 +17,7 @@ namespace blink
         // setup index buffer
         std::vector<uint16> indis;
         GeometryUtils::buildSphereFaceIndex(indis, rings, sections);
-        uploadIndexBuffer(indis.data(), indis.size(), GL_STATIC_DRAW);
+        uploadIndexBuffer(indis.data(), static_cast<uint32>(indis.size()), GL_STATIC_DRAW);
 
         // setup vertex buffer
         switch (vertexAttribute)
@@ -26,7 +26,7 @@ namespace blink
         {
             std::vector<VertexPos3Uv2Normal> verts;
             GeometryUtils::buildSphereVertexPos3Uv2Normal(verts, radius, rings, sections);
-            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), sizeof(verts[0])*verts.size(), GL_STATIC_DRAW);
+            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), static_cast<uint32>(sizeof(verts[0])*verts.size()), GL_STATIC_DRAW);
         }
         break;
         case blink::BufferAttributes::StockAttributes::Pos3Uv2NormalTangent:
@@ -34,7 +34,7 @@ namespace blink
             std::vector<VertexPos3Uv2NormalTangent> verts;
             GeometryUtils::buildSphereVertexPos3Uv2Normal(verts, radius, rings, sections);
             GeometryUtils::buildTangent(verts, indis);
-            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), sizeof(verts[0])*verts.size(), GL_STATIC_DRAW);
+            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), static_cast<uint32>(sizeof(verts[0])*verts.size()), GL_STATIC_DRAW);
         }
         break;
         default:

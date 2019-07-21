@@ -67,7 +67,7 @@ namespace blink
         if (seekType == SeekType::Begin) seekFrom = SEEK_SET;
         else if (seekType == SeekType::End) seekFrom = SEEK_END;
 
-        return fseek((FILE*)m_fileHandler, static_cast<size_t>(offset), seekFrom);
+        return fseek((FILE*)m_fileHandler, static_cast<long>(offset), seekFrom);
     }
 
     int64 File::tell()

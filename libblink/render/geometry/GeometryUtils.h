@@ -176,7 +176,7 @@ namespace blink
             std::vector<std::vector<glm::vec3>> tangentList;
             tangentList.resize(numVerts);
 
-            int numFaces = indis.size() / 3;
+            int numFaces = static_cast<int>(indis.size() / 3);
             for (int i = 0; i < numFaces; ++i)
             {
                 T& vert1 = verts[indis[i * 3 + 0]];

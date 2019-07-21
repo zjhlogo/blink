@@ -11,7 +11,7 @@ namespace blink
         if (arrSubString.size() > 1)
         {
             strInOut = join<StringList>(arrSubString, strReplace);
-            return arrSubString.size() - 1;
+            return static_cast<int>(arrSubString.size() - 1);
         }
 
         return 0;

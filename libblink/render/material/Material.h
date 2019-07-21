@@ -1,6 +1,7 @@
 #pragma once
 #include <Rtti.h>
 #include <map>
+#include <memory>
 
 namespace blink
 {

@@ -239,7 +239,7 @@ namespace blink
         const float* pValue = glm::value_ptr(matList[0]);
 
         // Then passes the matrix to that variable
-        glUniformMatrix4fv(loc, matList.size(), GL_FALSE, pValue);
+        glUniformMatrix4fv(loc, static_cast<GLsizei>(matList.size()), GL_FALSE, pValue);
         GL_ERROR_CHECK();
 
         return true;
@@ -375,7 +375,7 @@ namespace blink
             }
         }
 
-        glShaderSource(shaderId, shaderSourcesPtr.size(), shaderSourcesPtr.data(), nullptr);
+        glShaderSource(shaderId, static_cast<GLsizei>(shaderSourcesPtr.size()), shaderSourcesPtr.data(), nullptr);
         glCompileShader(shaderId);
 
         if (getShaderErrorLog(shaderId))
