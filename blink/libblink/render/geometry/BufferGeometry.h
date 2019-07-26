@@ -7,8 +7,6 @@ namespace blink
     class BufferGeometry : public Geometry
     {
     public:
-        RTTI_DEF(BufferGeometry, Geometry);
-
         BufferGeometry();
         virtual ~BufferGeometry();
 

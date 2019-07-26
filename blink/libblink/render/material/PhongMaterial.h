@@ -6,8 +6,6 @@ namespace blink
     class PhongMaterial : public Material
     {
     public:
-        RTTI_DEF(PhongMaterial, Material);
-
         PhongMaterial();
         virtual ~PhongMaterial();
 

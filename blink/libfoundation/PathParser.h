@@ -1,5 +1,6 @@
 #pragma once
-#include "BaseType.h"
+#include "BaseTypes.h"
+#include <vector>
 
 namespace blink
 {
@@ -16,11 +17,11 @@ namespace blink
         static tstring getFileLowerExtension(const tstring& path);
 
     private:
-        void appendSubDir(StringList& dirList, const tstring& subDir);
+        void appendSubDir(std::vector<tstring>& dirList, const tstring& subDir);
 
     public:
         tstring root;
-        StringList subDirectories;
+        std::vector<tstring> subDirectories;
         tstring filename;
         tstring extension;
 

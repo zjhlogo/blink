@@ -1,5 +1,4 @@
 #pragma once
-#include <Rtti.h>
 #include "../../scene/TransformData.h"
 #include <memory>
 
@@ -10,7 +9,6 @@ namespace blink
     class Light
     {
     public:
-        RTTI_ROOT(Light);
         Light();
         virtual ~Light();
 

@@ -1,11 +1,15 @@
-﻿#include "BaseType.h"
-#include "InstanceManager.h"
-#include <glm/gtc/quaternion.hpp>
+/*!
+ * \file BaseTypesGlm.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/26
+ *
+ * 
+ */
+#include "BaseTypesGlm.h"
 
 namespace blink
 {
-    const tstring EMPTY_STRING = "";
-
     const glm::ivec2 IVEC2_ZERO = glm::ivec2(0, 0);
     const glm::ivec3 IVEC3_ZERO = glm::ivec3(0, 0, 0);
     const glm::ivec4 IVEC4_ZERO = glm::ivec4(0, 0, 0, 0);
@@ -31,13 +35,6 @@ namespace blink
 
     const glm::quat QUAT_ZERO = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
-    const glm::vec4 VEC4_WHITE = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    const glm::vec4 VEC4_BLACK = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    const glm::vec4 VEC4_GRAY = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-    const glm::vec4 VEC4_RED = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    const glm::vec4 VEC4_GREEN = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    const glm::vec4 VEC4_BLUE = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
     const glm::mat3 MAT3_IDENTITY = glm::mat3(1.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f);
@@ -46,6 +43,4 @@ namespace blink
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f);
-
-    std::vector<InstanceManagerBase*> InstanceManagerBase::m_managers;
 }

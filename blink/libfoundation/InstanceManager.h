@@ -1,6 +1,16 @@
+/*!
+ * \file InstanceManager.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/26
+ *
+ * 
+ */
 #pragma once
+#include "BaseTypes.h"
 #include <unordered_map>
 #include <memory>
+#include <cassert>
 
 namespace blink
 {
@@ -16,9 +26,9 @@ namespace blink
 
         static void globalRelease()
         {
-            for (auto& manager : m_managers)
+            for (auto it = m_managers.rbegin(); it != m_managers.rend(); ++it)
             {
-                manager->releaseInstances();
+                (*it)->releaseInstances();
             }
         }
 

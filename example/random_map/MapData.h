@@ -1,5 +1,7 @@
 #pragma once
-#include <BaseType.h>
+#include <BaseTypes.h>
+#include <BaseTypesGlm.h>
+#include <vector>
 
 struct MapData
 {
@@ -18,7 +20,7 @@ struct MapData
 
     glm::ivec2 size;
     glm::ivec2 origin;
-    blink::BufferData buffer;
+    std::vector<blink::uint8> buffer;
     blink::uint32 bitFlag;
 };
 

@@ -227,7 +227,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, const Mat4List& matList)
+    bool Shader::setUniform(const char* pszName, const std::vector<glm::mat4>& matList)
     {
         if (matList.empty()) return false;
 
@@ -341,7 +341,7 @@ namespace blink
         return defineStr;
     }
 
-    void Shader::concatShaderSources(StringList & shaderSources, uint32 preprocessDefine, const char* shaderSource)
+    void Shader::concatShaderSources(std::vector<tstring>& shaderSources, uint32 preprocessDefine, const char* shaderSource)
     {
         if (!shaderSource) return;
 
@@ -359,7 +359,7 @@ namespace blink
         }
     }
 
-    uint32 Shader::compileShader(uint32 shaderType, const StringList& shaderSources)
+    uint32 Shader::compileShader(uint32 shaderType, const std::vector<tstring>& shaderSources)
     {
         if (shaderSources.empty()) return 0;
 
@@ -398,7 +398,7 @@ namespace blink
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLength);
         if (infoLength <= 1) return false;
 
-        BufferData buffer;
+        std::vector<uint8> buffer;
         buffer.resize(infoLength);
 
         GLsizei charWritten = 0;
@@ -420,7 +420,7 @@ namespace blink
         glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &infoLength);
         if (infoLength <= 1) return false;
 
-        BufferData buffer;
+        std::vector<uint8> buffer;
         buffer.resize(infoLength);
 
         GLsizei charWritten = 0;

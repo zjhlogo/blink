@@ -5,12 +5,12 @@ namespace blink
 {
     int StringBuilder::replace(tstring & strInOut, const tstring & strSearch, const tstring & strReplace)
     {
-        StringList arrSubString;
-        split<StringList>(arrSubString, strInOut, strSearch);
+        std::vector<tstring> arrSubString;
+        split<std::vector<tstring>>(arrSubString, strInOut, strSearch);
 
         if (arrSubString.size() > 1)
         {
-            strInOut = join<StringList>(arrSubString, strReplace);
+            strInOut = join<std::vector<tstring>>(arrSubString, strReplace);
             return static_cast<int>(arrSubString.size() - 1);
         }
 
@@ -61,7 +61,7 @@ namespace blink
         return false;
     }
 
-    template<> int StringBuilder::split<StringList>(StringList& arrOut, const tstring& strIn, const tstring& strSplit)
+    template<> int StringBuilder::split<std::vector<tstring>>(std::vector<tstring>& arrOut, const tstring& strIn, const tstring& strSplit)
     {
         int totalSplit = 0;
         size_t startIndex = 0;

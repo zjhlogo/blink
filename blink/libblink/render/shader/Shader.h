@@ -1,6 +1,8 @@
 #pragma once
-#include <BaseType.h>
+#include <BaseTypes.h>
+#include <BaseTypesGlm.h>
 #include <memory>
+#include <vector>
 
 namespace blink
 {
@@ -33,7 +35,7 @@ namespace blink
         bool setUniform(const char* pszName, const glm::vec4& v);
         bool setUniform(const char* pszName, const glm::mat3& mat3);
         bool setUniform(const char* pszName, const glm::mat4& mat4);
-        bool setUniform(const char* pszName, const Mat4List& matList);
+        bool setUniform(const char* pszName, const std::vector<glm::mat4>& matList);
 
         bool setUniform(const char* pszName, int count, const glm::vec3* v);
         bool setUniform(const char* pszName, int count, const glm::vec4* v);
@@ -49,19 +51,19 @@ namespace blink
     private:
         static tstring makeId(StockShaders stockShader, uint32 preprocessDefine);
         static tstring makePreprocessDefine(uint32 preprocessDefine);
-        static void concatShaderSources(StringList& shaderSources, uint32 preprocessDefine, const char* shaderSource);
+        static void concatShaderSources(std::vector<tstring>& shaderSources, uint32 preprocessDefine, const char* shaderSource);
 
         void destroyProgram();
-        uint32 compileShader(uint32 shaderType, const StringList& shaderSources);
+        uint32 compileShader(uint32 shaderType, const std::vector<tstring>& shaderSources);
         bool getShaderErrorLog(uint32 shaderId);
         bool getProgramErrorLog(uint32 programId);
 
     private:
         uint32 m_programId{};
 
-        StringList m_vertexShaderSources;
-        StringList m_geometryShaderSources;
-        StringList m_fragShaderSources;
+        std::vector<tstring> m_vertexShaderSources;
+        std::vector<tstring> m_geometryShaderSources;
+        std::vector<tstring> m_fragShaderSources;
 
         tstring m_errorLog;
 

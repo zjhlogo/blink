@@ -18,8 +18,6 @@ namespace blink
         };
 
     public:
-        RTTI_DEF(PlaneGeometry, BufferGeometry);
-
         PlaneGeometry(float width, float height, Facing facing, int widthSegments = 1, int heightSegments = 1, BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
         virtual ~PlaneGeometry();
 

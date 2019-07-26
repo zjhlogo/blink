@@ -1,5 +1,6 @@
 #pragma once
 #include "BufferAttributes.h"
+#include <BaseTypesGlm.h>
 #include <vector>
 #include <glm/gtc/constants.hpp>
 

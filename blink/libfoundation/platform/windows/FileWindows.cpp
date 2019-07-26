@@ -86,7 +86,7 @@ namespace blink
         return fread(dataOut, 1, static_cast<size_t>(size), (FILE*)m_fileHandler);
     }
 
-    int64 File::read(BufferData& dataOut, int64 size)
+    int64 File::read(std::vector<uint8>& dataOut, int64 size)
     {
         if (!m_fileHandler) return 0;
         if ((m_mode & AM_READ) == 0) return 0;
@@ -105,7 +105,7 @@ namespace blink
         return fwrite(data, 1, static_cast<size_t>(size), (FILE*)m_fileHandler);
     }
 
-    int64 File::write(const BufferData& data)
+    int64 File::write(const std::vector<uint8>& data)
     {
         if (!m_fileHandler) return 0;
         if ((m_mode & AM_WRITE) == 0) return 0;

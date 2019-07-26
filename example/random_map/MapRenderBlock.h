@@ -18,8 +18,6 @@ public:
     };
 
 public:
-    RTTI_DEF(MapRenderBlock, blink::BufferGeometry);
-
     MapRenderBlock();
     virtual ~MapRenderBlock();
 

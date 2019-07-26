@@ -7,7 +7,7 @@
  * 
  */
 #pragma once
-#include <BaseType.h>
+#include <BaseTypes.h>
 #include <memory>
 
 namespace blink

@@ -1,6 +1,6 @@
 #pragma once
-#include <BaseType.h>
-#include <glm/gtc/quaternion.hpp>
+#include <BaseTypes.h>
+#include <BaseTypesGlm.h>
 
 namespace blink
 {

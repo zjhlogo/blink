@@ -4,8 +4,6 @@
 class DiffuseMaterial : public blink::Material
 {
 public:
-    RTTI_DEF(DiffuseMaterial, blink::Material);
-
     DiffuseMaterial();
     virtual ~DiffuseMaterial();
 

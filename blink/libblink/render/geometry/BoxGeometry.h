@@ -7,8 +7,6 @@ namespace blink
     class BoxGeometry : public BufferGeometry
     {
     public:
-        RTTI_DEF(BoxGeometry, BufferGeometry);
-
         BoxGeometry(float width,
             float height,
             float depth,

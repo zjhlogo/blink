@@ -105,7 +105,7 @@ namespace blink
         return StringBuilder::lower(pp.extension);
     }
 
-    void PathParser::appendSubDir(StringList & dirList, const tstring & subDir)
+    void PathParser::appendSubDir(std::vector<tstring>& dirList, const tstring & subDir)
     {
         if (subDir.empty() || subDir == ".") return;
 

@@ -1,5 +1,6 @@
 #pragma once
-#include <BaseType.h>
+#include <BaseTypes.h>
+#include <BaseTypesGlm.h>
 
 namespace blink
 {

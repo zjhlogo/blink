@@ -1,6 +1,6 @@
 #pragma once
-#include <Rtti.h>
-#include <map>
+#include <BaseTypes.h>
+#include <BaseTypesGlm.h>
 #include <memory>
 
 namespace blink
@@ -22,7 +22,6 @@ namespace blink
         static const int MAX_TEXTURES = 8;
 
     public:
-        RTTI_ROOT(Material);
         Material();
         virtual ~Material();
 

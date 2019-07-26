@@ -1,5 +1,6 @@
 #pragma once
-#include "BaseType.h"
+#include "BaseTypes.h"
+#include <vector>
 
 namespace blink
 {
@@ -29,10 +30,10 @@ namespace blink
         int64 tell();
 
         int64 read(void* dataOut, int64 size);
-        int64 read(BufferData& dataOut, int64 size);
+        int64 read(std::vector<uint8>& dataOut, int64 size);
 
         int64 write(const void* data, int64 size);
-        int64 write(const BufferData& data);
+        int64 write(const std::vector<uint8>& data);
 
         int64 fileSize() const { return m_fileSize; };
 

@@ -7,8 +7,6 @@ namespace blink
     class Texture2D : public Texture
     {
     public:
-        RTTI_DEF(Texture2D, Texture);
-
         Texture2D(const tstring& id);
         virtual ~Texture2D();
 

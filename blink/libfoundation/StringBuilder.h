@@ -1,7 +1,9 @@
 #pragma once
-#include "BaseType.h"
+#include "BaseTypes.h"
 #include <fmt/format.h>
 #include <sstream>
+#include <vector>
+#include <set>
 
 namespace blink
 {
@@ -19,7 +21,7 @@ namespace blink
 
         template <typename CONTAINER> static int split(CONTAINER& arrOut, const tstring& strIn, const tstring& strSplit)
         {
-            StringList arrString;
+            std::vector<tstring> arrString;
             if (split(arrString, strIn, strSplit) <= 0) return 0;
 
             for (const auto& strValue : arrString)
@@ -40,7 +42,7 @@ namespace blink
 
         template <typename T> static int split(std::set<T>& arrOut, const tstring& strIn, const tstring& strSplit)
         {
-            StringList arrString;
+            std::vector<tstring> arrString;
             if (split(arrString, strIn, strSplit) <= 0) return 0;
 
             for (const auto& strValue : arrString)
@@ -95,5 +97,5 @@ namespace blink
 
     };
 
-    template<> int StringBuilder::split<StringList>(StringList& arrOut, const tstring& strIn, const tstring& strSplit);
+    template<> int StringBuilder::split<std::vector<tstring>>(std::vector<tstring>& arrOut, const tstring& strIn, const tstring& strSplit);
 }

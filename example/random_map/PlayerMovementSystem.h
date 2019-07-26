@@ -1,6 +1,7 @@
 #pragma once
 #include <entityx/entityx.h>
-#include <BaseType.h>
+#include <BaseTypes.h>
+#include <BaseTypesGlm.h>
 
 class PlayerMovementSystem : public entityx::System<PlayerMovementSystem>, public entityx::Receiver<PlayerMovementSystem>
 {

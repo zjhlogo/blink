@@ -7,15 +7,17 @@ find_package(glm PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 set(SOURCE_FILES
-BaseType.cpp
-BaseType.h
+BaseTypes.cpp
+BaseTypes.h
+BaseTypesGlm.cpp
+BaseTypesGlm.h
 EventSystem.h
 File.h
+InstanceManager.cpp
 InstanceManager.h
 Log.h
 PathParser.cpp
 PathParser.h
-Rtti.h
 StringBuilder.cpp
 StringBuilder.h
 )

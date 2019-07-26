@@ -1,6 +1,6 @@
 #pragma once
-#include <BaseType.h>
-#include <Rtti.h>
+#include <BaseTypes.h>
+#include <BaseTypesGlm.h>
 
 namespace blink
 {
@@ -25,8 +25,6 @@ namespace blink
         };
 
     public:
-        RTTI_ROOT(Texture);
-
         Texture(const tstring& id);
         virtual ~Texture();
         const tstring& getId() const { return m_id; };

@@ -1,5 +1,5 @@
 #pragma once
-#include <BaseType.h>
+#include <BaseTypesGlm.h>
 #include "MapData.h"
 
 class MapUtilities
