@@ -1,7 +1,15 @@
+/*!
+ * \file BufferAttributes.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/25
+ *
+ * 
+ */
 #include "BufferAttributes.h"
 #include <InstanceManager.h>
 #include <glad/glad.h>
-#include <tinyxml2.h>
+#include <tinyxml2/tinyxml2.h>
 
 namespace blink
 {

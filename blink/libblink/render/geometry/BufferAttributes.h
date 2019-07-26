@@ -1,3 +1,11 @@
+/*!
+ * \file BufferAttributes.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/25
+ *
+ * 
+ */
 #pragma once
 #include <BaseType.h>
 #include <memory>

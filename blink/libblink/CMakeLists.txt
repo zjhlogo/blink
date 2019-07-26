@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../cmake/utils.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 
 project(libblink)
 
@@ -74,10 +74,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:tinyxml2::tinyxml2,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:entityx,INTERFACE_INCLUDE_DIRECTORIES>>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/glad/include>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../external/imgui>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/glad/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/imgui>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../libfoundation>
 )
 
 group_sources("${SOURCE_FILES}")
-configure_library(${PROJECT_NAME} "")
+configure_library(${PROJECT_NAME} "blink")
