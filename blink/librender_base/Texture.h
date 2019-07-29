@@ -1,3 +1,11 @@
+/*!
+ * \file Texture.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/26
+ *
+ * 
+ */
 #pragma once
 #include <BaseTypes.h>
 #include <BaseTypesGlm.h>

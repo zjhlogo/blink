@@ -8,12 +8,21 @@
  */
 #include "BufferAttributes.h"
 #include <InstanceManager.h>
-#include <glad/glad.h>
 #include <tinyxml2/tinyxml2.h>
 
 namespace blink
 {
     static InstanceManager<tstring, BufferAttributes> s_instanceManager;
+
+    BufferAttributes::BufferAttributes()
+    {
+
+    }
+
+    BufferAttributes::~BufferAttributes()
+    {
+
+    }
 
     const BufferAttributes::AttributeItem* BufferAttributes::getAttributeItem(int nIndex) const
     {
@@ -25,7 +34,7 @@ namespace blink
     {
         for (int i = 0; i < m_numItems; ++i)
         {
-            if (m_attributeItems[i].m_name == name)
+            if (m_attributeItems[i].name == name)
             {
                 return &m_attributeItems[i];
             }
@@ -44,28 +53,12 @@ namespace blink
         {
             const AttributeItem* pAttrItem = pVertexAttrs->getAttributeItem(i);
 
-            if (m_attributeItems[i].m_size != pAttrItem->m_size) return false;
-            if (m_attributeItems[i].m_attrType != pAttrItem->m_attrType) return false;
-            if (m_attributeItems[i].m_name != pAttrItem->m_name) return false;
+            if (m_attributeItems[i].size != pAttrItem->size) return false;
+            if (m_attributeItems[i].type != pAttrItem->type) return false;
+            if (m_attributeItems[i].name != pAttrItem->name) return false;
         }
 
         return true;
-    }
-
-    uint32 BufferAttributes::getGlType(AttributeItemType eType)
-    {
-        static const uint32 s_GlType[static_cast<int>(AttributeItemType::NumberOfAttributeItemType)] =
-        {
-            GL_FLOAT,			// AT_UNKNOWN,
-            GL_BYTE,			// AT_BYTE,
-            GL_UNSIGNED_BYTE,	// AT_UNSIGNED_BYTE,
-            GL_SHORT,			// AT_SHORT,
-            GL_UNSIGNED_SHORT,	// AT_UNSIGNED_SHORT,
-            GL_FLOAT,			// AT_FLOAT,
-        };
-
-        if (eType < AttributeItemType::Unknown || eType >= AttributeItemType::NumberOfAttributeItemType) return GL_FLOAT;
-        return s_GlType[static_cast<int>(eType)];
     }
 
     uint32 BufferAttributes::getAttributeItemSize(uint32 nSize, AttributeItemType eType)
@@ -121,21 +114,19 @@ namespace blink
             const char* pszName = pXmlAttr->Attribute("name");
             if (!pszName) return nullptr;
 
-            attrItems[attrIndex].m_size = size;
-            attrItems[attrIndex].m_attrType = getAttributeItemType(pszType);
-            attrItems[attrIndex].m_glType = getGlType(attrItems[attrIndex].m_attrType);
-            attrItems[attrIndex].m_name = pszName;
+            attrItems[attrIndex].size = size;
+            attrItems[attrIndex].type = getAttributeItemType(pszType);
+            attrItems[attrIndex].name = pszName;
 
             ++attrIndex;
         }
 
         if (attrIndex <= 0 || attrIndex > MAX_ATTRIBUTE_ITEMS) return nullptr;
 
-        attrItems[attrIndex].m_size = 0;
-        attrItems[attrIndex].m_attrType = AttributeItemType::Unknown;
-        attrItems[attrIndex].m_glType = getGlType(attrItems[attrIndex].m_attrType);
-        attrItems[attrIndex].m_offset = 0;
-        attrItems[attrIndex].m_name.clear();
+        attrItems[attrIndex].size = 0;
+        attrItems[attrIndex].type = AttributeItemType::Unknown;
+        attrItems[attrIndex].offset = 0;
+        attrItems[attrIndex].name.clear();
 
         return fromAttributeItems("file::" + filePath, attrItems);
     }
@@ -144,54 +135,54 @@ namespace blink
     {
         static AttributeItem s_attrPos3[] =
         {
-            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
-            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+            {3, AttributeItemType::Float, 0, "a_position"},
+            {0, AttributeItemType::Unknown, 0, ""},
         };
 
         static AttributeItem s_attrPos3Color[] =
         {
-            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
-            {4, AttributeItemType::UnsignedByte, GL_UNSIGNED_BYTE, 12, "a_color"},
-            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+            {3, AttributeItemType::Float, 0, "a_position"},
+            {4, AttributeItemType::UnsignedByte, 12, "a_color"},
+            {0, AttributeItemType::Unknown, 0, ""},
         };
 
         static AttributeItem s_attrPos3Uv2[] =
         {
-            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
-            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_uv"},
-            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+            {3, AttributeItemType::Float, 0, "a_position"},
+            {2, AttributeItemType::Float, 12, "a_uv"},
+            {0, AttributeItemType::Unknown, 0, ""},
         };
 
         static AttributeItem s_attrPos3Normal[] =
         {
-            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
-            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_normal"},
-            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+            {3, AttributeItemType::Float, 0, "a_position"},
+            {2, AttributeItemType::Float, 12, "a_normal"},
+            {0, AttributeItemType::Unknown, 0, ""},
         };
 
         static AttributeItem s_attrPos3Uv2Normal[] = 
         {
-            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
-            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_uv"},
-            {3, AttributeItemType::Float, GL_FLOAT, 20, "a_normal"},
-            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+            {3, AttributeItemType::Float, 0, "a_position"},
+            {2, AttributeItemType::Float, 12, "a_uv"},
+            {3, AttributeItemType::Float, 20, "a_normal"},
+            {0, AttributeItemType::Unknown, 0, ""},
         };
 
         static AttributeItem s_attrPos3Uv2Color[] =
         {
-            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
-            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_uv"},
-            {4, AttributeItemType::UnsignedByte, GL_UNSIGNED_BYTE, 20, "a_color"},
-            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+            {3, AttributeItemType::Float, 0, "a_position"},
+            {2, AttributeItemType::Float, 12, "a_uv"},
+            {4, AttributeItemType::UnsignedByte, 20, "a_color"},
+            {0, AttributeItemType::Unknown, 0, ""},
         };
 
         static AttributeItem s_attrPos3Uv2NormalTangent[] =
         {
-            {3, AttributeItemType::Float, GL_FLOAT, 0, "a_position"},
-            {2, AttributeItemType::Float, GL_FLOAT, 12, "a_uv"},
-            {3, AttributeItemType::Float, GL_FLOAT, 20, "a_normal"},
-            {3, AttributeItemType::Float, GL_FLOAT, 32, "a_tangent"},
-            {0, AttributeItemType::Unknown, GL_FLOAT, 0, ""},
+            {3, AttributeItemType::Float, 0, "a_position"},
+            {2, AttributeItemType::Float, 12, "a_uv"},
+            {3, AttributeItemType::Float, 20, "a_normal"},
+            {3, AttributeItemType::Float, 32, "a_tangent"},
+            {0, AttributeItemType::Unknown, 0, ""},
         };
 
         static AttributeItem* s_stockAttributeItems[static_cast<int>(StockAttributes::NumberOfStockAttributes)] = 
@@ -226,7 +217,7 @@ namespace blink
 
         int nNumItems = 0;
         const AttributeItem* pCurrItem = pAttrItems;
-        while (pCurrItem && pCurrItem->m_attrType != AttributeItemType::Unknown)
+        while (pCurrItem && pCurrItem->type != AttributeItemType::Unknown)
         {
             nNumItems++;
             pCurrItem++;
@@ -240,19 +231,17 @@ namespace blink
         uint32 currOffset = 0;
         for (int i = 0; i < nNumItems; ++i)
         {
-            bufferAttributes->m_attributeItems[i].m_size = pAttrItems[i].m_size;
-            bufferAttributes->m_attributeItems[i].m_attrType = pAttrItems[i].m_attrType;
-            bufferAttributes->m_attributeItems[i].m_glType = pAttrItems[i].m_glType;
-            bufferAttributes->m_attributeItems[i].m_offset = currOffset;
-            bufferAttributes->m_attributeItems[i].m_name = pAttrItems[i].m_name;
-            currOffset += getAttributeItemSize(bufferAttributes->m_attributeItems[i].m_size, bufferAttributes->m_attributeItems[i].m_attrType);
+            bufferAttributes->m_attributeItems[i].size = pAttrItems[i].size;
+            bufferAttributes->m_attributeItems[i].type = pAttrItems[i].type;
+            bufferAttributes->m_attributeItems[i].offset = currOffset;
+            bufferAttributes->m_attributeItems[i].name = pAttrItems[i].name;
+            currOffset += getAttributeItemSize(bufferAttributes->m_attributeItems[i].size, bufferAttributes->m_attributeItems[i].type);
         }
 
-        bufferAttributes->m_attributeItems[nNumItems].m_size = 0;
-        bufferAttributes->m_attributeItems[nNumItems].m_attrType = AttributeItemType::Unknown;
-        bufferAttributes->m_attributeItems[nNumItems].m_glType = getGlType(AttributeItemType::Unknown);
-        bufferAttributes->m_attributeItems[nNumItems].m_offset = currOffset;
-        bufferAttributes->m_attributeItems[nNumItems].m_name.clear();
+        bufferAttributes->m_attributeItems[nNumItems].size = 0;
+        bufferAttributes->m_attributeItems[nNumItems].type = AttributeItemType::Unknown;
+        bufferAttributes->m_attributeItems[nNumItems].offset = currOffset;
+        bufferAttributes->m_attributeItems[nNumItems].name.clear();
 
         return s_instanceManager.insertInstance(id, bufferAttributes);
     }

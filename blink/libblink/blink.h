@@ -1,8 +1,18 @@
+/*!
+ * \file blink.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
 #include <entityx/entityx.h>
 
 namespace blink
 {
+    class RenderModule;
+
     class App
     {
     public:
@@ -16,5 +26,5 @@ namespace blink
 
     };
 
-    int run(App* app);
+    int run(RenderModule* renderModule);
 }

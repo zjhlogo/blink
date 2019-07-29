@@ -1,86 +1,44 @@
-#include "Shader.h"
+/*!
+ * \file OpenGLShader.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
+#include "OpenGLShader.h"
+#include "Texture.h"
 #include "shader_lib/ShaderLib.h"
-#include "../texture/Texture.h"
-#include "../GlConfig.h"
+#include "GlConfig.h"
 #include <InstanceManager.h>
-#include <glad/glad.h>
+#include <fmt/format.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace blink
 {
-    static InstanceManager<tstring, Shader> s_instanceManager;
-
     class AutoDeleteShaderObj
     {
     public:
-        AutoDeleteShaderObj(uint32 shaderId) :m_shaderId(shaderId) {};
+        AutoDeleteShaderObj(GLuint shaderId) :m_shaderId(shaderId) {};
         ~AutoDeleteShaderObj() { if (m_shaderId != 0) glDeleteShader(m_shaderId); };
 
     private:
-        uint32 m_shaderId{};
+        GLuint m_shaderId{};
 
     };
 
-    std::shared_ptr<Shader> Shader::fromStock(StockShaders stockShader, uint32 preprocessDefine)
+    OpenGLShader::OpenGLShader(const tstring& id)
+        :Shader(id)
     {
-        static const char* s_stockVs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
-        {
-            PHONG_VS,                 // Phong
-            WIREFRAME_VS,               // Wireframe
-        };
 
-        static const char* s_stockGs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
-        {
-            nullptr,                    // Phong
-            WIREFRAME_GS,               // Wireframe
-        };
-
-        static const char* s_stockFs[static_cast<int>(StockShaders::NumberOfStockShaders)] =
-        {
-            PHONG_FS,                 // Phong
-            WIREFRAME_FS,               // Wireframe
-        };
-
-        tstring shaderId = makeId(stockShader, preprocessDefine);
-        auto exitShader = s_instanceManager.insertInstance(shaderId);
-        if (exitShader) return exitShader;
-
-        std::shared_ptr<Shader> shader = std::make_shared<Shader>();
-
-        concatShaderSources(shader->m_vertexShaderSources, preprocessDefine, s_stockVs[static_cast<int>(stockShader)]);
-        concatShaderSources(shader->m_geometryShaderSources, preprocessDefine, s_stockGs[static_cast<int>(stockShader)]);
-        concatShaderSources(shader->m_fragShaderSources, preprocessDefine, s_stockFs[static_cast<int>(stockShader)]);
-
-        if (!shader->reload())
-        {
-            return nullptr;
-        }
-
-        return s_instanceManager.insertInstance(shaderId, shader);
     }
 
-    std::shared_ptr<Shader> Shader::fromBuffer(const tstring & id, const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
+    OpenGLShader::~OpenGLShader()
     {
-        tstring formatedId = "buffer::" + id;
-
-        auto exitShader = s_instanceManager.insertInstance(formatedId);
-        if (exitShader) return exitShader;
-
-        std::shared_ptr<Shader> shader = std::make_shared<Shader>();
-
-        concatShaderSources(shader->m_vertexShaderSources, 0, vsBuffer);
-        concatShaderSources(shader->m_geometryShaderSources, 0, gsBuffer);
-        concatShaderSources(shader->m_fragShaderSources, 0, fsBuffer);
-
-        if (!shader->reload())
-        {
-            return nullptr;
-        }
-
-        return s_instanceManager.insertInstance(formatedId, shader);
+        destroyProgram();
     }
 
-    bool Shader::reload()
+    bool OpenGLShader::reload()
     {
         destroyProgram();
 
@@ -125,7 +83,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, int value)
+    bool OpenGLShader::setUniform(const char* pszName, int value)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -139,7 +97,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, float value)
+    bool OpenGLShader::setUniform(const char* pszName, float value)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -153,7 +111,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, const glm::vec2& v)
+    bool OpenGLShader::setUniform(const char* pszName, const glm::vec2& v)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -167,7 +125,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, const glm::vec3& v)
+    bool OpenGLShader::setUniform(const char* pszName, const glm::vec3& v)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -181,7 +139,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, const glm::vec4& v)
+    bool OpenGLShader::setUniform(const char* pszName, const glm::vec4& v)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -195,7 +153,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, const glm::mat3& mat3)
+    bool OpenGLShader::setUniform(const char* pszName, const glm::mat3& mat3)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -211,7 +169,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, const glm::mat4& mat4)
+    bool OpenGLShader::setUniform(const char* pszName, const glm::mat4& mat4)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -227,7 +185,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, const std::vector<glm::mat4>& matList)
+    bool OpenGLShader::setUniform(const char* pszName, const std::vector<glm::mat4>& matList)
     {
         if (matList.empty()) return false;
 
@@ -245,7 +203,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, int count, const glm::vec3* v)
+    bool OpenGLShader::setUniform(const char* pszName, int count, const glm::vec3* v)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -261,7 +219,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, int count, const glm::vec4* v)
+    bool OpenGLShader::setUniform(const char* pszName, int count, const glm::vec4* v)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -277,7 +235,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setUniform(const char* pszName, int count, const glm::mat4* v)
+    bool OpenGLShader::setUniform(const char* pszName, int count, const glm::mat4* v)
     {
         // First gets the location of that variable in the shader using its name
         int loc = glGetUniformLocation(m_programId, pszName);
@@ -293,7 +251,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::setTexture(const char * pszName, std::shared_ptr<Texture> texture, uint32 slotIndex/* = 0 */)
+    bool OpenGLShader::setTexture(const char * pszName, std::shared_ptr<Texture> texture, uint32 slotIndex/* = 0 */)
     {
         if (!pszName || !texture) return false;
 
@@ -311,46 +269,7 @@ namespace blink
         return true;
     }
 
-    Shader::Shader()
-    {
-
-    }
-
-    Shader::~Shader()
-    {
-        destroyProgram();
-    }
-
-    tstring Shader::makeId(StockShaders stockShader, uint32 preprocessDefine)
-    {
-        static const tstring s_stockShaderIds[static_cast<int>(StockShaders::NumberOfStockShaders)] =
-        {
-            "stock::Phong",
-            "stock::Wireframe",
-        };
-
-        return fmt::format("{0}_{1}", s_stockShaderIds[static_cast<int>(stockShader)], preprocessDefine);
-    }
-
-    tstring Shader::makePreprocessDefine(uint32 preprocessDefine)
-    {
-        tstring defineStr = "#version 330 core\n";
-
-        if (preprocessDefine & USE_DIFFUSE_TEXTURE) defineStr += "#define USE_DIFFUSE_TEXTURE\n";
-
-        return defineStr;
-    }
-
-    void Shader::concatShaderSources(std::vector<tstring>& shaderSources, uint32 preprocessDefine, const char* shaderSource)
-    {
-        if (!shaderSource) return;
-
-        tstring defineStr = makePreprocessDefine(preprocessDefine);
-        shaderSources.push_back(defineStr);
-        shaderSources.push_back(shaderSource);
-    }
-
-    void Shader::destroyProgram()
+    void OpenGLShader::destroyProgram()
     {
         if (m_programId != 0)
         {
@@ -359,7 +278,7 @@ namespace blink
         }
     }
 
-    uint32 Shader::compileShader(uint32 shaderType, const std::vector<tstring>& shaderSources)
+    GLuint OpenGLShader::compileShader(uint32 shaderType, const std::vector<tstring>& shaderSources)
     {
         if (shaderSources.empty()) return 0;
 
@@ -388,7 +307,7 @@ namespace blink
         return shaderId;
     }
 
-    bool Shader::getShaderErrorLog(uint32 shaderId)
+    bool OpenGLShader::getShaderErrorLog(GLuint shaderId)
     {
         GLint compileStatus = 0;
         glGetShaderiv(shaderId, GL_COMPILE_STATUS, &compileStatus);
@@ -410,7 +329,7 @@ namespace blink
         return true;
     }
 
-    bool Shader::getProgramErrorLog(uint32 programId)
+    bool OpenGLShader::getProgramErrorLog(GLuint programId)
     {
         GLint linkStatus = 0;
         glGetProgramiv(programId, GL_LINK_STATUS, &linkStatus);

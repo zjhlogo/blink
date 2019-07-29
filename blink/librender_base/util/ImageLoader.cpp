@@ -1,7 +1,14 @@
+/*!
+ * \file ImageLoader.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/26
+ *
+ * 
+ */
 #include "ImageLoader.h"
 #include <Log.h>
 #include <PathParser.h>
-#include <glad/glad.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
@@ -10,6 +17,8 @@
 
 namespace blink
 {
+    ImageLoader::CreateTextureFromRawCb ImageLoader::m_createTextureFromRawData;
+
     ImageLoader::ImageInfo::~ImageInfo()
     {
         if (data)
@@ -34,40 +43,6 @@ namespace blink
         imageInfoOut.data = stbi_load(filePath.c_str(), &imageInfoOut.width, &imageInfoOut.height, &imageInfoOut.channels, 0);
         if (!imageInfoOut.data) return false;
 
-        return true;
-    }
-
-    bool ImageLoader::createTextureFromRawData(TextureInfo& textureInfo, int width, int height, int channels, const void* data)
-    {
-        GLint glFormat = GL_ALPHA;
-        switch (channels)
-        {
-        case 1:
-            glFormat = GL_LUMINANCE;
-            break;
-        case  2:
-            glFormat = GL_LUMINANCE_ALPHA;
-        case 3:
-            glFormat = GL_RGB;
-            break;
-        case 4:
-            glFormat = GL_RGBA;
-            break;
-        default:
-            return false;
-            break;
-        }
-
-        GLuint textureId = 0;
-        glGenTextures(1, &textureId);
-        if (textureId == 0) return false;
-
-        glBindTexture(GL_TEXTURE_2D, textureId);
-        glTexImage2D(GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        textureInfo.textureId = textureId;
-        textureInfo.texSize = glm::ivec2(width, height);
         return true;
     }
 

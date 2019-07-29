@@ -1,9 +1,13 @@
+/*!
+ * \file blink.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #include "blink.h"
-#include "input/InputData.h"
-#include <InstanceManager.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+#include <RenderModule.h>
 
 namespace blink
 {
@@ -12,109 +16,20 @@ namespace blink
         m_ex.systems.update_all(dt);
     }
 
-    GLFWwindow* g_window = nullptr;
-    static glm::ivec2 s_mousePos;
-    App* g_app = nullptr;
-
-    void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
+    int run(RenderModule* renderModule)
     {
-        g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Move, glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
-    }
-
-    void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-    {
-        MouseEvent::Action act = MouseEvent::Action::ButtonDown;
-        if (action == GLFW_PRESS) act = MouseEvent::Action::ButtonDown;
-        else if (action == GLFW_RELEASE) act = MouseEvent::Action::ButtonUp;
-
-        g_app->m_ex.events.emit<MouseEvent>(act, static_cast<MouseEvent::MouseButton>(button), static_cast<uint32>(mods));
-    }
-
-    void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-    {
-        g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Scroll, glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
-    }
-
-    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-    {
-        g_app->m_ex.events.emit<KeyboardEvent>(key, scancode, action, mods);
-    }
-
-    int run(App * app)
-    {
-        /* Initialize the library */
-        if (!glfwInit()) return -1;
-
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
-        /* Create a windowed mode window and its OpenGL context */
-        g_window = glfwCreateWindow(1280, 720, "blink", nullptr, nullptr);
-        if (!g_window)
+        if (!renderModule->createDevice({ 1280, 720 }))
         {
-            glfwTerminate();
+            renderModule->destroyDevice();
             return -1;
         }
 
-        glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        glfwSetCursorPosCallback(g_window, mousePositionCallback);
-        glfwSetMouseButtonCallback(g_window, mouseButtonCallback);
-        glfwSetScrollCallback(g_window, mouseScrollCallback);
-        glfwSetKeyCallback(g_window, keyCallback);
-
-        /* Make the window's context current */
-        glfwMakeContextCurrent(g_window);
-
-        // access gl API after context created
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        while (renderModule->gameLoop())
         {
-            glfwTerminate();
-            return -1;
+            // TODO: sleep ?
         }
 
-        // depth test setup
-        glEnable(GL_DEPTH_TEST);
-
-        // cull face setup
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CW);
-
-        // blend mode setup
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        app->initialize();
-        g_app = app;
-
-        double begin = glfwGetTime();
-
-        /* Loop until the user closes the window */
-        while (!glfwWindowShouldClose(g_window))
-        {
-            /* Poll for and process events */
-            glfwPollEvents();
-
-            double end = glfwGetTime();
-            double duration = end - begin;
-            begin = end;
-
-            glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            app->step(static_cast<float>(duration));
-
-            /* Swap front and back buffers */
-            glfwSwapBuffers(g_window);
-        }
-
-        app->terminate();
-
-        // clean up resources
-        InstanceManagerBase::globalRelease();
-
-        glfwTerminate();
-
+        renderModule->destroyDevice();
         return 0;
     }
 }

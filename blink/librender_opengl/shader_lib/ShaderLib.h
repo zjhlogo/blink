@@ -1,3 +1,11 @@
+/*!
+ * \file ShaderLib.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/26
+ *
+ * 
+ */
 #pragma once
 
 const char* PHONG_VS =
