@@ -5,6 +5,8 @@ project(blink)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 add_subdirectory(blink/libfoundation)
+add_subdirectory(blink/librender_base)
+add_subdirectory(blink/librender_opengl)
 add_subdirectory(blink/libblink)
 add_subdirectory(example/hello_world)
 add_subdirectory(example/random_map)

@@ -1,8 +1,8 @@
 #include "HelloWorldApp.h"
-#include <render/geometry/BoxGeometry.h>
-#include <render/material/PhongMaterial.h>
-#include <render/light/PointLight.h>
-#include <render/OpenGL3RenderSystem.h>
+#include <geometry/BoxGeometry.h>
+#include <material/PhongMaterial.h>
+#include <light/PointLight.h>
+#include <OpenGLRenderSystem.h>
 #include <scene/SceneSystem.h>
 #include <camera/CameraSystem.h>
 
@@ -22,9 +22,9 @@ entityx::Entity createBox(entityx::EntityManager& entities, std::shared_ptr<blin
 
 bool HelloWorldApp::initialize()
 {
+    m_ex.systems.add<blink::OpenGLRenderSystem>();
     m_ex.systems.add<blink::CameraSystem>();
     m_ex.systems.add<blink::SceneSystem>();
-    m_ex.systems.add<blink::OpenGL3RenderSystem>();
     m_ex.systems.configure();
 
     // add cubes

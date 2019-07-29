@@ -36,6 +36,8 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/glad/include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/imgui>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/libfoundation>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_base>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_opengl>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/libblink>
 	)
 
@@ -47,6 +49,8 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	libglad
 	libimgui
 	libfoundation
+    librender_base
+    librender_opengl
 	libblink
 	)
 

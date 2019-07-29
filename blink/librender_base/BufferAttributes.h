@@ -32,11 +32,10 @@ namespace blink
         class AttributeItem
         {
         public:
-            uint32 m_size;
-            AttributeItemType m_attrType;
-            uint32 m_glType;
-            uint32 m_offset;
-            tstring m_name;
+            uint32 size;
+            AttributeItemType type;
+            uint32 offset;
+            tstring name;
         };
 
         enum class StockAttributes
@@ -54,10 +53,10 @@ namespace blink
         };
 
     public:
-        BufferAttributes() {};
-        virtual ~BufferAttributes() {};
+        BufferAttributes();
+        virtual ~BufferAttributes();
 
-        inline uint32 getStride() const { return m_attributeItems[m_numItems].m_offset; };
+        inline uint32 getStride() const { return m_attributeItems[m_numItems].offset; };
         inline int getNumAttributeItems() const { return m_numItems; };
 
         const AttributeItem* getAttributeItem(int nIndex) const;
@@ -69,7 +68,6 @@ namespace blink
         static std::shared_ptr<BufferAttributes> fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems);
 
     private:
-        static uint32 getGlType(AttributeItemType eType);
         static uint32 getAttributeItemSize(uint32 nSize, AttributeItemType eType);
         static AttributeItemType getAttributeItemType(const tstring& strType);
 
@@ -77,51 +75,5 @@ namespace blink
         int m_numItems{};
         AttributeItem m_attributeItems[MAX_ATTRIBUTE_ITEMS + 1];
 
-    };
-
-    // pre-define vertex attributes
-    class VertexPos3
-    {
-    public:
-        float x, y, z;      // pos3
-    };
-
-    class VertexPos3Color
-    {
-    public:
-        float x, y, z;      // pos3
-        uint32 color;       // color
-    };
-
-    class VertexPos3Uv2
-    {
-    public:
-        float x, y, z;      // pos3
-        float u, v;         // uv2
-    };
-
-    class VertexPos3Uv2Normal
-    {
-    public:
-        float x, y, z;      // pos3
-        float u, v;         // uv2
-        float nx, ny, nz;   // normal
-    };
-
-    class VertexPos3Uv2Color
-    {
-    public:
-        float x, y, z;      // pos3
-        float u, v;         // uv2
-        uint32 color;       // color
-    };
-
-    class VertexPos3Uv2NormalTangent
-    {
-    public:
-        float x, y, z;      // pos3
-        float u, v;         // uv2
-        float nx, ny, nz;   // normal
-        float tx, ty, tz;   // tangent
     };
 }
