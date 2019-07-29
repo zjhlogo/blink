@@ -32,7 +32,7 @@ namespace blink
         virtual bool setUniform(const char* pszName, int count, const glm::vec4* v) override;
         virtual bool setUniform(const char* pszName, int count, const glm::mat4* v) override;
 
-        virtual bool setTexture(const char* pszName, std::shared_ptr<Texture> texture, uint32 slotIndex = 0) override;
+        virtual bool setTexture(const char* pszName, Texture* texture, uint32 slotIndex = 0) override;
 
     private:
         void destroyProgram();

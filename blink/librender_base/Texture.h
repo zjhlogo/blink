@@ -35,9 +35,8 @@ namespace blink
     public:
         Texture(const tstring& id);
         virtual ~Texture();
-        const tstring& getId() const { return m_id; };
 
-        virtual uint32 getTextureId() const = 0;
+        const tstring& getId() const { return m_id; };
 
     private:
         tstring m_id;

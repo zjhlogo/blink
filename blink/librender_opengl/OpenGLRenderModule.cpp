@@ -10,6 +10,10 @@
 #include "util/ImageLoader.h"
 #include "GlConfig.h"
 
+#include "OpenGLBufferObject.h"
+#include "OpenGLVertexBuffer.h"
+#include "OpenGLShader.h"
+
 namespace blink
 {
     static bool createTextureFromRawData(ImageLoader::TextureInfo& textureInfo, int width, int height, int channels, const void* data)
@@ -78,37 +82,47 @@ namespace blink
 
     BufferObject* OpenGLRenderModule::createBufferObject(BufferObject::BufferType bufferType)
     {
-
+        auto bufferObject = new OpenGLBufferObject(bufferType);
+        return bufferObject;
     }
 
     bool OpenGLRenderModule::destroyBufferObject(BufferObject* bufferObject)
     {
+        auto openglBufferObject = dynamic_cast<OpenGLBufferObject*>(bufferObject);
+        if (!openglBufferObject) return false;
 
+        SAFE_DELETE(openglBufferObject);
+        return true;
     }
 
-    VertexBuffer* OpenGLRenderModule::createVertexBuffer()
+    VertexBuffer* OpenGLRenderModule::createVertexBuffer(BufferAttributes* attributes)
     {
-
+        auto vertexBuffer = new OpenGLVertexBuffer(attributes);
+        return vertexBuffer;
     }
 
     bool OpenGLRenderModule::destroyVertexBuffer(VertexBuffer* vertexBuffer)
     {
+        auto openglVertexBuffer = dynamic_cast<OpenGLVertexBuffer*>(vertexBuffer);
+        if (!openglVertexBuffer) return false;
 
+        SAFE_DELETE(openglVertexBuffer);
+        return true;
     }
 
     Shader* OpenGLRenderModule::createShaderFromStock(Shader::StockShaders stockShader, uint32 preprocessDefine)
     {
-
+        return nullptr;
     }
 
     Shader* OpenGLRenderModule::createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
     {
-
+        return nullptr;
     }
 
     bool OpenGLRenderModule::destroyShader(Shader* shader)
     {
-
+        return false;
     }
 
     bool OpenGLRenderModule::createDevice(const glm::ivec2& deviceSize)
@@ -180,6 +194,9 @@ namespace blink
         double end = glfwGetTime();
         double duration = end - begin;
         begin = end;
+
+        glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 //         app->step(static_cast<float>(duration));
 

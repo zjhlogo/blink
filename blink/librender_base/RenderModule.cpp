@@ -10,9 +10,13 @@
 
 namespace blink
 {
-    RenderModule::CreateBufferObjectCb RenderModule::createBuffer{};
-    RenderModule::DestroyBufferObjectCb RenderModule::destroyBuffer{};
+    RenderModule::CreateBufferObjectCb RenderModule::createBufferObject{};
+    RenderModule::DestroyBufferObjectCb RenderModule::destroyBufferObject{};
     RenderModule::CreateVertexBufferCb RenderModule::createVertexBuffer{};
+    RenderModule::DestroyVertexBufferCb RenderModule::destroyVertexBuffer{};
+    RenderModule::CreateShaderFromStockCb RenderModule::createShaderFromStock{};
+    RenderModule::CreateShaderFromBufferCb RenderModule::createShaderFromBuffer{};
+    RenderModule::DestroyShaderCb RenderModule::destroyShader{};
 
     RenderModule::RenderModule()
     {
@@ -23,5 +27,4 @@ namespace blink
     {
 
     }
-
 }

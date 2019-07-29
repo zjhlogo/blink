@@ -8,7 +8,6 @@
  */
 #pragma once
 #include <BaseTypes.h>
-#include <memory>
 
 namespace blink
 {
@@ -61,11 +60,11 @@ namespace blink
 
         const AttributeItem* getAttributeItem(int nIndex) const;
         const AttributeItem* getAttributeItemByName(const tstring& name) const;
-        bool isEqual(const std::shared_ptr<BufferAttributes> pVertexAttrs) const;
+        bool isEqual(const BufferAttributes* pVertexAttrs) const;
 
-        static std::shared_ptr<BufferAttributes> fromFile(const tstring& filePath);
-        static std::shared_ptr<BufferAttributes> fromStock(StockAttributes stockAttrs);
-        static std::shared_ptr<BufferAttributes> fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems);
+        static BufferAttributes* fromFile(const tstring& filePath);
+        static BufferAttributes* fromStock(StockAttributes stockAttrs);
+        static BufferAttributes* fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems);
 
     private:
         static uint32 getAttributeItemSize(uint32 nSize, AttributeItemType eType);

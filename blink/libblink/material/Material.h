@@ -1,7 +1,14 @@
+/*!
+ * \file Material.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
 #include <BaseTypes.h>
 #include <BaseTypesGlm.h>
-#include <memory>
 
 namespace blink
 {
@@ -15,7 +22,7 @@ namespace blink
         {
         public:
             tstring name;
-            std::shared_ptr<Texture> texture;
+            Texture* texture;
             uint32 index{};
         };
 
@@ -25,21 +32,21 @@ namespace blink
         Material();
         virtual ~Material();
 
-        virtual std::shared_ptr<Shader> getShader() { return m_shader; };
+        virtual Shader* getShader() { return m_shader; };
 
         void setDiffuseColor(const glm::vec3& diffuseColor) { m_diffuseColor = diffuseColor; }
         const glm::vec3& getDiffuseColor() const { return m_diffuseColor; }
 
-        std::shared_ptr<Texture> setTexture(const tstring& name, const tstring& filePath, uint32 index);
-        std::shared_ptr<Texture> setTexture(const tstring& name, std::shared_ptr<Texture> texture, uint32 index);
-        std::shared_ptr<Texture> getTexture(uint32 index);
-        std::shared_ptr<Texture> getTexture(const tstring& name);
+        Texture* setTexture(const tstring& name, const tstring& filePath, uint32 index);
+        Texture* setTexture(const tstring& name, Texture* texture, uint32 index);
+        Texture* getTexture(uint32 index);
+        Texture* getTexture(const tstring& name);
 
-        virtual void setupShaderUniforms(std::shared_ptr<Shader> shader) = 0;
-        virtual void setupShaderSampler(std::shared_ptr<Shader> shader);
+        virtual void setupShaderUniforms(Shader* shader) = 0;
+        virtual void setupShaderSampler(Shader* shader);
 
     protected:
-        std::shared_ptr<Shader> m_shader{};
+        Shader* m_shader{};
         glm::vec3 m_diffuseColor{ VEC3_ONE };
         TexInfo m_texInfos[MAX_TEXTURES];
 

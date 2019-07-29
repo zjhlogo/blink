@@ -1,5 +1,13 @@
+/*!
+ * \file RenderData.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
-#include "geometry/BufferGeometry.h"
+#include <BufferGeometry.h>
 #include "material/Material.h"
 #include "light/Light.h"
 
@@ -7,7 +15,7 @@ namespace blink
 {
     struct MeshData
     {
-        MeshData(std::shared_ptr<BufferGeometry> geo, std::shared_ptr<Material> mat)
+        MeshData(BufferGeometry* geo, Material* mat)
             :geometry(geo)
             , material(mat)
         {
@@ -17,13 +25,13 @@ namespace blink
         {
         }
 
-        std::shared_ptr<BufferGeometry> geometry;
-        std::shared_ptr<Material> material;
+        BufferGeometry* geometry;
+        Material* material;
     };
 
     struct LightData
     {
-        LightData(std::shared_ptr<Light> lt)
+        LightData(Light* lt)
             : light(lt)
         {
         }
@@ -32,6 +40,6 @@ namespace blink
         {
         }
 
-        std::shared_ptr<Light> light;
+        Light* light;
     };
 }

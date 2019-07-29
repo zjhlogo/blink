@@ -12,8 +12,12 @@
 
 namespace blink
 {
+    class OpenGLRenderModule;
+
     class OpenGLBufferObject : public BufferObject
     {
+        friend OpenGLRenderModule;
+
     public:
         OpenGLBufferObject(BufferType bufferType);
         virtual ~OpenGLBufferObject();

@@ -1,3 +1,11 @@
+/*!
+ * \file WireframeMaterial.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
 #include "Material.h"
 
@@ -9,7 +17,7 @@ namespace blink
         WireframeMaterial();
         virtual ~WireframeMaterial();
 
-        virtual void setupShaderUniforms(std::shared_ptr<Shader> shader) override;
+        virtual void setupShaderUniforms(Shader* shader) override;
 
     };
 }

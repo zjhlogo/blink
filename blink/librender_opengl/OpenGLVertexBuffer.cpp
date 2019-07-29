@@ -1,18 +1,18 @@
 /*!
- * \file OpenGLVertexBufferObject.cpp
+ * \file OpenGLVertexBuffer.cpp
  *
  * \author zjhlogo
  * \date 2019/07/29
  *
  * 
  */
-#include "OpenGLVertexBufferObject.h"
+#include "OpenGLVertexBuffer.h"
 #include "GlConfig.h"
 #include <RenderModule.h>
 
 namespace blink
 {
-    OpenGLVertexBufferObject::OpenGLVertexBufferObject(const BufferAttributes* attributes)
+    OpenGLVertexBuffer::OpenGLVertexBuffer(const BufferAttributes* attributes)
         :VertexBuffer(attributes)
     {
         // create vao
@@ -24,7 +24,7 @@ namespace blink
         glBindVertexArray(m_vertexArray);
         GL_ERROR_CHECK();
 
-        m_vertexBuffer = RenderModule::createBuffer(BufferObject::BufferType::ArrayBuffer);
+        m_vertexBuffer = RenderModule::createBufferObject(BufferObject::BufferType::ArrayBuffer);
         assert(m_vertexBuffer);
 
         // enable vertex attribute array
@@ -42,28 +42,28 @@ namespace blink
         // TODO: unbind vao
     }
 
-    OpenGLVertexBufferObject::~OpenGLVertexBufferObject()
+    OpenGLVertexBuffer::~OpenGLVertexBuffer()
     {
-        RenderModule::destroyBuffer(m_vertexBuffer);
+        RenderModule::destroyBufferObject(m_vertexBuffer);
         m_vertexBuffer = nullptr;
 
         glDeleteVertexArrays(1, &m_vertexArray);
         m_vertexArray = 0;
     }
 
-    bool OpenGLVertexBufferObject::uploadBuffer(const void* buffer, uint32 size, BufferObject::Usage usage)
+    bool OpenGLVertexBuffer::uploadBuffer(const void* buffer, uint32 size, BufferObject::Usage usage)
     {
         assert(m_vertexBuffer);
         return m_vertexBuffer->uploadBufferData(buffer, size, usage);
     }
 
-    VertexBuffer* OpenGLVertexBufferObject::createVertexBuffer(const BufferAttributes* attributes)
+    VertexBuffer* OpenGLVertexBuffer::createVertexBuffer(const BufferAttributes* attributes)
     {
-        auto vertexBuffer = new OpenGLVertexBufferObject(attributes);
+        auto vertexBuffer = new OpenGLVertexBuffer(attributes);
         return vertexBuffer;
     }
 
-    GLenum OpenGLVertexBufferObject::getGLType(BufferAttributes::AttributeItemType type)
+    GLenum OpenGLVertexBuffer::getGLType(BufferAttributes::AttributeItemType type)
     {
         static const GLenum GL_TYPE_MAP[static_cast<int>(BufferAttributes::AttributeItemType::NumberOfAttributeItemType)] =
         {

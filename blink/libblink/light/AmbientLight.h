@@ -1,3 +1,11 @@
+/*!
+ * \file AmbientLight.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #include "Light.h"
 
 namespace blink

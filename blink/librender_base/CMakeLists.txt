@@ -14,6 +14,8 @@ util/ImageLoader.h
 util/stb_image.h
 BufferAttributes.cpp
 BufferAttributes.h
+BufferGeometry.cpp
+BufferGeometry.h
 BufferObject.cpp
 BufferObject.h
 Geometry.cpp

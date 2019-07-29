@@ -9,7 +9,6 @@
 #pragma once
 #include <BaseTypes.h>
 #include <BaseTypesGlm.h>
-#include <memory>
 #include <vector>
 
 namespace blink
@@ -50,7 +49,7 @@ namespace blink
             return setUniform(pszName, t_size, v);
         }
 
-        virtual bool setTexture(const char* pszName, std::shared_ptr<Texture> texture, uint32 slotIndex = 0) = 0;
+        virtual bool setTexture(const char* pszName, Texture* texture, uint32 slotIndex = 0) = 0;
 
     protected:
         Shader(const tstring& id);

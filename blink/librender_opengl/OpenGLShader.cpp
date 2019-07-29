@@ -251,20 +251,20 @@ namespace blink
         return true;
     }
 
-    bool OpenGLShader::setTexture(const char * pszName, std::shared_ptr<Texture> texture, uint32 slotIndex/* = 0 */)
+    bool OpenGLShader::setTexture(const char * pszName, Texture* texture, uint32 slotIndex/* = 0 */)
     {
         if (!pszName || !texture) return false;
 
-        // TODO: optimize it by cache the operation, do not perform it everytime
-        int loc = glGetUniformLocation(m_programId, pszName);
-        GL_ERROR_CHECK();
-        if (loc == -1) return false;
-
-        glUniform1i(loc, slotIndex);
-
-        glActiveTexture(GL_TEXTURE0 + slotIndex);
-        glBindTexture(GL_TEXTURE_2D, texture->getTextureId());
-        GL_ERROR_CHECK();
+//         // TODO: optimize it by cache the operation, do not perform it everytime
+//         int loc = glGetUniformLocation(m_programId, pszName);
+//         GL_ERROR_CHECK();
+//         if (loc == -1) return false;
+// 
+//         glUniform1i(loc, slotIndex);
+// 
+//         glActiveTexture(GL_TEXTURE0 + slotIndex);
+//         glBindTexture(GL_TEXTURE_2D, texture->getTextureId());
+//         GL_ERROR_CHECK();
 
         return true;
     }

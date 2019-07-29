@@ -23,7 +23,7 @@ namespace blink
         BufferObject* createBufferObject(BufferObject::BufferType bufferType);
         bool destroyBufferObject(BufferObject* bufferObject);
 
-        VertexBuffer* createVertexBuffer();
+        VertexBuffer* createVertexBuffer(BufferAttributes* attributes);
         bool destroyVertexBuffer(VertexBuffer* vertexBuffer);
 
         Shader* createShaderFromStock(Shader::StockShaders stockShader, uint32 preprocessDefine);

@@ -1,5 +1,13 @@
+/*!
+ * \file PointLight.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #include "PointLight.h"
-#include "../shader/Shader.h"
+#include <Shader.h>
 
 namespace blink
 {

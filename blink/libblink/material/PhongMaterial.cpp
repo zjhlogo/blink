@@ -1,5 +1,13 @@
+/*!
+ * \file PhongMaterial.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #include "PhongMaterial.h"
-#include "../shader/Shader.h"
+#include <RenderModule.h>
 
 namespace blink
 {
@@ -13,7 +21,7 @@ namespace blink
 
     }
 
-    std::shared_ptr<Shader> PhongMaterial::getShader()
+    Shader* PhongMaterial::getShader()
     {
         if (!m_shader)
         {
@@ -21,12 +29,12 @@ namespace blink
 
             if (getTexture("tex_diffuse")) defineFlag |= Shader::USE_DIFFUSE_TEXTURE;
 
-            m_shader = Shader::fromStock(Shader::StockShaders::Phong, defineFlag);
+            m_shader = RenderModule::createShaderFromStock(Shader::StockShaders::Phong, defineFlag);
         }
         return m_shader;
     }
 
-    void PhongMaterial::setupShaderUniforms(std::shared_ptr<Shader> shader)
+    void PhongMaterial::setupShaderUniforms(Shader* shader)
     {
         shader->setUniform("u_diffuseColor", getDiffuseColor());
     }

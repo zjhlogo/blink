@@ -1,5 +1,13 @@
+/*!
+ * \file Light.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
-#include "../../scene/TransformData.h"
+#include "../scene/TransformData.h"
 #include <memory>
 
 namespace blink

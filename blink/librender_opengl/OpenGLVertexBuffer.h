@@ -1,5 +1,5 @@
 /*!
- * \file OpenGLVertexBufferObject.h
+ * \file OpenGLVertexBuffer.h
  *
  * \author zjhlogo
  * \date 2019/07/29
@@ -12,11 +12,15 @@
 
 namespace blink
 {
-    class OpenGLVertexBufferObject : public VertexBuffer
+    class OpenGLRenderModule;
+
+    class OpenGLVertexBuffer : public VertexBuffer
     {
+        friend OpenGLRenderModule;
+
     public:
-        OpenGLVertexBufferObject(const BufferAttributes* attributes);
-        virtual ~OpenGLVertexBufferObject();
+        OpenGLVertexBuffer(const BufferAttributes* attributes);
+        virtual ~OpenGLVertexBuffer();
 
         virtual bool uploadBuffer(const void* buffer, uint32 size, BufferObject::Usage usage) override;
 

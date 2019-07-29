@@ -1,3 +1,11 @@
+/*!
+ * \file PlaneGeometry.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
 #include "BufferGeometry.h"
 #include "BufferAttributes.h"

@@ -1,6 +1,14 @@
+/*!
+ * \file BoxGeometry.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #include "BoxGeometry.h"
 #include "GeometryUtils.h"
-#include <glad/glad.h>
+#include <PredefinedVertexAttributes.h>
 
 namespace blink
 {
@@ -58,7 +66,7 @@ namespace blink
         {
             std::vector<VertexPos3Uv2Normal> verts;
             buildBox(verts, indis, width, height, depth, widthSegments, heightSegments, depthSegments);
-            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), static_cast<uint32>(sizeof(verts[0])*verts.size()), GL_STATIC_DRAW);
+            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), static_cast<uint32>(sizeof(verts[0])*verts.size()));
         }
         break;
         case BufferAttributes::StockAttributes::Pos3Uv2NormalTangent:
@@ -66,7 +74,7 @@ namespace blink
             std::vector<VertexPos3Uv2NormalTangent> verts;
             buildBox(verts, indis, width, height, depth, widthSegments, heightSegments, depthSegments);
             GeometryUtils::buildTangent(verts, indis);
-            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), static_cast<uint32>(sizeof(verts[0])*verts.size()), GL_STATIC_DRAW);
+            uploadVertexBuffer(BufferAttributes::fromStock(vertexAttribute), verts.data(), static_cast<uint32>(sizeof(verts[0])*verts.size()));
         }
         break;
         default:
@@ -74,7 +82,7 @@ namespace blink
             break;
         }
 
-        uploadIndexBuffer(indis.data(), static_cast<uint32>(indis.size()), GL_STATIC_DRAW);
+        uploadIndexBuffer(indis.data(), static_cast<uint32>(indis.size()));
     }
 
     BoxGeometry::~BoxGeometry()

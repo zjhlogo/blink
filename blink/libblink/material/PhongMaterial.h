@@ -1,3 +1,11 @@
+/*!
+ * \file PhongMaterial.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
 #include "Material.h"
 
@@ -9,8 +17,8 @@ namespace blink
         PhongMaterial();
         virtual ~PhongMaterial();
 
-        std::shared_ptr<Shader> getShader() override;
-        void setupShaderUniforms(std::shared_ptr<Shader> shader) override;
+        virtual Shader* getShader() override;
+        virtual void setupShaderUniforms(Shader* shader) override;
 
     };
 }

@@ -1,13 +1,21 @@
+/*!
+ * \file HelloWorldApp.h
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #pragma once
 #include <blink.h>
 
 class HelloWorldApp : public blink::App
 {
 public:
-    HelloWorldApp() {};
-    virtual ~HelloWorldApp() {};
+    HelloWorldApp();
+    virtual ~HelloWorldApp();
 
-	bool initialize() override;
-	void terminate() override;
+	virtual bool initialize() override;
+	virtual void terminate() override;
 
 };

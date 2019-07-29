@@ -12,8 +12,6 @@
 
 namespace blink
 {
-    static InstanceManager<tstring, BufferAttributes> s_instanceManager;
-
     BufferAttributes::BufferAttributes()
     {
 
@@ -43,7 +41,7 @@ namespace blink
         return nullptr;
     }
 
-    bool BufferAttributes::isEqual(const std::shared_ptr<BufferAttributes> pVertexAttrs) const
+    bool BufferAttributes::isEqual(const BufferAttributes* pVertexAttrs) const
     {
         if (!pVertexAttrs) return false;
 
@@ -88,11 +86,8 @@ namespace blink
         return AttributeItemType::Unknown;
     }
 
-    std::shared_ptr<BufferAttributes> BufferAttributes::fromFile(const tstring & filePath)
+    BufferAttributes* BufferAttributes::fromFile(const tstring & filePath)
     {
-        auto exitInst = s_instanceManager.insertInstance("file::" + filePath);
-        if (exitInst) return exitInst;
-
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) return nullptr;
 
@@ -131,7 +126,7 @@ namespace blink
         return fromAttributeItems("file::" + filePath, attrItems);
     }
 
-    std::shared_ptr<BufferAttributes> BufferAttributes::fromStock(StockAttributes stockAttrs)
+    BufferAttributes* BufferAttributes::fromStock(StockAttributes stockAttrs)
     {
         static AttributeItem s_attrPos3[] =
         {
@@ -210,11 +205,8 @@ namespace blink
         return fromAttributeItems(s_stockAttributeId[static_cast<int>(stockAttrs)], s_stockAttributeItems[static_cast<int>(stockAttrs)]);
     }
 
-    std::shared_ptr<BufferAttributes> BufferAttributes::fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems)
+    BufferAttributes* BufferAttributes::fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems)
     {
-        auto exitInst = s_instanceManager.insertInstance(id);
-        if (exitInst) return exitInst;
-
         int nNumItems = 0;
         const AttributeItem* pCurrItem = pAttrItems;
         while (pCurrItem && pCurrItem->type != AttributeItemType::Unknown)
@@ -225,7 +217,7 @@ namespace blink
 
         if (nNumItems <= 0 || nNumItems > MAX_ATTRIBUTE_ITEMS) return nullptr;
 
-        std::shared_ptr<BufferAttributes> bufferAttributes = std::make_shared<BufferAttributes>();
+        BufferAttributes* bufferAttributes = new BufferAttributes();
         bufferAttributes->m_numItems = nNumItems;
 
         uint32 currOffset = 0;
@@ -243,6 +235,6 @@ namespace blink
         bufferAttributes->m_attributeItems[nNumItems].offset = currOffset;
         bufferAttributes->m_attributeItems[nNumItems].name.clear();
 
-        return s_instanceManager.insertInstance(id, bufferAttributes);
+        return bufferAttributes;
     }
 }

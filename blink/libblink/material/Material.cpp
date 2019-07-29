@@ -1,6 +1,14 @@
+/*!
+ * \file Material.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #include "Material.h"
-#include "../shader/Shader.h"
-#include "../texture/Texture2D.h"
+#include <Shader.h>
+#include <Texture.h>
 
 namespace blink
 {
@@ -17,12 +25,13 @@ namespace blink
 
     }
 
-    std::shared_ptr<Texture> Material::setTexture(const tstring& name, const tstring& filePath, uint32 index)
+    Texture* Material::setTexture(const tstring& name, const tstring& filePath, uint32 index)
     {
-        return setTexture(name, Texture2D::fromFile(filePath), index);
+        return nullptr;
+// TODO:        return setTexture(name, Texture2D::fromFile(filePath), index);
     }
 
-    std::shared_ptr<Texture> Material::setTexture(const tstring & name, std::shared_ptr<Texture> texture, uint32 index)
+    Texture* Material::setTexture(const tstring & name, Texture* texture, uint32 index)
     {
         if (!texture) return nullptr;
 
@@ -38,14 +47,14 @@ namespace blink
         return texture;
     }
 
-    std::shared_ptr<Texture> Material::getTexture(uint32 index)
+    Texture* Material::getTexture(uint32 index)
     {
         if (index < 0 || index >= MAX_TEXTURES) return nullptr;
 
         return m_texInfos[index].texture;
     }
 
-    std::shared_ptr<Texture> Material::getTexture(const tstring & name)
+    Texture* Material::getTexture(const tstring & name)
     {
         for (int i = 0; i < MAX_TEXTURES; ++i)
         {
@@ -58,7 +67,7 @@ namespace blink
         return nullptr;
     }
 
-    void Material::setupShaderSampler(std::shared_ptr<Shader> shader)
+    void Material::setupShaderSampler(Shader* shader)
     {
         for (int i = 0; i < MAX_TEXTURES; ++i)
         {

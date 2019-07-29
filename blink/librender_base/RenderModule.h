@@ -21,12 +21,12 @@ namespace blink
         virtual ~RenderModule();
 
         typedef BufferObject* (*CreateBufferObjectCb)(BufferObject::BufferType bufferType);
-        static CreateBufferObjectCb createBuffer;
+        static CreateBufferObjectCb createBufferObject;
 
         typedef bool (*DestroyBufferObjectCb)(BufferObject* bufferObject);
-        static DestroyBufferObjectCb destroyBuffer;
+        static DestroyBufferObjectCb destroyBufferObject;
 
-        typedef VertexBuffer* (*CreateVertexBufferCb)();
+        typedef VertexBuffer* (*CreateVertexBufferCb)(BufferAttributes* attributes);
         static CreateVertexBufferCb createVertexBuffer;
 
         typedef bool(*DestroyVertexBufferCb)(VertexBuffer* vertexBuffer);

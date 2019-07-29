@@ -21,8 +21,8 @@ OpenGLRenderModule.cpp
 OpenGLRenderModule.h
 OpenGLShader.cpp
 OpenGLShader.h
-OpenGLVertexBufferObject.cpp
-OpenGLVertexBufferObject.h
+OpenGLVertexBuffer.cpp
+OpenGLVertexBuffer.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

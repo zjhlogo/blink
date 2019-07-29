@@ -1,5 +1,13 @@
+/*!
+ * \file AmbientLight.cpp
+ *
+ * \author zjhlogo
+ * \date 2019/07/29
+ *
+ * 
+ */
 #include "AmbientLight.h"
-#include "../shader/Shader.h"
+#include <Shader.h>
 
 namespace blink
 {
