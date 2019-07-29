@@ -18,6 +18,7 @@ namespace blink
     class OpenGLRenderModule: public RenderModule
     {
     public:
+        OpenGLRenderModule();
         virtual ~OpenGLRenderModule();
 
         BufferObject* createBufferObject(BufferObject::BufferType bufferType);

@@ -50,13 +50,12 @@ namespace blink
         return true;
     }
 
-
-    void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
+    static void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
     {
 //        g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Move, glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
     }
 
-    void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     {
 //         MouseEvent::Action act = MouseEvent::Action::ButtonDown;
 //         if (action == GLFW_PRESS) act = MouseEvent::Action::ButtonDown;
@@ -65,14 +64,19 @@ namespace blink
 //         g_app->m_ex.events.emit<MouseEvent>(act, static_cast<MouseEvent::MouseButton>(button), static_cast<uint32>(mods));
     }
 
-    void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+    static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     {
 //         g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Scroll, glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
     }
 
-    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
 //         g_app->m_ex.events.emit<KeyboardEvent>(key, scancode, action, mods);
+    }
+
+    OpenGLRenderModule::OpenGLRenderModule()
+    {
+
     }
 
     OpenGLRenderModule::~OpenGLRenderModule()
@@ -134,7 +138,7 @@ namespace blink
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
         /* Create a windowed mode window and its OpenGL context */
-        m_window = glfwCreateWindow(1280, 720, "blink", nullptr, nullptr);
+        m_window = glfwCreateWindow(deviceSize.x, deviceSize.y, "blink", nullptr, nullptr);
         if (!m_window) return false;
 
         glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
