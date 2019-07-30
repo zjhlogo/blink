@@ -35,9 +35,11 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:entityx,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/glad/include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/imgui>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/source>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/libfoundation>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_base>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_opengl>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_vulkan>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/libblink>
 	)
 
@@ -48,9 +50,11 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	entityx
 	libglad
 	libimgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/lib/vulkan-1.lib
 	libfoundation
     librender_base
     librender_opengl
+    librender_vulkan
 	libblink
 	)
 

@@ -7,7 +7,7 @@
  * 
  */
 #include "HelloWorldApp.h"
-#include <OpenGLRenderModule.h>
+#include <VulkanRenderModule.h>
 #include <geometry/BoxGeometry.h>
 #include <material/PhongMaterial.h>
 #include <light/PointLight.h>
@@ -69,6 +69,6 @@ void HelloWorldApp::terminate()
 
 int main(int argc, char** argv)
 {
-    blink::OpenGLRenderModule renderModule;
+    blink::VulkanRenderModule renderModule;
     return blink::run(&renderModule);
 }
