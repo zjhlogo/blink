@@ -39,32 +39,42 @@ namespace blink
         bool createWindow(const glm::ivec2& windowSize);
         void destroyWindow();
 
-        bool createContext();
-        void destroyContext();
+        bool createInstance();
+        void destroyInstance();
+
+        bool setupDebugMessenger();
+        void destroyDebugMessenger();
 
         bool createSurface();
         void destroySurface();
+
+        bool pickPhysicalDevice();
+
+        bool createLogicalDevice();
+        void destroyLogicalDevice();
 
         bool createSwapchain();
         void destroySwapchain();
 
         const std::vector<const char*>& getRequiredValidationLayers();
-        bool checkValidationLayerSupported();
+        bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers);
 
         const std::vector<const char*>& getRequiredExtensions();
-        bool checkExtensionsSupported();
+        bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions);
 
-        uint32_t getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices);
-        uint32_t getBestFitQueueFamilyPropertyIndex(const std::vector<vk::QueueFamilyProperties>& queueFamilies);
+        int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices);
+        bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily, int& presentFamily, const vk::PhysicalDevice& physicalDevice, const vk::SurfaceKHR& surface, const std::vector<vk::QueueFamilyProperties>& queueFamilies);
 
     private:
         GLFWwindow* m_window{};
 
         vk::Instance m_instance;
+        vk::DispatchLoaderDynamic m_dispatchLoader;
         vk::DebugUtilsMessengerEXT m_debugMessenger;
         vk::PhysicalDevice m_physicalDevice;
         vk::Device m_logicalDevice;
-        vk::Queue m_queue;
+        vk::Queue m_graphicsQueue;
+        vk::Queue m_presentQueue;
 
         vk::SurfaceKHR m_surface;
 
