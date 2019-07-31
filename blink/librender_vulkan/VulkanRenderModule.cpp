@@ -96,6 +96,8 @@ namespace blink
 
     bool VulkanRenderModule::createWindow(const glm::ivec2& windowSize)
     {
+        m_deviceSize = windowSize;
+
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
@@ -270,18 +272,98 @@ namespace blink
 
     bool VulkanRenderModule::createSwapchain()
     {
-        std::vector<vk::SurfaceFormatKHR> surfaceFormats = m_physicalDevice.getSurfaceFormatsKHR(m_surface);
+        // select format
+        std::vector<vk::SurfaceFormatKHR> formats = m_physicalDevice.getSurfaceFormatsKHR(m_surface);
+        vk::SurfaceFormatKHR selFormat = formats[0];
+        for (const auto& format : formats)
+        {
+            if (format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+            {
+                selFormat = format;
+                break;
+            }
+        }
 
-        // always select first available color format
-        vk::Format colorFormat = surfaceFormats[0].format;
-        vk::ColorSpaceKHR colorSpace = surfaceFormats[0].colorSpace;
+        // select present mode
+        std::vector<vk::PresentModeKHR> presentModes = m_physicalDevice.getSurfacePresentModesKHR(m_surface);
+        vk::PresentModeKHR selPresentMode = vk::PresentModeKHR::eFifo;
+        for (const auto& presentMode : presentModes)
+        {
+            if (presentMode == vk::PresentModeKHR::eMailbox)
+            {
+                selPresentMode = presentMode;
+                break;
+            }
+            else if (presentMode == vk::PresentModeKHR::eImmediate)
+            {
+                selPresentMode = presentMode;
+            }
+        }
 
-        return false;
+        // select extent
+        vk::SurfaceCapabilitiesKHR capabilities = m_physicalDevice.getSurfaceCapabilitiesKHR(m_surface);
+        vk::Extent2D selExtent;
+        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+        {
+            selExtent = capabilities.currentExtent;
+        }
+        else
+        {
+            vk::Extent2D actualExtent(m_deviceSize.x, m_deviceSize.y);
+            actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+            actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
+            selExtent = actualExtent;
+        }
+
+        // select image count
+        uint32_t imageCount = capabilities.minImageCount + 1;
+        if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) imageCount = capabilities.maxImageCount;
+
+        vk::SwapchainCreateInfoKHR createInfo;
+        createInfo.surface = m_surface;
+        createInfo.minImageCount = imageCount;
+        createInfo.imageFormat = selFormat.format;
+        createInfo.imageColorSpace = selFormat.colorSpace;
+        createInfo.imageExtent = selExtent;
+        createInfo.imageArrayLayers = 1;
+        createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
+
+        // get best fit queue index from queue families
+        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = m_physicalDevice.getQueueFamilyProperties();
+
+        int graphicsFamilyIndex{};
+        int presentFamilyIndex{};
+        getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, m_physicalDevice, m_surface, queueFamilyProperties);
+        if (graphicsFamilyIndex != presentFamilyIndex)
+        {
+            uint32_t queueFamilyIndexs[2] = { graphicsFamilyIndex, presentFamilyIndex };
+            createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+            createInfo.queueFamilyIndexCount = 2;
+            createInfo.pQueueFamilyIndices = queueFamilyIndexs;
+        }
+        else
+        {
+            createInfo.imageSharingMode = vk::SharingMode::eExclusive;
+        }
+
+        createInfo.preTransform = capabilities.currentTransform;
+        createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+        createInfo.presentMode = selPresentMode;
+        createInfo.clipped = VK_TRUE;
+        createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+        m_swapchain = m_logicalDevice.createSwapchainKHR(createInfo);
+        m_images = m_logicalDevice.getSwapchainImagesKHR(m_swapchain);
+
+        m_swapChainImageFormat = selFormat.format;
+        m_swapChainExtent = selExtent;
+
+        return true;
     }
 
     void VulkanRenderModule::destroySwapchain()
     {
-
+        m_logicalDevice.destroySwapchainKHR(m_swapchain);
     }
 
     const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers()

@@ -18,15 +18,6 @@ namespace blink
     class VulkanRenderModule : public RenderModule
     {
     public:
-        class SwapChainImage
-        {
-        public:
-            vk::Image image;
-            vk::ImageView view;
-            vk::Fence fence;
-        };
-
-    public:
         VulkanRenderModule();
         virtual ~VulkanRenderModule();
 
@@ -68,6 +59,7 @@ namespace blink
 
     private:
         GLFWwindow* m_window{};
+        glm::ivec2 m_deviceSize;
 
         vk::Instance m_instance;
         vk::DispatchLoaderDynamic m_dispatchLoader;
@@ -82,7 +74,10 @@ namespace blink
         vk::Queue m_presentQueue;
 
         vk::SwapchainKHR m_swapchain;
-        std::vector<SwapChainImage> m_images;
+        std::vector<vk::Image> m_images;
+        vk::Format m_swapChainImageFormat;
+        vk::Extent2D m_swapChainExtent;
+
         vk::PresentInfoKHR m_presentInfo;
 
     };
