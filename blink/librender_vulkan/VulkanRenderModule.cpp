@@ -58,12 +58,16 @@ namespace blink
         if (!createSurface()) return false;
         if (!pickPhysicalDevice()) return false;
         if (!createLogicalDevice()) return false;
+        if (!createSwapchain()) return false;
+        if (!createImageViews()) return false;
 
         return true;
     }
 
     void VulkanRenderModule::destroyDevice()
     {
+        destroyImageViews();
+        destroySwapchain();
         destroyLogicalDevice();
         destroySurface();
         destroyDebugMessenger();
@@ -350,10 +354,9 @@ namespace blink
         createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
         createInfo.presentMode = selPresentMode;
         createInfo.clipped = VK_TRUE;
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        m_swapchain = m_logicalDevice.createSwapchainKHR(createInfo);
-        m_images = m_logicalDevice.getSwapchainImagesKHR(m_swapchain);
+        m_swapChain = m_logicalDevice.createSwapchainKHR(createInfo);
+        m_swapChainImages = m_logicalDevice.getSwapchainImagesKHR(m_swapChain);
 
         m_swapChainImageFormat = selFormat.format;
         m_swapChainExtent = selExtent;
@@ -363,7 +366,127 @@ namespace blink
 
     void VulkanRenderModule::destroySwapchain()
     {
-        m_logicalDevice.destroySwapchainKHR(m_swapchain);
+        m_logicalDevice.destroySwapchainKHR(m_swapChain);
+    }
+
+    bool VulkanRenderModule::createImageViews()
+    {
+        m_swapChainImageViews.resize(m_swapChainImages.size());
+
+        for (size_t i = 0; i < m_swapChainImageViews.size(); ++i)
+        {
+            vk::ImageViewCreateInfo createInfo;
+            createInfo.image = m_swapChainImages[i];
+            createInfo.viewType = vk::ImageViewType::e2D;
+            createInfo.format = m_swapChainImageFormat;
+            createInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+            createInfo.subresourceRange.baseMipLevel = 0;
+            createInfo.subresourceRange.levelCount = 1;
+            createInfo.subresourceRange.baseArrayLayer = 0;
+            createInfo.subresourceRange.layerCount = 1;
+
+            m_swapChainImageViews[i] = m_logicalDevice.createImageView(createInfo);
+        }
+    }
+
+    void VulkanRenderModule::destroyImageViews()
+    {
+        for (auto& imageView : m_swapChainImageViews)
+        {
+            m_logicalDevice.destroyImageView(imageView);
+        }
+        m_swapChainImageViews.clear();
+    }
+
+    bool VulkanRenderModule::createGraphicsPipeline()
+    {
+        std::string vertShaderCode;
+        std::string fragShaderCode;
+
+        vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+        vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+        vk::PipelineShaderStageCreateInfo vertShaderStageInfo;
+        vertShaderStageInfo.stage = vk::ShaderStageFlagBits::eVertex;
+        vertShaderStageInfo.module = vertShaderModule;
+        vertShaderStageInfo.pName = "main";
+
+        vk::PipelineShaderStageCreateInfo fragShaderStageInfo;
+        fragShaderStageInfo.stage = vk::ShaderStageFlagBits::eFragment;
+        fragShaderStageInfo.module = vertShaderModule;
+        fragShaderStageInfo.pName = "main";
+
+        // shader state
+        vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
+        // TODO: do it later
+        // vertex input state
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+
+        // input assembly state
+        vk::PipelineInputAssemblyStateCreateInfo inputAssembly;
+        inputAssembly.topology = vk::PrimitiveTopology::eTriangleList;
+
+        // viewport state
+        vk::Viewport viewport(0.0f, 0.0f, m_swapChainExtent.width, m_swapChainExtent.height, 0.0f, 1.0f);
+        vk::Rect2D sissor({ 0, 0 }, m_swapChainExtent);
+        vk::PipelineViewportStateCreateInfo viewportState;
+        viewportState.viewportCount = 1;
+        viewportState.pViewports = &viewport;
+        viewportState.scissorCount = 1;
+        viewportState.pScissors = &sissor;
+
+        // rasterizer state
+        vk::PipelineRasterizationStateCreateInfo rasterizer;
+        rasterizer.depthClampEnable = VK_FALSE;
+        rasterizer.rasterizerDiscardEnable = VK_FALSE;
+        rasterizer.polygonMode = vk::PolygonMode::eFill;
+        rasterizer.lineWidth = 1.0f;
+        rasterizer.cullMode = vk::CullModeFlagBits::eBack;
+        rasterizer.frontFace = vk::FrontFace::eClockwise;
+        rasterizer.depthBiasEnable = VK_FALSE;
+
+        // multisampling state
+        vk::PipelineMultisampleStateCreateInfo multisampling;
+        multisampling.sampleShadingEnable = VK_FALSE;
+        multisampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+
+        // depth and stencil state
+        // vk::PipelineDepthStencilStateCreateInfo;
+
+        // color blending state
+        vk::PipelineColorBlendAttachmentState colorBlendAttachment;
+        colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+        colorBlendAttachment.blendEnable = VK_FALSE;
+
+        vk::PipelineColorBlendStateCreateInfo colorBlending;
+        colorBlending.logicOpEnable = VK_FALSE;
+        colorBlending.logicOp = vk::LogicOp::eCopy;
+        colorBlending.attachmentCount = 1;
+        colorBlending.pAttachments = &colorBlendAttachment;
+
+        // dynamic state
+//         VkDynamicState dynamicStates[] = {
+//             VK_DYNAMIC_STATE_VIEWPORT,
+//             VK_DYNAMIC_STATE_LINE_WIDTH
+//         };
+// 
+//         VkPipelineDynamicStateCreateInfo dynamicState = {};
+//         dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+//         dynamicState.dynamicStateCount = 2;
+//         dynamicState.pDynamicStates = dynamicStates;
+
+        // layout state
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo;
+        m_pipelineLayout = m_logicalDevice.createPipelineLayout(pipelineLayoutInfo);
+
+        m_logicalDevice.destroyShaderModule(fragShaderModule);
+        m_logicalDevice.destroyShaderModule(vertShaderModule);
+    }
+
+    void VulkanRenderModule::destroyGraphicsPipeline()
+    {
+        m_logicalDevice.destroyPipelineLayout(m_pipelineLayout);
     }
 
     const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers()
@@ -502,4 +625,14 @@ namespace blink
 
         return false;
     }
+
+    vk::ShaderModule VulkanRenderModule::createShaderModule(const std::string& shaderSource)
+    {
+        vk::ShaderModuleCreateInfo createInfo;
+        createInfo.codeSize = shaderSource.size();
+        createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderSource.data());
+
+        return m_logicalDevice.createShaderModule(createInfo);
+    }
+
 }

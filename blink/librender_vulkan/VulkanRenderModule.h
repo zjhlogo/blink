@@ -47,6 +47,12 @@ namespace blink
         bool createSwapchain();
         void destroySwapchain();
 
+        bool createImageViews();
+        void destroyImageViews();
+
+        bool createGraphicsPipeline();
+        void destroyGraphicsPipeline();
+
         const std::vector<const char*>& getRequiredValidationLayers();
         bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers);
 
@@ -56,6 +62,8 @@ namespace blink
 
         int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
         bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily, int& presentFamily, const vk::PhysicalDevice& physicalDevice, const vk::SurfaceKHR& surface, const std::vector<vk::QueueFamilyProperties>& queueFamilies);
+
+        vk::ShaderModule createShaderModule(const std::string& shaderSource);
 
     private:
         GLFWwindow* m_window{};
@@ -73,10 +81,13 @@ namespace blink
         vk::Queue m_graphicsQueue;
         vk::Queue m_presentQueue;
 
-        vk::SwapchainKHR m_swapchain;
-        std::vector<vk::Image> m_images;
+        vk::SwapchainKHR m_swapChain;
+        std::vector<vk::Image> m_swapChainImages;
         vk::Format m_swapChainImageFormat;
         vk::Extent2D m_swapChainExtent;
+        std::vector<vk::ImageView> m_swapChainImageViews;
+
+        vk::PipelineLayout m_pipelineLayout;
 
         vk::PresentInfoKHR m_presentInfo;
 
