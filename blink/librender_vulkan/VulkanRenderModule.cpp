@@ -52,12 +52,12 @@ namespace blink
         /* Initialize the library */
         if (!glfwInit()) return false;
 
-        createWindow(deviceSize);
-        createInstance();
-        setupDebugMessenger();
-        pickPhysicalDevice();
-        createSurface();
-        createLogicalDevice();
+        if (!createWindow(deviceSize)) return false;
+        if (!createInstance()) return false;
+        if (!setupDebugMessenger()) return false;
+        if (!createSurface()) return false;
+        if (!pickPhysicalDevice()) return false;
+        if (!createLogicalDevice()) return false;
 
         return true;
     }
@@ -132,20 +132,20 @@ namespace blink
 
         // this is the vulkan supported layers
         std::vector<vk::LayerProperties> layers = vk::enumerateInstanceLayerProperties();
-        if (checkValidationLayerSupported(layers))
+        if (checkValidationLayerSupported(layers, getRequiredValidationLayers()))
         {
-            const auto& layers = getRequiredValidationLayers();
-            createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
-            createInfo.ppEnabledLayerNames = layers.data();
+            const auto& requiredLayers = getRequiredValidationLayers();
+            createInfo.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
+            createInfo.ppEnabledLayerNames = requiredLayers.data();
         }
 
         // this is the vulkan supported extensions
         std::vector<vk::ExtensionProperties> extensions = vk::enumerateInstanceExtensionProperties();
-        if (checkExtensionsSupported(extensions))
+        if (checkExtensionsSupported(extensions, getRequiredInstanceExtensions()))
         {
-            const auto& extensions = getRequiredExtensions();
-            createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-            createInfo.ppEnabledExtensionNames = extensions.data();
+            const auto& requiredExtensions = getRequiredInstanceExtensions();
+            createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
+            createInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
         m_instance = vk::createInstance(createInfo);
@@ -195,7 +195,7 @@ namespace blink
     bool VulkanRenderModule::pickPhysicalDevice()
     {
         std::vector<vk::PhysicalDevice> physicalDevices = m_instance.enumeratePhysicalDevices();
-        int index = getBestFitPhysicalDeviceIndex(physicalDevices);
+        int index = getBestFitPhysicalDeviceIndex(physicalDevices, m_surface);
         if (index != -1)
         {
             m_physicalDevice = physicalDevices[index];
@@ -239,19 +239,19 @@ namespace blink
         deviceCreateInfo.enabledExtensionCount = 0;
 
         std::vector<vk::LayerProperties> layers = m_physicalDevice.enumerateDeviceLayerProperties();
-        if (checkValidationLayerSupported(layers))
+        if (checkValidationLayerSupported(layers, getRequiredValidationLayers()))
         {
-            const auto& layers = getRequiredValidationLayers();
-            deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
-            deviceCreateInfo.ppEnabledLayerNames = layers.data();
+            const auto& requiredLayers = getRequiredValidationLayers();
+            deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
+            deviceCreateInfo.ppEnabledLayerNames = requiredLayers.data();
         }
 
         std::vector<vk::ExtensionProperties> extensions = m_physicalDevice.enumerateDeviceExtensionProperties();
-        if (checkExtensionsSupported(extensions))
+        if (checkExtensionsSupported(extensions, getRequiredDeviceExtensions()))
         {
-            const auto& extensions = getRequiredExtensions();
-            deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-            deviceCreateInfo.ppEnabledExtensionNames = extensions.data();
+            const auto& requiredExtensions = getRequiredDeviceExtensions();
+            deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
+            deviceCreateInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
         m_logicalDevice = m_physicalDevice.createDevice(deviceCreateInfo);
@@ -265,7 +265,7 @@ namespace blink
 
     void VulkanRenderModule::destroyLogicalDevice()
     {
-
+        // TODO: 
     }
 
     bool VulkanRenderModule::createSwapchain()
@@ -294,9 +294,8 @@ namespace blink
         return REQUIRED_LAYERS;
     }
 
-    bool VulkanRenderModule::checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers)
+    bool VulkanRenderModule::checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char *>& requiredLayers)
     {
-        const auto& requiredLayers = getRequiredValidationLayers();
         for (const auto& requireLayer : requiredLayers)
         {
             bool layerFound = false;
@@ -315,22 +314,30 @@ namespace blink
         return true;
     }
 
-    const std::vector<const char*>& VulkanRenderModule::getRequiredExtensions()
+    const std::vector<const char*>& VulkanRenderModule::getRequiredInstanceExtensions()
     {
         static const std::vector<const char*> REQUIRED_EXTENSIONS =
         {
             "VK_KHR_surface",
             "VK_KHR_win32_surface",
-            "VK_KHR_swapchain",
             "VK_EXT_debug_utils",
         };
 
         return REQUIRED_EXTENSIONS;
     }
 
-    bool VulkanRenderModule::checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions)
+    const std::vector<const char*>& VulkanRenderModule::getRequiredDeviceExtensions()
     {
-        const auto& requiredExtensions = getRequiredExtensions();
+        static const std::vector<const char*> REQUIRED_EXTENSIONS =
+        {
+            "VK_KHR_swapchain",
+        };
+
+        return REQUIRED_EXTENSIONS;
+    }
+
+    bool VulkanRenderModule::checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char *>& requiredExtensions)
+    {
         for (const auto& requiredExtension : requiredExtensions)
         {
             bool extensionFound = false;
@@ -349,7 +356,7 @@ namespace blink
         return true;
     }
 
-    int VulkanRenderModule::getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices)
+    int VulkanRenderModule::getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface)
     {
         int index = 0;
         for (const auto& device : physicalDevices)
@@ -358,23 +365,23 @@ namespace blink
 
             int graphicsFamilyIndex{};
             int presentFamilyIndex{};
-            getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, m_physicalDevice, m_surface, queueFamilyProperties);
+            getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, device, surface, queueFamilyProperties);
 
             auto extensions = device.enumerateDeviceExtensionProperties();
-            bool extensionsSupported = checkExtensionsSupported(extensions);
+            bool extensionsSupported = checkExtensionsSupported(extensions, getRequiredDeviceExtensions());
 
             bool swapChainAdequate = false;
             if (extensionsSupported)
             {
-                vk::SurfaceCapabilitiesKHR capabilities = device.getSurfaceCapabilitiesKHR(m_surface);
-                std::vector<vk::SurfaceFormatKHR> formats = device.getSurfaceFormatsKHR(m_surface);
-                std::vector<vk::PresentModeKHR> presentModes = device.getSurfacePresentModesKHR(m_surface);
+                vk::SurfaceCapabilitiesKHR capabilities = device.getSurfaceCapabilitiesKHR(surface);
+                std::vector<vk::SurfaceFormatKHR> formats = device.getSurfaceFormatsKHR(surface);
+                std::vector<vk::PresentModeKHR> presentModes = device.getSurfacePresentModesKHR(surface);
 
                 swapChainAdequate = !formats.empty() && !presentModes.empty();
             }
 
-            if (graphicsFamilyIndex != 0xFFFFFFFF
-                && presentFamilyIndex != 0xFFFFFFFF
+            if (graphicsFamilyIndex != -1
+                && presentFamilyIndex != -1
                 && extensionsSupported
                 && swapChainAdequate)
             {

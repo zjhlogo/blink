@@ -57,12 +57,13 @@ namespace blink
         void destroySwapchain();
 
         const std::vector<const char*>& getRequiredValidationLayers();
-        bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers);
+        bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers);
 
-        const std::vector<const char*>& getRequiredExtensions();
-        bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions);
+        const std::vector<const char*>& getRequiredInstanceExtensions();
+        const std::vector<const char*>& getRequiredDeviceExtensions();
+        bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char*>& requiredExtensions);
 
-        int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices);
+        int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
         bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily, int& presentFamily, const vk::PhysicalDevice& physicalDevice, const vk::SurfaceKHR& surface, const std::vector<vk::QueueFamilyProperties>& queueFamilies);
 
     private:
@@ -71,12 +72,14 @@ namespace blink
         vk::Instance m_instance;
         vk::DispatchLoaderDynamic m_dispatchLoader;
         vk::DebugUtilsMessengerEXT m_debugMessenger;
-        vk::PhysicalDevice m_physicalDevice;
-        vk::Device m_logicalDevice;
-        vk::Queue m_graphicsQueue;
-        vk::Queue m_presentQueue;
 
         vk::SurfaceKHR m_surface;
+
+        vk::PhysicalDevice m_physicalDevice;
+        vk::Device m_logicalDevice;
+
+        vk::Queue m_graphicsQueue;
+        vk::Queue m_presentQueue;
 
         vk::SwapchainKHR m_swapchain;
         std::vector<SwapChainImage> m_images;

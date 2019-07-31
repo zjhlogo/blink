@@ -50,7 +50,6 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	entityx
 	libglad
 	libimgui
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/lib/vulkan-1.lib
 	libfoundation
     librender_base
     librender_opengl
@@ -60,7 +59,14 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 
 	if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 		set(ALL_LIBRARIES ${ALL_LIBRARIES} opengl32)
+        
+        if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set(ALL_LIBRARIES ${ALL_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/lib/x64/vulkan-1.lib)
+        elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
+            set(ALL_LIBRARIES ${ALL_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/lib/x86/vulkan-1.lib)
+        endif ()
 	endif ()
+    
 	target_link_libraries(${PROJ_NAME} ${ALL_LIBRARIES})
 
 	set_target_properties(${PROJ_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH})
