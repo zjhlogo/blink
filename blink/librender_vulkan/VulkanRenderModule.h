@@ -50,6 +50,9 @@ namespace blink
         bool createImageViews();
         void destroyImageViews();
 
+        bool createRenderPass();
+        void destroyRenderPass();
+
         bool createGraphicsPipeline();
         void destroyGraphicsPipeline();
 
@@ -63,7 +66,8 @@ namespace blink
         int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
         bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily, int& presentFamily, const vk::PhysicalDevice& physicalDevice, const vk::SurfaceKHR& surface, const std::vector<vk::QueueFamilyProperties>& queueFamilies);
 
-        vk::ShaderModule createShaderModule(const std::string& shaderSource);
+        vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
+        bool readFileIntoBuffer(std::vector<uint8>& bufferOut, const std::string& filePath);
 
     private:
         GLFWwindow* m_window{};
@@ -87,7 +91,9 @@ namespace blink
         vk::Extent2D m_swapChainExtent;
         std::vector<vk::ImageView> m_swapChainImageViews;
 
+        vk::RenderPass m_renderPass;
         vk::PipelineLayout m_pipelineLayout;
+        vk::Pipeline m_pipeline;
 
         vk::PresentInfoKHR m_presentInfo;
 

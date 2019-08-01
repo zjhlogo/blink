@@ -7,6 +7,7 @@
  * 
  */
 #include "VulkanRenderModule.h"
+#include <File.h>
 #include <set>
 
 namespace blink
@@ -29,11 +30,12 @@ namespace blink
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
     {
-//         if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-//         {
-//             // Message is important enough to show
-//         }
-//         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+        if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+        {
+            // TODO: Message is important enough to show
+        }
+
+        tstring strError = pCallbackData->pMessage;
         return VK_FALSE;
     }
 
@@ -60,12 +62,16 @@ namespace blink
         if (!createLogicalDevice()) return false;
         if (!createSwapchain()) return false;
         if (!createImageViews()) return false;
+        if (!createRenderPass()) return false;
+        if (!createGraphicsPipeline()) return false;
 
         return true;
     }
 
     void VulkanRenderModule::destroyDevice()
     {
+        destroyGraphicsPipeline();
+        destroyRenderPass();
         destroyImageViews();
         destroySwapchain();
         destroyLogicalDevice();
@@ -340,7 +346,7 @@ namespace blink
         getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, m_physicalDevice, m_surface, queueFamilyProperties);
         if (graphicsFamilyIndex != presentFamilyIndex)
         {
-            uint32_t queueFamilyIndexs[2] = { graphicsFamilyIndex, presentFamilyIndex };
+            uint32_t queueFamilyIndexs[2] = { static_cast<uint32_t>(graphicsFamilyIndex), static_cast<uint32_t>(presentFamilyIndex) };
             createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
             createInfo.queueFamilyIndexCount = 2;
             createInfo.pQueueFamilyIndices = queueFamilyIndexs;
@@ -387,6 +393,8 @@ namespace blink
 
             m_swapChainImageViews[i] = m_logicalDevice.createImageView(createInfo);
         }
+
+        return true;
     }
 
     void VulkanRenderModule::destroyImageViews()
@@ -398,10 +406,53 @@ namespace blink
         m_swapChainImageViews.clear();
     }
 
+    bool VulkanRenderModule::createRenderPass()
+    {
+        // color attachment
+        vk::AttachmentDescription colorAttachment;
+        colorAttachment.format = m_swapChainImageFormat;
+        colorAttachment.samples = vk::SampleCountFlagBits::e1;
+        colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
+        colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
+        colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+        colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+        colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
+        colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+
+        // subpass
+        vk::AttachmentReference colorAttachmentRef;
+        colorAttachmentRef.attachment = 0;
+        colorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
+
+        vk::SubpassDescription subpass;
+        subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &colorAttachmentRef;
+
+        // create render pass
+        vk::RenderPassCreateInfo renderPassInfo;
+        renderPassInfo.attachmentCount = 1;
+        renderPassInfo.pAttachments = &colorAttachment;
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+
+        m_renderPass = m_logicalDevice.createRenderPass(renderPassInfo);
+
+        return true;
+    }
+
+    void VulkanRenderModule::destroyRenderPass()
+    {
+        m_logicalDevice.destroyRenderPass(m_renderPass);
+    }
+
     bool VulkanRenderModule::createGraphicsPipeline()
     {
-        std::string vertShaderCode;
-        std::string fragShaderCode;
+        std::vector<uint8> vertShaderCode;
+        readFileIntoBuffer(vertShaderCode, "resource/shaders/shader_base.vert.spv");
+
+        std::vector<uint8> fragShaderCode;
+        readFileIntoBuffer(fragShaderCode, "resource/shaders/shader_base.frag.spv");
 
         vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
         vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -413,7 +464,7 @@ namespace blink
 
         vk::PipelineShaderStageCreateInfo fragShaderStageInfo;
         fragShaderStageInfo.stage = vk::ShaderStageFlagBits::eFragment;
-        fragShaderStageInfo.module = vertShaderModule;
+        fragShaderStageInfo.module = fragShaderModule;
         fragShaderStageInfo.pName = "main";
 
         // shader state
@@ -428,7 +479,7 @@ namespace blink
         inputAssembly.topology = vk::PrimitiveTopology::eTriangleList;
 
         // viewport state
-        vk::Viewport viewport(0.0f, 0.0f, m_swapChainExtent.width, m_swapChainExtent.height, 0.0f, 1.0f);
+        vk::Viewport viewport(0.0f, 0.0f, static_cast<float>(m_swapChainExtent.width), static_cast<float>(m_swapChainExtent.height), 0.0f, 1.0f);
         vk::Rect2D sissor({ 0, 0 }, m_swapChainExtent);
         vk::PipelineViewportStateCreateInfo viewportState;
         viewportState.viewportCount = 1;
@@ -480,12 +531,33 @@ namespace blink
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo;
         m_pipelineLayout = m_logicalDevice.createPipelineLayout(pipelineLayoutInfo);
 
+        // create pipeline
+        vk::GraphicsPipelineCreateInfo pipelineInfo;
+        pipelineInfo.stageCount = 2;
+        pipelineInfo.pStages = shaderStages;
+        pipelineInfo.pVertexInputState = &vertexInputInfo;
+        pipelineInfo.pInputAssemblyState = &inputAssembly;
+        pipelineInfo.pViewportState = &viewportState;
+        pipelineInfo.pRasterizationState = &rasterizer;
+        pipelineInfo.pMultisampleState = &multisampling;
+//        pipelineInfo.pDepthStencilState = nullptr;
+        pipelineInfo.pColorBlendState = &colorBlending;
+//        pipelineInfo.pDynamicState = nullptr;
+        pipelineInfo.layout = m_pipelineLayout;
+        pipelineInfo.renderPass = m_renderPass;
+        pipelineInfo.subpass = 0;
+
+        m_pipeline = m_logicalDevice.createGraphicsPipeline(VK_NULL_HANDLE, pipelineInfo);
+
         m_logicalDevice.destroyShaderModule(fragShaderModule);
         m_logicalDevice.destroyShaderModule(vertShaderModule);
+
+        return true;
     }
 
     void VulkanRenderModule::destroyGraphicsPipeline()
     {
+        m_logicalDevice.destroyPipeline(m_pipeline);
         m_logicalDevice.destroyPipelineLayout(m_pipelineLayout);
     }
 
@@ -626,13 +698,22 @@ namespace blink
         return false;
     }
 
-    vk::ShaderModule VulkanRenderModule::createShaderModule(const std::string& shaderSource)
+    vk::ShaderModule VulkanRenderModule::createShaderModule(const std::vector<uint8>& shaderCode)
     {
         vk::ShaderModuleCreateInfo createInfo;
-        createInfo.codeSize = shaderSource.size();
-        createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderSource.data());
+        createInfo.codeSize = shaderCode.size();
+        createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
         return m_logicalDevice.createShaderModule(createInfo);
+    }
+
+    bool VulkanRenderModule::readFileIntoBuffer(std::vector<uint8>& bufferOut, const std::string& filePath)
+    {
+        File file(filePath);
+        file.read(bufferOut, file.fileSize());
+        file.close();
+
+        return true;
     }
 
 }
