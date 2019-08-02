@@ -64,12 +64,20 @@ namespace blink
         if (!createImageViews()) return false;
         if (!createRenderPass()) return false;
         if (!createGraphicsPipeline()) return false;
+        if (!createFramebuffers()) return false;
+        if (!createCommandPool()) return false;
+        if (!createCommandBuffers()) return false;
+        if (!createSemaphores()) return false;
 
         return true;
     }
 
     void VulkanRenderModule::destroyDevice()
     {
+        destroySemaphores();
+        destroyCommandBuffers();
+        destroyCommandPool();
+        destroyFramebuffers();
         destroyGraphicsPipeline();
         destroyRenderPass();
         destroyImageViews();
@@ -97,11 +105,33 @@ namespace blink
         begin = end;
 
 //         app->step(static_cast<float>(duration));
-
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(m_window);
 
         return true;
+    }
+
+    void VulkanRenderModule::drawFrame()
+    {
+        uint32_t imageIndex{};
+        m_logicalDevice.acquireNextImageKHR(m_swapChain, std::numeric_limits<uint64_t>::max(), m_imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+        vk::SubmitInfo submitInfo;
+        vk::Semaphore waitSemaphores[] = { m_imageAvailableSemaphore };
+        vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &m_commandBuffers[imageIndex];
+
+        vk::Semaphore signalSemaphores[] = { m_renderFinishedSemaphore };
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
+
+        m_graphicsQueue.submit(1, &submitInfo, VK_NULL_HANDLE);
     }
 
     bool VulkanRenderModule::createWindow(const glm::ivec2& windowSize)
@@ -559,6 +589,116 @@ namespace blink
     {
         m_logicalDevice.destroyPipeline(m_pipeline);
         m_logicalDevice.destroyPipelineLayout(m_pipelineLayout);
+    }
+
+    bool VulkanRenderModule::createFramebuffers()
+    {
+        m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
+
+        for (size_t i = 0; i < m_swapChainImageViews.size(); ++i)
+        {
+            vk::FramebufferCreateInfo frameBufferInfo;
+            frameBufferInfo.renderPass = m_renderPass;
+            frameBufferInfo.attachmentCount = 1;
+            frameBufferInfo.pAttachments = &m_swapChainImageViews[i];
+            frameBufferInfo.width = m_swapChainExtent.width;
+            frameBufferInfo.height = m_swapChainExtent.height;
+            frameBufferInfo.layers = 1;
+
+            m_swapChainFramebuffers[i] = m_logicalDevice.createFramebuffer(frameBufferInfo);
+        }
+
+        return true;
+    }
+
+    void VulkanRenderModule::destroyFramebuffers()
+    {
+        for (auto framebuffer : m_swapChainFramebuffers)
+        {
+            m_logicalDevice.destroyFramebuffer(framebuffer);
+        }
+        m_swapChainFramebuffers.clear();
+    }
+
+    bool VulkanRenderModule::createCommandPool()
+    {
+        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = m_physicalDevice.getQueueFamilyProperties();
+
+        int graphicsFamilyIndex{};
+        int presentFamilyIndex{};
+        getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, m_physicalDevice, m_surface, queueFamilyProperties);
+
+        vk::CommandPoolCreateInfo poolInfo;
+        poolInfo.queueFamilyIndex = static_cast<uint32_t>(graphicsFamilyIndex);
+
+        m_commandPool = m_logicalDevice.createCommandPool(poolInfo);
+
+        return true;
+    }
+
+    void VulkanRenderModule::destroyCommandPool()
+    {
+        m_logicalDevice.destroyCommandPool(m_commandPool);
+    }
+
+    bool VulkanRenderModule::createCommandBuffers()
+    {
+        vk::CommandBufferAllocateInfo allocInfo;
+        allocInfo.commandPool = m_commandPool;
+        allocInfo.level = vk::CommandBufferLevel::ePrimary;
+        allocInfo.commandBufferCount = static_cast<uint32_t>(m_swapChainFramebuffers.size());
+        m_commandBuffers = m_logicalDevice.allocateCommandBuffers(allocInfo);
+
+        for (size_t i = 0; i < m_commandBuffers.size(); ++i)
+        {
+            vk::CommandBufferBeginInfo beginInfo;
+            m_commandBuffers[i].begin(beginInfo);
+
+            vk::RenderPassBeginInfo renderPassInfo;
+            renderPassInfo.renderPass = m_renderPass;
+            renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
+            renderPassInfo.renderArea.offset = { 0, 0 };
+            renderPassInfo.renderArea.extent = m_swapChainExtent;
+
+            vk::ClearValue clearColor;
+            vk::ClearColorValue colorValue;
+            colorValue.setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
+            clearColor.color = colorValue;
+
+            renderPassInfo.clearValueCount = 1;
+            renderPassInfo.pClearValues = &clearColor;
+
+            m_commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+
+            m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+            m_commandBuffers[i].draw(3, 1, 0, 0);
+
+            m_commandBuffers[i].endRenderPass();
+
+            m_commandBuffers[i].end();
+        }
+
+        return true;
+    }
+
+    void VulkanRenderModule::destroyCommandBuffers()
+    {
+
+    }
+
+    bool VulkanRenderModule::createSemaphores()
+    {
+        vk::SemaphoreCreateInfo semaphoreInfo;
+        m_imageAvailableSemaphore = m_logicalDevice.createSemaphore(semaphoreInfo);
+        m_renderFinishedSemaphore = m_logicalDevice.createSemaphore(semaphoreInfo);
+
+        return true;
+    }
+
+    void VulkanRenderModule::destroySemaphores()
+    {
+        m_logicalDevice.destroySemaphore(m_renderFinishedSemaphore);
+        m_logicalDevice.destroySemaphore(m_imageAvailableSemaphore);
     }
 
     const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers()

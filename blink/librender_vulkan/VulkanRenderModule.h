@@ -26,6 +26,8 @@ namespace blink
 
         virtual bool gameLoop() override;
 
+        void drawFrame();
+
     private:
         bool createWindow(const glm::ivec2& windowSize);
         void destroyWindow();
@@ -55,6 +57,18 @@ namespace blink
 
         bool createGraphicsPipeline();
         void destroyGraphicsPipeline();
+
+        bool createFramebuffers();
+        void destroyFramebuffers();
+
+        bool createCommandPool();
+        void destroyCommandPool();
+
+        bool createCommandBuffers();
+        void destroyCommandBuffers();
+
+        bool createSemaphores();
+        void destroySemaphores();
 
         const std::vector<const char*>& getRequiredValidationLayers();
         bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers);
@@ -95,7 +109,12 @@ namespace blink
         vk::PipelineLayout m_pipelineLayout;
         vk::Pipeline m_pipeline;
 
-        vk::PresentInfoKHR m_presentInfo;
+        std::vector<vk::Framebuffer> m_swapChainFramebuffers;
+        vk::CommandPool m_commandPool;
+        std::vector<vk::CommandBuffer> m_commandBuffers;
+
+        vk::Semaphore m_imageAvailableSemaphore;
+        vk::Semaphore m_renderFinishedSemaphore;
 
     };
 }
