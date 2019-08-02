@@ -116,7 +116,7 @@ namespace blink
     void VulkanRenderModule::drawFrame()
     {
         uint32_t imageIndex{};
-        m_logicalDevice.acquireNextImageKHR(m_swapChain, std::numeric_limits<uint64_t>::max(), m_imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+        m_logicalDevice.acquireNextImageKHR(m_swapChain, std::numeric_limits<uint64_t>::max(), m_imageAvailableSemaphore, vk::Fence(), &imageIndex);
 
         vk::SubmitInfo submitInfo;
         vk::Semaphore waitSemaphores[] = { m_imageAvailableSemaphore };
@@ -132,7 +132,7 @@ namespace blink
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        m_graphicsQueue.submit(1, &submitInfo, VK_NULL_HANDLE);
+        m_graphicsQueue.submit(1, &submitInfo, vk::Fence());
 
         vk::PresentInfoKHR presentInfo;
         presentInfo.waitSemaphoreCount = 1;
@@ -319,7 +319,7 @@ namespace blink
 
     void VulkanRenderModule::destroyLogicalDevice()
     {
-        // TODO: 
+        m_logicalDevice.destroy();
     }
 
     bool VulkanRenderModule::createSwapchain()
@@ -597,7 +597,7 @@ namespace blink
         pipelineInfo.renderPass = m_renderPass;
         pipelineInfo.subpass = 0;
 
-        m_pipeline = m_logicalDevice.createGraphicsPipeline(VK_NULL_HANDLE, pipelineInfo);
+        m_pipeline = m_logicalDevice.createGraphicsPipeline(vk::PipelineCache(), pipelineInfo);
 
         m_logicalDevice.destroyShaderModule(fragShaderModule);
         m_logicalDevice.destroyShaderModule(vertShaderModule);
