@@ -74,6 +74,8 @@ namespace blink
 
     void VulkanRenderModule::destroyDevice()
     {
+        m_logicalDevice.waitIdle();
+
         destroySemaphores();
         destroyCommandBuffers();
         destroyCommandPool();
@@ -106,8 +108,7 @@ namespace blink
 
 //         app->step(static_cast<float>(duration));
         
-        /* Swap front and back buffers */
-        glfwSwapBuffers(m_window);
+        drawFrame();
 
         return true;
     }
@@ -132,6 +133,17 @@ namespace blink
         submitInfo.pSignalSemaphores = signalSemaphores;
 
         m_graphicsQueue.submit(1, &submitInfo, VK_NULL_HANDLE);
+
+        vk::PresentInfoKHR presentInfo;
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = signalSemaphores;
+
+        vk::SwapchainKHR swapChains[] = { m_swapChain };
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &imageIndex;
+
+        m_presentQueue.presentKHR(presentInfo);
     }
 
     bool VulkanRenderModule::createWindow(const glm::ivec2& windowSize)
@@ -466,6 +478,14 @@ namespace blink
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;
 
+        vk::SubpassDependency dependency(VK_SUBPASS_EXTERNAL, 0);
+        dependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+        dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+
+        renderPassInfo.dependencyCount = 1;
+        renderPassInfo.pDependencies = &dependency;
+
         m_renderPass = m_logicalDevice.createRenderPass(renderPassInfo);
 
         return true;
@@ -652,28 +672,34 @@ namespace blink
         for (size_t i = 0; i < m_commandBuffers.size(); ++i)
         {
             vk::CommandBufferBeginInfo beginInfo;
+            beginInfo.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse;
+
             m_commandBuffers[i].begin(beginInfo);
 
-            vk::RenderPassBeginInfo renderPassInfo;
-            renderPassInfo.renderPass = m_renderPass;
-            renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
-            renderPassInfo.renderArea.offset = { 0, 0 };
-            renderPassInfo.renderArea.extent = m_swapChainExtent;
+            {
+                vk::RenderPassBeginInfo renderPassInfo;
+                renderPassInfo.renderPass = m_renderPass;
+                renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
+                renderPassInfo.renderArea.offset = { 0, 0 };
+                renderPassInfo.renderArea.extent = m_swapChainExtent;
 
-            vk::ClearValue clearColor;
-            vk::ClearColorValue colorValue;
-            colorValue.setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
-            clearColor.color = colorValue;
+                vk::ClearValue clearColor;
+                vk::ClearColorValue colorValue;
+                colorValue.setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
+                clearColor.color = colorValue;
 
-            renderPassInfo.clearValueCount = 1;
-            renderPassInfo.pClearValues = &clearColor;
+                renderPassInfo.clearValueCount = 1;
+                renderPassInfo.pClearValues = &clearColor;
 
-            m_commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+                m_commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
-            m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-            m_commandBuffers[i].draw(3, 1, 0, 0);
+                {
+                    m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+                    m_commandBuffers[i].draw(3, 1, 0, 0);
+                }
 
-            m_commandBuffers[i].endRenderPass();
+                m_commandBuffers[i].endRenderPass();
+            }
 
             m_commandBuffers[i].end();
         }
