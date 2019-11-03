@@ -18,6 +18,9 @@ namespace blink
     class VulkanRenderModule : public RenderModule
     {
     public:
+        static const int MAX_FRAMES_IN_FLIGHT = 2;
+
+    public:
         VulkanRenderModule();
         virtual ~VulkanRenderModule();
 
@@ -27,6 +30,8 @@ namespace blink
         virtual bool gameLoop() override;
 
         void drawFrame();
+
+        void setFrameBBufferResized(bool resized) { m_frameBufferResized = resized; };
 
     private:
         bool createWindow(const glm::ivec2& windowSize);
@@ -46,8 +51,8 @@ namespace blink
         bool createLogicalDevice();
         void destroyLogicalDevice();
 
-        bool createSwapchain();
-        void destroySwapchain();
+        bool createSwapChain();
+        void destroySwapChain();
 
         bool createImageViews();
         void destroyImageViews();
@@ -67,8 +72,11 @@ namespace blink
         bool createCommandBuffers();
         void destroyCommandBuffers();
 
-        bool createSemaphores();
-        void destroySemaphores();
+        bool createSyncObjects();
+        void destroySyncObjects();
+
+        bool recreateSwapChain();
+        void cleanSwapChain();
 
         const std::vector<const char*>& getRequiredValidationLayers();
         bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers);
@@ -113,8 +121,13 @@ namespace blink
         vk::CommandPool m_commandPool;
         std::vector<vk::CommandBuffer> m_commandBuffers;
 
-        vk::Semaphore m_imageAvailableSemaphore;
-        vk::Semaphore m_renderFinishedSemaphore;
+        std::vector<vk::Semaphore> m_imageAvailableSemaphores;
+        std::vector<vk::Semaphore> m_renderFinishedSemaphores;
+        std::vector<vk::Fence> m_inFlightFences;
+        std::vector<vk::Fence> m_imagesInFlight;
+        std::size_t m_currentFrame{};
+
+        bool m_frameBufferResized{};
 
     };
 }

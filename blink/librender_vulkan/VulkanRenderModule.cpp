@@ -12,6 +12,12 @@
 
 namespace blink
 {
+    static void frameBufferResizeCallback(GLFWwindow* window, int width, int height)
+    {
+        VulkanRenderModule* renderModule = reinterpret_cast<VulkanRenderModule*>(glfwGetWindowUserPointer(window));
+        renderModule->setFrameBBufferResized(true);
+    }
+
     static void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
     {
     }
@@ -60,30 +66,24 @@ namespace blink
         if (!createSurface()) return false;
         if (!pickPhysicalDevice()) return false;
         if (!createLogicalDevice()) return false;
-        if (!createSwapchain()) return false;
+        if (!createSwapChain()) return false;
         if (!createImageViews()) return false;
         if (!createRenderPass()) return false;
         if (!createGraphicsPipeline()) return false;
         if (!createFramebuffers()) return false;
         if (!createCommandPool()) return false;
         if (!createCommandBuffers()) return false;
-        if (!createSemaphores()) return false;
+        if (!createSyncObjects()) return false;
 
         return true;
     }
 
     void VulkanRenderModule::destroyDevice()
     {
-        m_logicalDevice.waitIdle();
+        cleanSwapChain();
 
-        destroySemaphores();
-        destroyCommandBuffers();
+        destroySyncObjects();
         destroyCommandPool();
-        destroyFramebuffers();
-        destroyGraphicsPipeline();
-        destroyRenderPass();
-        destroyImageViews();
-        destroySwapchain();
         destroyLogicalDevice();
         destroySurface();
         destroyDebugMessenger();
@@ -116,10 +116,21 @@ namespace blink
     void VulkanRenderModule::drawFrame()
     {
         uint32_t imageIndex{};
-        m_logicalDevice.acquireNextImageKHR(m_swapChain, std::numeric_limits<uint64_t>::max(), m_imageAvailableSemaphore, vk::Fence(), &imageIndex);
+        vk::Result result = m_logicalDevice.acquireNextImageKHR(m_swapChain, std::numeric_limits<uint64_t>::max(), m_imageAvailableSemaphores[m_currentFrame], vk::Fence(), &imageIndex);
+
+        if (result == vk::Result::eErrorOutOfDateKHR)
+        {
+            recreateSwapChain();
+            return;
+        }
+        else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
+        {
+            throw std::runtime_error("failed to acquire swap chain image!");
+        }
+        m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
         vk::SubmitInfo submitInfo;
-        vk::Semaphore waitSemaphores[] = { m_imageAvailableSemaphore };
+        vk::Semaphore waitSemaphores[] = { m_imageAvailableSemaphores[m_currentFrame] };
         vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
@@ -128,11 +139,15 @@ namespace blink
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &m_commandBuffers[imageIndex];
 
-        vk::Semaphore signalSemaphores[] = { m_renderFinishedSemaphore };
+        vk::Semaphore signalSemaphores[] = { m_renderFinishedSemaphores[m_currentFrame] };
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        m_graphicsQueue.submit(1, &submitInfo, vk::Fence());
+        m_logicalDevice.resetFences(1, &m_inFlightFences[m_currentFrame]);
+        if (m_graphicsQueue.submit(1, &submitInfo, vk::Fence()) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("failed to submit draw command buffer!");
+        }
 
         vk::PresentInfoKHR presentInfo;
         presentInfo.waitSemaphoreCount = 1;
@@ -143,7 +158,16 @@ namespace blink
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &imageIndex;
 
-        m_presentQueue.presentKHR(presentInfo);
+        result = m_presentQueue.presentKHR(presentInfo);
+        if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || m_frameBufferResized)
+        {
+            m_frameBufferResized = false;
+            recreateSwapChain();
+        }
+        else if (result != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("failed to present swap chain image!");
+        }
     }
 
     bool VulkanRenderModule::createWindow(const glm::ivec2& windowSize)
@@ -156,6 +180,9 @@ namespace blink
         /* Create a windowed mode window and its OpenGL context */
         m_window = glfwCreateWindow(windowSize.x, windowSize.y, "blink", nullptr, nullptr);
         if (!m_window) return false;
+
+        glfwSetWindowUserPointer(m_window, this);
+        glfwSetFramebufferSizeCallback(m_window, frameBufferResizeCallback);
 
         glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSetCursorPosCallback(m_window, mousePositionCallback);
@@ -322,7 +349,7 @@ namespace blink
         m_logicalDevice.destroy();
     }
 
-    bool VulkanRenderModule::createSwapchain()
+    bool VulkanRenderModule::createSwapChain()
     {
         // select format
         std::vector<vk::SurfaceFormatKHR> formats = m_physicalDevice.getSurfaceFormatsKHR(m_surface);
@@ -361,9 +388,9 @@ namespace blink
         }
         else
         {
-            vk::Extent2D actualExtent(m_deviceSize.x, m_deviceSize.y);
-            actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
-            actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
+            int width, height;
+            glfwGetFramebufferSize(m_window, &width, &height);
+            vk::Extent2D actualExtent(width, height);
             selExtent = actualExtent;
         }
 
@@ -412,7 +439,7 @@ namespace blink
         return true;
     }
 
-    void VulkanRenderModule::destroySwapchain()
+    void VulkanRenderModule::destroySwapChain()
     {
         m_logicalDevice.destroySwapchainKHR(m_swapChain);
     }
@@ -709,22 +736,72 @@ namespace blink
 
     void VulkanRenderModule::destroyCommandBuffers()
     {
-
+        m_logicalDevice.freeCommandBuffers(m_commandPool, m_commandBuffers);
     }
 
-    bool VulkanRenderModule::createSemaphores()
+    bool VulkanRenderModule::createSyncObjects()
     {
+        m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_imagesInFlight.resize(m_swapChainImages.size());
+
         vk::SemaphoreCreateInfo semaphoreInfo;
-        m_imageAvailableSemaphore = m_logicalDevice.createSemaphore(semaphoreInfo);
-        m_renderFinishedSemaphore = m_logicalDevice.createSemaphore(semaphoreInfo);
+        vk::FenceCreateInfo fenceInfo;
+        fenceInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        {
+            m_imageAvailableSemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
+            m_renderFinishedSemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
+            m_inFlightFences[i] = m_logicalDevice.createFence(fenceInfo);
+        }
 
         return true;
     }
 
-    void VulkanRenderModule::destroySemaphores()
+    void VulkanRenderModule::destroySyncObjects()
     {
-        m_logicalDevice.destroySemaphore(m_renderFinishedSemaphore);
-        m_logicalDevice.destroySemaphore(m_imageAvailableSemaphore);
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        {
+            m_logicalDevice.destroySemaphore(m_renderFinishedSemaphores[i]);
+            m_logicalDevice.destroySemaphore(m_imageAvailableSemaphores[i]);
+            m_logicalDevice.destroyFence(m_inFlightFences[i]);
+        }
+    }
+
+    bool VulkanRenderModule::recreateSwapChain()
+    {
+        int width = 0;
+        int height = 0;
+        while (width == 0 || height == 0)
+        {
+            glfwGetFramebufferSize(m_window, &width, &height);
+            glfwWaitEvents();
+        }
+
+        m_logicalDevice.waitIdle();
+
+        cleanSwapChain();
+
+        createSwapChain();
+        createImageViews();
+        createRenderPass();
+        createGraphicsPipeline();
+        createFramebuffers();
+        createCommandBuffers();
+
+        return true;
+    }
+
+    void VulkanRenderModule::cleanSwapChain()
+    {
+        destroyFramebuffers();
+        destroyCommandBuffers();
+        destroyGraphicsPipeline();
+        destroyRenderPass();
+        destroyImageViews();
+        destroySwapChain();
     }
 
     const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers()
