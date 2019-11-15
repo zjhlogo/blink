@@ -15,7 +15,7 @@ public:
     void configure(entityx::EventManager &events) override;
     void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
-    void receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt);
+    void receive(const entityx::ComponentAddedEvent<NS::CameraData>& evt);
     void receive(const entityx::ComponentAddedEvent<PlayerData>& evt);
 
 private:
@@ -28,9 +28,9 @@ private:
     DiffuseMaterial* m_material{};
     Atlas* m_atlas{};
 
-    blink::BufferGeometry* m_geometry{};
-    std::vector<blink::VertexPos3Uv2> m_verts;
-    std::vector<blink::uint16> m_indis;
+    NS::BufferGeometry* m_geometry{};
+    std::vector<NS::VertexPos3Uv2> m_verts;
+    std::vector<NS::uint16> m_indis;
 
     int m_frameIndex{};
 

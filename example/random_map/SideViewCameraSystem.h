@@ -11,8 +11,8 @@ public:
     void configure(entityx::EventManager &events) override;
     void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
-    void receive(const blink::MouseEvent& evt);
-    void receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt);
+    void receive(const NS::MouseEvent& evt);
+    void receive(const entityx::ComponentAddedEvent<NS::CameraData>& evt);
 
 private:
     entityx::Entity m_camera;

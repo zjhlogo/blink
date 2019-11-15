@@ -7,13 +7,16 @@
  * 
  */
 #pragma once
-namespace blink
-{
-    class Geometry
-    {
-    public:
-        Geometry();
-        virtual ~Geometry();
+#include <BaseTypes.h>
 
-    };
-}
+NS_BEGIN
+
+class Geometry
+{
+public:
+    Geometry();
+    virtual ~Geometry();
+
+};
+
+NS_END

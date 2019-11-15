@@ -10,26 +10,27 @@
 #include <BufferObject.h>
 #include <glad/glad.h>
 
-namespace blink
+NS_BEGIN
+
+class OpenGLRenderModule;
+
+class OpenGLBufferObject : public BufferObject
 {
-    class OpenGLRenderModule;
+    friend OpenGLRenderModule;
 
-    class OpenGLBufferObject : public BufferObject
-    {
-        friend OpenGLRenderModule;
+public:
+    OpenGLBufferObject(BufferType bufferType);
+    virtual ~OpenGLBufferObject();
 
-    public:
-        OpenGLBufferObject(BufferType bufferType);
-        virtual ~OpenGLBufferObject();
+    virtual bool uploadBufferData(const void* data, uint32 size, Usage usage) override;
 
-        virtual bool uploadBufferData(const void* data, uint32 size, Usage usage) override;
+    static BufferObject* createBuffer(BufferType bufferType);
+    static GLenum getGLTarget(BufferType bufferType);
+    static GLenum getGLUsage(Usage usage);
 
-        static BufferObject* createBuffer(BufferType bufferType);
-        static GLenum getGLTarget(BufferType bufferType);
-        static GLenum getGLUsage(Usage usage);
+private:
+    GLuint m_buffer{};
 
-    private:
-        GLuint m_buffer{};
+};
 
-    };
-}
+NS_END

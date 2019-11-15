@@ -8,13 +8,13 @@
 #include <scene/SceneSystem.h>
 #include <render/util/ImageLoader.h>
 
-entityx::Entity createMap(entityx::EntityManager& entities, const blink::tstring& filePath)
+entityx::Entity createMap(entityx::EntityManager& entities, const NS::tstring& filePath)
 {
     entityx::Entity map = entities.create();
 
     // load map from file
-    blink::ImageLoader::ImageInfo imageInfo;
-    blink::ImageLoader::loadTextureFromImage(imageInfo, filePath, true);
+    NS::ImageLoader::ImageInfo imageInfo;
+    NS::ImageLoader::loadTextureFromImage(imageInfo, filePath, true);
 
     auto mapData = map.assign<MapData>(imageInfo.width, imageInfo.height, imageInfo.data);
     mapData->origin.x = imageInfo.width / 2;
@@ -28,7 +28,7 @@ bool RandomMapApp::initialize()
     m_ex.systems.add<PlayerControlSystem>();
     //m_ex.systems.add<SideViewCameraSystem>();
     m_ex.systems.add<PlayerCameraSystem>();
-    m_ex.systems.add<blink::SceneSystem>();
+    m_ex.systems.add<NS::SceneSystem>();
     m_ex.systems.add<MapSystem>();
     m_ex.systems.add<MapRenderSystem>();
     m_ex.systems.add<PlayerRenderSystem>();
@@ -43,7 +43,7 @@ bool RandomMapApp::initialize()
 
     // add a camera
     entityx::Entity camera = m_ex.entities.create();
-    camera.assign<blink::CameraData>(glm::vec3(0.0f, 0.0f, 30.0f), blink::VEC3_ZERO, blink::VEC3_PY);
+    camera.assign<NS::CameraData>(glm::vec3(0.0f, 0.0f, 30.0f), NS::VEC3_ZERO, NS::VEC3_PY);
 
     return true;
 }
@@ -56,5 +56,5 @@ void RandomMapApp::terminate()
 int main(int argc, char** argv)
 {
     RandomMapApp app;
-    return blink::run(&app);
+    return NS::run(&app);
 }

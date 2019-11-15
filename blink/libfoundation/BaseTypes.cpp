@@ -8,7 +8,8 @@
  */
 #include "BaseTypes.h"
 
-namespace blink
-{
-    const tstring EMPTY_STRING = {};
-}
+NS_BEGIN
+
+const tstring EMPTY_STRING = {};
+
+NS_END

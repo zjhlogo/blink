@@ -10,15 +10,16 @@
 
 #include "Light.h"
 
-namespace blink
+NS_BEGIN
+
+class PointLight : public Light
 {
-    class PointLight : public Light
-    {
-    public:
-        PointLight();
-        virtual ~PointLight();
+public:
+    PointLight();
+    virtual ~PointLight();
 
-        virtual void setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform) override;
+    virtual void setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform) override;
 
-    };
-}
+};
+
+NS_END

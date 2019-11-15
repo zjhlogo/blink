@@ -8,23 +8,24 @@
  */
 #include "RenderModule.h"
 
-namespace blink
+NS_BEGIN
+
+RenderModule::CreateBufferObjectCb RenderModule::createBufferObject{};
+RenderModule::DestroyBufferObjectCb RenderModule::destroyBufferObject{};
+RenderModule::CreateVertexBufferCb RenderModule::createVertexBuffer{};
+RenderModule::DestroyVertexBufferCb RenderModule::destroyVertexBuffer{};
+RenderModule::CreateShaderFromStockCb RenderModule::createShaderFromStock{};
+RenderModule::CreateShaderFromBufferCb RenderModule::createShaderFromBuffer{};
+RenderModule::DestroyShaderCb RenderModule::destroyShader{};
+
+RenderModule::RenderModule()
 {
-    RenderModule::CreateBufferObjectCb RenderModule::createBufferObject{};
-    RenderModule::DestroyBufferObjectCb RenderModule::destroyBufferObject{};
-    RenderModule::CreateVertexBufferCb RenderModule::createVertexBuffer{};
-    RenderModule::DestroyVertexBufferCb RenderModule::destroyVertexBuffer{};
-    RenderModule::CreateShaderFromStockCb RenderModule::createShaderFromStock{};
-    RenderModule::CreateShaderFromBufferCb RenderModule::createShaderFromBuffer{};
-    RenderModule::DestroyShaderCb RenderModule::destroyShader{};
 
-    RenderModule::RenderModule()
-    {
-
-    }
-
-    RenderModule::~RenderModule()
-    {
-
-    }
 }
+
+RenderModule::~RenderModule()
+{
+
+}
+
+NS_END

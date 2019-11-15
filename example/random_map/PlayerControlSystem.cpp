@@ -12,7 +12,7 @@ PlayerControlSystem::~PlayerControlSystem()
 
 void PlayerControlSystem::configure(entityx::EventManager & events)
 {
-    events.subscribe<blink::KeyboardEvent>(*this);
+    events.subscribe<NS::KeyboardEvent>(*this);
     events.subscribe<entityx::ComponentAddedEvent<PlayerData>>(*this);
     events.subscribe<entityx::ComponentAddedEvent<MapData>>(*this);
 }
@@ -46,7 +46,7 @@ void PlayerControlSystem::update(entityx::EntityManager & entities, entityx::Eve
     }
 }
 
-void PlayerControlSystem::receive(const blink::KeyboardEvent & evt)
+void PlayerControlSystem::receive(const NS::KeyboardEvent & evt)
 {
     MOVEMENT index = MOVE_UP;
     switch (evt.key)

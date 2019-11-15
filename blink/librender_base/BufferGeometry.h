@@ -12,25 +12,26 @@
 #include "BufferObject.h"
 #include "VertexBuffer.h"
 
-namespace blink
+NS_BEGIN
+
+class BufferGeometry : public Geometry
 {
-    class BufferGeometry : public Geometry
-    {
-    public:
-        BufferGeometry();
-        virtual ~BufferGeometry();
+public:
+    BufferGeometry();
+    virtual ~BufferGeometry();
 
-        bool uploadVertexBuffer(BufferAttributes::StockAttributes stock, const void* bufferData, uint32 bufferSize, BufferObject::Usage usage = BufferObject::Usage::StaticDraw);
-        bool uploadVertexBuffer(BufferAttributes* attributes, const void* bufferData, uint32 bufferSize, BufferObject::Usage usage = BufferObject::Usage::StaticDraw);
-        bool uploadIndexBuffer(const uint16* bufferData, uint32 numIndex, BufferObject::Usage usage = BufferObject::Usage::StaticDraw);
+    bool uploadVertexBuffer(BufferAttributes::StockAttributes stock, const void* bufferData, uint32 bufferSize, BufferObject::Usage usage = BufferObject::Usage::StaticDraw);
+    bool uploadVertexBuffer(BufferAttributes* attributes, const void* bufferData, uint32 bufferSize, BufferObject::Usage usage = BufferObject::Usage::StaticDraw);
+    bool uploadIndexBuffer(const uint16* bufferData, uint32 numIndex, BufferObject::Usage usage = BufferObject::Usage::StaticDraw);
 
-    protected:
-        void destroyVertexBuffer();
-        void destroyIndexBuffer();
+protected:
+    void destroyVertexBuffer();
+    void destroyIndexBuffer();
 
-    protected:
-        VertexBuffer* m_vertexBuffer{};
-        BufferObject* m_indexBuffer{};
+protected:
+    VertexBuffer* m_vertexBuffer{};
+    BufferObject* m_indexBuffer{};
 
-    };
-}
+};
+
+NS_END

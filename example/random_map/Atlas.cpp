@@ -9,7 +9,7 @@ Atlas::~Atlas()
 
 }
 
-const Atlas::Piece * Atlas::findPiece(const blink::tstring & id)
+const Atlas::Piece * Atlas::findPiece(const NS::tstring & id)
 {
     const auto& it = m_pieceMap.find(id);
     if (it == m_pieceMap.end()) return nullptr;

@@ -9,7 +9,7 @@
 #pragma once
 #include <blink.h>
 
-class HelloWorldApp : public blink::App
+class HelloWorldApp : public NS::App
 {
 public:
     HelloWorldApp();

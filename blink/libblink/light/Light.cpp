@@ -8,15 +8,16 @@
  */
 #include "Light.h"
 
-namespace blink
+NS_BEGIN
+
+Light::Light()
 {
-    Light::Light()
-    {
 
-    }
-
-    Light::~Light()
-    {
-
-    }
 }
+
+Light::~Light()
+{
+
+}
+
+NS_END

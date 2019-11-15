@@ -12,19 +12,22 @@ BaseTypes.cpp
 BaseTypes.h
 BaseTypesGlm.cpp
 BaseTypesGlm.h
-EventSystem.h
+Directory.cpp
+Directory.h
+File.cpp
 File.h
-InstanceManager.cpp
-InstanceManager.h
+Log.cpp
 Log.h
 PathParser.cpp
 PathParser.h
+PreDefine.h
 StringBuilder.cpp
 StringBuilder.h
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	set(SOURCE_FILES ${SOURCE_FILES}
+		platform/windows/DirectoryWindows.cpp
 		platform/windows/dirent_windows.h
 		platform/windows/FileWindows.cpp
 		platform/windows/LogWindows.cpp

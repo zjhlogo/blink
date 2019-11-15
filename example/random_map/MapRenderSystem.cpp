@@ -20,7 +20,7 @@ MapRenderSystem::~MapRenderSystem()
 void MapRenderSystem::configure(entityx::EventManager & events)
 {
     events.subscribe<MapDataUpdateEvent>(*this);
-    events.subscribe<entityx::ComponentAddedEvent<blink::CameraData>>(*this);
+    events.subscribe<entityx::ComponentAddedEvent<NS::CameraData>>(*this);
 
     m_atlas = new TileAtlas();
     m_atlas->initialize();
@@ -33,7 +33,7 @@ void MapRenderSystem::update(entityx::EntityManager & entities, entityx::EventMa
 {
     // select camera
     if (!m_camera.valid()) return;
-    auto cameraData = m_camera.component<blink::CameraData>().get();
+    auto cameraData = m_camera.component<NS::CameraData>().get();
 
     // calculate block index
     glm::ivec2 blockIndex;
@@ -70,8 +70,8 @@ void MapRenderSystem::update(entityx::EntityManager & entities, entityx::EventMa
     // setup shader uniforms for camera
     {
         shader->setUniform("u_worldToClip", cameraData->worldToClip);
-        shader->setUniform("u_localToWorld", blink::MAT4_IDENTITY);
-        shader->setUniform("u_localToWorldTranInv", blink::MAT3_IDENTITY);
+        shader->setUniform("u_localToWorld", NS::MAT4_IDENTITY);
+        shader->setUniform("u_localToWorldTranInv", NS::MAT3_IDENTITY);
         shader->setUniform("u_localToClip", cameraData->worldToClip);
         shader->setUniform("u_viewPos", cameraData->cameraPos);
     }
@@ -97,7 +97,7 @@ void MapRenderSystem::receive(const MapDataUpdateEvent & evt)
     // TODO: update render block
 }
 
-void MapRenderSystem::receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt)
+void MapRenderSystem::receive(const entityx::ComponentAddedEvent<NS::CameraData>& evt)
 {
     m_camera = evt.entity;
 }

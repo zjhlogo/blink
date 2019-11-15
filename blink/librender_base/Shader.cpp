@@ -8,16 +8,17 @@
  */
 #include "Shader.h"
 
-namespace blink
+NS_BEGIN
+
+Shader::Shader(const tstring& id)
+    :m_id(id)
 {
-    Shader::Shader(const tstring& id)
-        :m_id(id)
-    {
 
-    }
-
-    Shader::~Shader()
-    {
-
-    }
 }
+
+Shader::~Shader()
+{
+
+}
+
+NS_END

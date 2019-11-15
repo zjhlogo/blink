@@ -7,24 +7,26 @@
  * 
  */
 #pragma once
+#include <BaseTypes.h>
 #include <entityx/entityx.h>
 
-namespace blink
+NS_BEGIN
+
+class RenderModule;
+
+class App
 {
-    class RenderModule;
+public:
+    virtual bool initialize() = 0;
+    virtual void terminate() = 0;
 
-    class App
-    {
-    public:
-        virtual bool initialize() = 0;
-        virtual void terminate() = 0;
+    virtual void step(float dt);
 
-        virtual void step(float dt);
+public:
+    entityx::EntityX m_ex;
 
-    public:
-        entityx::EntityX m_ex;
+};
 
-    };
+int run(RenderModule* renderModule);
 
-    int run(RenderModule* renderModule);
-}
+NS_END

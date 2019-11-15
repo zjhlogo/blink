@@ -23,7 +23,7 @@ public:
     void configure(entityx::EventManager &events) override;
     void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
-    void receive(const blink::KeyboardEvent& evt);
+    void receive(const NS::KeyboardEvent& evt);
     void receive(const entityx::ComponentAddedEvent<PlayerData>& evt);
     void receive(const entityx::ComponentAddedEvent<MapData>& evt);
 

@@ -18,8 +18,8 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
 {
     m_blockIndex = blockIndex;
 
-    std::vector<blink::VertexPos3Uv2> verts;
-    std::vector<blink::uint16> indis;
+    std::vector<NS::VertexPos3Uv2> verts;
+    std::vector<NS::uint16> indis;
 
     glm::ivec2 lb{ blockIndex.x * BLOCK_SIZE, blockIndex.y * BLOCK_SIZE };
     glm::ivec2 rt{ std::min(lb.x + BLOCK_SIZE, mapData->size.x - 1), std::min(lb.y + BLOCK_SIZE, mapData->size.y - 1) };
@@ -74,6 +74,6 @@ void MapRenderBlock::generateGeometry(const MapData* mapData, Atlas* atlas, cons
         }
     }
 
-    uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, verts.data(), sizeof(verts[0])* numVerts, GL_STATIC_DRAW);
-    uploadIndexBuffer(indis.data(), static_cast<blink::uint32>(indis.size()), GL_STATIC_DRAW);
+    uploadVertexBuffer(NS::BufferAttributes::StockAttributes::Pos3Uv2, verts.data(), sizeof(verts[0])* numVerts, GL_STATIC_DRAW);
+    uploadIndexBuffer(indis.data(), static_cast<NS::uint32>(indis.size()), GL_STATIC_DRAW);
 }

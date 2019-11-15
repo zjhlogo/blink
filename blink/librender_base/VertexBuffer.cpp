@@ -8,16 +8,17 @@
  */
 #include "VertexBuffer.h"
 
-namespace blink
+NS_BEGIN
+
+VertexBuffer::VertexBuffer(const BufferAttributes* attributes)
+    :m_attributes(attributes)
 {
-    VertexBuffer::VertexBuffer(const BufferAttributes* attributes)
-        :m_attributes(attributes)
-    {
 
-    }
-
-    VertexBuffer::~VertexBuffer()
-    {
-
-    }
 }
+
+VertexBuffer::~VertexBuffer()
+{
+
+}
+
+NS_END

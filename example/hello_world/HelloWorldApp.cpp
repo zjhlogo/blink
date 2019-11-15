@@ -15,16 +15,16 @@
 #include <camera/CameraSystem.h>
 #include <RenderData.h>
 
-entityx::Entity createBox(entityx::EntityManager& entities, blink::BufferGeometry* geometry, blink::Material* material, int id)
+entityx::Entity createBox(entityx::EntityManager& entities, NS::BufferGeometry* geometry, NS::Material* material, int id)
 {
     static int s_currentId = 1;
 
     entityx::Entity box = entities.create();
 
-    box.assign<blink::TransformData>();
+    box.assign<NS::TransformData>();
 
-    box.assign<blink::MeshData>(geometry, material);
-    box.assign<blink::HierarchyData>(s_currentId++, id);
+    box.assign<NS::MeshData>(geometry, material);
+    box.assign<NS::HierarchyData>(s_currentId++, id);
 
     return box;
 }
@@ -41,23 +41,23 @@ HelloWorldApp::~HelloWorldApp()
 
 bool HelloWorldApp::initialize()
 {
-    m_ex.systems.add<blink::CameraSystem>();
-    m_ex.systems.add<blink::SceneSystem>();
+    m_ex.systems.add<NS::CameraSystem>();
+    m_ex.systems.add<NS::SceneSystem>();
     m_ex.systems.configure();
 
     // add cubes
-    blink::Material* material = new blink::PhongMaterial();
+    NS::Material* material = new NS::PhongMaterial();
     material->setTexture("tex_diffuse", "resource/grid16.png", 0);
-    createBox(m_ex.entities, new blink::BoxGeometry(1.0f, 1.0f, 1.0f), material, -1);
+    createBox(m_ex.entities, new NS::BoxGeometry(1.0f, 1.0f, 1.0f), material, -1);
 
     // add light
     auto lightEntity = m_ex.entities.create();
-    lightEntity.assign<blink::TransformData>()->position = glm::vec3(3.0f, 3.0f, 3.0f);
-    lightEntity.assign<blink::LightData>(new blink::PointLight());
+    lightEntity.assign<NS::TransformData>()->position = glm::vec3(3.0f, 3.0f, 3.0f);
+    lightEntity.assign<NS::LightData>(new NS::PointLight());
 
     // add a camera
     entityx::Entity camera = m_ex.entities.create();
-    camera.assign<blink::CameraData>(glm::vec3(0.0f, 0.0f, 3.0f), blink::VEC3_ZERO, blink::VEC3_PY);
+    camera.assign<NS::CameraData>(glm::vec3(0.0f, 0.0f, 3.0f), NS::VEC3_ZERO, NS::VEC3_PY);
 
     return true;
 }
@@ -69,6 +69,6 @@ void HelloWorldApp::terminate()
 
 int main(int argc, char** argv)
 {
-    blink::VulkanRenderModule renderModule;
-    return blink::run(&renderModule);
+    NS::VulkanRenderModule renderModule;
+    return NS::run(&renderModule);
 }

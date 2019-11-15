@@ -3,7 +3,7 @@
 #include "MapData.h"
 #include "Atlas.h"
 
-class MapRenderBlock : public blink::BufferGeometry
+class MapRenderBlock : public NS::BufferGeometry
 {
 public:
     static const int BLOCK_SIZE = 32;

@@ -7,18 +7,18 @@
  * 
  */
 #include "BufferObject.h"
-#include <cassert>
 
-namespace blink
+NS_BEGIN
+
+BufferObject::BufferObject(BufferType bufferType)
+    :m_bufferType(bufferType)
 {
-    BufferObject::BufferObject(BufferType bufferType)
-        :m_bufferType(bufferType)
-    {
 
-    }
-
-    BufferObject::~BufferObject()
-    {
-
-    }
 }
+
+BufferObject::~BufferObject()
+{
+
+}
+
+NS_END

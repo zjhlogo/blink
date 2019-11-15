@@ -8,16 +8,17 @@
  */
 #include "Texture.h"
 
-namespace blink
+NS_BEGIN
+
+Texture::Texture(const tstring& id)
+    :m_id(id)
 {
-    Texture::Texture(const tstring& id)
-        :m_id(id)
-    {
 
-    }
-
-    Texture::~Texture()
-    {
-
-    }
 }
+
+Texture::~Texture()
+{
+
+}
+
+NS_END

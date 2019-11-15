@@ -9,21 +9,22 @@
 #include "PointLight.h"
 #include <Shader.h>
 
-namespace blink
+NS_BEGIN
+
+PointLight::PointLight()
 {
-    PointLight::PointLight()
-    {
 
-    }
-
-    PointLight::~PointLight()
-    {
-
-    }
-
-    void PointLight::setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform)
-    {
-        shader->setUniform("u_lightPos", transform.position);
-        shader->setUniform("u_lightColor", getLightColor());
-    }
 }
+
+PointLight::~PointLight()
+{
+
+}
+
+void PointLight::setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform)
+{
+    shader->setUniform("u_lightPos", transform.position);
+    shader->setUniform("u_lightColor", getLightColor());
+}
+
+NS_END

@@ -9,15 +9,16 @@
 #pragma once
 #include "Material.h"
 
-namespace blink
+NS_BEGIN
+
+class WireframeMaterial : public Material
 {
-    class WireframeMaterial : public Material
-    {
-    public:
-        WireframeMaterial();
-        virtual ~WireframeMaterial();
+public:
+    WireframeMaterial();
+    virtual ~WireframeMaterial();
 
-        virtual void setupShaderUniforms(Shader* shader) override;
+    virtual void setupShaderUniforms(Shader* shader) override;
 
-    };
-}
+};
+
+NS_END

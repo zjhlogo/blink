@@ -10,18 +10,19 @@
 #include "BufferGeometry.h"
 #include "BufferAttributes.h"
 
-namespace blink
+NS_BEGIN
+
+class SphereGeometry : public BufferGeometry
 {
-    class SphereGeometry : public BufferGeometry
-    {
-    public:
-        SphereGeometry(float radius, int rings = 8, int segments = 16, BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
-        virtual ~SphereGeometry();
+public:
+    SphereGeometry(float radius, int rings = 8, int segments = 16, BufferAttributes::StockAttributes vertexAttribute = BufferAttributes::StockAttributes::Pos3Uv2Normal);
+    virtual ~SphereGeometry();
 
-    private:
-        float m_radius{};
-        int m_rings{};
-        int m_sections{};
+private:
+    float m_radius{};
+    int m_rings{};
+    int m_sections{};
 
-    };
-}
+};
+
+NS_END

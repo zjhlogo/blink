@@ -10,7 +10,7 @@ struct MapData
         BF_DIRTY = 1 << 0,
     };
 
-    explicit MapData(int w, int h, blink::uint8* data)
+    explicit MapData(int w, int h, NS::uint8* data)
         :size(w, h)
         , bitFlag(BF_DIRTY)
     {
@@ -20,8 +20,8 @@ struct MapData
 
     glm::ivec2 size;
     glm::ivec2 origin;
-    std::vector<blink::uint8> buffer;
-    blink::uint32 bitFlag;
+    std::vector<NS::uint8> buffer;
+    NS::uint32 bitFlag;
 };
 
 struct MapDataUpdateEvent

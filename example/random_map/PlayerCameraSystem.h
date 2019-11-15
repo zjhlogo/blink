@@ -12,7 +12,7 @@ public:
     void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
     void receive(const entityx::ComponentAddedEvent<PlayerData>& evt);
-    void receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt);
+    void receive(const entityx::ComponentAddedEvent<NS::CameraData>& evt);
 
 private:
     entityx::Entity m_player;

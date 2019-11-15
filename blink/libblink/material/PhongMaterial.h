@@ -9,16 +9,17 @@
 #pragma once
 #include "Material.h"
 
-namespace blink
+NS_BEGIN
+
+class PhongMaterial : public Material
 {
-    class PhongMaterial : public Material
-    {
-    public:
-        PhongMaterial();
-        virtual ~PhongMaterial();
+public:
+    PhongMaterial();
+    virtual ~PhongMaterial();
 
-        virtual Shader* getShader() override;
-        virtual void setupShaderUniforms(Shader* shader) override;
+    virtual Shader* getShader() override;
+    virtual void setupShaderUniforms(Shader* shader) override;
 
-    };
-}
+};
+
+NS_END

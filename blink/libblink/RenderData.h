@@ -11,35 +11,36 @@
 #include "material/Material.h"
 #include "light/Light.h"
 
-namespace blink
+NS_BEGIN
+
+struct MeshData
 {
-    struct MeshData
+    MeshData(BufferGeometry* geo, Material* mat)
+        :geometry(geo)
+        , material(mat)
     {
-        MeshData(BufferGeometry* geo, Material* mat)
-            :geometry(geo)
-            , material(mat)
-        {
-        }
+    }
 
-        ~MeshData()
-        {
-        }
-
-        BufferGeometry* geometry;
-        Material* material;
-    };
-
-    struct LightData
+    ~MeshData()
     {
-        LightData(Light* lt)
-            : light(lt)
-        {
-        }
+    }
 
-        ~LightData()
-        {
-        }
+    BufferGeometry* geometry;
+    Material* material;
+};
 
-        Light* light;
-    };
-}
+struct LightData
+{
+    LightData(Light* lt)
+        : light(lt)
+    {
+    }
+
+    ~LightData()
+    {
+    }
+
+    Light* light;
+};
+
+NS_END

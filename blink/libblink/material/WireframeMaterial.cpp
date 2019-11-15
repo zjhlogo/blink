@@ -9,19 +9,20 @@
 #include "WireframeMaterial.h"
 #include <RenderModule.h>
 
-namespace blink
+NS_BEGIN
+
+WireframeMaterial::WireframeMaterial()
 {
-    WireframeMaterial::WireframeMaterial()
-    {
-        m_shader = RenderModule::createShaderFromStock(Shader::StockShaders::Wireframe, 0);
-    }
-
-    WireframeMaterial::~WireframeMaterial()
-    {
-    }
-
-    void WireframeMaterial::setupShaderUniforms(Shader* shader)
-    {
-        shader->setUniform("u_diffuseColor", getDiffuseColor());
-    }
+    m_shader = RenderModule::createShaderFromStock(Shader::StockShaders::Wireframe, 0);
 }
+
+WireframeMaterial::~WireframeMaterial()
+{
+}
+
+void WireframeMaterial::setupShaderUniforms(Shader* shader)
+{
+    shader->setUniform("u_diffuseColor", getDiffuseColor());
+}
+
+NS_END

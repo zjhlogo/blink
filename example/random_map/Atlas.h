@@ -15,7 +15,7 @@ public:
         glm::vec2 uvs[4];
     };
 
-    typedef std::unordered_map<blink::tstring, const Piece*> PieceMap;
+    typedef std::unordered_map<NS::tstring, const Piece*> PieceMap;
 
 public:
     Atlas();
@@ -23,12 +23,12 @@ public:
 
     virtual bool initialize() = 0;
 
-    std::shared_ptr<blink::Texture2D> getTexture() const { return m_texture; };
-    const Piece* findPiece(const blink::tstring& id);
+    std::shared_ptr<NS::Texture2D> getTexture() const { return m_texture; };
+    const Piece* findPiece(const NS::tstring& id);
     const Piece* getPiece(int index);
 
 protected:
-    std::shared_ptr<blink::Texture2D> m_texture{};
+    std::shared_ptr<NS::Texture2D> m_texture{};
     PieceMap m_pieceMap;
 
     const Piece* m_pieceList{};

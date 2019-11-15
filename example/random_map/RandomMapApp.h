@@ -1,7 +1,7 @@
 #pragma once
 #include <blink.h>
 
-class RandomMapApp : public blink::App
+class RandomMapApp : public NS::App
 {
 public:
     RandomMapApp() {};

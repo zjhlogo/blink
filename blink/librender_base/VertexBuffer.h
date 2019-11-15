@@ -10,20 +10,21 @@
 #include "BufferAttributes.h"
 #include "BufferObject.h"
 
-namespace blink
+NS_BEGIN
+
+class VertexBuffer
 {
-    class VertexBuffer
-    {
-    public:
-        VertexBuffer(const BufferAttributes* attributes);
-        virtual ~VertexBuffer();
+public:
+    VertexBuffer(const BufferAttributes* attributes);
+    virtual ~VertexBuffer();
 
-        const BufferAttributes* getAttributes() { return m_attributes; };
+    const BufferAttributes* getAttributes() { return m_attributes; };
 
-        virtual bool uploadBuffer(const void* buffer, uint32 size, BufferObject::Usage usage) = 0;
+    virtual bool uploadBuffer(const void* buffer, uint32 size, BufferObject::Usage usage) = 0;
 
-    protected:
-        const BufferAttributes* m_attributes{};
+protected:
+    const BufferAttributes* m_attributes{};
 
-    };
-}
+};
+
+NS_END

@@ -8,15 +8,16 @@
  */
 #include "Geometry.h"
 
-namespace blink
+NS_BEGIN
+
+Geometry::Geometry()
 {
-    Geometry::Geometry()
-    {
 
-    }
-
-    Geometry::~Geometry()
-    {
-
-    }
 }
+
+Geometry::~Geometry()
+{
+
+}
+
+NS_END

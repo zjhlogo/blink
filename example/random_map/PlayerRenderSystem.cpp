@@ -18,7 +18,7 @@ PlayerRenderSystem::~PlayerRenderSystem()
 
 void PlayerRenderSystem::configure(entityx::EventManager & events)
 {
-    events.subscribe<entityx::ComponentAddedEvent<blink::CameraData>>(*this);
+    events.subscribe<entityx::ComponentAddedEvent<NS::CameraData>>(*this);
     events.subscribe<entityx::ComponentAddedEvent<PlayerData>>(*this);
 
     m_atlas = new ArmorAtlas();
@@ -35,7 +35,7 @@ void PlayerRenderSystem::configure(entityx::EventManager & events)
     m_material = new DiffuseMaterial();
     m_material->setTexture("tex_diffuse", m_atlas->getTexture(), 0);
 
-    m_geometry = new blink::BufferGeometry();
+    m_geometry = new NS::BufferGeometry();
 }
 
 void PlayerRenderSystem::update(entityx::EntityManager & entities, entityx::EventManager & events, entityx::TimeDelta dt)
@@ -59,8 +59,8 @@ void PlayerRenderSystem::update(entityx::EntityManager & entities, entityx::Even
 
     if (!m_verts.empty())
     {
-        m_geometry->uploadVertexBuffer(blink::BufferAttributes::StockAttributes::Pos3Uv2, m_verts.data(), static_cast<blink::uint32>(sizeof(m_verts[0])* m_verts.size()), GL_DYNAMIC_DRAW);
-        m_geometry->uploadIndexBuffer(m_indis.data(), static_cast<blink::uint32>(m_indis.size()), GL_DYNAMIC_DRAW);
+        m_geometry->uploadVertexBuffer(NS::BufferAttributes::StockAttributes::Pos3Uv2, m_verts.data(), static_cast<NS::uint32>(sizeof(m_verts[0])* m_verts.size()), GL_DYNAMIC_DRAW);
+        m_geometry->uploadIndexBuffer(m_indis.data(), static_cast<NS::uint32>(m_indis.size()), GL_DYNAMIC_DRAW);
         m_verts.clear();
         m_indis.clear();
 
@@ -68,7 +68,7 @@ void PlayerRenderSystem::update(entityx::EntityManager & entities, entityx::Even
     }
 }
 
-void PlayerRenderSystem::receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt)
+void PlayerRenderSystem::receive(const entityx::ComponentAddedEvent<NS::CameraData>& evt)
 {
     m_camera = evt.entity;
 }
@@ -115,7 +115,7 @@ void PlayerRenderSystem::render()
 {
     // select camera
     if (!m_camera.valid()) return;
-    auto cameraData = m_camera.component<blink::CameraData>().get();
+    auto cameraData = m_camera.component<NS::CameraData>().get();
 
     auto shader = m_material->getShader();
     if (!shader) return;
@@ -131,8 +131,8 @@ void PlayerRenderSystem::render()
     // setup shader uniforms for camera
     {
         shader->setUniform("u_worldToClip", cameraData->worldToClip);
-        shader->setUniform("u_localToWorld", blink::MAT4_IDENTITY);
-        shader->setUniform("u_localToWorldTranInv", blink::MAT3_IDENTITY);
+        shader->setUniform("u_localToWorld", NS::MAT4_IDENTITY);
+        shader->setUniform("u_localToWorldTranInv", NS::MAT3_IDENTITY);
         shader->setUniform("u_localToClip", cameraData->worldToClip);
         shader->setUniform("u_viewPos", cameraData->cameraPos);
     }

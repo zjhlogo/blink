@@ -96,9 +96,9 @@ bool ArmorAtlas::initialize()
         m_pieceMap[s_pieceList[i].id] = &s_pieceList[i];
     }
     // create texture
-    m_texture = blink::Texture2D::fromFile("resource/ArmorAtlas.png");
-    m_texture->setMinFilter(blink::Texture::SampleFilter::Nearest);
-    m_texture->setMagFilter(blink::Texture::SampleFilter::Nearest);
+    m_texture = NS::Texture2D::fromFile("resource/ArmorAtlas.png");
+    m_texture->setMinFilter(NS::Texture::SampleFilter::Nearest);
+    m_texture->setMagFilter(NS::Texture::SampleFilter::Nearest);
 
     return true;
 }

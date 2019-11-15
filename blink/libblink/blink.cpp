@@ -9,27 +9,28 @@
 #include "blink.h"
 #include <RenderModule.h>
 
-namespace blink
+NS_BEGIN
+
+void App::step(float dt)
 {
-    void App::step(float dt)
-    {
-        m_ex.systems.update_all(dt);
-    }
-
-    int run(RenderModule* renderModule)
-    {
-        if (!renderModule->createDevice({ 1280, 720 }))
-        {
-            renderModule->destroyDevice();
-            return -1;
-        }
-
-        while (renderModule->gameLoop())
-        {
-            // TODO: sleep ?
-        }
-
-        renderModule->destroyDevice();
-        return 0;
-    }
+    m_ex.systems.update_all(dt);
 }
+
+int run(RenderModule* renderModule)
+{
+    if (!renderModule->createDevice({ 1280, 720 }))
+    {
+        renderModule->destroyDevice();
+        return -1;
+    }
+
+    while (renderModule->gameLoop())
+    {
+        // TODO: sleep ?
+    }
+
+    renderModule->destroyDevice();
+    return 0;
+}
+
+NS_END

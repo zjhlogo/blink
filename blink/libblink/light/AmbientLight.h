@@ -8,16 +8,17 @@
  */
 #include "Light.h"
 
-namespace blink
+NS_BEGIN
+
+class AmbientLight : public Light
 {
-    class AmbientLight : public Light
-    {
-    public:
+public:
 
-        AmbientLight();
-        virtual ~AmbientLight();
+    AmbientLight();
+    virtual ~AmbientLight();
 
-        virtual void setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform) override;
+    virtual void setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform) override;
 
-    };
-}
+};
+
+NS_END

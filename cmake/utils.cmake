@@ -46,7 +46,6 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	set(ALL_LIBRARIES
 	glfw
 	fmt::fmt
-	tinyxml2::tinyxml2
 	entityx
 	libglad
 	libimgui

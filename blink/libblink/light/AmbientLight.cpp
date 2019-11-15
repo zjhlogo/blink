@@ -9,20 +9,21 @@
 #include "AmbientLight.h"
 #include <Shader.h>
 
-namespace blink
+NS_BEGIN
+
+AmbientLight::AmbientLight()
 {
-    AmbientLight::AmbientLight()
-    {
-        setLightColor(VEC3_ZERO);
-    }
-
-    AmbientLight::~AmbientLight()
-    {
-
-    }
-
-    void AmbientLight::setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform)
-    {
-        shader->setUniform("u_ambientColor", getLightColor());
-    }
+    setLightColor(VEC3_ZERO);
 }
+
+AmbientLight::~AmbientLight()
+{
+
+}
+
+void AmbientLight::setupShaderUniforms(std::shared_ptr<Shader> shader, const TransformData& transform)
+{
+    shader->setUniform("u_ambientColor", getLightColor());
+}
+
+NS_END

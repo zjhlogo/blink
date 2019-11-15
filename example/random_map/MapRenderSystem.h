@@ -20,7 +20,7 @@ public:
     void update(entityx::EntityManager &entities, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
     void receive(const MapDataUpdateEvent& evt);
-    void receive(const entityx::ComponentAddedEvent<blink::CameraData>& evt);
+    void receive(const entityx::ComponentAddedEvent<NS::CameraData>& evt);
 
 private:
     MapRenderBlock* checkOutBlock();
