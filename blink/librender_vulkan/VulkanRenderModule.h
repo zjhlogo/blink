@@ -10,8 +10,8 @@
 #include <RenderModule.h>
 
 #define GLFW_INCLUDE_VULKAN
-#include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 
 NS_BEGIN
 
@@ -128,7 +128,6 @@ private:
     std::size_t m_currentFrame{};
 
     bool m_frameBufferResized{};
-
 };
 
 NS_END

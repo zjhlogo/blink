@@ -7,6 +7,7 @@
  * 
  */
 #include "VulkanRenderModule.h"
+
 #include <File.h>
 #include <set>
 
@@ -47,12 +48,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
 
 VulkanRenderModule::VulkanRenderModule()
 {
-
 }
 
 VulkanRenderModule::~VulkanRenderModule()
 {
-
 }
 
 bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
@@ -106,15 +105,19 @@ bool VulkanRenderModule::gameLoop()
     double duration = end - begin;
     begin = end;
 
-    //         app->step(static_cast<float>(duration));
+    // app->step(static_cast<float>(duration));
 
     drawFrame();
+
+    m_logicalDevice.waitIdle();
 
     return true;
 }
 
 void VulkanRenderModule::drawFrame()
 {
+    m_logicalDevice.waitForFences(m_inFlightFences[m_currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+
     uint32_t imageIndex{};
     vk::Result result = m_logicalDevice.acquireNextImageKHR(m_swapChain, std::numeric_limits<uint64_t>::max(), m_imageAvailableSemaphores[m_currentFrame], vk::Fence(), &imageIndex);
 
@@ -127,7 +130,12 @@ void VulkanRenderModule::drawFrame()
     {
         throw std::runtime_error("failed to acquire swap chain image!");
     }
-    m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
+    if (m_imagesInFlight[imageIndex])
+    {
+        m_logicalDevice.waitForFences(m_imagesInFlight[imageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
+    }
+    m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];
 
     vk::SubmitInfo submitInfo;
     vk::Semaphore waitSemaphores[] = { m_imageAvailableSemaphores[m_currentFrame] };
@@ -143,11 +151,8 @@ void VulkanRenderModule::drawFrame()
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    m_logicalDevice.resetFences(1, &m_inFlightFences[m_currentFrame]);
-    if (m_graphicsQueue.submit(1, &submitInfo, vk::Fence()) != vk::Result::eSuccess)
-    {
-        throw std::runtime_error("failed to submit draw command buffer!");
-    }
+    m_logicalDevice.resetFences(m_inFlightFences[m_currentFrame]);
+    m_graphicsQueue.submit(submitInfo, m_inFlightFences[m_currentFrame]);
 
     vk::PresentInfoKHR presentInfo;
     presentInfo.waitSemaphoreCount = 1;
@@ -158,7 +163,7 @@ void VulkanRenderModule::drawFrame()
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    result = m_presentQueue.presentKHR(presentInfo);
+    result = m_presentQueue.presentKHR(&presentInfo);
     if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || m_frameBufferResized)
     {
         m_frameBufferResized = false;
@@ -168,6 +173,8 @@ void VulkanRenderModule::drawFrame()
     {
         throw std::runtime_error("failed to present swap chain image!");
     }
+
+    m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 bool VulkanRenderModule::createWindow(const glm::ivec2& windowSize)
@@ -175,7 +182,7 @@ bool VulkanRenderModule::createWindow(const glm::ivec2& windowSize)
     m_deviceSize = windowSize;
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     /* Create a windowed mode window and its OpenGL context */
     m_window = glfwCreateWindow(windowSize.x, windowSize.y, "blink", nullptr, nullptr);
@@ -594,17 +601,17 @@ bool VulkanRenderModule::createGraphicsPipeline()
     colorBlending.pAttachments = &colorBlendAttachment;
 
     // dynamic state
-//         VkDynamicState dynamicStates[] = {
-//             VK_DYNAMIC_STATE_VIEWPORT,
-//             VK_DYNAMIC_STATE_LINE_WIDTH
-//         };
-// 
-//         VkPipelineDynamicStateCreateInfo dynamicState = {};
-//         dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-//         dynamicState.dynamicStateCount = 2;
-//         dynamicState.pDynamicStates = dynamicStates;
+    //         VkDynamicState dynamicStates[] = {
+    //             VK_DYNAMIC_STATE_VIEWPORT,
+    //             VK_DYNAMIC_STATE_LINE_WIDTH
+    //         };
+    //
+    //         VkPipelineDynamicStateCreateInfo dynamicState = {};
+    //         dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    //         dynamicState.dynamicStateCount = 2;
+    //         dynamicState.pDynamicStates = dynamicStates;
 
-        // layout state
+    // layout state
     vk::PipelineLayoutCreateInfo pipelineLayoutInfo;
     m_pipelineLayout = m_logicalDevice.createPipelineLayout(pipelineLayoutInfo);
 
@@ -774,6 +781,8 @@ bool VulkanRenderModule::recreateSwapChain()
 {
     int width = 0;
     int height = 0;
+    glfwGetFramebufferSize(m_window, &width, &height);
+
     while (width == 0 || height == 0)
     {
         glfwGetFramebufferSize(m_window, &width, &height);
@@ -806,15 +815,14 @@ void VulkanRenderModule::cleanSwapChain()
 
 const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers()
 {
-    static const std::vector<const char*> REQUIRED_LAYERS =
-    {
+    static const std::vector<const char*> REQUIRED_LAYERS = {
         "VK_LAYER_KHRONOS_validation"
     };
 
     return REQUIRED_LAYERS;
 }
 
-bool VulkanRenderModule::checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char *>& requiredLayers)
+bool VulkanRenderModule::checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers)
 {
     for (const auto& requireLayer : requiredLayers)
     {
@@ -836,8 +844,7 @@ bool VulkanRenderModule::checkValidationLayerSupported(const std::vector<vk::Lay
 
 const std::vector<const char*>& VulkanRenderModule::getRequiredInstanceExtensions()
 {
-    static const std::vector<const char*> REQUIRED_EXTENSIONS =
-    {
+    static const std::vector<const char*> REQUIRED_EXTENSIONS = {
         "VK_KHR_surface",
         "VK_KHR_win32_surface",
         "VK_EXT_debug_utils",
@@ -848,15 +855,14 @@ const std::vector<const char*>& VulkanRenderModule::getRequiredInstanceExtension
 
 const std::vector<const char*>& VulkanRenderModule::getRequiredDeviceExtensions()
 {
-    static const std::vector<const char*> REQUIRED_EXTENSIONS =
-    {
+    static const std::vector<const char*> REQUIRED_EXTENSIONS = {
         "VK_KHR_swapchain",
     };
 
     return REQUIRED_EXTENSIONS;
 }
 
-bool VulkanRenderModule::checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char *>& requiredExtensions)
+bool VulkanRenderModule::checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char*>& requiredExtensions)
 {
     for (const auto& requiredExtension : requiredExtensions)
     {
@@ -900,10 +906,7 @@ int VulkanRenderModule::getBestFitPhysicalDeviceIndex(const std::vector<vk::Phys
             swapChainAdequate = !formats.empty() && !presentModes.empty();
         }
 
-        if (graphicsFamilyIndex != -1
-            && presentFamilyIndex != -1
-            && extensionsSupported
-            && swapChainAdequate)
+        if (graphicsFamilyIndex != -1 && presentFamilyIndex != -1 && extensionsSupported && swapChainAdequate)
         {
             return index;
         }

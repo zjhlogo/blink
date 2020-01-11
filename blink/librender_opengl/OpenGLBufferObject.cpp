@@ -8,6 +8,7 @@
  */
 #include "OpenGLBufferObject.h"
 #include "GlConfig.h"
+#include <cassert>
 
 NS_BEGIN
 
