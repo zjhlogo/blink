@@ -69,6 +69,12 @@ private:
     bool createCommandPool();
     void destroyCommandPool();
 
+    bool createVertexBuffer();
+    void destroyVertexBuffer();
+
+    bool createIndexBuffer();
+    void destroyIndexBuffer();
+
     bool createCommandBuffers();
     void destroyCommandBuffers();
 
@@ -90,6 +96,10 @@ private:
 
     vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
     bool readFileIntoBuffer(std::vector<uint8>& bufferOut, const std::string& filePath);
+
+    uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+    bool createBuffer(vk::Buffer& buffer, vk::DeviceMemory& bufferMemory, vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties);
+    void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
 
 private:
     GLFWwindow* m_window{};
@@ -120,6 +130,12 @@ private:
     std::vector<vk::Framebuffer> m_swapChainFramebuffers;
     vk::CommandPool m_commandPool;
     std::vector<vk::CommandBuffer> m_commandBuffers;
+
+    vk::Buffer m_vertexBuffer;
+    vk::DeviceMemory m_vertexBufferMemory;
+
+    vk::Buffer m_indexBuffer;
+    vk::DeviceMemory m_indexBufferMemory;
 
     std::vector<vk::Semaphore> m_imageAvailableSemaphores;
     std::vector<vk::Semaphore> m_renderFinishedSemaphores;

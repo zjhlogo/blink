@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #include "VulkanRenderModule.h"
 
@@ -12,6 +12,45 @@
 #include <set>
 
 NS_BEGIN
+
+struct Vertex
+{
+    glm::vec2 pos;
+    glm::vec3 color;
+
+    static vk::VertexInputBindingDescription getBindingDescription()
+    {
+        vk::VertexInputBindingDescription bindingDescription;
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(Vertex);
+        bindingDescription.inputRate = vk::VertexInputRate::eVertex;
+        return bindingDescription;
+    }
+
+    static std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions()
+    {
+        std::array<vk::VertexInputAttributeDescription, 2> attributeDescriptions;
+
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = vk::Format::eR32G32Sfloat;
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = vk::Format::eR32G32B32Sfloat;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+        return attributeDescriptions;
+    }
+};
+
+const std::vector<Vertex> g_vertices = { { { -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+                                         { { 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+                                         { { 0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } },
+                                         { { -0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f } } };
+
+const std::vector<uint16_t> g_indices = { 0, 1, 2, 0, 2, 3 };
 
 static void frameBufferResizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -35,7 +74,10 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 {
 }
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                                    VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                                    void* pUserData)
 {
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
     {
@@ -71,6 +113,8 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     if (!createGraphicsPipeline()) return false;
     if (!createFramebuffers()) return false;
     if (!createCommandPool()) return false;
+    if (!createVertexBuffer()) return false;
+    if (!createIndexBuffer()) return false;
     if (!createCommandBuffers()) return false;
     if (!createSyncObjects()) return false;
 
@@ -81,6 +125,8 @@ void VulkanRenderModule::destroyDevice()
 {
     cleanSwapChain();
 
+    destroyIndexBuffer();
+    destroyVertexBuffer();
     destroySyncObjects();
     destroyCommandPool();
     destroyLogicalDevice();
@@ -119,7 +165,11 @@ void VulkanRenderModule::drawFrame()
     m_logicalDevice.waitForFences(m_inFlightFences[m_currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
     uint32_t imageIndex{};
-    vk::Result result = m_logicalDevice.acquireNextImageKHR(m_swapChain, std::numeric_limits<uint64_t>::max(), m_imageAvailableSemaphores[m_currentFrame], vk::Fence(), &imageIndex);
+    vk::Result result = m_logicalDevice.acquireNextImageKHR(m_swapChain,
+                                                            std::numeric_limits<uint64_t>::max(),
+                                                            m_imageAvailableSemaphores[m_currentFrame],
+                                                            vk::Fence(),
+                                                            &imageIndex);
 
     if (result == vk::Result::eErrorOutOfDateKHR)
     {
@@ -250,8 +300,10 @@ void VulkanRenderModule::destroyInstance()
 bool VulkanRenderModule::setupDebugMessenger()
 {
     vk::DebugUtilsMessengerCreateInfoEXT createInfo;
-    createInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
-    createInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
+    createInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+                                 | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
+    createInfo.messageType =
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
     createInfo.pfnUserCallback = debugCallback;
     m_debugMessenger = m_instance.createDebugUtilsMessengerEXT(createInfo, nullptr, m_dispatchLoader);
 
@@ -554,9 +606,15 @@ bool VulkanRenderModule::createGraphicsPipeline()
     // shader state
     vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
-    // TODO: do it later
     // vertex input state
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
     vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
     // input assembly state
     vk::PipelineInputAssemblyStateCreateInfo inputAssembly;
@@ -591,7 +649,8 @@ bool VulkanRenderModule::createGraphicsPipeline()
 
     // color blending state
     vk::PipelineColorBlendAttachmentState colorBlendAttachment;
-    colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+    colorBlendAttachment.colorWriteMask =
+        vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
     colorBlendAttachment.blendEnable = VK_FALSE;
 
     vk::PipelineColorBlendStateCreateInfo colorBlending;
@@ -695,6 +754,78 @@ void VulkanRenderModule::destroyCommandPool()
     m_logicalDevice.destroyCommandPool(m_commandPool);
 }
 
+bool VulkanRenderModule::createVertexBuffer()
+{
+    vk::DeviceSize bufferSize = sizeof(g_vertices[0]) * g_vertices.size();
+
+    vk::Buffer stagingBuffer;
+    vk::DeviceMemory stagingBufferMemory;
+
+    createBuffer(stagingBuffer,
+                 stagingBufferMemory,
+                 bufferSize,
+                 vk::BufferUsageFlagBits::eTransferSrc,
+                 vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+    void* data = m_logicalDevice.mapMemory(stagingBufferMemory, 0, bufferSize);
+    memcpy(data, g_vertices.data(), static_cast<size_t>(bufferSize));
+    m_logicalDevice.unmapMemory(stagingBufferMemory);
+
+    createBuffer(m_vertexBuffer,
+                 m_vertexBufferMemory,
+                 bufferSize,
+                 vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
+                 vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+    copyBuffer(stagingBuffer, m_vertexBuffer, bufferSize);
+
+    m_logicalDevice.destroyBuffer(stagingBuffer);
+    m_logicalDevice.freeMemory(stagingBufferMemory);
+
+    return true;
+}
+
+void VulkanRenderModule::destroyVertexBuffer()
+{
+    m_logicalDevice.destroyBuffer(m_vertexBuffer);
+    m_logicalDevice.freeMemory(m_vertexBufferMemory);
+}
+
+bool VulkanRenderModule::createIndexBuffer()
+{
+    vk::DeviceSize bufferSize = sizeof(g_indices[0]) * g_indices.size();
+
+    vk::Buffer stagingBuffer;
+    vk::DeviceMemory stagingBufferMemory;
+    createBuffer(stagingBuffer,
+                 stagingBufferMemory,
+                 bufferSize,
+                 vk::BufferUsageFlagBits::eTransferSrc,
+                 vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+    void* data = m_logicalDevice.mapMemory(stagingBufferMemory, 0, bufferSize);
+    memcpy(data, g_indices.data(), static_cast<size_t>(bufferSize));
+    m_logicalDevice.unmapMemory(stagingBufferMemory);
+
+    createBuffer(m_indexBuffer,
+                 m_indexBufferMemory,
+                 bufferSize,
+                 vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer,
+                 vk::MemoryPropertyFlagBits::eDeviceLocal);
+    copyBuffer(stagingBuffer, m_indexBuffer, bufferSize);
+
+    m_logicalDevice.destroyBuffer(stagingBuffer);
+    m_logicalDevice.freeMemory(stagingBufferMemory);
+
+    return true;
+}
+
+void VulkanRenderModule::destroyIndexBuffer()
+{
+    m_logicalDevice.destroyBuffer(m_indexBuffer);
+    m_logicalDevice.freeMemory(m_indexBufferMemory);
+}
+
 bool VulkanRenderModule::createCommandBuffers()
 {
     vk::CommandBufferAllocateInfo allocInfo;
@@ -729,7 +860,10 @@ bool VulkanRenderModule::createCommandBuffers()
 
             {
                 m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-                m_commandBuffers[i].draw(3, 1, 0, 0);
+                vk::DeviceSize offset = 0;
+                m_commandBuffers[i].bindVertexBuffers(0, m_vertexBuffer, offset);
+                m_commandBuffers[i].bindIndexBuffer(m_indexBuffer, 0, vk::IndexType::eUint16);
+                m_commandBuffers[i].drawIndexed(static_cast<uint32_t>(g_indices.size()), 1, 0, 0, 0);
             }
 
             m_commandBuffers[i].endRenderPass();
@@ -815,9 +949,7 @@ void VulkanRenderModule::cleanSwapChain()
 
 const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers()
 {
-    static const std::vector<const char*> REQUIRED_LAYERS = {
-        "VK_LAYER_KHRONOS_validation"
-    };
+    static const std::vector<const char*> REQUIRED_LAYERS = { "VK_LAYER_KHRONOS_validation" };
 
     return REQUIRED_LAYERS;
 }
@@ -917,7 +1049,11 @@ int VulkanRenderModule::getBestFitPhysicalDeviceIndex(const std::vector<vk::Phys
     return -1;
 }
 
-bool VulkanRenderModule::getBestFitQueueFamilyPropertyIndex(int& graphicsFamily, int& presentFamily, const vk::PhysicalDevice& physicalDevice, const vk::SurfaceKHR& surface, const std::vector<vk::QueueFamilyProperties>& queueFamilies)
+bool VulkanRenderModule::getBestFitQueueFamilyPropertyIndex(int& graphicsFamily,
+                                                            int& presentFamily,
+                                                            const vk::PhysicalDevice& physicalDevice,
+                                                            const vk::SurfaceKHR& surface,
+                                                            const std::vector<vk::QueueFamilyProperties>& queueFamilies)
 {
     graphicsFamily = -1;
     presentFamily = -1;
@@ -960,6 +1096,71 @@ bool VulkanRenderModule::readFileIntoBuffer(std::vector<uint8>& bufferOut, const
     file.close();
 
     return true;
+}
+
+uint32_t VulkanRenderModule::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
+{
+    vk::PhysicalDeviceMemoryProperties memProperties = m_physicalDevice.getMemoryProperties();
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
+    {
+        if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) return i;
+    }
+
+    throw std::runtime_error("failed to find suitable memory type!");
+}
+
+bool VulkanRenderModule::createBuffer(vk::Buffer& buffer,
+                                      vk::DeviceMemory& bufferMemory,
+                                      vk::DeviceSize size,
+                                      vk::BufferUsageFlags usage,
+                                      vk::MemoryPropertyFlags properties)
+{
+    vk::BufferCreateInfo bufferInfo;
+    bufferInfo.size = sizeof(g_vertices[0]) * g_vertices.size();
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+    buffer = m_logicalDevice.createBuffer(bufferInfo);
+
+    vk::MemoryRequirements memRequirements = m_logicalDevice.getBufferMemoryRequirements(buffer);
+
+    vk::MemoryAllocateInfo allocInfo;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+    bufferMemory = m_logicalDevice.allocateMemory(allocInfo);
+    m_logicalDevice.bindBufferMemory(buffer, bufferMemory, 0);
+
+    return true;
+}
+
+void VulkanRenderModule::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size)
+{
+    vk::CommandBufferAllocateInfo allocInfo;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandPool = m_commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    std::vector<vk::CommandBuffer> commandBuffers = m_logicalDevice.allocateCommandBuffers(allocInfo);
+    auto& commandBuffer = commandBuffers[0];
+
+    vk::CommandBufferBeginInfo beginInfo;
+    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+    commandBuffer.begin(beginInfo);
+
+    vk::BufferCopy copyRegion;
+    copyRegion.srcOffset = 0;
+    copyRegion.dstOffset = 0;
+    copyRegion.size = size;
+    commandBuffer.copyBuffer(srcBuffer, dstBuffer, copyRegion);
+
+    commandBuffer.end();
+
+    vk::SubmitInfo submitInfo;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+    m_graphicsQueue.submit(submitInfo, vk::Fence());
+    m_graphicsQueue.waitIdle();
+
+    m_logicalDevice.freeCommandBuffers(m_commandPool, commandBuffer);
 }
 
 NS_END
