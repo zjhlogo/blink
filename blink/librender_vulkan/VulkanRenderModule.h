@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #pragma once
 #include <RenderModule.h>
@@ -60,6 +60,9 @@ private:
     bool createRenderPass();
     void destroyRenderPass();
 
+    bool createDescriptorSetLayout();
+    void destroyDescriptorSetLayout();
+
     bool createGraphicsPipeline();
     void destroyGraphicsPipeline();
 
@@ -75,6 +78,15 @@ private:
     bool createIndexBuffer();
     void destroyIndexBuffer();
 
+    bool createUniformBuffers();
+    void destroyUniformBuffers();
+
+    bool createDescriptorPool();
+    void destroyDescriptorPool();
+
+    bool createDescriptorSets();
+    void destroyDescriptorSets();
+
     bool createCommandBuffers();
     void destroyCommandBuffers();
 
@@ -89,17 +101,27 @@ private:
 
     const std::vector<const char*>& getRequiredInstanceExtensions();
     const std::vector<const char*>& getRequiredDeviceExtensions();
-    bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char*>& requiredExtensions);
+    bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions,
+                                  const std::vector<const char*>& requiredExtensions);
 
     int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
-    bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily, int& presentFamily, const vk::PhysicalDevice& physicalDevice, const vk::SurfaceKHR& surface, const std::vector<vk::QueueFamilyProperties>& queueFamilies);
+    bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily,
+                                            int& presentFamily,
+                                            const vk::PhysicalDevice& physicalDevice,
+                                            const vk::SurfaceKHR& surface,
+                                            const std::vector<vk::QueueFamilyProperties>& queueFamilies);
 
     vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
     bool readFileIntoBuffer(std::vector<uint8>& bufferOut, const std::string& filePath);
 
     uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-    bool createBuffer(vk::Buffer& buffer, vk::DeviceMemory& bufferMemory, vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties);
+    bool createBuffer(vk::Buffer& buffer,
+                      vk::DeviceMemory& bufferMemory,
+                      vk::DeviceSize size,
+                      vk::BufferUsageFlags usage,
+                      vk::MemoryPropertyFlags properties);
     void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
+    void updateUniformBuffer(uint32_t currentImage);
 
 private:
     GLFWwindow* m_window{};
@@ -124,8 +146,12 @@ private:
     std::vector<vk::ImageView> m_swapChainImageViews;
 
     vk::RenderPass m_renderPass;
+    vk::DescriptorSetLayout m_descriptorSetLayout;
     vk::PipelineLayout m_pipelineLayout;
     vk::Pipeline m_pipeline;
+
+    vk::DescriptorPool m_descriptorPool;
+    std::vector<vk::DescriptorSet> m_descriptorSets;
 
     std::vector<vk::Framebuffer> m_swapChainFramebuffers;
     vk::CommandPool m_commandPool;
@@ -136,6 +162,9 @@ private:
 
     vk::Buffer m_indexBuffer;
     vk::DeviceMemory m_indexBufferMemory;
+
+    std::vector<vk::Buffer> m_uniformBuffers;
+    std::vector<vk::DeviceMemory> m_uniformBuffersMemory;
 
     std::vector<vk::Semaphore> m_imageAvailableSemaphores;
     std::vector<vk::Semaphore> m_renderFinishedSemaphores;

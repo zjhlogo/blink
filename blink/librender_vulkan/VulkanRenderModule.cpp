@@ -9,6 +9,7 @@
 #include "VulkanRenderModule.h"
 
 #include <File.h>
+#include <chrono>
 #include <set>
 
 NS_BEGIN
@@ -51,6 +52,13 @@ const std::vector<Vertex> g_vertices = { { { -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f 
                                          { { -0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f } } };
 
 const std::vector<uint16_t> g_indices = { 0, 1, 2, 0, 2, 3 };
+
+struct UniformBufferObject
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
 
 static void frameBufferResizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -110,11 +118,15 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     if (!createSwapChain()) return false;
     if (!createImageViews()) return false;
     if (!createRenderPass()) return false;
+    if (!createDescriptorSetLayout()) return false;
     if (!createGraphicsPipeline()) return false;
     if (!createFramebuffers()) return false;
     if (!createCommandPool()) return false;
     if (!createVertexBuffer()) return false;
     if (!createIndexBuffer()) return false;
+    if (!createUniformBuffers()) return false;
+    if (!createDescriptorPool()) return false;
+    if (!createDescriptorSets()) return false;
     if (!createCommandBuffers()) return false;
     if (!createSyncObjects()) return false;
 
@@ -125,6 +137,10 @@ void VulkanRenderModule::destroyDevice()
 {
     cleanSwapChain();
 
+    destroyDescriptorSetLayout();
+    destroyUniformBuffers();
+    destroyDescriptorSets();
+    destroyDescriptorPool();
     destroyIndexBuffer();
     destroyVertexBuffer();
     destroySyncObjects();
@@ -180,6 +196,8 @@ void VulkanRenderModule::drawFrame()
     {
         throw std::runtime_error("failed to acquire swap chain image!");
     }
+
+    updateUniformBuffer(imageIndex);
 
     if (m_imagesInFlight[imageIndex])
     {
@@ -302,8 +320,8 @@ bool VulkanRenderModule::setupDebugMessenger()
     vk::DebugUtilsMessengerCreateInfoEXT createInfo;
     createInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
                                  | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
-    createInfo.messageType =
-        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
+    createInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+                             | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
     createInfo.pfnUserCallback = debugCallback;
     m_debugMessenger = m_instance.createDebugUtilsMessengerEXT(createInfo, nullptr, m_dispatchLoader);
 
@@ -582,6 +600,28 @@ void VulkanRenderModule::destroyRenderPass()
     m_logicalDevice.destroyRenderPass(m_renderPass);
 }
 
+bool VulkanRenderModule::createDescriptorSetLayout()
+{
+    vk::DescriptorSetLayoutBinding uboLayoutBinding;
+    uboLayoutBinding.binding = 0;
+    uboLayoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+    uboLayoutBinding.descriptorCount = 1;
+    uboLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+    uboLayoutBinding.pImmutableSamplers = nullptr;
+
+    vk::DescriptorSetLayoutCreateInfo layoutInfo;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &uboLayoutBinding;
+    m_descriptorSetLayout = m_logicalDevice.createDescriptorSetLayout(layoutInfo);
+
+    return true;
+}
+
+void VulkanRenderModule::destroyDescriptorSetLayout()
+{
+    m_logicalDevice.destroyDescriptorSetLayout(m_descriptorSetLayout);
+}
+
 bool VulkanRenderModule::createGraphicsPipeline()
 {
     std::vector<uint8> vertShaderCode;
@@ -621,7 +661,12 @@ bool VulkanRenderModule::createGraphicsPipeline()
     inputAssembly.topology = vk::PrimitiveTopology::eTriangleList;
 
     // viewport state
-    vk::Viewport viewport(0.0f, 0.0f, static_cast<float>(m_swapChainExtent.width), static_cast<float>(m_swapChainExtent.height), 0.0f, 1.0f);
+    vk::Viewport viewport(0.0f,
+                          0.0f,
+                          static_cast<float>(m_swapChainExtent.width),
+                          static_cast<float>(m_swapChainExtent.height),
+                          0.0f,
+                          1.0f);
     vk::Rect2D sissor({ 0, 0 }, m_swapChainExtent);
     vk::PipelineViewportStateCreateInfo viewportState;
     viewportState.viewportCount = 1;
@@ -672,6 +717,8 @@ bool VulkanRenderModule::createGraphicsPipeline()
 
     // layout state
     vk::PipelineLayoutCreateInfo pipelineLayoutInfo;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
     m_pipelineLayout = m_logicalDevice.createPipelineLayout(pipelineLayoutInfo);
 
     // create pipeline
@@ -826,6 +873,90 @@ void VulkanRenderModule::destroyIndexBuffer()
     m_logicalDevice.freeMemory(m_indexBufferMemory);
 }
 
+bool VulkanRenderModule::createUniformBuffers()
+{
+    vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
+    m_uniformBuffers.resize(m_swapChainImages.size());
+    m_uniformBuffersMemory.resize(m_swapChainImages.size());
+
+    for (size_t i = 0; i < m_swapChainImages.size(); ++i)
+    {
+        createBuffer(m_uniformBuffers[i],
+                     m_uniformBuffersMemory[i],
+                     bufferSize,
+                     vk::BufferUsageFlagBits::eUniformBuffer,
+                     vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+    }
+
+    return true;
+}
+
+void VulkanRenderModule::destroyUniformBuffers()
+{
+    for (size_t i = 0; i < m_swapChainImages.size(); ++i)
+    {
+        m_logicalDevice.destroyBuffer(m_uniformBuffers[i]);
+        m_logicalDevice.freeMemory(m_uniformBuffersMemory[i]);
+    }
+}
+
+bool VulkanRenderModule::createDescriptorPool()
+{
+    vk::DescriptorPoolSize poolSize;
+    poolSize.type = vk::DescriptorType::eUniformBuffer;
+    poolSize.descriptorCount = static_cast<uint32_t>(m_swapChainImages.size());
+
+    vk::DescriptorPoolCreateInfo poolInfo;
+    poolInfo.poolSizeCount = 1;
+    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.maxSets = static_cast<uint32_t>(m_swapChainImages.size());
+    m_descriptorPool = m_logicalDevice.createDescriptorPool(poolInfo);
+
+    return true;
+}
+
+void VulkanRenderModule::destroyDescriptorPool()
+{
+    m_logicalDevice.destroyDescriptorPool(m_descriptorPool);
+}
+
+bool VulkanRenderModule::createDescriptorSets()
+{
+    std::vector<vk::DescriptorSetLayout> layouts(m_swapChainImages.size(), m_descriptorSetLayout);
+
+    vk::DescriptorSetAllocateInfo allocInfo;
+    allocInfo.descriptorPool = m_descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(m_swapChainImages.size());
+    allocInfo.pSetLayouts = layouts.data();
+    m_descriptorSets.resize(m_swapChainImages.size());
+    m_descriptorSets = m_logicalDevice.allocateDescriptorSets(allocInfo);
+
+    for (size_t i = 0; i < m_swapChainImages.size(); ++i)
+    {
+        vk::DescriptorBufferInfo bufferInfo;
+        bufferInfo.buffer = m_uniformBuffers[i];
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(UniformBufferObject);
+
+        vk::WriteDescriptorSet descriptorWrite;
+        descriptorWrite.dstSet = m_descriptorSets[i];
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = vk::DescriptorType::eUniformBuffer;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+        descriptorWrite.pImageInfo = nullptr;
+        descriptorWrite.pTexelBufferView = nullptr;
+        m_logicalDevice.updateDescriptorSets(1, &descriptorWrite, 0, nullptr);
+    }
+
+    return true;
+}
+
+void VulkanRenderModule::destroyDescriptorSets()
+{
+}
+
 bool VulkanRenderModule::createCommandBuffers()
 {
     vk::CommandBufferAllocateInfo allocInfo;
@@ -863,6 +994,8 @@ bool VulkanRenderModule::createCommandBuffers()
                 vk::DeviceSize offset = 0;
                 m_commandBuffers[i].bindVertexBuffers(0, m_vertexBuffer, offset);
                 m_commandBuffers[i].bindIndexBuffer(m_indexBuffer, 0, vk::IndexType::eUint16);
+                m_commandBuffers[i]
+                    .bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, &m_descriptorSets[i], 0, nullptr);
                 m_commandBuffers[i].drawIndexed(static_cast<uint32_t>(g_indices.size()), 1, 0, 0, 0);
             }
 
@@ -932,6 +1065,9 @@ bool VulkanRenderModule::recreateSwapChain()
     createRenderPass();
     createGraphicsPipeline();
     createFramebuffers();
+    createUniformBuffers();
+    createDescriptorPool();
+    createDescriptorSets();
     createCommandBuffers();
 
     return true;
@@ -954,7 +1090,8 @@ const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers(
     return REQUIRED_LAYERS;
 }
 
-bool VulkanRenderModule::checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers)
+bool VulkanRenderModule::checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers,
+                                                       const std::vector<const char*>& requiredLayers)
 {
     for (const auto& requireLayer : requiredLayers)
     {
@@ -994,7 +1131,8 @@ const std::vector<const char*>& VulkanRenderModule::getRequiredDeviceExtensions(
     return REQUIRED_EXTENSIONS;
 }
 
-bool VulkanRenderModule::checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char*>& requiredExtensions)
+bool VulkanRenderModule::checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions,
+                                                  const std::vector<const char*>& requiredExtensions)
 {
     for (const auto& requiredExtension : requiredExtensions)
     {
@@ -1161,6 +1299,23 @@ void VulkanRenderModule::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer
     m_graphicsQueue.waitIdle();
 
     m_logicalDevice.freeCommandBuffers(m_commandPool, commandBuffer);
+}
+
+void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)
+{
+    static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    UniformBufferObject ubo;
+    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.proj = glm::perspective(glm::radians(45.0f), m_swapChainExtent.width / (float)m_swapChainExtent.height, 0.1f, 10.0f);
+
+    void* data = m_logicalDevice.mapMemory(m_uniformBuffersMemory[currentImage], 0, sizeof(ubo));
+    memcpy(data, &ubo, sizeof(ubo));
+    m_logicalDevice.unmapMemory(m_uniformBuffersMemory[currentImage]);
 }
 
 NS_END
