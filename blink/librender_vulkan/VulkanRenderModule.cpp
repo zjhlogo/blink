@@ -11,6 +11,7 @@
 #include <File.h>
 #include <chrono>
 #include <set>
+#include <util/stb_image.h>
 
 NS_BEGIN
 
@@ -122,6 +123,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     if (!createGraphicsPipeline()) return false;
     if (!createFramebuffers()) return false;
     if (!createCommandPool()) return false;
+    if (!createTextureImage()) return false;
     if (!createVertexBuffer()) return false;
     if (!createIndexBuffer()) return false;
     if (!createUniformBuffers()) return false;
@@ -137,6 +139,7 @@ void VulkanRenderModule::destroyDevice()
 {
     cleanSwapChain();
 
+    destroyTextureImage();
     destroyDescriptorSetLayout();
     destroyUniformBuffers();
     destroyDescriptorSets();
@@ -801,6 +804,59 @@ void VulkanRenderModule::destroyCommandPool()
     m_logicalDevice.destroyCommandPool(m_commandPool);
 }
 
+bool VulkanRenderModule::createTextureImage()
+{
+    int texWidth = 0;
+    int texHeight = 0;
+    int texChannels = 0;
+
+    stbi_uc* pixels = stbi_load("resource/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    vk::DeviceSize imageSize = texWidth * texHeight * 4;
+    if (!pixels) return false;
+
+    vk::Buffer stagingBuffer;
+    vk::DeviceMemory stagingBufferMemory;
+
+    createBuffer(stagingBuffer,
+                 stagingBufferMemory,
+                 imageSize,
+                 vk::BufferUsageFlagBits::eTransferSrc,
+                 vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+    void* data = m_logicalDevice.mapMemory(stagingBufferMemory, 0, imageSize);
+    memcpy(data, pixels, static_cast<size_t>(imageSize));
+    m_logicalDevice.unmapMemory(stagingBufferMemory);
+
+    stbi_image_free(pixels);
+
+    createImage(m_textureImage,
+                m_textureImageMemory,
+                texWidth,
+                texHeight,
+                vk::Format::eR8G8B8A8Unorm,
+                vk::ImageTiling::eOptimal,
+                vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+                vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+    transitionImageLayout(m_textureImage, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+    copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+    transitionImageLayout(m_textureImage,
+                          vk::Format::eR8G8B8A8Unorm,
+                          vk::ImageLayout::eTransferDstOptimal,
+                          vk::ImageLayout::eShaderReadOnlyOptimal);
+
+    m_logicalDevice.destroyBuffer(stagingBuffer);
+    m_logicalDevice.freeMemory(stagingBufferMemory);
+
+    return true;
+}
+
+void VulkanRenderModule::destroyTextureImage()
+{
+    m_logicalDevice.destroyImage(m_textureImage);
+    m_logicalDevice.freeMemory(m_textureImageMemory);
+}
+
 bool VulkanRenderModule::createVertexBuffer()
 {
     vk::DeviceSize bufferSize = sizeof(g_vertices[0]) * g_vertices.size();
@@ -1272,17 +1328,7 @@ bool VulkanRenderModule::createBuffer(vk::Buffer& buffer,
 
 void VulkanRenderModule::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size)
 {
-    vk::CommandBufferAllocateInfo allocInfo;
-    allocInfo.level = vk::CommandBufferLevel::ePrimary;
-    allocInfo.commandPool = m_commandPool;
-    allocInfo.commandBufferCount = 1;
-
-    std::vector<vk::CommandBuffer> commandBuffers = m_logicalDevice.allocateCommandBuffers(allocInfo);
-    auto& commandBuffer = commandBuffers[0];
-
-    vk::CommandBufferBeginInfo beginInfo;
-    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-    commandBuffer.begin(beginInfo);
+    vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
 
     vk::BufferCopy copyRegion;
     copyRegion.srcOffset = 0;
@@ -1290,15 +1336,7 @@ void VulkanRenderModule::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer
     copyRegion.size = size;
     commandBuffer.copyBuffer(srcBuffer, dstBuffer, copyRegion);
 
-    commandBuffer.end();
-
-    vk::SubmitInfo submitInfo;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-    m_graphicsQueue.submit(submitInfo, vk::Fence());
-    m_graphicsQueue.waitIdle();
-
-    m_logicalDevice.freeCommandBuffers(m_commandPool, commandBuffer);
+    endSingleTimeCommands(commandBuffer);
 }
 
 void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)
@@ -1316,6 +1354,134 @@ void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)
     void* data = m_logicalDevice.mapMemory(m_uniformBuffersMemory[currentImage], 0, sizeof(ubo));
     memcpy(data, &ubo, sizeof(ubo));
     m_logicalDevice.unmapMemory(m_uniformBuffersMemory[currentImage]);
+}
+
+bool VulkanRenderModule::createImage(vk::Image& image,
+                                     vk::DeviceMemory& imageMemory,
+                                     uint32_t width,
+                                     uint32_t height,
+                                     vk::Format format,
+                                     vk::ImageTiling tiling,
+                                     vk::ImageUsageFlags usage,
+                                     vk::MemoryPropertyFlags properties)
+{
+    vk::ImageCreateInfo imageInfo;
+    imageInfo.imageType = vk::ImageType::e2D;
+    imageInfo.extent.width = static_cast<uint32_t>(width);
+    imageInfo.extent.height = static_cast<uint32_t>(height);
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = format;
+    imageInfo.tiling = tiling;
+    imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+    imageInfo.usage = usage;
+    imageInfo.sharingMode = vk::SharingMode::eExclusive;
+    imageInfo.samples = vk::SampleCountFlagBits::e1;
+    image = m_logicalDevice.createImage(imageInfo);
+
+    vk::MemoryRequirements memRequirements = m_logicalDevice.getImageMemoryRequirements(image);
+    vk::MemoryAllocateInfo allocInfo;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+    imageMemory = m_logicalDevice.allocateMemory(allocInfo);
+
+    m_logicalDevice.bindImageMemory(image, imageMemory, 0);
+
+    return true;
+}
+
+vk::CommandBuffer VulkanRenderModule::beginSingleTimeCommands()
+{
+    vk::CommandBufferAllocateInfo allocInfo;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandPool = m_commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    vk::CommandBuffer commandBuffer;
+    m_logicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer);
+
+    vk::CommandBufferBeginInfo beginInfo;
+    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+    commandBuffer.begin(beginInfo);
+    return commandBuffer;
+}
+
+void VulkanRenderModule::endSingleTimeCommands(vk::CommandBuffer commandBuffer)
+{
+    commandBuffer.end();
+
+    vk::SubmitInfo submitInfo;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    m_graphicsQueue.submit(submitInfo, vk::Fence());
+    m_graphicsQueue.waitIdle();
+    m_logicalDevice.freeCommandBuffers(m_commandPool, commandBuffer);
+}
+
+void VulkanRenderModule::transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
+{
+    vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    vk::ImageMemoryBarrier barrier;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    vk::PipelineStageFlags sourceStage;
+    vk::PipelineStageFlags destinationStage;
+
+    if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
+    {
+        barrier.srcAccessMask = {};
+        barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+        sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+        destinationStage = vk::PipelineStageFlagBits::eTransfer;
+    }
+    else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+    {
+        barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+        barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+        sourceStage = vk::PipelineStageFlagBits::eTransfer;
+        destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+    }
+
+    commandBuffer.pipelineBarrier(sourceStage, destinationStage, {}, 0, nullptr, 0, nullptr, 1, &barrier);
+
+    endSingleTimeCommands(commandBuffer);
+}
+
+void VulkanRenderModule::copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height)
+{
+    vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    vk::BufferImageCopy region;
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+
+    region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = { width, height, 1 };
+
+    commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, region);
+
+    endSingleTimeCommands(commandBuffer);
 }
 
 NS_END

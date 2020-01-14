@@ -72,6 +72,9 @@ private:
     bool createCommandPool();
     void destroyCommandPool();
 
+    bool createTextureImage();
+    void destroyTextureImage();
+
     bool createVertexBuffer();
     void destroyVertexBuffer();
 
@@ -122,6 +125,20 @@ private:
                       vk::MemoryPropertyFlags properties);
     void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
     void updateUniformBuffer(uint32_t currentImage);
+    bool createImage(vk::Image& image,
+                     vk::DeviceMemory& imageMemory,
+                     uint32_t width,
+                     uint32_t height,
+                     vk::Format format,
+                     vk::ImageTiling tiling,
+                     vk::ImageUsageFlags usage,
+                     vk::MemoryPropertyFlags properties);
+
+    vk::CommandBuffer beginSingleTimeCommands();
+    void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
+
+    void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+    void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
 
 private:
     GLFWwindow* m_window{};
@@ -165,6 +182,9 @@ private:
 
     std::vector<vk::Buffer> m_uniformBuffers;
     std::vector<vk::DeviceMemory> m_uniformBuffersMemory;
+
+    vk::Image m_textureImage;
+    vk::DeviceMemory m_textureImageMemory;
 
     std::vector<vk::Semaphore> m_imageAvailableSemaphores;
     std::vector<vk::Semaphore> m_renderFinishedSemaphores;
