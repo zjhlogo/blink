@@ -66,6 +66,9 @@ private:
     bool createGraphicsPipeline();
     void destroyGraphicsPipeline();
 
+    bool createDepthResources();
+    void destroyDepthResources();
+
     bool createFramebuffers();
     void destroyFramebuffers();
 
@@ -106,14 +109,16 @@ private:
     void cleanSwapChain();
 
     const std::vector<const char*>& getRequiredValidationLayers();
-    bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers);
+    bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers,
+                                       const std::vector<const char*>& requiredLayers);
 
     const std::vector<const char*>& getRequiredInstanceExtensions();
     const std::vector<const char*>& getRequiredDeviceExtensions();
     bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions,
                                   const std::vector<const char*>& requiredExtensions);
 
-    int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
+    int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices,
+                                      const vk::SurfaceKHR& surface);
     bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily,
                                             int& presentFamily,
                                             const vk::PhysicalDevice& physicalDevice,
@@ -143,10 +148,18 @@ private:
     vk::CommandBuffer beginSingleTimeCommands();
     void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
-    void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+    void transitionImageLayout(vk::Image image,
+                               vk::Format format,
+                               vk::ImageLayout oldLayout,
+                               vk::ImageLayout newLayout);
     void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
 
-    vk::ImageView createImageView(vk::Image image, vk::Format format);
+    vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
+                                   vk::ImageTiling tiling,
+                                   vk::FormatFeatureFlags features);
+    vk::Format findDepthFormat();
+    bool hasStencilComponent(vk::Format format);
 
 private:
     GLFWwindow* m_window{};
@@ -196,6 +209,10 @@ private:
 
     vk::ImageView m_textureImageView;
     vk::Sampler m_textureSampler;
+
+    vk::Image m_depthImage;
+    vk::DeviceMemory m_depthImageMemory;
+    vk::ImageView m_depthImageView;
 
     std::vector<vk::Semaphore> m_imageAvailableSemaphores;
     std::vector<vk::Semaphore> m_renderFinishedSemaphores;
