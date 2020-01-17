@@ -4,11 +4,12 @@
  * \author zjhlogo
  * \date 2019/11/15
  *
- * 
+ *
  */
 #pragma once
 
 #include "BaseTypes.h"
+
 #include <fmt/format.h>
 
 NS_BEGIN
@@ -27,7 +28,6 @@ public:
 
 public:
     static void print(const char* location, int line, LogPriority prio, const tstring& strMsg);
-
 };
 
 NS_END

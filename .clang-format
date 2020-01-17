@@ -13,7 +13,7 @@ BinPackArguments: false
 BinPackParameters: false
 AlignAfterOpenBracket: Align
 IndentCaseLabels: false
-ColumnLimit: 120
+ColumnLimit: 130
 Cpp11BracedListStyle: false
 IncludeBlocks: Regroup
 SortIncludes: true
@@ -36,7 +36,10 @@ SpaceInEmptyParentheses: false
 SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: true
-PenaltyReturnTypeOnItsOwnLine: 120
+PenaltyBreakAssignment: 130
+PenaltyBreakBeforeFirstCallParameter: 130
+PenaltyBreakTemplateDeclaration: 130
+PenaltyReturnTypeOnItsOwnLine: 130
 
 IncludeCategories:
   - Regex:           '^("|<)stdafx\.h("|>)$'

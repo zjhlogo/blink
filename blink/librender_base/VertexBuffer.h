@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #pragma once
 #include "BufferAttributes.h"
@@ -24,7 +24,6 @@ public:
 
 protected:
     const BufferAttributes* m_attributes{};
-
 };
 
 NS_END

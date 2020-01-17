@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/26
  *
- * 
+ *
  */
 #include "BaseTypesGlm.h"
 
@@ -35,15 +35,11 @@ const glm::vec3 VEC3_NZ = glm::vec3(0.0f, 0.0f, -1.0f);
 
 const glm::quat QUAT_ZERO = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
-const glm::mat3 MAT3_IDENTITY = glm::mat3(
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f);
+const glm::mat3 MAT3_IDENTITY = { { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } };
 
-const glm::mat4 MAT4_IDENTITY = glm::mat4(
-    1.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 1.0f);
+const glm::mat4 MAT4_IDENTITY = { { 1.0f, 0.0f, 0.0f, 0.0f },
+                                  { 0.0f, 1.0f, 0.0f, 0.0f },
+                                  { 0.0f, 0.0f, 1.0f, 0.0f },
+                                  { 0.0f, 0.0f, 0.0f, 1.0f } };
 
 NS_END

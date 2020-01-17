@@ -4,12 +4,13 @@
  * \author zjhlogo
  * \date 2019/11/15
  *
- * 
+ *
  */
 #pragma once
 #include "BaseTypes.h"
-#include <vector>
+
 #include <set>
+#include <vector>
 
 NS_BEGIN
 
@@ -36,7 +37,6 @@ public:
     std::vector<tstring> subDirectories;
     tstring filename;
     tstring extension;
-
 };
 
 NS_END

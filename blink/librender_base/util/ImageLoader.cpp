@@ -4,9 +4,10 @@
  * \author zjhlogo
  * \date 2019/07/26
  *
- * 
+ *
  */
 #include "ImageLoader.h"
+
 #include <Log.h>
 #include <PathParser.h>
 

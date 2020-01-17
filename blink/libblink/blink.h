@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #pragma once
 #include <BaseTypes.h>
@@ -17,6 +17,8 @@ class RenderModule;
 class App
 {
 public:
+    virtual ~App();
+
     virtual bool initialize() = 0;
     virtual void terminate() = 0;
 
@@ -24,9 +26,8 @@ public:
 
 public:
     entityx::EntityX m_ex;
-
 };
 
-int run(RenderModule* renderModule);
+int run(const tstring& renderEngine);
 
 NS_END

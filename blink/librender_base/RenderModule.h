@@ -4,48 +4,53 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #pragma once
-#include <BaseTypesGlm.h>
 #include "BufferObject.h"
-#include "VertexBuffer.h"
 #include "Shader.h"
+#include "VertexBuffer.h"
+
+#include <BaseTypesGlm.h>
 
 NS_BEGIN
 
 class RenderModule
 {
 public:
-    RenderModule();
+    RenderModule(const tstring& name);
     virtual ~RenderModule();
 
-    typedef BufferObject* (*CreateBufferObjectCb)(BufferObject::BufferType bufferType);
-    static CreateBufferObjectCb createBufferObject;
+    const tstring& getName();
 
-    typedef bool(*DestroyBufferObjectCb)(BufferObject* bufferObject);
-    static DestroyBufferObjectCb destroyBufferObject;
+    typedef BufferObject* (*FuncCreateBufferObject)(BufferObject::BufferType bufferType);
+    static FuncCreateBufferObject createBufferObject;
 
-    typedef VertexBuffer* (*CreateVertexBufferCb)(BufferAttributes* attributes);
-    static CreateVertexBufferCb createVertexBuffer;
+    typedef bool (*FuncDestroyBufferObject)(BufferObject* bufferObject);
+    static FuncDestroyBufferObject destroyBufferObject;
 
-    typedef bool(*DestroyVertexBufferCb)(VertexBuffer* vertexBuffer);
-    static DestroyVertexBufferCb destroyVertexBuffer;
+    typedef VertexBuffer* (*FuncCreateVertexBuffer)(BufferAttributes* attributes);
+    static FuncCreateVertexBuffer createVertexBuffer;
 
-    typedef Shader* (*CreateShaderFromStockCb)(Shader::StockShaders stockShader, uint32 preprocessDefine);
-    static CreateShaderFromStockCb createShaderFromStock;
+    typedef bool (*FuncDestroyVertexBuffer)(VertexBuffer* vertexBuffer);
+    static FuncDestroyVertexBuffer destroyVertexBuffer;
 
-    typedef Shader* (*CreateShaderFromBufferCb)(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer);
-    static CreateShaderFromBufferCb createShaderFromBuffer;
+    typedef Shader* (*FuncCreateShaderFromStock)(Shader::StockShaders stockShader, uint32 preprocessDefine);
+    static FuncCreateShaderFromStock createShaderFromStock;
 
-    typedef bool(*DestroyShaderCb)(Shader* shader);
-    static DestroyShaderCb destroyShader;
+    typedef Shader* (*FuncCreateShaderFromBuffer)(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer);
+    static FuncCreateShaderFromBuffer createShaderFromBuffer;
+
+    typedef bool (*FuncDestroyShader)(Shader* shader);
+    static FuncDestroyShader destroyShader;
 
     virtual bool createDevice(const glm::ivec2& deviceSize) = 0;
     virtual void destroyDevice() = 0;
 
     virtual bool gameLoop() = 0;
 
+private:
+    tstring m_name;
 };
 
 NS_END

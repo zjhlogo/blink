@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/26
  *
- * 
+ *
  */
 #pragma once
 #include <BaseTypes.h>
@@ -44,7 +44,7 @@ public:
     virtual bool setUniform(const char* pszName, int count, const glm::vec4* v) = 0;
     virtual bool setUniform(const char* pszName, int count, const glm::mat4* v) = 0;
 
-    template<typename T, int t_size> bool setUniform(const char* pszName, const T(&v)[t_size])
+    template <typename T, int t_size> bool setUniform(const char* pszName, const T (&v)[t_size])
     {
         return setUniform(pszName, t_size, v);
     }
@@ -57,7 +57,6 @@ protected:
 
 protected:
     tstring m_id;
-
 };
 
 NS_END

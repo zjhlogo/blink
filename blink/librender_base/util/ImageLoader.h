@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/26
  *
- * 
+ *
  */
 #pragma once
 #include <BaseTypes.h>
@@ -42,7 +42,8 @@ public:
         glm::ivec2 texSize;
     };
 
-    typedef std::function<bool(TextureInfo& textureInfo, int width, int height, int channels, const void* data)> CreateTextureFromRawCb;
+    typedef std::function<bool(TextureInfo& textureInfo, int width, int height, int channels, const void* data)>
+        CreateTextureFromRawCb;
 
 public:
     static ImageFileType getImageType(const tstring& filePath);
@@ -53,7 +54,6 @@ public:
 
 private:
     static CreateTextureFromRawCb m_createTextureFromRawData;
-
 };
 
 NS_END

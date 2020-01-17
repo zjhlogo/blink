@@ -4,14 +4,15 @@
  * \author zjhlogo
  * \date 2019/11/15
  *
- * 
+ *
  */
 #pragma once
 #include "BaseTypes.h"
+
 #include <fmt/format.h>
+#include <set>
 #include <sstream>
 #include <vector>
-#include <set>
 
 NS_BEGIN
 
@@ -102,9 +103,9 @@ public:
 
         return strOut;
     }
-
 };
 
-template<> int StringBuilder::split<std::vector<tstring>>(std::vector<tstring>& arrOut, const tstring& strIn, const tstring& strSplit);
+template <>
+int StringBuilder::split<std::vector<tstring>>(std::vector<tstring>& arrOut, const tstring& strIn, const tstring& strSplit);
 
 NS_END

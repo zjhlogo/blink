@@ -4,10 +4,11 @@
  * \author zjhlogo
  * \date 2019/11/15
  *
- * 
+ *
  */
 #pragma once
 #include "BaseTypes.h"
+
 #include <vector>
 
 NS_BEGIN
@@ -49,7 +50,6 @@ private:
     void* m_fileHandler{};
     int64 m_fileSize{};
     int m_mode{ AM_READ };
-
 };
 
 NS_END

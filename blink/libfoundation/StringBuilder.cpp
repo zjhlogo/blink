@@ -4,9 +4,10 @@
  * \author zjhlogo
  * \date 2019/11/15
  *
- * 
+ *
  */
 #include "StringBuilder.h"
+
 #include <algorithm>
 
 NS_BEGIN
@@ -36,7 +37,7 @@ bool StringBuilder::trim(tstring& strOut, const tstring& strIn)
     return true;
 }
 
-tstring StringBuilder::upper(const tstring & strIn)
+tstring StringBuilder::upper(const tstring& strIn)
 {
     tstring strOut = strIn;
     std::transform(strOut.begin(), strOut.end(), strOut.begin(), ::toupper);
@@ -69,7 +70,8 @@ bool StringBuilder::hasSpace(const tstring& strIn)
     return false;
 }
 
-template<> int StringBuilder::split<std::vector<tstring>>(std::vector<tstring>& arrOut, const tstring& strIn, const tstring& strSplit)
+template <>
+int StringBuilder::split<std::vector<tstring>>(std::vector<tstring>& arrOut, const tstring& strIn, const tstring& strSplit)
 {
     int totalSplit = 0;
     size_t startIndex = 0;

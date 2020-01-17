@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #pragma once
 #include <blink.h>
@@ -15,7 +15,6 @@ public:
     HelloWorldApp();
     virtual ~HelloWorldApp();
 
-	virtual bool initialize() override;
-	virtual void terminate() override;
-
+    virtual bool initialize() override;
+    virtual void terminate() override;
 };

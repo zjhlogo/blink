@@ -4,25 +4,24 @@
  * \author zjhlogo
  * \date 2019/11/15
  *
- * 
+ *
  */
 #include "PathParser.h"
 #include "StringBuilder.h"
+
 #include <algorithm>
 
 NS_BEGIN
 
 PathParser::PathParser()
 {
-
 }
 
 PathParser::~PathParser()
 {
-
 }
 
-void PathParser::parse(const tstring & path)
+void PathParser::parse(const tstring& path)
 {
     // clear all informations
     root.clear();
@@ -176,7 +175,7 @@ tstring PathParser::combinePath(const tstring& path1, const tstring& path2)
     }
 }
 
-void PathParser::appendSubDir(std::vector<tstring>& dirList, const tstring & subDir)
+void PathParser::appendSubDir(std::vector<tstring>& dirList, const tstring& subDir)
 {
     if (subDir.empty() || subDir == ".") return;
 

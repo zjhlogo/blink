@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/26
  *
- * 
+ *
  */
 #pragma once
 #include <BaseTypes.h>
@@ -40,7 +40,6 @@ public:
 
 private:
     tstring m_id;
-
 };
 
 NS_END

@@ -4,16 +4,16 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #include "HelloWorldApp.h"
-#include <VulkanRenderModule.h>
-#include <geometry/BoxGeometry.h>
-#include <material/PhongMaterial.h>
-#include <light/PointLight.h>
-#include <scene/SceneSystem.h>
-#include <camera/CameraSystem.h>
+
 #include <RenderData.h>
+#include <camera/CameraSystem.h>
+#include <geometry/BoxGeometry.h>
+#include <light/PointLight.h>
+#include <material/PhongMaterial.h>
+#include <scene/SceneSystem.h>
 
 entityx::Entity createBox(entityx::EntityManager& entities, NS::BufferGeometry* geometry, NS::Material* material, int id)
 {
@@ -31,12 +31,10 @@ entityx::Entity createBox(entityx::EntityManager& entities, NS::BufferGeometry* 
 
 HelloWorldApp::HelloWorldApp()
 {
-
 }
 
 HelloWorldApp::~HelloWorldApp()
 {
-
 }
 
 bool HelloWorldApp::initialize()
@@ -64,11 +62,9 @@ bool HelloWorldApp::initialize()
 
 void HelloWorldApp::terminate()
 {
-
 }
 
 int main(int argc, char** argv)
 {
-    NS::VulkanRenderModule renderModule;
-    return NS::run(&renderModule);
+    return NS::run("Vulkan");
 }

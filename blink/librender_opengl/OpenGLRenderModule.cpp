@@ -75,6 +75,7 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 }
 
 OpenGLRenderModule::OpenGLRenderModule()
+    : RenderModule("OpenGL")
 {
 
 }

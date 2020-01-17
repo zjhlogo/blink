@@ -109,6 +109,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
 }
 
 VulkanRenderModule::VulkanRenderModule()
+    : RenderModule("Vulkan")
 {
 }
 
@@ -340,8 +341,7 @@ bool VulkanRenderModule::setupDebugMessenger()
     createInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
                                  | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
                                  | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
-    createInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-                             | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+    createInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
                              | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
     createInfo.pfnUserCallback = debugCallback;
     m_debugMessenger = m_instance.createDebugUtilsMessengerEXT(createInfo, nullptr, m_dispatchLoader);
@@ -525,8 +525,7 @@ bool VulkanRenderModule::createSwapChain()
                                        queueFamilyProperties);
     if (graphicsFamilyIndex != presentFamilyIndex)
     {
-        uint32_t queueFamilyIndexs[2] = { static_cast<uint32_t>(graphicsFamilyIndex),
-                                          static_cast<uint32_t>(presentFamilyIndex) };
+        uint32_t queueFamilyIndexs[2] = { static_cast<uint32_t>(graphicsFamilyIndex), static_cast<uint32_t>(presentFamilyIndex) };
         createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
         createInfo.queueFamilyIndexCount = 2;
         createInfo.pQueueFamilyIndices = queueFamilyIndexs;
@@ -561,8 +560,7 @@ bool VulkanRenderModule::createImageViews()
 
     for (size_t i = 0; i < m_swapChainImageViews.size(); ++i)
     {
-        m_swapChainImageViews[i] =
-            createImageView(m_swapChainImages[i], m_swapChainImageFormat, vk::ImageAspectFlagBits::eColor);
+        m_swapChainImageViews[i] = createImageView(m_swapChainImages[i], m_swapChainImageFormat, vk::ImageAspectFlagBits::eColor);
     }
 
     return true;
@@ -1144,10 +1142,7 @@ bool VulkanRenderModule::createDescriptorSets()
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pImageInfo = &imageInfo;
 
-        m_logicalDevice.updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()),
-                                             descriptorWrites.data(),
-                                             0,
-                                             nullptr);
+        m_logicalDevice.updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 
     return true;
@@ -1367,11 +1362,7 @@ int VulkanRenderModule::getBestFitPhysicalDeviceIndex(const std::vector<vk::Phys
 
         int graphicsFamilyIndex{};
         int presentFamilyIndex{};
-        getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex,
-                                           presentFamilyIndex,
-                                           device,
-                                           surface,
-                                           queueFamilyProperties);
+        getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, device, surface, queueFamilyProperties);
 
         auto extensions = device.enumerateDeviceExtensionProperties();
         bool extensionsSupported = checkExtensionsSupported(extensions, getRequiredDeviceExtensions());
@@ -1505,8 +1496,7 @@ void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)
     UniformBufferObject ubo;
     ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj =
-        glm::perspective(glm::radians(45.0f), m_swapChainExtent.width / (float)m_swapChainExtent.height, 0.1f, 10.0f);
+    ubo.proj = glm::perspective(glm::radians(45.0f), m_swapChainExtent.width / (float)m_swapChainExtent.height, 0.1f, 10.0f);
 
     void* data = m_logicalDevice.mapMemory(m_uniformBuffersMemory[currentImage], 0, sizeof(ubo));
     memcpy(data, &ubo, sizeof(ubo));
@@ -1633,8 +1623,8 @@ void VulkanRenderModule::transitionImageLayout(vk::Image image,
     else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
     {
         barrier.srcAccessMask = {};
-        barrier.dstAccessMask =
-            vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+        barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead
+                                | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 
         sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
         destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
