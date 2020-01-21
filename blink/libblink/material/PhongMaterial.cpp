@@ -4,21 +4,20 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #include "PhongMaterial.h"
+
 #include <RenderModule.h>
 
 NS_BEGIN
 
 PhongMaterial::PhongMaterial()
 {
-
 }
 
 PhongMaterial::~PhongMaterial()
 {
-
 }
 
 Shader* PhongMaterial::getShader()
@@ -29,7 +28,7 @@ Shader* PhongMaterial::getShader()
 
         if (getTexture("tex_diffuse")) defineFlag |= Shader::USE_DIFFUSE_TEXTURE;
 
-        m_shader = RenderModule::createShaderFromStock(Shader::StockShaders::Phong, defineFlag);
+        m_shader = RenderModule::getInstance().createShaderFromStock(Shader::StockShaders::Phong, defineFlag);
     }
     return m_shader;
 }

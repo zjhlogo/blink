@@ -11,6 +11,8 @@ find_package(tinyxml2 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 set(SOURCE_FILES
 VulkanRenderModule.cpp
 VulkanRenderModule.h
+VulkanTexture.cpp
+VulkanTexture.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

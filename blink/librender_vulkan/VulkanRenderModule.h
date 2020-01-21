@@ -27,11 +27,40 @@ public:
     virtual bool createDevice(const glm::ivec2& deviceSize) override;
     virtual void destroyDevice() override;
 
+    virtual BufferObject* createBufferObject(BufferObject::BufferType bufferType) override { return nullptr; };
+    virtual bool destroyBufferObject(BufferObject* bufferObject) override { return false; };
+
+    virtual VertexBuffer* createVertexBuffer(BufferAttributes* attributes) override { return nullptr; };
+    virtual bool destroyVertexBuffer(VertexBuffer* vertexBuffer) override { return false; };
+
+    virtual Shader* createShaderFromStock(Shader::StockShaders stockShader, uint32 preprocessDefine) override { return nullptr; };
+    virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) override { return nullptr; };
+    virtual bool destroyShader(Shader* shader) override { return false; };
+
+    virtual Texture* createTexture(const tstring& texFile) override;
+    virtual bool destroyTexture(Texture*& texture) override;
+
     virtual bool gameLoop() override;
 
     void drawFrame();
 
     void setFrameBBufferResized(bool resized) { m_frameBufferResized = resized; };
+
+    bool createBuffer(vk::Buffer& buffer,
+                      vk::DeviceMemory& bufferMemory,
+                      const vk::DeviceSize& size,
+                      vk::BufferUsageFlags usage,
+                      vk::MemoryPropertyFlags properties);
+    bool createImage(vk::Image& image,
+                     vk::DeviceMemory& imageMemory,
+                     uint32_t width,
+                     uint32_t height,
+                     vk::Format format,
+                     vk::ImageTiling tiling,
+                     vk::ImageUsageFlags usage,
+                     vk::MemoryPropertyFlags properties);
+
+    void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
 
 private:
     bool createWindow(const glm::ivec2& windowSize);
@@ -66,23 +95,11 @@ private:
     bool createGraphicsPipeline();
     void destroyGraphicsPipeline();
 
-    bool createDepthResources();
-    void destroyDepthResources();
-
     bool createFramebuffers();
     void destroyFramebuffers();
 
     bool createCommandPool();
     void destroyCommandPool();
-
-    bool createTextureImage();
-    void destroyTextureImage();
-
-    bool createTextureImageView();
-    void destroyTextureImageView();
-
-    bool createTextureSampler();
-    void destroyTextureSampler();
 
     bool createVertexBuffer();
     void destroyVertexBuffer();
@@ -109,16 +126,13 @@ private:
     void cleanSwapChain();
 
     const std::vector<const char*>& getRequiredValidationLayers();
-    bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers,
-                                       const std::vector<const char*>& requiredLayers);
+    bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers);
 
     const std::vector<const char*>& getRequiredInstanceExtensions();
     const std::vector<const char*>& getRequiredDeviceExtensions();
-    bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions,
-                                  const std::vector<const char*>& requiredExtensions);
+    bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char*>& requiredExtensions);
 
-    int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices,
-                                      const vk::SurfaceKHR& surface);
+    int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
     bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily,
                                             int& presentFamily,
                                             const vk::PhysicalDevice& physicalDevice,
@@ -129,35 +143,14 @@ private:
     bool readFileIntoBuffer(std::vector<uint8>& bufferOut, const std::string& filePath);
 
     uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-    bool createBuffer(vk::Buffer& buffer,
-                      vk::DeviceMemory& bufferMemory,
-                      vk::DeviceSize size,
-                      vk::BufferUsageFlags usage,
-                      vk::MemoryPropertyFlags properties);
     void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
     void updateUniformBuffer(uint32_t currentImage);
-    bool createImage(vk::Image& image,
-                     vk::DeviceMemory& imageMemory,
-                     uint32_t width,
-                     uint32_t height,
-                     vk::Format format,
-                     vk::ImageTiling tiling,
-                     vk::ImageUsageFlags usage,
-                     vk::MemoryPropertyFlags properties);
 
     vk::CommandBuffer beginSingleTimeCommands();
     void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
-    void transitionImageLayout(vk::Image image,
-                               vk::Format format,
-                               vk::ImageLayout oldLayout,
-                               vk::ImageLayout newLayout);
-    void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
-
     vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
-    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
-                                   vk::ImageTiling tiling,
-                                   vk::FormatFeatureFlags features);
+    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
     vk::Format findDepthFormat();
     bool hasStencilComponent(vk::Format format);
 
@@ -204,16 +197,6 @@ private:
     std::vector<vk::Buffer> m_uniformBuffers;
     std::vector<vk::DeviceMemory> m_uniformBuffersMemory;
 
-    vk::Image m_textureImage;
-    vk::DeviceMemory m_textureImageMemory;
-
-    vk::ImageView m_textureImageView;
-    vk::Sampler m_textureSampler;
-
-    vk::Image m_depthImage;
-    vk::DeviceMemory m_depthImageMemory;
-    vk::ImageView m_depthImageView;
-
     std::vector<vk::Semaphore> m_imageAvailableSemaphores;
     std::vector<vk::Semaphore> m_renderFinishedSemaphores;
     std::vector<vk::Fence> m_inFlightFences;
@@ -221,6 +204,10 @@ private:
     std::size_t m_currentFrame{};
 
     bool m_frameBufferResized{};
+
+    Texture* m_texture{};
+    Texture* m_depthTexture{};
+
 };
 
 NS_END

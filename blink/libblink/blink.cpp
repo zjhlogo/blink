@@ -8,8 +8,8 @@
  */
 #include "blink.h"
 
-#include <OpenGLRenderModule.h>
 #include <RenderModule.h>
+#include <OpenGLRenderModule.h>
 #include <VulkanRenderModule.h>
 
 NS_BEGIN

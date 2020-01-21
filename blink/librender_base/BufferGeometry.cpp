@@ -4,7 +4,7 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #include "BufferGeometry.h"
 #include "RenderModule.h"
@@ -13,7 +13,6 @@ NS_BEGIN
 
 BufferGeometry::BufferGeometry()
 {
-
 }
 
 BufferGeometry::~BufferGeometry()
@@ -22,20 +21,26 @@ BufferGeometry::~BufferGeometry()
     destroyIndexBuffer();
 }
 
-bool BufferGeometry::uploadVertexBuffer(BufferAttributes::StockAttributes stock, const void* bufferData, uint32 bufferSize, BufferObject::Usage usage /* = BufferObject::Usage::StaticDraw */)
+bool BufferGeometry::uploadVertexBuffer(BufferAttributes::StockAttributes stock,
+                                        const void* bufferData,
+                                        uint32 bufferSize,
+                                        BufferObject::Usage usage /* = BufferObject::Usage::StaticDraw */)
 {
     auto attributes = BufferAttributes::fromStock(stock);
     return uploadVertexBuffer(attributes, bufferData, bufferSize, usage);
 }
 
-bool BufferGeometry::uploadVertexBuffer(BufferAttributes* attributes, const void* bufferData, uint32 bufferSize, BufferObject::Usage usage /* = BufferObject::Usage::StaticDraw */)
+bool BufferGeometry::uploadVertexBuffer(BufferAttributes* attributes,
+                                        const void* bufferData,
+                                        uint32 bufferSize,
+                                        BufferObject::Usage usage /* = BufferObject::Usage::StaticDraw */)
 {
     if (!attributes) return false;
 
     // create buffer object
     if (!m_vertexBuffer)
     {
-        m_vertexBuffer = RenderModule::createVertexBuffer(attributes);
+        m_vertexBuffer = RenderModule::getInstance().createVertexBuffer(attributes);
         if (!m_vertexBuffer) return false;
     }
 
@@ -47,7 +52,7 @@ bool BufferGeometry::uploadIndexBuffer(const uint16* bufferData, uint32 numIndex
     // create buffer object
     if (!m_indexBuffer)
     {
-        m_indexBuffer = RenderModule::createBufferObject(BufferObject::BufferType::ElementArrayBuffer);
+        m_indexBuffer = RenderModule::getInstance().createBufferObject(BufferObject::BufferType::ElementArrayBuffer);
         if (!m_indexBuffer) return false;
     }
 
@@ -56,13 +61,13 @@ bool BufferGeometry::uploadIndexBuffer(const uint16* bufferData, uint32 numIndex
 
 void BufferGeometry::destroyVertexBuffer()
 {
-    RenderModule::destroyVertexBuffer(m_vertexBuffer);
+    RenderModule::getInstance().destroyVertexBuffer(m_vertexBuffer);
     m_vertexBuffer = nullptr;
 }
 
 void BufferGeometry::destroyIndexBuffer()
 {
-    RenderModule::destroyBufferObject(m_indexBuffer);
+    RenderModule::getInstance().destroyBufferObject(m_indexBuffer);
     m_indexBuffer = nullptr;
 }
 

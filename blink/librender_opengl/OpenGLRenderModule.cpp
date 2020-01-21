@@ -4,15 +4,15 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #include "OpenGLRenderModule.h"
-#include "util/ImageLoader.h"
 #include "GlConfig.h"
-
 #include "OpenGLBufferObject.h"
-#include "OpenGLVertexBuffer.h"
 #include "OpenGLShader.h"
+#include "OpenGLVertexBuffer.h"
+
+#include <util/ImageLoader.h>
 
 NS_BEGIN
 
@@ -24,7 +24,7 @@ static bool createTextureFromRawData(ImageLoader::TextureInfo& textureInfo, int 
     case 1:
         glFormat = GL_LUMINANCE;
         break;
-    case  2:
+    case 2:
         glFormat = GL_LUMINANCE_ALPHA;
     case 3:
         glFormat = GL_RGB;
@@ -52,37 +52,35 @@ static bool createTextureFromRawData(ImageLoader::TextureInfo& textureInfo, int 
 
 static void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
-//  g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Move, glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
+    //  g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Move, glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
 }
 
 static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-//  MouseEvent::Action act = MouseEvent::Action::ButtonDown;
-//  if (action == GLFW_PRESS) act = MouseEvent::Action::ButtonDown;
-//  else if (action == GLFW_RELEASE) act = MouseEvent::Action::ButtonUp;
-// 
-//  g_app->m_ex.events.emit<MouseEvent>(act, static_cast<MouseEvent::MouseButton>(button), static_cast<uint32>(mods));
+    //  MouseEvent::Action act = MouseEvent::Action::ButtonDown;
+    //  if (action == GLFW_PRESS) act = MouseEvent::Action::ButtonDown;
+    //  else if (action == GLFW_RELEASE) act = MouseEvent::Action::ButtonUp;
+    //
+    //  g_app->m_ex.events.emit<MouseEvent>(act, static_cast<MouseEvent::MouseButton>(button), static_cast<uint32>(mods));
 }
 
 static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-//  g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Scroll, glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
+    //  g_app->m_ex.events.emit<MouseEvent>(MouseEvent::Action::Scroll, glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset)));
 }
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-//  g_app->m_ex.events.emit<KeyboardEvent>(key, scancode, action, mods);
+    //  g_app->m_ex.events.emit<KeyboardEvent>(key, scancode, action, mods);
 }
 
 OpenGLRenderModule::OpenGLRenderModule()
     : RenderModule("OpenGL")
 {
-
 }
 
 OpenGLRenderModule::~OpenGLRenderModule()
 {
-
 }
 
 BufferObject* OpenGLRenderModule::createBufferObject(BufferObject::BufferType bufferType)
@@ -126,6 +124,16 @@ Shader* OpenGLRenderModule::createShaderFromBuffer(const char* vsBuffer, const c
 }
 
 bool OpenGLRenderModule::destroyShader(Shader* shader)
+{
+    return false;
+}
+
+Texture* NS::OpenGLRenderModule::createTexture(const tstring& texFile)
+{
+    return nullptr;
+}
+
+bool OpenGLRenderModule::destroyTexture(Texture*& texture)
 {
     return false;
 }
@@ -203,7 +211,7 @@ bool OpenGLRenderModule::gameLoop()
     glClearColor(0.1f, 0.3f, 0.7f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//  app->step(static_cast<float>(duration));
+    //  app->step(static_cast<float>(duration));
 
     /* Swap front and back buffers */
     glfwSwapBuffers(m_window);

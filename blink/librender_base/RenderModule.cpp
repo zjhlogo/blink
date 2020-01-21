@@ -10,21 +10,25 @@
 
 NS_BEGIN
 
-RenderModule::FuncCreateBufferObject RenderModule::createBufferObject{};
-RenderModule::FuncDestroyBufferObject RenderModule::destroyBufferObject{};
-RenderModule::FuncCreateVertexBuffer RenderModule::createVertexBuffer{};
-RenderModule::FuncDestroyVertexBuffer RenderModule::destroyVertexBuffer{};
-RenderModule::FuncCreateShaderFromStock RenderModule::createShaderFromStock{};
-RenderModule::FuncCreateShaderFromBuffer RenderModule::createShaderFromBuffer{};
-RenderModule::FuncDestroyShader RenderModule::destroyShader{};
+RenderModule* RenderModule::s_renderModule = nullptr;
 
 RenderModule::RenderModule(const tstring& name)
     : m_name(name)
 {
+    assert(!s_renderModule);
+    s_renderModule = this;
 }
 
 RenderModule::~RenderModule()
 {
+    assert(s_renderModule);
+    s_renderModule = nullptr;
+}
+
+RenderModule& RenderModule::getInstance()
+{
+    assert(s_renderModule);
+    return *s_renderModule;
 }
 
 const tstring& RenderModule::getName()

@@ -4,16 +4,17 @@
  * \author zjhlogo
  * \date 2019/07/29
  *
- * 
+ *
  */
 #include "WireframeMaterial.h"
+
 #include <RenderModule.h>
 
 NS_BEGIN
 
 WireframeMaterial::WireframeMaterial()
 {
-    m_shader = RenderModule::createShaderFromStock(Shader::StockShaders::Wireframe, 0);
+    m_shader = RenderModule::getInstance().createShaderFromStock(Shader::StockShaders::Wireframe, 0);
 }
 
 WireframeMaterial::~WireframeMaterial()

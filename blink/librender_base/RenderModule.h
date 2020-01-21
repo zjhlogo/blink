@@ -23,34 +23,30 @@ public:
 
     const tstring& getName();
 
-    typedef BufferObject* (*FuncCreateBufferObject)(BufferObject::BufferType bufferType);
-    static FuncCreateBufferObject createBufferObject;
-
-    typedef bool (*FuncDestroyBufferObject)(BufferObject* bufferObject);
-    static FuncDestroyBufferObject destroyBufferObject;
-
-    typedef VertexBuffer* (*FuncCreateVertexBuffer)(BufferAttributes* attributes);
-    static FuncCreateVertexBuffer createVertexBuffer;
-
-    typedef bool (*FuncDestroyVertexBuffer)(VertexBuffer* vertexBuffer);
-    static FuncDestroyVertexBuffer destroyVertexBuffer;
-
-    typedef Shader* (*FuncCreateShaderFromStock)(Shader::StockShaders stockShader, uint32 preprocessDefine);
-    static FuncCreateShaderFromStock createShaderFromStock;
-
-    typedef Shader* (*FuncCreateShaderFromBuffer)(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer);
-    static FuncCreateShaderFromBuffer createShaderFromBuffer;
-
-    typedef bool (*FuncDestroyShader)(Shader* shader);
-    static FuncDestroyShader destroyShader;
+    static RenderModule& getInstance();
 
     virtual bool createDevice(const glm::ivec2& deviceSize) = 0;
     virtual void destroyDevice() = 0;
+
+    virtual BufferObject* createBufferObject(BufferObject::BufferType bufferType) = 0;
+    virtual bool destroyBufferObject(BufferObject* bufferObject) = 0;
+
+    virtual VertexBuffer* createVertexBuffer(BufferAttributes* attributes) = 0;
+    virtual bool destroyVertexBuffer(VertexBuffer* vertexBuffer) = 0;
+
+    virtual Shader* createShaderFromStock(Shader::StockShaders stockShader, uint32 preprocessDefine) = 0;
+    virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) = 0;
+    virtual bool destroyShader(Shader* shader) = 0;
+
+    virtual Texture* createTexture(const tstring& texFile) = 0;
+    virtual bool destroyTexture(Texture*& texture) = 0;
 
     virtual bool gameLoop() = 0;
 
 private:
     tstring m_name;
+
+    static RenderModule* s_renderModule;
 };
 
 NS_END
