@@ -24,4 +24,16 @@ File::~File()
     close();
 }
 
+bool File::readFileAsString(tstring& strOut, const tstring& filePath)
+{
+    File file;
+    if (!file.open(filePath)) return false;
+
+    auto fileSize = file.fileSize();
+    strOut.resize(fileSize);
+    file.read((void*)strOut.data(), fileSize);
+
+    return true;
+}
+
 NS_END

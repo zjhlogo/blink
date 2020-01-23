@@ -9,13 +9,15 @@
 #pragma once
 #include <foundation/BaseTypes.h>
 
+#include <rttr/registration_friend>
+#include <vector>
+
 NS_BEGIN
 
 class BufferAttributes
 {
 public:
     static const int MAX_ATTR_SIZE = 128;
-    static const int MAX_ATTRIBUTE_ITEMS = 8;
 
     enum class AttributeItemType
     {
@@ -36,6 +38,8 @@ public:
         uint32 offset;
     };
 
+    using AttributeItemList = std::vector<AttributeItem>;
+
     enum class StockAttributes
     {
         Pos3 = 0,
@@ -54,23 +58,24 @@ public:
     BufferAttributes();
     virtual ~BufferAttributes();
 
-    inline uint32 getStride() const { return m_attributeItems[m_numItems].offset; };
-    inline int getNumAttributeItems() const { return m_numItems; };
+    uint32 getStride() const;
+    int getNumAttributeItems() const;
 
     const AttributeItem* getAttributeItem(int nIndex) const;
     bool isEqual(const BufferAttributes* pVertexAttrs) const;
 
-    //     static BufferAttributes* fromFile(const tstring& filePath);
+    static BufferAttributes* fromFile(const tstring& filePath);
     static BufferAttributes* fromStock(StockAttributes stockAttrs);
-    static BufferAttributes* fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems);
+    static BufferAttributes* fromAttributeItems(const tstring& id, const AttributeItemList& attrItems);
 
 private:
     static uint32 getAttributeItemSize(uint32 nSize, AttributeItemType eType);
     static AttributeItemType getAttributeItemType(const tstring& strType);
 
 private:
-    int m_numItems{};
-    AttributeItem m_attributeItems[MAX_ATTRIBUTE_ITEMS + 1];
+    AttributeItemList m_attributeItems;
+
+    RTTR_REGISTRATION_FRIEND
 };
 
 NS_END

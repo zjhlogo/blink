@@ -6,6 +6,7 @@ project(foundation_test)
 set(SOURCE_FILES
 main.cpp
 PathParserTestCase.cpp
+ReflectionTestCase.cpp
 StringBuilderTestCase.cpp
 )
 

@@ -14,7 +14,7 @@ BinPackParameters: false
 AlignAfterOpenBracket: Align
 IndentCaseLabels: false
 ColumnLimit: 160
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 IncludeBlocks: Regroup
 SortIncludes: true
 SortUsingDeclarations: true

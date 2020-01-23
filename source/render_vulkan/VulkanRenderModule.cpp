@@ -119,6 +119,8 @@ VulkanRenderModule::~VulkanRenderModule()
 
 bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 {
+    auto attrs = NS::BufferAttributes::fromFile("resource/vertex_attributes.json");
+
     /* Initialize the library */
     if (!glfwInit()) return false;
 

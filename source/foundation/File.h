@@ -46,6 +46,8 @@ public:
 
     int64 fileSize() const { return m_fileSize; };
 
+    static bool readFileAsString(tstring& strOut, const tstring& filePath);
+
 private:
     void* m_fileHandler{};
     int64 m_fileSize{};

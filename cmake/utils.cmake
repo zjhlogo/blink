@@ -21,8 +21,8 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	find_package(glfw3 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 	find_package(glm PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 	find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
-	find_package(tinyxml2 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 	find_package(entityx PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+	find_package (rttr PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 	if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 		add_executable(${PROJ_NAME} WIN32 ${SOURCE_FILES})
@@ -43,6 +43,7 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	entityx
 	libglad
 	libimgui
+	RTTR::Core_Lib
 	libfoundation
     librender_base
     librender_opengl
@@ -74,20 +75,23 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 endMacro()
 
 macro(configure_test PROJ_NAME OUTPUT_PATH FOLDER_NAME)
-	find_package (GTest PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 	find_package (fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+	find_package (GTest PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
+	find_package (rttr PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 	add_executable(${PROJ_NAME} ${SOURCE_FILES})
 
 	target_include_directories(${PROJ_NAME} PRIVATE
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:GTest::gtest,INTERFACE_INCLUDE_DIRECTORIES>>
+		$<BUILD_INTERFACE:$<TARGET_PROPERTY:RTTR::Core_Lib,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:${PROJECT_ROOT}/source>
 	)
 
 	set(ALL_LIBRARIES
 	fmt::fmt
 	GTest::gtest
+	RTTR::Core_Lib
 	libfoundation
 	)
 	target_link_libraries(${PROJ_NAME} ${ALL_LIBRARIES})

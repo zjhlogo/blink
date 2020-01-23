@@ -16,6 +16,8 @@ Directory.cpp
 Directory.h
 File.cpp
 File.h
+JsonSerializer.cpp
+JsonSerializer.h
 Log.cpp
 Log.h
 PathParser.cpp
@@ -39,6 +41,7 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
 )
 
 group_sources("${SOURCE_FILES}")

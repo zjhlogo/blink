@@ -8,6 +8,30 @@
  */
 #include "BufferAttributes.h"
 
+#include <foundation/File.h>
+#include <foundation/JsonSerializer.h>
+
+#include <rttr/registration>
+#include <rttr/registration_friend>
+#include <rttr/type>
+
+RTTR_REGISTRATION
+{
+    rttr::registration::enumeration<NS::BufferAttributes::AttributeItemType>(
+        "AttributeItemType")(rttr::value("byte", NS::BufferAttributes::AttributeItemType::Byte),
+                             rttr::value("unsigned_byte", NS::BufferAttributes::AttributeItemType::UnsignedByte),
+                             rttr::value("short", NS::BufferAttributes::AttributeItemType::Short),
+                             rttr::value("unsigned_short", NS::BufferAttributes::AttributeItemType::UnsignedShort),
+                             rttr::value("float", NS::BufferAttributes::AttributeItemType::Float));
+
+    rttr::registration::class_<NS::BufferAttributes::AttributeItem>("AttributeItem")(rttr::policy::ctor::as_object)
+        .property("size", &NS::BufferAttributes::AttributeItem::size)
+        .property("type", &NS::BufferAttributes::AttributeItem::type)
+        .property("offset", &NS::BufferAttributes::AttributeItem::offset);
+
+    rttr::registration::class_<NS::BufferAttributes>("BufferAttributes").property("attribute_items", &NS::BufferAttributes::m_attributeItems);
+}
+
 NS_BEGIN
 
 BufferAttributes::BufferAttributes()
@@ -18,9 +42,23 @@ BufferAttributes::~BufferAttributes()
 {
 }
 
+uint32 NS::BufferAttributes::getStride() const
+{
+    if (m_attributeItems.size() <= 0) return 0;
+
+    const auto& item = m_attributeItems[m_attributeItems.size() - 1];
+    return item.offset + item.size;
+}
+
+int NS::BufferAttributes::getNumAttributeItems() const
+{
+    return static_cast<int>(m_attributeItems.size());
+}
+
 const BufferAttributes::AttributeItem* BufferAttributes::getAttributeItem(int nIndex) const
 {
-    if (nIndex < 0 || nIndex >= m_numItems) return nullptr;
+    int numItems = static_cast<int>(m_attributeItems.size());
+    if (nIndex < 0 || nIndex >= numItems) return nullptr;
     return &m_attributeItems[nIndex];
 }
 
@@ -28,9 +66,10 @@ bool BufferAttributes::isEqual(const BufferAttributes* pVertexAttrs) const
 {
     if (!pVertexAttrs) return false;
 
-    if (m_numItems != pVertexAttrs->getNumAttributeItems()) return false;
+    int numItems = static_cast<int>(m_attributeItems.size());
+    if (numItems != pVertexAttrs->getNumAttributeItems()) return false;
 
-    for (int i = 0; i < m_numItems; ++i)
+    for (int i = 0; i < numItems; ++i)
     {
         const AttributeItem* pAttrItem = pVertexAttrs->getAttributeItem(i);
 
@@ -73,138 +112,88 @@ BufferAttributes::AttributeItemType BufferAttributes::getAttributeItemType(const
     return AttributeItemType::Unknown;
 }
 
-// BufferAttributes* BufferAttributes::fromFile(const tstring & filePath)
-// {
-//     tinyxml2::XMLDocument doc;
-//     if (doc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) return nullptr;
-//
-//     tinyxml2::XMLElement* pXmlRoot = doc.RootElement();
-//     if (!pXmlRoot) return nullptr;
-//
-//     AttributeItem attrItems[MAX_ATTRIBUTE_ITEMS + 1];
-//     int attrIndex = 0;
-//
-//     for (tinyxml2::XMLElement* pXmlAttr = pXmlRoot->FirstChildElement(); pXmlAttr != nullptr; pXmlAttr = pXmlAttr->NextSiblingElement())
-//     {
-//         int size = 0;
-//         pXmlAttr->QueryAttribute("size", &size);
-//         if (size <= 0 || size > MAX_ATTR_SIZE) return nullptr;
-//
-//         const char* pszType = pXmlAttr->Attribute("type");
-//         if (!pszType) return nullptr;
-//
-//         const char* pszName = pXmlAttr->Attribute("name");
-//         if (!pszName) return nullptr;
-//
-//         attrItems[attrIndex].size = size;
-//         attrItems[attrIndex].type = getAttributeItemType(pszType);
-//         attrItems[attrIndex].name = pszName;
-//
-//         ++attrIndex;
-//     }
-//
-//     if (attrIndex <= 0 || attrIndex > MAX_ATTRIBUTE_ITEMS) return nullptr;
-//
-//     attrItems[attrIndex].size = 0;
-//     attrItems[attrIndex].type = AttributeItemType::Unknown;
-//     attrItems[attrIndex].offset = 0;
-//     attrItems[attrIndex].name.clear();
-//
-//     return fromAttributeItems("file::" + filePath, attrItems);
-// }
+BufferAttributes* BufferAttributes::fromFile(const tstring& filePath)
+{
+    tstring strJson;
+    if (!File::readFileAsString(strJson, filePath)) return nullptr;
+
+    BufferAttributes* attrs = new BufferAttributes();
+    if (!JsonSerializer::fromJson(strJson, *attrs))
+    {
+        SAFE_DELETE(attrs);
+        return nullptr;
+    }
+
+    return attrs;
+}
 
 BufferAttributes* BufferAttributes::fromStock(StockAttributes stockAttrs)
 {
-    static AttributeItem s_attrPos3[] = {
-        { 3, AttributeItemType::Float, 0 },
-        { 0, AttributeItemType::Unknown, 0 },
+    static const AttributeItemList s_attrPos3 = {
+        {3, AttributeItemType::Float, 0},
     };
 
-    static AttributeItem s_attrPos3Color[] = {
-        { 3, AttributeItemType::Float, 0 },
-        { 4, AttributeItemType::UnsignedByte, 12 },
-        { 0, AttributeItemType::Unknown, 0 },
+    static const AttributeItemList s_attrPos3Color = {
+        {3, AttributeItemType::Float, 0},
+        {4, AttributeItemType::UnsignedByte, 12},
     };
 
-    static AttributeItem s_attrPos3Uv2[] = {
-        { 3, AttributeItemType::Float, 0 },
-        { 2, AttributeItemType::Float, 12 },
-        { 0, AttributeItemType::Unknown, 0 },
+    static const AttributeItemList s_attrPos3Uv2 = {
+        {3, AttributeItemType::Float, 0},
+        {2, AttributeItemType::Float, 12},
     };
 
-    static AttributeItem s_attrPos3Normal[] = {
-        { 3, AttributeItemType::Float, 0 },
-        { 2, AttributeItemType::Float, 12 },
-        { 0, AttributeItemType::Unknown, 0 },
+    static const AttributeItemList s_attrPos3Normal = {
+        {3, AttributeItemType::Float, 0},
+        {2, AttributeItemType::Float, 12},
     };
 
-    static AttributeItem s_attrPos3Uv2Normal[] = {
-        { 3, AttributeItemType::Float, 0 },
-        { 2, AttributeItemType::Float, 12 },
-        { 3, AttributeItemType::Float, 20 },
-        { 0, AttributeItemType::Unknown, 0 },
+    static const AttributeItemList s_attrPos3Uv2Normal = {
+        {3, AttributeItemType::Float, 0},
+        {2, AttributeItemType::Float, 12},
+        {3, AttributeItemType::Float, 20},
     };
 
-    static AttributeItem s_attrPos3Uv2Color[] = {
-        { 3, AttributeItemType::Float, 0 },
-        { 2, AttributeItemType::Float, 12 },
-        { 4, AttributeItemType::UnsignedByte, 20 },
-        { 0, AttributeItemType::Unknown, 0 },
+    static const AttributeItemList s_attrPos3Uv2Color = {
+        {3, AttributeItemType::Float, 0},
+        {2, AttributeItemType::Float, 12},
+        {4, AttributeItemType::UnsignedByte, 20},
     };
 
-    static AttributeItem s_attrPos3Uv2NormalTangent[] = {
-        { 3, AttributeItemType::Float, 0 },
-        { 2, AttributeItemType::Float, 12 },
-        { 3, AttributeItemType::Float, 20 },
-        { 3, AttributeItemType::Float, 32 },
-        { 0, AttributeItemType::Unknown, 0 },
+    static const AttributeItemList s_attrPos3Uv2NormalTangent = {
+        {3, AttributeItemType::Float, 0},
+        {2, AttributeItemType::Float, 12},
+        {3, AttributeItemType::Float, 20},
+        {3, AttributeItemType::Float, 32},
     };
 
-    static AttributeItem* s_stockAttributeItems[static_cast<int>(StockAttributes::NumberOfStockAttributes)] = {
-        s_attrPos3,                 // Pos3
-        s_attrPos3Color,            // Pos3Color
-        s_attrPos3Uv2,              // Pos3Uv2
-        s_attrPos3Normal,           // Pos3Normal
-        s_attrPos3Uv2Normal,        // Pos3Uv2Normal
-        s_attrPos3Uv2Color,         // Pos3Uv2Color
-        s_attrPos3Uv2NormalTangent, // Pos3Uv2Color
+    static const AttributeItemList* s_stockAttributeItems[static_cast<int>(StockAttributes::NumberOfStockAttributes)] = {
+        &s_attrPos3,                 // Pos3
+        &s_attrPos3Color,            // Pos3Color
+        &s_attrPos3Uv2,              // Pos3Uv2
+        &s_attrPos3Normal,           // Pos3Normal
+        &s_attrPos3Uv2Normal,        // Pos3Uv2Normal
+        &s_attrPos3Uv2Color,         // Pos3Uv2Color
+        &s_attrPos3Uv2NormalTangent, // Pos3Uv2Color
     };
 
     static const tstring s_stockAttributeId[static_cast<int>(StockAttributes::NumberOfStockAttributes)] = {
-        "stock::Pos3", "stock::Pos3Color", "stock::Pos3Uv2", "stock::Pos3Normal", "stock::Pos3Uv2Normal", "stock::Pos3Uv2Color", "stock::Pos3Uv2NormalTangent",
+        "stock::Pos3",
+        "stock::Pos3Color",
+        "stock::Pos3Uv2",
+        "stock::Pos3Normal",
+        "stock::Pos3Uv2Normal",
+        "stock::Pos3Uv2Color",
+        "stock::Pos3Uv2NormalTangent",
     };
 
-    return fromAttributeItems(s_stockAttributeId[static_cast<int>(stockAttrs)], s_stockAttributeItems[static_cast<int>(stockAttrs)]);
+    return fromAttributeItems(s_stockAttributeId[static_cast<int>(stockAttrs)], *s_stockAttributeItems[static_cast<int>(stockAttrs)]);
 }
 
-BufferAttributes* BufferAttributes::fromAttributeItems(const tstring& id, const AttributeItem* pAttrItems)
+BufferAttributes* BufferAttributes::fromAttributeItems(const tstring& id, const AttributeItemList& attrItems)
 {
-    int nNumItems = 0;
-    const AttributeItem* pCurrItem = pAttrItems;
-    while (pCurrItem && pCurrItem->type != AttributeItemType::Unknown)
-    {
-        nNumItems++;
-        pCurrItem++;
-    }
-
-    if (nNumItems <= 0 || nNumItems > MAX_ATTRIBUTE_ITEMS) return nullptr;
-
     BufferAttributes* bufferAttributes = new BufferAttributes();
-    bufferAttributes->m_numItems = nNumItems;
-
-    uint32 currOffset = 0;
-    for (int i = 0; i < nNumItems; ++i)
-    {
-        bufferAttributes->m_attributeItems[i].size = pAttrItems[i].size;
-        bufferAttributes->m_attributeItems[i].type = pAttrItems[i].type;
-        bufferAttributes->m_attributeItems[i].offset = currOffset;
-        currOffset += getAttributeItemSize(bufferAttributes->m_attributeItems[i].size, bufferAttributes->m_attributeItems[i].type);
-    }
-
-    bufferAttributes->m_attributeItems[nNumItems].size = 0;
-    bufferAttributes->m_attributeItems[nNumItems].type = AttributeItemType::Unknown;
-    bufferAttributes->m_attributeItems[nNumItems].offset = currOffset;
-
+    bufferAttributes->m_attributeItems = attrItems;
     return bufferAttributes;
 }
 
