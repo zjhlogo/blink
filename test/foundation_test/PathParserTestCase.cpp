@@ -1,4 +1,12 @@
-#include <PathParser.h>
+/*!
+ * \file PathParserTestCase.cpp
+ *
+ * \author zjhlogo
+ * \date 2020/01/23
+ *
+ *
+ */
+#include <foundation/PathParser.h>
 #include <gtest/gtest.h>
 
 TEST(PathParserTestCase, parseTest)

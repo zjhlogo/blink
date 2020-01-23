@@ -16,14 +16,14 @@ noiseutils.h
 group_sources("${SOURCE_FILES}")
 
 set(PROJ_NAME ${PROJECT_NAME})
-set(OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../bin)
+set(OUTPUT_PATH ${PROJECT_ROOT}/bin)
 set(FOLDER_NAME "test")
 
 add_executable(${PROJ_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJ_NAME} PRIVATE
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libfoundation>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/noise/include>
+	$<BUILD_INTERFACE:${PROJECT_ROOT}/external/noise/include>
+	$<BUILD_INTERFACE:${PROJECT_ROOT}/source>
 )
 
 set(ALL_LIBRARIES

@@ -1,5 +1,14 @@
+/*!
+ * \file Atlas.h
+ *
+ * \author zjhlogo
+ * \date 2020/01/23
+ *
+ *
+ */
 #pragma once
-#include <render/texture/Texture2D.h>
+#include <render_base/Texture2D.h>
+
 #include <unordered_map>
 
 class Atlas
@@ -33,5 +42,4 @@ protected:
 
     const Piece* m_pieceList{};
     int m_numPieces{};
-
 };

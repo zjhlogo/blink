@@ -33,14 +33,10 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:entityx,INTERFACE_INCLUDE_DIRECTORIES>>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/glad/include>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/imgui>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/source>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/libfoundation>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_base>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_opengl>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/librender_vulkan>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/libblink>
+		$<BUILD_INTERFACE:${PROJECT_ROOT}/external/glad/include>
+		$<BUILD_INTERFACE:${PROJECT_ROOT}/external/imgui>
+		$<BUILD_INTERFACE:${PROJECT_ROOT}/external/vulkan/source>
+		$<BUILD_INTERFACE:${PROJECT_ROOT}/source>
 	)
 
 	set(ALL_LIBRARIES
@@ -60,9 +56,9 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 		set(ALL_LIBRARIES ${ALL_LIBRARIES} opengl32)
         
         if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-            set(ALL_LIBRARIES ${ALL_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/lib/x64/vulkan-1.lib)
+            set(ALL_LIBRARIES ${ALL_LIBRARIES} ${PROJECT_ROOT}/external/vulkan/lib/x64/vulkan-1.lib)
         elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
-            set(ALL_LIBRARIES ${ALL_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../external/vulkan/lib/x86/vulkan-1.lib)
+            set(ALL_LIBRARIES ${ALL_LIBRARIES} ${PROJECT_ROOT}/external/vulkan/lib/x86/vulkan-1.lib)
         endif ()
 	endif ()
     
@@ -88,7 +84,7 @@ macro(configure_test PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	target_include_directories(${PROJ_NAME} PRIVATE
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 		$<BUILD_INTERFACE:$<TARGET_PROPERTY:GTest::gtest,INTERFACE_INCLUDE_DIRECTORIES>>
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../blink/libfoundation>
+		$<BUILD_INTERFACE:${PROJECT_ROOT}/source>
 	)
 
 	set(ALL_LIBRARIES

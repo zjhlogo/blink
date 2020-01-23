@@ -8,12 +8,12 @@
  */
 #include "HelloWorldApp.h"
 
-#include <RenderData.h>
-#include <camera/CameraSystem.h>
-#include <geometry/BoxGeometry.h>
-#include <light/PointLight.h>
-#include <material/PhongMaterial.h>
-#include <scene/SceneSystem.h>
+#include <blink/RenderData.h>
+#include <blink/camera/CameraSystem.h>
+#include <blink/geometry/BoxGeometry.h>
+#include <blink/light/PointLight.h>
+#include <blink/material/PhongMaterial.h>
+#include <blink/scene/SceneSystem.h>
 
 entityx::Entity createBox(entityx::EntityManager& entities, NS::BufferGeometry* geometry, NS::Material* material, int id)
 {

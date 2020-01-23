@@ -7,7 +7,7 @@
  *
  */
 #pragma once
-#include <blink.h>
+#include <blink/blink.h>
 
 class HelloWorldApp : public NS::App
 {
