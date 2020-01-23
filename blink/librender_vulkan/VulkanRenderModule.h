@@ -37,7 +37,8 @@ public:
     virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) override { return nullptr; };
     virtual bool destroyShader(Shader* shader) override { return false; };
 
-    virtual Texture* createTexture(const tstring& texFile) override;
+    virtual Texture* createTexture2D(const tstring& texFile) override;
+    virtual Texture* createDepthTexture(int width, int height) override;
     virtual bool destroyTexture(Texture*& texture) override;
 
     virtual bool gameLoop() override;
@@ -51,16 +52,11 @@ public:
                       const vk::DeviceSize& size,
                       vk::BufferUsageFlags usage,
                       vk::MemoryPropertyFlags properties);
-    bool createImage(vk::Image& image,
-                     vk::DeviceMemory& imageMemory,
-                     uint32_t width,
-                     uint32_t height,
-                     vk::Format format,
-                     vk::ImageTiling tiling,
-                     vk::ImageUsageFlags usage,
-                     vk::MemoryPropertyFlags properties);
 
-    void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+    vk::PhysicalDevice& getPhysicalDevice() { return m_physicalDevice; };
+    vk::Device& getLogicalDevice() { return m_logicalDevice; };
+    vk::CommandPool& getCommandPool() { return m_commandPool; };
+    vk::Queue& getGraphicsQueue() { return m_graphicsQueue; };
 
 private:
     bool createWindow(const glm::ivec2& windowSize);
@@ -152,7 +148,6 @@ private:
     vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
     vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
     vk::Format findDepthFormat();
-    bool hasStencilComponent(vk::Format format);
 
 private:
     GLFWwindow* m_window{};

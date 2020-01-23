@@ -38,7 +38,8 @@ public:
     virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) = 0;
     virtual bool destroyShader(Shader* shader) = 0;
 
-    virtual Texture* createTexture(const tstring& texFile) = 0;
+    virtual Texture* createTexture2D(const tstring& texFile) = 0;
+    virtual Texture* createDepthTexture(int width, int height) = 0;
     virtual bool destroyTexture(Texture*& texture) = 0;
 
     virtual bool gameLoop() = 0;

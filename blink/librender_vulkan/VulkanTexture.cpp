@@ -11,12 +11,9 @@
 
 NS_BEGIN
 
-VulkanTexture::VulkanTexture(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::Queue graphicsQueue, vk::CommandPool commandPool)
+VulkanTexture::VulkanTexture(VulkanRenderModule* renderModule)
     : Texture(EMPTY_STRING)
-    , m_physicalDevice(physicalDevice)
-    , m_logicalDevice(logicalDevice)
-    , m_graphicsQueue(graphicsQueue)
-    , m_commandPool(commandPool)
+    , m_renderModule(renderModule)
 {
 }
 
@@ -44,6 +41,8 @@ bool VulkanTexture::createDepthTexture(int width, int height)
 
     // create image
     {
+        auto& logicalDevice = m_renderModule->getLogicalDevice();
+
         vk::ImageCreateInfo imageInfo;
         imageInfo.imageType = vk::ImageType::e2D;
         imageInfo.extent.width = static_cast<uint32_t>(width);
@@ -57,15 +56,15 @@ bool VulkanTexture::createDepthTexture(int width, int height)
         imageInfo.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
         imageInfo.sharingMode = vk::SharingMode::eExclusive;
         imageInfo.samples = vk::SampleCountFlagBits::e1;
-        m_textureImage = m_logicalDevice.createImage(imageInfo);
+        m_textureImage = logicalDevice.createImage(imageInfo);
 
-        vk::MemoryRequirements memRequirements = m_logicalDevice.getImageMemoryRequirements(m_textureImage);
+        vk::MemoryRequirements memRequirements = logicalDevice.getImageMemoryRequirements(m_textureImage);
         vk::MemoryAllocateInfo allocInfo;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
-        m_textureImageMemory = m_logicalDevice.allocateMemory(allocInfo);
+        m_textureImageMemory = logicalDevice.allocateMemory(allocInfo);
 
-        m_logicalDevice.bindImageMemory(m_textureImage, m_textureImageMemory, 0);
+        logicalDevice.bindImageMemory(m_textureImage, m_textureImageMemory, 0);
     }
 
     m_textureImageView = createTextureImageView(m_textureImage, depthFormat, vk::ImageAspectFlagBits::eDepth);
@@ -86,6 +85,7 @@ void VulkanTexture::destroy()
 bool VulkanTexture::createTextureImage(void* pixels, int width, int height, int channels)
 {
     vk::DeviceSize imageSize = width * height * 4;
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
 
     // create staging buffer
     vk::Buffer stagingBuffer;
@@ -95,23 +95,23 @@ bool VulkanTexture::createTextureImage(void* pixels, int width, int height, int 
         bufferInfo.size = imageSize;
         bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
         bufferInfo.sharingMode = vk::SharingMode::eExclusive;
-        stagingBuffer = m_logicalDevice.createBuffer(bufferInfo);
+        stagingBuffer = logicalDevice.createBuffer(bufferInfo);
 
-        vk::MemoryRequirements memRequirements = m_logicalDevice.getBufferMemoryRequirements(stagingBuffer);
+        vk::MemoryRequirements memRequirements = logicalDevice.getBufferMemoryRequirements(stagingBuffer);
 
         vk::MemoryAllocateInfo allocInfo;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits,
                                                    vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-        stagingBufferMemory = m_logicalDevice.allocateMemory(allocInfo);
-        m_logicalDevice.bindBufferMemory(stagingBuffer, stagingBufferMemory, 0);
+        stagingBufferMemory = logicalDevice.allocateMemory(allocInfo);
+        logicalDevice.bindBufferMemory(stagingBuffer, stagingBufferMemory, 0);
     }
 
     // copy buffer into staging buffer memory
     {
-        void* mapedBuffer = m_logicalDevice.mapMemory(stagingBufferMemory, 0, imageSize);
+        void* mapedBuffer = logicalDevice.mapMemory(stagingBufferMemory, 0, imageSize);
         memcpy(mapedBuffer, pixels, static_cast<size_t>(imageSize));
-        m_logicalDevice.unmapMemory(stagingBufferMemory);
+        logicalDevice.unmapMemory(stagingBufferMemory);
     }
 
     // create image
@@ -129,15 +129,15 @@ bool VulkanTexture::createTextureImage(void* pixels, int width, int height, int 
         imageInfo.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
         imageInfo.sharingMode = vk::SharingMode::eExclusive;
         imageInfo.samples = vk::SampleCountFlagBits::e1;
-        m_textureImage = m_logicalDevice.createImage(imageInfo);
+        m_textureImage = logicalDevice.createImage(imageInfo);
 
-        vk::MemoryRequirements memRequirements = m_logicalDevice.getImageMemoryRequirements(m_textureImage);
+        vk::MemoryRequirements memRequirements = logicalDevice.getImageMemoryRequirements(m_textureImage);
         vk::MemoryAllocateInfo allocInfo;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
-        m_textureImageMemory = m_logicalDevice.allocateMemory(allocInfo);
+        m_textureImageMemory = logicalDevice.allocateMemory(allocInfo);
 
-        m_logicalDevice.bindImageMemory(m_textureImage, m_textureImageMemory, 0);
+        logicalDevice.bindImageMemory(m_textureImage, m_textureImageMemory, 0);
     }
 
     transitionImageLayout(m_textureImage, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
@@ -167,20 +167,23 @@ bool VulkanTexture::createTextureImage(void* pixels, int width, int height, int 
     transitionImageLayout(m_textureImage, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 
     // destroy staging buffer
-    m_logicalDevice.destroyBuffer(stagingBuffer);
-    m_logicalDevice.freeMemory(stagingBufferMemory);
+    logicalDevice.destroyBuffer(stagingBuffer);
+    logicalDevice.freeMemory(stagingBufferMemory);
 
     return true;
 }
 
 void VulkanTexture::destroyTextureImage()
 {
-    m_logicalDevice.destroyImage(m_textureImage);
-    m_logicalDevice.freeMemory(m_textureImageMemory);
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
+    logicalDevice.destroyImage(m_textureImage);
+    logicalDevice.freeMemory(m_textureImageMemory);
 }
 
 vk::ImageView VulkanTexture::createTextureImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
 {
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
+
     vk::ImageViewCreateInfo viewInfo;
     viewInfo.image = image;
     viewInfo.viewType = vk::ImageViewType::e2D;
@@ -190,16 +193,19 @@ vk::ImageView VulkanTexture::createTextureImageView(vk::Image image, vk::Format 
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
-    return m_logicalDevice.createImageView(viewInfo);
+    return logicalDevice.createImageView(viewInfo);
 }
 
 void VulkanTexture::destroyTextureImageView()
 {
-    m_logicalDevice.destroyImageView(m_textureImageView);
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
+    logicalDevice.destroyImageView(m_textureImageView);
 }
 
 bool VulkanTexture::createTextureSampler()
 {
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
+
     vk::SamplerCreateInfo samplerInfo;
     samplerInfo.magFilter = vk::Filter::eLinear;
     samplerInfo.minFilter = vk::Filter::eLinear;
@@ -216,19 +222,23 @@ bool VulkanTexture::createTextureSampler()
     samplerInfo.mipLodBias = 0.0f;
     samplerInfo.minLod = 0.0f;
     samplerInfo.maxLod = 0.0f;
-    m_textureSampler = m_logicalDevice.createSampler(samplerInfo);
+    m_textureSampler = logicalDevice.createSampler(samplerInfo);
 
     return true;
 }
 
 void VulkanTexture::destroyTextureSampler()
 {
-    m_logicalDevice.destroySampler(m_textureSampler);
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
+
+    logicalDevice.destroySampler(m_textureSampler);
 }
 
 uint32_t VulkanTexture::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {
-    vk::PhysicalDeviceMemoryProperties memProperties = m_physicalDevice.getMemoryProperties();
+    auto& physicalDevice = m_renderModule->getPhysicalDevice();
+
+    vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
     {
         if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) return i;
@@ -303,13 +313,16 @@ void VulkanTexture::transitionImageLayout(vk::Image image, vk::Format format, vk
 
 vk::CommandBuffer VulkanTexture::beginSingleTimeCommands()
 {
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
+    auto& commandPool = m_renderModule->getCommandPool();
+
     vk::CommandBufferAllocateInfo allocInfo;
     allocInfo.level = vk::CommandBufferLevel::ePrimary;
-    allocInfo.commandPool = m_commandPool;
+    allocInfo.commandPool = commandPool;
     allocInfo.commandBufferCount = 1;
 
     vk::CommandBuffer commandBuffer;
-    m_logicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer);
+    logicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer);
 
     vk::CommandBufferBeginInfo beginInfo;
     beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
@@ -320,22 +333,28 @@ vk::CommandBuffer VulkanTexture::beginSingleTimeCommands()
 
 void VulkanTexture::endSingleTimeCommands(vk::CommandBuffer commandBuffer)
 {
+    auto& logicalDevice = m_renderModule->getLogicalDevice();
+    auto& commandPool = m_renderModule->getCommandPool();
+    auto& graphicsQueue = m_renderModule->getGraphicsQueue();
+
     commandBuffer.end();
 
     vk::SubmitInfo submitInfo;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    m_graphicsQueue.submit(submitInfo, vk::Fence());
-    m_graphicsQueue.waitIdle();
-    m_logicalDevice.freeCommandBuffers(m_commandPool, commandBuffer);
+    graphicsQueue.submit(submitInfo, vk::Fence());
+    graphicsQueue.waitIdle();
+    logicalDevice.freeCommandBuffers(commandPool, commandBuffer);
 }
 
 vk::Format VulkanTexture::findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features)
 {
+    auto& physicalDevice = m_renderModule->getPhysicalDevice();
+
     for (vk::Format format : candidates)
     {
-        vk::FormatProperties props = m_physicalDevice.getFormatProperties(format);
+        vk::FormatProperties props = physicalDevice.getFormatProperties(format);
         if (tiling == vk::ImageTiling::eLinear && (props.linearTilingFeatures & features) == features)
         {
             return format;

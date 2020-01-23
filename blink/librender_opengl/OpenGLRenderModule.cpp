@@ -128,7 +128,12 @@ bool OpenGLRenderModule::destroyShader(Shader* shader)
     return false;
 }
 
-Texture* NS::OpenGLRenderModule::createTexture(const tstring& texFile)
+Texture* OpenGLRenderModule::createTexture2D(const tstring& texFile)
+{
+    return nullptr;
+}
+
+Texture* OpenGLRenderModule::createDepthTexture(int width, int height)
 {
     return nullptr;
 }

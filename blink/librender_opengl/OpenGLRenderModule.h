@@ -34,7 +34,8 @@ public:
     virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) override;
     virtual bool destroyShader(Shader* shader) override;
 
-    virtual Texture* createTexture(const tstring& texFile) override;
+    virtual Texture* createTexture2D(const tstring& texFile) override;
+    virtual Texture* createDepthTexture(int width, int height) override;
     virtual bool destroyTexture(Texture*& texture) override;
 
     virtual bool gameLoop() override;

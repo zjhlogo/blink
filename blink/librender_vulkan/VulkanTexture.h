@@ -13,10 +13,12 @@
 
 NS_BEGIN
 
+class VulkanRenderModule;
+
 class VulkanTexture : public Texture
 {
 public:
-    VulkanTexture(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::Queue graphicsQueue, vk::CommandPool commandPool);
+    VulkanTexture(VulkanRenderModule* renderModule);
     virtual ~VulkanTexture();
 
     bool createTexture2D(void* pixels, int width, int height, int channels);
@@ -47,10 +49,7 @@ private:
     void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
 private:
-    vk::PhysicalDevice m_physicalDevice;
-    vk::Device m_logicalDevice;
-    vk::Queue m_graphicsQueue;
-    vk::CommandPool m_commandPool;
+    VulkanRenderModule* m_renderModule{};
 
     vk::Image m_textureImage;
     vk::DeviceMemory m_textureImageMemory;
