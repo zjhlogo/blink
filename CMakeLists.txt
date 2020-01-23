@@ -22,7 +22,7 @@ add_subdirectory(example/hello_world)
 add_subdirectory(example/random_map)
 
 add_subdirectory(external/glad)
-add_subdirectory(external/imgui/source)
+add_subdirectory(external/imgui)
 add_subdirectory(external/noise)
 
 add_subdirectory(test/foundation_test)

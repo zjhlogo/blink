@@ -22,7 +22,7 @@ set(FOLDER_NAME "test")
 add_executable(${PROJ_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJ_NAME} PRIVATE
-	$<BUILD_INTERFACE:${PROJECT_ROOT}/external/noise/include>
+	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/source>
 )
 
