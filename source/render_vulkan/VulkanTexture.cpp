@@ -35,7 +35,7 @@ bool VulkanTexture::createTexture2D(void* pixels, int width, int height, int cha
 
 bool VulkanTexture::createDepthTexture(int width, int height)
 {
-    vk::Format depthFormat = findSupportedFormat({ vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint },
+    vk::Format depthFormat = findSupportedFormat({vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
                                                  vk::ImageTiling::eOptimal,
                                                  vk::FormatFeatureFlagBits::eDepthStencilAttachment);
 
@@ -156,8 +156,8 @@ bool VulkanTexture::createTextureImage(void* pixels, int width, int height, int 
         region.imageSubresource.baseArrayLayer = 0;
         region.imageSubresource.layerCount = 1;
 
-        region.imageOffset = { 0, 0, 0 };
-        region.imageExtent = { (uint32_t)width, (uint32_t)height, 1 };
+        region.imageOffset = {0, 0, 0};
+        region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
 
         commandBuffer.copyBufferToImage(stagingBuffer, m_textureImage, vk::ImageLayout::eTransferDstOptimal, region);
 

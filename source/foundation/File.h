@@ -46,7 +46,8 @@ public:
 
     int64 fileSize() const { return m_fileSize; };
 
-    static bool readFileAsString(tstring& strOut, const tstring& filePath);
+    static bool readFileIntoString(tstring& strOut, const tstring& filePath);
+    static bool readFileIntoBuffer(std::vector<uint8>& dataOut, const tstring& filePath);
 
 private:
     void* m_fileHandler{};

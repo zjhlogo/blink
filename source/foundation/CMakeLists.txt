@@ -23,8 +23,6 @@ Log.h
 PathParser.cpp
 PathParser.h
 PreDefine.h
-Reflect.cpp
-Reflect.h
 StringBuilder.cpp
 StringBuilder.h
 )

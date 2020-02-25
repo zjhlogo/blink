@@ -10,6 +10,8 @@ find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 set(SOURCE_FILES
 VulkanRenderModule.cpp
 VulkanRenderModule.h
+VulkanShader.cpp
+VulkanShader.h
 VulkanTexture.cpp
 VulkanTexture.h
 )

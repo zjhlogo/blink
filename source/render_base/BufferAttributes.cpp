@@ -115,7 +115,7 @@ BufferAttributes::AttributeItemType BufferAttributes::getAttributeItemType(const
 BufferAttributes* BufferAttributes::fromFile(const tstring& filePath)
 {
     tstring strJson;
-    if (!File::readFileAsString(strJson, filePath)) return nullptr;
+    if (!File::readFileIntoString(strJson, filePath)) return nullptr;
 
     BufferAttributes* attrs = new BufferAttributes();
     if (!JsonSerializer::fromJson(strJson, *attrs))

@@ -119,8 +119,6 @@ VulkanRenderModule::~VulkanRenderModule()
 
 bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 {
-    auto attrs = NS::BufferAttributes::fromFile("resource/vertex_attributes.json");
-
     /* Initialize the library */
     if (!glfwInit()) return false;
 
@@ -694,8 +692,8 @@ bool VulkanRenderModule::createDescriptorSetLayout()
     samplerLayoutBinding.binding = 1;
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-    samplerLayoutBinding.pImmutableSamplers = nullptr;
     samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eFragment;
+    samplerLayoutBinding.pImmutableSamplers = nullptr;
 
     std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
 
@@ -715,10 +713,10 @@ void VulkanRenderModule::destroyDescriptorSetLayout()
 bool VulkanRenderModule::createGraphicsPipeline()
 {
     std::vector<uint8> vertShaderCode;
-    readFileIntoBuffer(vertShaderCode, "resource/shaders/shader_base.vert.spv");
+    File::readFileIntoBuffer(vertShaderCode, "resource/shaders/shader_base.vert.spv");
 
     std::vector<uint8> fragShaderCode;
-    readFileIntoBuffer(fragShaderCode, "resource/shaders/shader_base.frag.spv");
+    File::readFileIntoBuffer(fragShaderCode, "resource/shaders/shader_base.frag.spv");
 
     vk::ShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     vk::ShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -929,6 +927,11 @@ void VulkanRenderModule::destroyVertexBuffer()
 {
     m_logicalDevice.destroyBuffer(m_vertexBuffer);
     m_logicalDevice.freeMemory(m_vertexBufferMemory);
+}
+
+Shader* VulkanRenderModule::createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
+{
+
 }
 
 bool VulkanRenderModule::createIndexBuffer()
@@ -1333,15 +1336,6 @@ vk::ShaderModule VulkanRenderModule::createShaderModule(const std::vector<uint8>
     createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
     return m_logicalDevice.createShaderModule(createInfo);
-}
-
-bool VulkanRenderModule::readFileIntoBuffer(std::vector<uint8>& bufferOut, const std::string& filePath)
-{
-    File file(filePath);
-    file.read(bufferOut, file.fileSize());
-    file.close();
-
-    return true;
 }
 
 uint32_t VulkanRenderModule::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)

@@ -34,7 +34,7 @@ public:
     virtual bool destroyVertexBuffer(VertexBuffer* vertexBuffer) override { return false; };
 
     virtual Shader* createShaderFromStock(Shader::StockShaders stockShader, uint32 preprocessDefine) override { return nullptr; };
-    virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) override { return nullptr; };
+    virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) override;
     virtual bool destroyShader(Shader* shader) override { return false; };
 
     virtual Texture* createTexture2D(const tstring& texFile) override;
@@ -136,7 +136,6 @@ private:
                                             const std::vector<vk::QueueFamilyProperties>& queueFamilies);
 
     vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
-    bool readFileIntoBuffer(std::vector<uint8>& bufferOut, const std::string& filePath);
 
     uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
     void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
