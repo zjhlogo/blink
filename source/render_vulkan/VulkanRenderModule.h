@@ -82,15 +82,6 @@ private:
     bool createImageViews();
     void destroyImageViews();
 
-    bool createRenderPass();
-    void destroyRenderPass();
-
-    bool createDescriptorSetLayout();
-    void destroyDescriptorSetLayout();
-
-    bool createGraphicsPipeline();
-    void destroyGraphicsPipeline();
-
     bool createFramebuffers();
     void destroyFramebuffers();
 
@@ -135,8 +126,6 @@ private:
                                             const vk::SurfaceKHR& surface,
                                             const std::vector<vk::QueueFamilyProperties>& queueFamilies);
 
-    vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
-
     uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
     void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
     void updateUniformBuffer(uint32_t currentImage);
@@ -169,11 +158,6 @@ private:
     vk::Format m_swapChainImageFormat;
     vk::Extent2D m_swapChainExtent;
     std::vector<vk::ImageView> m_swapChainImageViews;
-
-    vk::RenderPass m_renderPass;
-    vk::DescriptorSetLayout m_descriptorSetLayout;
-    vk::PipelineLayout m_pipelineLayout;
-    vk::Pipeline m_pipeline;
 
     vk::DescriptorPool m_descriptorPool;
     std::vector<vk::DescriptorSet> m_descriptorSets;

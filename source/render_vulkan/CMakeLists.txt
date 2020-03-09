@@ -8,6 +8,8 @@ find_package(glm PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 set(SOURCE_FILES
+VulkanPipeline.cpp
+VulkanPipeline.h
 VulkanRenderModule.cpp
 VulkanRenderModule.h
 VulkanShader.cpp
