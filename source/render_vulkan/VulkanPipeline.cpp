@@ -4,9 +4,11 @@
  * \author zjhlogo
  * \date 2020/02/26
  *
- * 
+ *
  */
 #include "VulkanPipeline.h"
+#include "Types.h"
+
 #include <foundation/File.h>
 
 NS_BEGIN
@@ -14,12 +16,10 @@ NS_BEGIN
 VulkanPipeline::VulkanPipeline(const vk::Device& logicalDevice)
     : m_logicalDevice(logicalDevice)
 {
-
 }
 
 VulkanPipeline::~VulkanPipeline()
 {
-
 }
 
 bool VulkanPipeline::createRenderPass(const vk::Format& colorAttachmentFormat, const vk::Format& depthAttachmentFormat)
@@ -62,7 +62,7 @@ bool VulkanPipeline::createRenderPass(const vk::Format& colorAttachmentFormat, c
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
     // create render pass
-    std::array<vk::AttachmentDescription, 2> attacments = { colorAttachment, depthAttachment };
+    std::array<vk::AttachmentDescription, 2> attacments = {colorAttachment, depthAttachment};
     vk::RenderPassCreateInfo renderPassInfo;
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attacments.size());
     renderPassInfo.pAttachments = attacments.data();
@@ -103,7 +103,7 @@ bool VulkanPipeline::createDescriptorSetLayout()
     samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eFragment;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
 
-    std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+    std::array<vk::DescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
 
     vk::DescriptorSetLayoutCreateInfo layoutInfo;
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
@@ -118,7 +118,7 @@ void VulkanPipeline::destroyDescriptorSetLayout()
     m_logicalDevice.destroyDescriptorSetLayout(m_descriptorSetLayout);
 }
 
-bool VulkanPipeline::createGraphicsPipeline(float width, float height)
+bool VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t height)
 {
     std::vector<uint8> vertShaderCode;
     File::readFileIntoBuffer(vertShaderCode, "resource/shaders/shader_base.vert.spv");
@@ -140,7 +140,7 @@ bool VulkanPipeline::createGraphicsPipeline(float width, float height)
     fragShaderStageInfo.pName = "main";
 
     // shader state
-    vk::PipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+    vk::PipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
     // vertex input state
     auto bindingDescription = Vertex::getBindingDescription();
@@ -157,8 +157,8 @@ bool VulkanPipeline::createGraphicsPipeline(float width, float height)
     inputAssembly.topology = vk::PrimitiveTopology::eTriangleList;
 
     // viewport state
-    vk::Viewport viewport(0.0f, 0.0f, width, height, 0.0f, 1.0f);
-    vk::Rect2D sissor({ 0, 0 }, {width, height});
+    vk::Viewport viewport(0.0f, 0.0f, width * 1.0f, height * 1.0f, 0.0f, 1.0f);
+    vk::Rect2D sissor({0, 0}, {width, height});
     vk::PipelineViewportStateCreateInfo viewportState;
     viewportState.viewportCount = 1;
     viewportState.pViewports = &viewport;
@@ -191,7 +191,7 @@ bool VulkanPipeline::createGraphicsPipeline(float width, float height)
     // color blending state
     vk::PipelineColorBlendAttachmentState colorBlendAttachment;
     colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB
-        | vk::ColorComponentFlagBits::eA;
+                                          | vk::ColorComponentFlagBits::eA;
     colorBlendAttachment.blendEnable = VK_FALSE;
 
     vk::PipelineColorBlendStateCreateInfo colorBlending;

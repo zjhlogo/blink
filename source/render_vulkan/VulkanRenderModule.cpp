@@ -7,6 +7,8 @@
  *
  */
 #include "VulkanRenderModule.h"
+#include "Types.h"
+#include "VulkanPipeline.h"
 #include "VulkanTexture.h"
 
 #include <foundation/File.h>
@@ -17,53 +19,17 @@
 
 NS_BEGIN
 
-struct Vertex
-{
-    glm::vec3 pos;
-    glm::vec3 color;
-    glm::vec2 texCoord;
+const std::vector<Vertex> g_vertices = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+                                        {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+                                        {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+                                        {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 
-    static vk::VertexInputBindingDescription getBindingDescription()
-    {
-        vk::VertexInputBindingDescription bindingDescription;
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(Vertex);
-        bindingDescription.inputRate = vk::VertexInputRate::eVertex;
-        return bindingDescription;
-    }
+                                        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+                                        {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+                                        {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+                                        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
 
-    static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions()
-    {
-        std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions;
-
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = vk::Format::eR32G32B32Sfloat;
-        attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = vk::Format::eR32G32B32Sfloat;
-        attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-        attributeDescriptions[2].binding = 0;
-        attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = vk::Format::eR32G32Sfloat;
-        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-        return attributeDescriptions;
-    }
-};
-
-const std::vector<Vertex> g_vertices = {
-    { { -0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },  { { 0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } },
-    { { 0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },    { { -0.5f, 0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
-
-    { { -0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } }, { { 0.5f, -0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } },
-    { { 0.5f, 0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },   { { -0.5f, 0.5f, -0.5f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } }
-};
-
-const std::vector<uint16_t> g_indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
+const std::vector<uint16_t> g_indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
 
 struct UniformBufferObject
 {
@@ -130,9 +96,12 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     if (!createLogicalDevice()) return false;
     if (!createSwapChain()) return false;
     if (!createImageViews()) return false;
-    if (!createRenderPass()) return false;
-    if (!createDescriptorSetLayout()) return false;
-    if (!createGraphicsPipeline()) return false;
+
+    m_pipeline = new VulkanPipeline(m_logicalDevice);
+    if (!m_pipeline->createRenderPass(m_swapChainImageFormat, findDepthFormat())) return false;
+    if (!m_pipeline->createDescriptorSetLayout()) return false;
+    if (!m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
+
     if (!createCommandPool()) return false;
 
     m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
@@ -158,7 +127,8 @@ void VulkanRenderModule::destroyDevice()
 
     destroyTexture(m_texture);
 
-    destroyDescriptorSetLayout();
+    m_pipeline->destroyDescriptorSetLayout();
+
     destroyUniformBuffers();
     destroyDescriptorSets();
     destroyDescriptorPool();
@@ -274,8 +244,8 @@ void VulkanRenderModule::drawFrame()
     m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];
 
     vk::SubmitInfo submitInfo;
-    vk::Semaphore waitSemaphores[] = { m_imageAvailableSemaphores[m_currentFrame] };
-    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    vk::Semaphore waitSemaphores[] = {m_imageAvailableSemaphores[m_currentFrame]};
+    vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
@@ -283,7 +253,7 @@ void VulkanRenderModule::drawFrame()
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &m_commandBuffers[imageIndex];
 
-    vk::Semaphore signalSemaphores[] = { m_renderFinishedSemaphores[m_currentFrame] };
+    vk::Semaphore signalSemaphores[] = {m_renderFinishedSemaphores[m_currentFrame]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -294,7 +264,7 @@ void VulkanRenderModule::drawFrame()
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    vk::SwapchainKHR swapChains[] = { m_swapChain };
+    vk::SwapchainKHR swapChains[] = {m_swapChain};
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
@@ -444,7 +414,7 @@ bool VulkanRenderModule::createLogicalDevice()
     }
 
     std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-    std::set<int> uniqueQueueFamilies = { graphicsFamilyIndex, presentFamilyIndex };
+    std::set<int> uniqueQueueFamilies = {graphicsFamilyIndex, presentFamilyIndex};
 
     float priority = 1.0f;
     for (uint32_t queueFamilyIndex : uniqueQueueFamilies)
@@ -564,7 +534,7 @@ bool VulkanRenderModule::createSwapChain()
     getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, m_physicalDevice, m_surface, queueFamilyProperties);
     if (graphicsFamilyIndex != presentFamilyIndex)
     {
-        uint32_t queueFamilyIndexs[2] = { static_cast<uint32_t>(graphicsFamilyIndex), static_cast<uint32_t>(presentFamilyIndex) };
+        uint32_t queueFamilyIndexs[2] = {static_cast<uint32_t>(graphicsFamilyIndex), static_cast<uint32_t>(presentFamilyIndex)};
         createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
         createInfo.queueFamilyIndexCount = 2;
         createInfo.pQueueFamilyIndices = queueFamilyIndexs;
@@ -621,10 +591,10 @@ bool VulkanRenderModule::createFramebuffers()
     VulkanTexture* vulkanTexture = (VulkanTexture*)m_depthTexture;
     for (size_t i = 0; i < m_swapChainImageViews.size(); ++i)
     {
-        std::array<vk::ImageView, 2> attacments = { m_swapChainImageViews[i], vulkanTexture->getTextureImageView() };
+        std::array<vk::ImageView, 2> attacments = {m_swapChainImageViews[i], vulkanTexture->getTextureImageView()};
 
         vk::FramebufferCreateInfo frameBufferInfo;
-        frameBufferInfo.renderPass = m_renderPass;
+        frameBufferInfo.renderPass = m_pipeline->getRenderPass();
         frameBufferInfo.attachmentCount = static_cast<uint32_t>(attacments.size());
         frameBufferInfo.pAttachments = attacments.data();
         frameBufferInfo.width = m_swapChainExtent.width;
@@ -706,7 +676,8 @@ void VulkanRenderModule::destroyVertexBuffer()
 
 Shader* VulkanRenderModule::createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
 {
-
+    // TODO: 
+    return nullptr;
 }
 
 bool VulkanRenderModule::createIndexBuffer()
@@ -795,7 +766,7 @@ void VulkanRenderModule::destroyDescriptorPool()
 
 bool VulkanRenderModule::createDescriptorSets()
 {
-    std::vector<vk::DescriptorSetLayout> layouts(m_swapChainImages.size(), m_descriptorSetLayout);
+    std::vector<vk::DescriptorSetLayout> layouts(m_swapChainImages.size(), m_pipeline->getDestriptorSetLayout());
 
     vk::DescriptorSetAllocateInfo allocInfo;
     allocInfo.descriptorPool = m_descriptorPool;
@@ -860,25 +831,26 @@ bool VulkanRenderModule::createCommandBuffers()
 
         {
             vk::RenderPassBeginInfo renderPassInfo;
-            renderPassInfo.renderPass = m_renderPass;
+            renderPassInfo.renderPass = m_pipeline->getRenderPass();
             renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
-            renderPassInfo.renderArea.offset = { 0, 0 };
+            renderPassInfo.renderArea.offset = {0, 0};
             renderPassInfo.renderArea.extent = m_swapChainExtent;
 
             std::array<vk::ClearValue, 2> clearValues;
-            clearValues[0].color.setFloat32({ 0.0f, 0.0f, 0.0f, 1.0f });
-            clearValues[1].depthStencil = { 1.0f, 0 };
+            clearValues[0].color.setFloat32({0.0f, 0.0f, 0.0f, 1.0f});
+            clearValues[1].depthStencil = {1.0f, 0};
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
 
             m_commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
             {
-                m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+                m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline->getPipeline());
                 vk::DeviceSize offset = 0;
                 m_commandBuffers[i].bindVertexBuffers(0, m_vertexBuffer, offset);
                 m_commandBuffers[i].bindIndexBuffer(m_indexBuffer, 0, vk::IndexType::eUint16);
-                m_commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, &m_descriptorSets[i], 0, nullptr);
+                m_commandBuffers[i]
+                    .bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipeline->getPipelineLayout(), 0, 1, &m_descriptorSets[i], 0, nullptr);
                 m_commandBuffers[i].drawIndexed(static_cast<uint32_t>(g_indices.size()), 1, 0, 0, 0);
             }
 
@@ -945,8 +917,8 @@ bool VulkanRenderModule::recreateSwapChain()
 
     createSwapChain();
     createImageViews();
-    createRenderPass();
-    createGraphicsPipeline();
+    m_pipeline->createRenderPass(m_swapChainImageFormat, findDepthFormat());
+    m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
 
     m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
 
@@ -964,15 +936,15 @@ void VulkanRenderModule::cleanSwapChain()
     destroyFramebuffers();
     destroyTexture(m_depthTexture);
     destroyCommandBuffers();
-    destroyGraphicsPipeline();
-    destroyRenderPass();
+    m_pipeline->destroyGraphicsPipeline();
+    m_pipeline->destroyRenderPass();
     destroyImageViews();
     destroySwapChain();
 }
 
 const std::vector<const char*>& VulkanRenderModule::getRequiredValidationLayers()
 {
-    static const std::vector<const char*> REQUIRED_LAYERS = { "VK_LAYER_KHRONOS_validation" };
+    static const std::vector<const char*> REQUIRED_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
     return REQUIRED_LAYERS;
 }
@@ -1232,7 +1204,7 @@ vk::Format VulkanRenderModule::findSupportedFormat(const std::vector<vk::Format>
 
 vk::Format VulkanRenderModule::findDepthFormat()
 {
-    return findSupportedFormat({ vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint },
+    return findSupportedFormat({vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
                                vk::ImageTiling::eOptimal,
                                vk::FormatFeatureFlagBits::eDepthStencilAttachment);
 }

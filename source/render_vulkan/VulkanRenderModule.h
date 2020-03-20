@@ -15,6 +15,8 @@
 
 NS_BEGIN
 
+class VulkanPipeline;
+
 class VulkanRenderModule : public RenderModule
 {
 public:
@@ -185,6 +187,7 @@ private:
 
     Texture* m_texture{};
     Texture* m_depthTexture{};
+    VulkanPipeline* m_pipeline{};
 
 };
 
