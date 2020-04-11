@@ -8,8 +8,14 @@ find_package(glm PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 find_package(fmt PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
 
 set(SOURCE_FILES
+utils/VulkanUtils.cpp
+utils/VulkanUtils.h
 Types.cpp
 Types.h
+VulkanContext.cpp
+VulkanContext.h
+VulkanLogicalDevice.cpp
+VulkanLogicalDevice.h
 VulkanPipeline.cpp
 VulkanPipeline.h
 VulkanRenderModule.cpp
@@ -18,6 +24,8 @@ VulkanShader.cpp
 VulkanShader.h
 VulkanTexture.cpp
 VulkanTexture.h
+VulkanWindow.cpp
+VulkanWindow.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

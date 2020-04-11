@@ -13,10 +13,12 @@
 
 NS_BEGIN
 
+class VulkanLogicalDevice;
+
 class VulkanPipeline
 {
 public:
-    VulkanPipeline(const vk::Device& logicalDevice);
+    VulkanPipeline(VulkanLogicalDevice* logicalDevice);
     ~VulkanPipeline();
 
     bool createRenderPass(const vk::Format& colorAttachmentFormat, const vk::Format& depthAttachmentFormat);
@@ -37,7 +39,7 @@ private:
     vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
 
 private:
-    vk::Device m_logicalDevice;
+    VulkanLogicalDevice* m_logicalDevice{};
     vk::RenderPass m_renderPass;
     vk::DescriptorSetLayout m_descriptorSetLayout;
     vk::PipelineLayout m_pipelineLayout;

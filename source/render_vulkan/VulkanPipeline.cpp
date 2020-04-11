@@ -8,12 +8,13 @@
  */
 #include "VulkanPipeline.h"
 #include "Types.h"
+#include "VulkanLogicalDevice.h"
 
 #include <foundation/File.h>
 
 NS_BEGIN
 
-VulkanPipeline::VulkanPipeline(const vk::Device& logicalDevice)
+VulkanPipeline::VulkanPipeline(VulkanLogicalDevice* logicalDevice)
     : m_logicalDevice(logicalDevice)
 {
 }
@@ -37,7 +38,7 @@ bool VulkanPipeline::createRenderPass(const vk::Format& colorAttachmentFormat, c
 
     // depth attachment
     vk::AttachmentDescription depthAttachment;
-    depthAttachment.format = depthAttachmentFormat; // findDepthFormat();
+    depthAttachment.format = depthAttachmentFormat;
     depthAttachment.samples = vk::SampleCountFlagBits::e1;
     depthAttachment.loadOp = vk::AttachmentLoadOp::eClear;
     depthAttachment.storeOp = vk::AttachmentStoreOp::eDontCare;
@@ -77,14 +78,14 @@ bool VulkanPipeline::createRenderPass(const vk::Format& colorAttachmentFormat, c
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    m_renderPass = m_logicalDevice.createRenderPass(renderPassInfo);
+    m_renderPass = m_logicalDevice->getVkLogicalDevice().createRenderPass(renderPassInfo);
 
     return true;
 }
 
 void VulkanPipeline::destroyRenderPass()
 {
-    m_logicalDevice.destroyRenderPass(m_renderPass);
+    m_logicalDevice->getVkLogicalDevice().destroyRenderPass(m_renderPass);
 }
 
 bool VulkanPipeline::createDescriptorSetLayout()
@@ -108,14 +109,14 @@ bool VulkanPipeline::createDescriptorSetLayout()
     vk::DescriptorSetLayoutCreateInfo layoutInfo;
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     layoutInfo.pBindings = bindings.data();
-    m_descriptorSetLayout = m_logicalDevice.createDescriptorSetLayout(layoutInfo);
+    m_descriptorSetLayout = m_logicalDevice->getVkLogicalDevice().createDescriptorSetLayout(layoutInfo);
 
     return true;
 }
 
 void VulkanPipeline::destroyDescriptorSetLayout()
 {
-    m_logicalDevice.destroyDescriptorSetLayout(m_descriptorSetLayout);
+    m_logicalDevice->getVkLogicalDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
 }
 
 bool VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t height)
@@ -215,7 +216,7 @@ bool VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t height)
     vk::PipelineLayoutCreateInfo pipelineLayoutInfo;
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
-    m_pipelineLayout = m_logicalDevice.createPipelineLayout(pipelineLayoutInfo);
+    m_pipelineLayout = m_logicalDevice->getVkLogicalDevice().createPipelineLayout(pipelineLayoutInfo);
 
     // create pipeline
     vk::GraphicsPipelineCreateInfo pipelineInfo;
@@ -233,18 +234,18 @@ bool VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t height)
     pipelineInfo.renderPass = m_renderPass;
     pipelineInfo.subpass = 0;
 
-    m_pipeline = m_logicalDevice.createGraphicsPipeline(vk::PipelineCache(), pipelineInfo);
+    m_pipeline = m_logicalDevice->getVkLogicalDevice().createGraphicsPipeline(vk::PipelineCache(), pipelineInfo);
 
-    m_logicalDevice.destroyShaderModule(fragShaderModule);
-    m_logicalDevice.destroyShaderModule(vertShaderModule);
+    m_logicalDevice->getVkLogicalDevice().destroyShaderModule(fragShaderModule);
+    m_logicalDevice->getVkLogicalDevice().destroyShaderModule(vertShaderModule);
 
     return true;
 }
 
 void VulkanPipeline::destroyGraphicsPipeline()
 {
-    m_logicalDevice.destroyPipeline(m_pipeline);
-    m_logicalDevice.destroyPipelineLayout(m_pipelineLayout);
+    m_logicalDevice->getVkLogicalDevice().destroyPipeline(m_pipeline);
+    m_logicalDevice->getVkLogicalDevice().destroyPipelineLayout(m_pipelineLayout);
 }
 
 vk::ShaderModule VulkanPipeline::createShaderModule(const std::vector<uint8>& shaderCode)
@@ -253,7 +254,7 @@ vk::ShaderModule VulkanPipeline::createShaderModule(const std::vector<uint8>& sh
     createInfo.codeSize = shaderCode.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
-    return m_logicalDevice.createShaderModule(createInfo);
+    return m_logicalDevice->getVkLogicalDevice().createShaderModule(createInfo);
 }
 
 NS_END

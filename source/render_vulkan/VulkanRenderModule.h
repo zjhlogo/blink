@@ -15,6 +15,9 @@
 
 NS_BEGIN
 
+class VulkanWindow;
+class VulkanContext;
+class VulkanLogicalDevice;
 class VulkanPipeline;
 
 class VulkanRenderModule : public RenderModule
@@ -55,28 +58,9 @@ public:
                       vk::BufferUsageFlags usage,
                       vk::MemoryPropertyFlags properties);
 
-    vk::PhysicalDevice& getPhysicalDevice() { return m_physicalDevice; };
-    vk::Device& getLogicalDevice() { return m_logicalDevice; };
     vk::CommandPool& getCommandPool() { return m_commandPool; };
-    vk::Queue& getGraphicsQueue() { return m_graphicsQueue; };
 
 private:
-    bool createWindow(const glm::ivec2& windowSize);
-    void destroyWindow();
-
-    bool createInstance();
-    void destroyInstance();
-
-    bool setupDebugMessenger();
-    void destroyDebugMessenger();
-
-    bool createSurface();
-    void destroySurface();
-
-    bool pickPhysicalDevice();
-
-    bool createLogicalDevice();
-    void destroyLogicalDevice();
 
     bool createSwapChain();
     void destroySwapChain();
@@ -114,21 +98,6 @@ private:
     bool recreateSwapChain();
     void cleanSwapChain();
 
-    const std::vector<const char*>& getRequiredValidationLayers();
-    bool checkValidationLayerSupported(const std::vector<vk::LayerProperties>& layers, const std::vector<const char*>& requiredLayers);
-
-    const std::vector<const char*>& getRequiredInstanceExtensions();
-    const std::vector<const char*>& getRequiredDeviceExtensions();
-    bool checkExtensionsSupported(const std::vector<vk::ExtensionProperties>& extensions, const std::vector<const char*>& requiredExtensions);
-
-    int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
-    bool getBestFitQueueFamilyPropertyIndex(int& graphicsFamily,
-                                            int& presentFamily,
-                                            const vk::PhysicalDevice& physicalDevice,
-                                            const vk::SurfaceKHR& surface,
-                                            const std::vector<vk::QueueFamilyProperties>& queueFamilies);
-
-    uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
     void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
     void updateUniformBuffer(uint32_t currentImage);
 
@@ -136,25 +105,8 @@ private:
     void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
     vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
-    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
-    vk::Format findDepthFormat();
 
 private:
-    GLFWwindow* m_window{};
-    glm::ivec2 m_deviceSize;
-
-    vk::Instance m_instance;
-    vk::DispatchLoaderDynamic m_dispatchLoader;
-    vk::DebugUtilsMessengerEXT m_debugMessenger;
-
-    vk::SurfaceKHR m_surface;
-
-    vk::PhysicalDevice m_physicalDevice;
-    vk::Device m_logicalDevice;
-
-    vk::Queue m_graphicsQueue;
-    vk::Queue m_presentQueue;
-
     vk::SwapchainKHR m_swapChain;
     std::vector<vk::Image> m_swapChainImages;
     vk::Format m_swapChainImageFormat;
@@ -185,10 +137,13 @@ private:
 
     bool m_frameBufferResized{};
 
+    VulkanWindow* m_window{};
+    VulkanContext* m_context{};
+    VulkanLogicalDevice* m_logicalDevice{};
+
     Texture* m_texture{};
     Texture* m_depthTexture{};
     VulkanPipeline* m_pipeline{};
-
 };
 
 NS_END
