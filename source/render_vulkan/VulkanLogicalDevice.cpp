@@ -35,6 +35,20 @@ void VulkanLogicalDevice::terminate()
     destroyLogicalDevice();
 }
 
+vk::ImageView NS::VulkanLogicalDevice::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
+{
+    vk::ImageViewCreateInfo viewInfo;
+    viewInfo.image = image;
+    viewInfo.viewType = vk::ImageViewType::e2D;
+    viewInfo.format = format;
+    viewInfo.subresourceRange.aspectMask = aspectFlags;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+    return m_logicalDevice.createImageView(viewInfo);
+}
+
 bool VulkanLogicalDevice::createLogicalDevice()
 {
     // get best fit queue index from queue families

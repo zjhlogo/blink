@@ -24,8 +24,10 @@ public:
     bool initialize(VulkanContext* context);
     void terminate();
 
+    vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+
     const vk::Device& getVkLogicalDevice() const { return m_logicalDevice; };
-    vk::Queue& getGraphicsQueue() { return m_graphicsQueue; };
+    const vk::Queue& getGraphicsQueue() const { return m_graphicsQueue; };
 
 private:
     bool createLogicalDevice();

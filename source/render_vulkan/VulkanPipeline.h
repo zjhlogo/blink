@@ -13,14 +13,20 @@
 
 NS_BEGIN
 
+class VulkanContext;
 class VulkanLogicalDevice;
+class VulkanSwapchain;
 
 class VulkanPipeline
 {
 public:
-    VulkanPipeline(VulkanLogicalDevice* logicalDevice);
+    VulkanPipeline();
     ~VulkanPipeline();
 
+    bool initialize(VulkanContext* context, VulkanLogicalDevice* logicalDevice, VulkanSwapchain* swapchain);
+    void terminate();
+
+private:
     bool createRenderPass(const vk::Format& colorAttachmentFormat, const vk::Format& depthAttachmentFormat);
     void destroyRenderPass();
 
@@ -35,11 +41,13 @@ public:
     const vk::PipelineLayout& getPipelineLayout() const { return m_pipelineLayout; };
     const vk::Pipeline& getPipeline() const { return m_pipeline; };
 
-private:
     vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
 
 private:
+    VulkanContext* m_context{};
     VulkanLogicalDevice* m_logicalDevice{};
+    VulkanSwapchain* m_swapchain{};
+
     vk::RenderPass m_renderPass;
     vk::DescriptorSetLayout m_descriptorSetLayout;
     vk::PipelineLayout m_pipelineLayout;

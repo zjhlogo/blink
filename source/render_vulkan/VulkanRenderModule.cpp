@@ -11,6 +11,7 @@
 #include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanPipeline.h"
+#include "VulkanSwapchain.h"
 #include "VulkanTexture.h"
 #include "VulkanWindow.h"
 #include "utils/VulkanUtils.h"
@@ -65,13 +66,11 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     m_logicalDevice = new VulkanLogicalDevice();
     if (!m_logicalDevice->initialize(m_context)) return false;
 
-    if (!createSwapChain()) return false;
-    if (!createImageViews()) return false;
+    m_swapchain = new VulkanSwapchain();
+    if (!m_swapchain->initialize(m_window, m_context, m_logicalDevice)) return false;
 
-    m_pipeline = new VulkanPipeline(m_logicalDevice);
-    if (!m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()))) return false;
-    if (!m_pipeline->createDescriptorSetLayout()) return false;
-    if (!m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
+    m_pipeline = new VulkanPipeline();
+    if (!m_pipeline->initialize(m_context, m_logicalDevice, m_swapchain)) return false;
 
     if (!createCommandPool()) return false;
 
@@ -94,11 +93,13 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
 void VulkanRenderModule::destroyDevice()
 {
-    cleanSwapChain();
+    destroyFramebuffers();
+    destroyTexture(m_depthTexture);
+    destroyCommandBuffers();
 
     destroyTexture(m_texture);
 
-    m_pipeline->destroyDescriptorSetLayout();
+    SAFE_DELETE_AND_TERMINATE(m_pipeline);
 
     destroyUniformBuffers();
     destroyDescriptorSets();
@@ -197,7 +198,19 @@ void VulkanRenderModule::drawFrame()
 
     if (result == vk::Result::eErrorOutOfDateKHR)
     {
-        recreateSwapChain();
+        assert(0 && "not support yet");
+        //         m_swapchain->recreateSwapChain();
+        //         m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
+        //         m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
+        //
+        //         m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
+        //
+        //         createFramebuffers();
+        //         createUniformBuffers();
+        //         createDescriptorPool();
+        //         createDescriptorSets();
+        //         createCommandBuffers();
+
         return;
     }
     else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
@@ -242,8 +255,22 @@ void VulkanRenderModule::drawFrame()
     result = m_presentQueue.presentKHR(&presentInfo);
     if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || m_frameBufferResized)
     {
-        m_frameBufferResized = false;
-        recreateSwapChain();
+        assert(0 && "not support yet");
+
+        //         m_frameBufferResized = false;
+        //         m_swapchain->recreateSwapChain();
+        //
+        //         createImageViews();
+        //         m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
+        //         m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
+        //
+        //         m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
+        //
+        //         createFramebuffers();
+        //         createUniformBuffers();
+        //         createDescriptorPool();
+        //         createDescriptorSets();
+        //         createCommandBuffers();
     }
     else if (result != vk::Result::eSuccess)
     {
@@ -251,126 +278,6 @@ void VulkanRenderModule::drawFrame()
     }
 
     m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-bool VulkanRenderModule::createSwapChain()
-{
-    const auto& physicalDevice = m_context->getPickedPhysicalDevice();
-    const auto& surface = m_context->getVkSurface();
-
-    // select format
-    std::vector<vk::SurfaceFormatKHR> formats = physicalDevice.getSurfaceFormatsKHR(surface);
-    vk::SurfaceFormatKHR selFormat = formats[0];
-    for (const auto& format : formats)
-    {
-        if (format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
-        {
-            selFormat = format;
-            break;
-        }
-    }
-
-    // select present mode
-    std::vector<vk::PresentModeKHR> presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
-    vk::PresentModeKHR selPresentMode = vk::PresentModeKHR::eFifo;
-    for (const auto& presentMode : presentModes)
-    {
-        if (presentMode == vk::PresentModeKHR::eMailbox)
-        {
-            selPresentMode = presentMode;
-            break;
-        }
-        else if (presentMode == vk::PresentModeKHR::eImmediate)
-        {
-            selPresentMode = presentMode;
-        }
-    }
-
-    // select extent
-    vk::SurfaceCapabilitiesKHR capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
-    vk::Extent2D selExtent;
-    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-    {
-        selExtent = capabilities.currentExtent;
-    }
-    else
-    {
-        int width, height;
-        glfwGetFramebufferSize(m_window->getWindow(), &width, &height);
-        vk::Extent2D actualExtent(width, height);
-        selExtent = actualExtent;
-    }
-
-    // select image count
-    uint32_t imageCount = capabilities.minImageCount + 1;
-    if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
-    {
-        imageCount = capabilities.maxImageCount;
-    }
-
-    vk::SwapchainCreateInfoKHR createInfo;
-    createInfo.surface = surface;
-    createInfo.minImageCount = imageCount;
-    createInfo.imageFormat = selFormat.format;
-    createInfo.imageColorSpace = selFormat.colorSpace;
-    createInfo.imageExtent = selExtent;
-    createInfo.imageArrayLayers = 1;
-    createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
-
-    // get best fit queue index from queue families
-    int graphicsFamilyIndex{};
-    int presentFamilyIndex{};
-    VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, physicalDevice, surface);
-    if (graphicsFamilyIndex != presentFamilyIndex)
-    {
-        uint32_t queueFamilyIndexs[2] = {static_cast<uint32_t>(graphicsFamilyIndex), static_cast<uint32_t>(presentFamilyIndex)};
-        createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-        createInfo.queueFamilyIndexCount = 2;
-        createInfo.pQueueFamilyIndices = queueFamilyIndexs;
-    }
-    else
-    {
-        createInfo.imageSharingMode = vk::SharingMode::eExclusive;
-    }
-
-    createInfo.preTransform = capabilities.currentTransform;
-    createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
-    createInfo.presentMode = selPresentMode;
-    createInfo.clipped = VK_TRUE;
-
-    m_swapChain = m_logicalDevice.createSwapchainKHR(createInfo);
-    m_swapChainImages = m_logicalDevice.getSwapchainImagesKHR(m_swapChain);
-
-    m_swapChainImageFormat = selFormat.format;
-    m_swapChainExtent = selExtent;
-
-    return true;
-}
-
-void VulkanRenderModule::destroySwapChain()
-{
-    m_logicalDevice.destroySwapchainKHR(m_swapChain);
-}
-
-bool VulkanRenderModule::createImageViews()
-{
-    m_swapChainImageViews.resize(m_swapChainImages.size());
-
-    for (size_t i = 0; i < m_swapChainImageViews.size(); ++i)
-    {
-        m_swapChainImageViews[i] = createImageView(m_swapChainImages[i], m_swapChainImageFormat, vk::ImageAspectFlagBits::eColor);
-    }
-
-    return true;
-}
-
-void VulkanRenderModule::destroyImageViews()
-{
-    for (auto& imageView : m_swapChainImageViews)
-    {
-        m_logicalDevice.destroyImageView(imageView);
-    }
-    m_swapChainImageViews.clear();
 }
 
 bool VulkanRenderModule::createFramebuffers()
@@ -686,49 +593,6 @@ void VulkanRenderModule::destroySyncObjects()
     }
 }
 
-bool VulkanRenderModule::recreateSwapChain()
-{
-    int width = 0;
-    int height = 0;
-    glfwGetFramebufferSize(m_window->getWindow(), &width, &height);
-
-    while (width == 0 || height == 0)
-    {
-        glfwGetFramebufferSize(m_window->getWindow(), &width, &height);
-        glfwWaitEvents();
-    }
-
-    m_logicalDevice.waitIdle();
-
-    cleanSwapChain();
-
-    createSwapChain();
-    createImageViews();
-    m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
-    m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
-
-    m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
-
-    createFramebuffers();
-    createUniformBuffers();
-    createDescriptorPool();
-    createDescriptorSets();
-    createCommandBuffers();
-
-    return true;
-}
-
-void VulkanRenderModule::cleanSwapChain()
-{
-    destroyFramebuffers();
-    destroyTexture(m_depthTexture);
-    destroyCommandBuffers();
-    m_pipeline->destroyGraphicsPipeline();
-    m_pipeline->destroyRenderPass();
-    destroyImageViews();
-    destroySwapChain();
-}
-
 bool VulkanRenderModule::createBuffer(vk::Buffer& buffer,
                                       vk::DeviceMemory& bufferMemory,
                                       const vk::DeviceSize& size,
@@ -810,20 +674,6 @@ void VulkanRenderModule::endSingleTimeCommands(vk::CommandBuffer commandBuffer)
     m_graphicsQueue.submit(submitInfo, vk::Fence());
     m_graphicsQueue.waitIdle();
     m_logicalDevice.freeCommandBuffers(m_commandPool, commandBuffer);
-}
-
-vk::ImageView VulkanRenderModule::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
-{
-    vk::ImageViewCreateInfo viewInfo;
-    viewInfo.image = image;
-    viewInfo.viewType = vk::ImageViewType::e2D;
-    viewInfo.format = format;
-    viewInfo.subresourceRange.aspectMask = aspectFlags;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = 1;
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
-    return m_logicalDevice.createImageView(viewInfo);
 }
 
 NS_END

@@ -22,8 +22,12 @@ VulkanRenderModule.cpp
 VulkanRenderModule.h
 VulkanShader.cpp
 VulkanShader.h
+VulkanSwapchain.cpp
+VulkanSwapchain.h
 VulkanTexture.cpp
 VulkanTexture.h
+VulkanVertexInput.cpp
+VulkanVertexInput.h
 VulkanWindow.cpp
 VulkanWindow.h
 )

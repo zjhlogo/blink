@@ -18,6 +18,7 @@ NS_BEGIN
 class VulkanWindow;
 class VulkanContext;
 class VulkanLogicalDevice;
+class VulkanSwapchain;
 class VulkanPipeline;
 
 class VulkanRenderModule : public RenderModule
@@ -61,13 +62,6 @@ public:
     vk::CommandPool& getCommandPool() { return m_commandPool; };
 
 private:
-
-    bool createSwapChain();
-    void destroySwapChain();
-
-    bool createImageViews();
-    void destroyImageViews();
-
     bool createFramebuffers();
     void destroyFramebuffers();
 
@@ -95,24 +89,13 @@ private:
     bool createSyncObjects();
     void destroySyncObjects();
 
-    bool recreateSwapChain();
-    void cleanSwapChain();
-
     void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
     void updateUniformBuffer(uint32_t currentImage);
 
     vk::CommandBuffer beginSingleTimeCommands();
     void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
-    vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
-
 private:
-    vk::SwapchainKHR m_swapChain;
-    std::vector<vk::Image> m_swapChainImages;
-    vk::Format m_swapChainImageFormat;
-    vk::Extent2D m_swapChainExtent;
-    std::vector<vk::ImageView> m_swapChainImageViews;
-
     vk::DescriptorPool m_descriptorPool;
     std::vector<vk::DescriptorSet> m_descriptorSets;
 
@@ -140,6 +123,7 @@ private:
     VulkanWindow* m_window{};
     VulkanContext* m_context{};
     VulkanLogicalDevice* m_logicalDevice{};
+    VulkanSwapchain* m_swapchain{};
 
     Texture* m_texture{};
     Texture* m_depthTexture{};
