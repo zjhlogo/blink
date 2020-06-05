@@ -117,17 +117,17 @@ RTTR_REGISTRATION
 //     ASSERT_EQ(c_1.color_, c_2.color_);
 // }
 
-TEST(ReflectionTestCase, reflectArray)
-{
-    g_values.push_back(new circle("name1"));
-    g_values.push_back(new circle("name2"));
-    g_values.push_back(new circle("name3"));
-    g_values.push_back(new circle("name4"));
-
-    NS::tstring json_string = NS::JsonSerializer::toJsonGlobal(rttr::type::get_global_property("g_values"), g_values);
-
-    g_values.clear();
-    NS::JsonSerializer::fromJsonGlobal(json_string, rttr::type::get_global_property("g_values"), g_values);
-
-    ASSERT_EQ(g_values[2]->name, "name3");
-}
+// TEST(ReflectionTestCase, reflectArray)
+// {
+//     g_values.push_back(new circle("name1"));
+//     g_values.push_back(new circle("name2"));
+//     g_values.push_back(new circle("name3"));
+//     g_values.push_back(new circle("name4"));
+// 
+//     NS::tstring json_string = NS::JsonSerializer::toJsonGlobal(rttr::type::get_global_property("g_values"), g_values);
+// 
+//     g_values.clear();
+//     NS::JsonSerializer::fromJsonGlobal(json_string, rttr::type::get_global_property("g_values"), g_values);
+// 
+//     ASSERT_EQ(g_values[2]->name, "name3");
+// }
