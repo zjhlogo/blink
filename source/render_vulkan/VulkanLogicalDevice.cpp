@@ -35,7 +35,113 @@ void VulkanLogicalDevice::terminate()
     destroyLogicalDevice();
 }
 
-vk::ImageView NS::VulkanLogicalDevice::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
+bool VulkanLogicalDevice::createBuffer(vk::Buffer& buffer,
+                                       vk::DeviceMemory& bufferMemory,
+                                       const vk::DeviceSize& size,
+                                       vk::BufferUsageFlags usage,
+                                       vk::MemoryPropertyFlags properties)
+{
+    vk::BufferCreateInfo bufferInfo;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+    buffer = m_logicalDevice.createBuffer(bufferInfo);
+
+    vk::MemoryRequirements memRequirements = m_logicalDevice.getBufferMemoryRequirements(buffer);
+
+    vk::MemoryAllocateInfo allocInfo;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = VulkanUtils::findMemoryType(m_context->getMemoryProperties(), memRequirements.memoryTypeBits, properties);
+    bufferMemory = m_logicalDevice.allocateMemory(allocInfo);
+    m_logicalDevice.bindBufferMemory(buffer, bufferMemory, 0);
+
+    return true;
+}
+
+void VulkanLogicalDevice::destroyBuffer(vk::Buffer buffer, vk::DeviceMemory bufferMemory)
+{
+    m_logicalDevice.destroyBuffer(buffer);
+    m_logicalDevice.freeMemory(bufferMemory);
+}
+
+void VulkanLogicalDevice::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, const vk::DeviceSize& size, vk::CommandPool commandPool)
+{
+    vk::CommandBuffer commandBuffer = beginSingleTimeCommands(commandPool);
+
+    vk::BufferCopy copyRegion;
+    copyRegion.srcOffset = 0;
+    copyRegion.dstOffset = 0;
+    copyRegion.size = size;
+    commandBuffer.copyBuffer(srcBuffer, dstBuffer, copyRegion);
+
+    endSingleTimeCommands(commandPool, commandBuffer);
+}
+
+bool VulkanLogicalDevice::createVertexBuffer(vk::Buffer& vertexBufferOut,
+                                             vk::DeviceMemory& vertexBufferMemoryOut,
+                                             vk::CommandPool commandPool,
+                                             const void* buffer,
+                                             const vk::DeviceSize& size)
+{
+    vk::Buffer stagingBuffer;
+    vk::DeviceMemory stagingBufferMemory;
+
+    createBuffer(stagingBuffer,
+                 stagingBufferMemory,
+                 size,
+                 vk::BufferUsageFlagBits::eTransferSrc,
+                 vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+    void* data = m_logicalDevice.mapMemory(stagingBufferMemory, 0, size);
+    memcpy(data, buffer, static_cast<size_t>(size));
+    m_logicalDevice.unmapMemory(stagingBufferMemory);
+
+    createBuffer(vertexBufferOut,
+                 vertexBufferMemoryOut,
+                 size,
+                 vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
+                 vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+    copyBuffer(stagingBuffer, vertexBufferOut, size, commandPool);
+
+    m_logicalDevice.destroyBuffer(stagingBuffer);
+    m_logicalDevice.freeMemory(stagingBufferMemory);
+
+    return true;
+}
+
+bool VulkanLogicalDevice::createIndexBuffer(vk::Buffer& indexBufferOut,
+                                            vk::DeviceMemory& indexBufferMemoryOut,
+                                            vk::CommandPool commandPool,
+                                            const void* buffer,
+                                            const vk::DeviceSize& size)
+{
+    vk::Buffer stagingBuffer;
+    vk::DeviceMemory stagingBufferMemory;
+    createBuffer(stagingBuffer,
+                 stagingBufferMemory,
+                 size,
+                 vk::BufferUsageFlagBits::eTransferSrc,
+                 vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+    void* data = m_logicalDevice.mapMemory(stagingBufferMemory, 0, size);
+    memcpy(data, buffer, static_cast<size_t>(size));
+    m_logicalDevice.unmapMemory(stagingBufferMemory);
+
+    createBuffer(indexBufferOut,
+                 indexBufferMemoryOut,
+                 size,
+                 vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer,
+                 vk::MemoryPropertyFlagBits::eDeviceLocal);
+    copyBuffer(stagingBuffer, indexBufferOut, size, commandPool);
+
+    m_logicalDevice.destroyBuffer(stagingBuffer);
+    m_logicalDevice.freeMemory(stagingBufferMemory);
+
+    return true;
+}
+
+vk::ImageView VulkanLogicalDevice::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
 {
     vk::ImageViewCreateInfo viewInfo;
     viewInfo.image = image;
@@ -111,6 +217,36 @@ bool VulkanLogicalDevice::createLogicalDevice()
 void VulkanLogicalDevice::destroyLogicalDevice()
 {
     m_logicalDevice.destroy();
+}
+
+vk::CommandBuffer VulkanLogicalDevice::beginSingleTimeCommands(vk::CommandPool commandPool)
+{
+    vk::CommandBufferAllocateInfo allocInfo;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandPool = commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    vk::CommandBuffer commandBuffer;
+    m_logicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer);
+
+    vk::CommandBufferBeginInfo beginInfo;
+    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+    commandBuffer.begin(beginInfo);
+    return commandBuffer;
+}
+
+void VulkanLogicalDevice::endSingleTimeCommands(vk::CommandPool commandPool, vk::CommandBuffer commandBuffer)
+{
+    commandBuffer.end();
+
+    vk::SubmitInfo submitInfo;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    m_graphicsQueue.submit(submitInfo, vk::Fence());
+    m_graphicsQueue.waitIdle();
+    m_logicalDevice.freeCommandBuffers(commandPool, commandBuffer);
 }
 
 NS_END

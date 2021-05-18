@@ -28,6 +28,7 @@ public:
 
     vk::Format getImageFormat() const { return m_swapChainImageFormat; };
     const vk::Extent2D& getImageExtent() const { return m_swapChainExtent; };
+    std::size_t getImageCount() const { return m_swapChainImages.size(); };
 
 //     bool recreateSwapChain();
 

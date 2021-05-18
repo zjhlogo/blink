@@ -53,12 +53,6 @@ public:
 
     void setFrameBBufferResized(bool resized) { m_frameBufferResized = resized; };
 
-    bool createBuffer(vk::Buffer& buffer,
-                      vk::DeviceMemory& bufferMemory,
-                      const vk::DeviceSize& size,
-                      vk::BufferUsageFlags usage,
-                      vk::MemoryPropertyFlags properties);
-
     vk::CommandPool& getCommandPool() { return m_commandPool; };
 
 private:
@@ -67,12 +61,6 @@ private:
 
     bool createCommandPool();
     void destroyCommandPool();
-
-    bool createVertexBuffer();
-    void destroyVertexBuffer();
-
-    bool createIndexBuffer();
-    void destroyIndexBuffer();
 
     bool createUniformBuffers();
     void destroyUniformBuffers();
@@ -89,11 +77,7 @@ private:
     bool createSyncObjects();
     void destroySyncObjects();
 
-    void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size);
     void updateUniformBuffer(uint32_t currentImage);
-
-    vk::CommandBuffer beginSingleTimeCommands();
-    void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
 private:
     vk::DescriptorPool m_descriptorPool;

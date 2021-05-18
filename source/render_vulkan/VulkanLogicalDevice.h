@@ -29,9 +29,23 @@ public:
     const vk::Device& getVkLogicalDevice() const { return m_logicalDevice; };
     const vk::Queue& getGraphicsQueue() const { return m_graphicsQueue; };
 
+    bool createBuffer(vk::Buffer& buffer,
+                      vk::DeviceMemory& bufferMemory,
+                      const vk::DeviceSize& size,
+                      vk::BufferUsageFlags usage,
+                      vk::MemoryPropertyFlags properties);
+    void destroyBuffer(vk::Buffer buffer, vk::DeviceMemory bufferMemory);
+    void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, const vk::DeviceSize& size, vk::CommandPool commandPool);
+
+    bool createVertexBuffer(vk::Buffer& vertexBufferOut, vk::DeviceMemory& vertexBufferMemoryOut, vk::CommandPool commandPool, const void* buffer, const vk::DeviceSize& size);
+    bool createIndexBuffer(vk::Buffer& indexBufferOut, vk::DeviceMemory& indexBufferMemoryOut, vk::CommandPool commandPool, const void* buffer, const vk::DeviceSize& size);
+
 private:
     bool createLogicalDevice();
     void destroyLogicalDevice();
+
+    vk::CommandBuffer beginSingleTimeCommands(vk::CommandPool commandPool);
+    void endSingleTimeCommands(vk::CommandPool commandPool, vk::CommandBuffer commandBuffer);
 
 private:
     VulkanContext* m_context{};

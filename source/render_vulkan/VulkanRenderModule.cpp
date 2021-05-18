@@ -74,14 +74,15 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
     if (!createCommandPool()) return false;
 
-    m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
+    const auto& extent = m_swapchain->getImageExtent();
+    m_depthTexture = createDepthTexture(extent.width, extent.height);
 
     if (!createFramebuffers()) return false;
 
     m_texture = createTexture2D("resource/texture.jpg");
 
-    if (!createVertexBuffer()) return false;
-    if (!createIndexBuffer()) return false;
+    if (!m_logicalDevice->createVertexBuffer(m_vertexBuffer, m_vertexBufferMemory, m_commandPool, g_vertices.data(), g_vertices.size())) return false;
+    if (!m_logicalDevice->createVertexBuffer(m_indexBuffer, m_indexBufferMemory, m_commandPool, g_indices.data(), g_indices.size())) return false;
     if (!createUniformBuffers()) return false;
     if (!createDescriptorPool()) return false;
     if (!createDescriptorSets()) return false;
@@ -104,8 +105,8 @@ void VulkanRenderModule::destroyDevice()
     destroyUniformBuffers();
     destroyDescriptorSets();
     destroyDescriptorPool();
-    destroyIndexBuffer();
-    destroyVertexBuffer();
+    m_logicalDevice->destroyBuffer(m_indexBuffer, m_indexBufferMemory);
+    m_logicalDevice->destroyBuffer(m_vertexBuffer, m_vertexBufferMemory);
     destroySyncObjects();
     destroyCommandPool();
     SAFE_DELETE_AND_TERMINATE(m_logicalDevice);
@@ -331,97 +332,27 @@ void VulkanRenderModule::destroyCommandPool()
     m_logicalDevice.destroyCommandPool(m_commandPool);
 }
 
-bool VulkanRenderModule::createVertexBuffer()
-{
-    vk::DeviceSize bufferSize = sizeof(g_vertices[0]) * g_vertices.size();
-
-    vk::Buffer stagingBuffer;
-    vk::DeviceMemory stagingBufferMemory;
-
-    createBuffer(stagingBuffer,
-                 stagingBufferMemory,
-                 bufferSize,
-                 vk::BufferUsageFlagBits::eTransferSrc,
-                 vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-
-    void* data = m_logicalDevice.mapMemory(stagingBufferMemory, 0, bufferSize);
-    memcpy(data, g_vertices.data(), static_cast<size_t>(bufferSize));
-    m_logicalDevice.unmapMemory(stagingBufferMemory);
-
-    createBuffer(m_vertexBuffer,
-                 m_vertexBufferMemory,
-                 bufferSize,
-                 vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
-                 vk::MemoryPropertyFlagBits::eDeviceLocal);
-
-    copyBuffer(stagingBuffer, m_vertexBuffer, bufferSize);
-
-    m_logicalDevice.destroyBuffer(stagingBuffer);
-    m_logicalDevice.freeMemory(stagingBufferMemory);
-
-    return true;
-}
-
-void VulkanRenderModule::destroyVertexBuffer()
-{
-    m_logicalDevice.destroyBuffer(m_vertexBuffer);
-    m_logicalDevice.freeMemory(m_vertexBufferMemory);
-}
-
 Shader* VulkanRenderModule::createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
 {
     // TODO:
     return nullptr;
 }
 
-bool VulkanRenderModule::createIndexBuffer()
-{
-    vk::DeviceSize bufferSize = sizeof(g_indices[0]) * g_indices.size();
-
-    vk::Buffer stagingBuffer;
-    vk::DeviceMemory stagingBufferMemory;
-    createBuffer(stagingBuffer,
-                 stagingBufferMemory,
-                 bufferSize,
-                 vk::BufferUsageFlagBits::eTransferSrc,
-                 vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-
-    void* data = m_logicalDevice.mapMemory(stagingBufferMemory, 0, bufferSize);
-    memcpy(data, g_indices.data(), static_cast<size_t>(bufferSize));
-    m_logicalDevice.unmapMemory(stagingBufferMemory);
-
-    createBuffer(m_indexBuffer,
-                 m_indexBufferMemory,
-                 bufferSize,
-                 vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer,
-                 vk::MemoryPropertyFlagBits::eDeviceLocal);
-    copyBuffer(stagingBuffer, m_indexBuffer, bufferSize);
-
-    m_logicalDevice.destroyBuffer(stagingBuffer);
-    m_logicalDevice.freeMemory(stagingBufferMemory);
-
-    return true;
-}
-
-void VulkanRenderModule::destroyIndexBuffer()
-{
-    m_logicalDevice.destroyBuffer(m_indexBuffer);
-    m_logicalDevice.freeMemory(m_indexBufferMemory);
-}
-
 bool VulkanRenderModule::createUniformBuffers()
 {
-    vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
-    m_uniformBuffers.resize(m_swapChainImages.size());
-    m_uniformBuffersMemory.resize(m_swapChainImages.size());
+    auto imageCount = m_swapchain->getImageCount();
 
-    for (size_t i = 0; i < m_swapChainImages.size(); ++i)
+    vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
+    m_uniformBuffers.resize(imageCount);
+    m_uniformBuffersMemory.resize(imageCount);
+
+    for (int i = 0; i < imageCount; ++i)
     {
-        createBuffer(m_uniformBuffers[i],
-                     m_uniformBuffersMemory[i],
-                     bufferSize,
-                     vk::BufferUsageFlagBits::eUniformBuffer,
-                     vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+        m_logicalDevice->createBuffer(m_uniformBuffers[i],
+                                      m_uniformBuffersMemory[i],
+                                      bufferSize,
+                                      vk::BufferUsageFlagBits::eUniformBuffer,
+                                      vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
     }
 
     return true;
@@ -429,10 +360,11 @@ bool VulkanRenderModule::createUniformBuffers()
 
 void VulkanRenderModule::destroyUniformBuffers()
 {
-    for (size_t i = 0; i < m_swapChainImages.size(); ++i)
+    auto imageCount = m_swapchain->getImageCount();
+
+    for (int i = 0; i < imageCount; ++i)
     {
-        m_logicalDevice.destroyBuffer(m_uniformBuffers[i]);
-        m_logicalDevice.freeMemory(m_uniformBuffersMemory[i]);
+        m_logicalDevice->destroyBuffer(m_uniformBuffers[i], m_uniformBuffersMemory[i]);
     }
 }
 
@@ -593,42 +525,6 @@ void VulkanRenderModule::destroySyncObjects()
     }
 }
 
-bool VulkanRenderModule::createBuffer(vk::Buffer& buffer,
-                                      vk::DeviceMemory& bufferMemory,
-                                      const vk::DeviceSize& size,
-                                      vk::BufferUsageFlags usage,
-                                      vk::MemoryPropertyFlags properties)
-{
-    vk::BufferCreateInfo bufferInfo;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = vk::SharingMode::eExclusive;
-    buffer = m_logicalDevice.createBuffer(bufferInfo);
-
-    vk::MemoryRequirements memRequirements = m_logicalDevice.getBufferMemoryRequirements(buffer);
-
-    vk::MemoryAllocateInfo allocInfo;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = VulkanUtils::findMemoryType(m_physicalDevice, memRequirements.memoryTypeBits, properties);
-    bufferMemory = m_logicalDevice.allocateMemory(allocInfo);
-    m_logicalDevice.bindBufferMemory(buffer, bufferMemory, 0);
-
-    return true;
-}
-
-void VulkanRenderModule::copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize& size)
-{
-    vk::CommandBuffer commandBuffer = beginSingleTimeCommands();
-
-    vk::BufferCopy copyRegion;
-    copyRegion.srcOffset = 0;
-    copyRegion.dstOffset = 0;
-    copyRegion.size = size;
-    commandBuffer.copyBuffer(srcBuffer, dstBuffer, copyRegion);
-
-    endSingleTimeCommands(commandBuffer);
-}
-
 void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)
 {
     static auto startTime = std::chrono::high_resolution_clock::now();
@@ -644,36 +540,6 @@ void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)
     void* data = m_logicalDevice.mapMemory(m_uniformBuffersMemory[currentImage], 0, sizeof(ubo));
     memcpy(data, &ubo, sizeof(ubo));
     m_logicalDevice.unmapMemory(m_uniformBuffersMemory[currentImage]);
-}
-
-vk::CommandBuffer VulkanRenderModule::beginSingleTimeCommands()
-{
-    vk::CommandBufferAllocateInfo allocInfo;
-    allocInfo.level = vk::CommandBufferLevel::ePrimary;
-    allocInfo.commandPool = m_commandPool;
-    allocInfo.commandBufferCount = 1;
-
-    vk::CommandBuffer commandBuffer;
-    m_logicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer);
-
-    vk::CommandBufferBeginInfo beginInfo;
-    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-
-    commandBuffer.begin(beginInfo);
-    return commandBuffer;
-}
-
-void VulkanRenderModule::endSingleTimeCommands(vk::CommandBuffer commandBuffer)
-{
-    commandBuffer.end();
-
-    vk::SubmitInfo submitInfo;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    m_graphicsQueue.submit(submitInfo, vk::Fence());
-    m_graphicsQueue.waitIdle();
-    m_logicalDevice.freeCommandBuffers(m_commandPool, commandBuffer);
 }
 
 NS_END
