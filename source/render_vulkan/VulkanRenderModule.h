@@ -53,15 +53,7 @@ public:
 
     void setFrameBBufferResized(bool resized) { m_frameBufferResized = resized; };
 
-    vk::CommandPool& getCommandPool() { return m_commandPool; };
-
 private:
-    bool createFramebuffers();
-    void destroyFramebuffers();
-
-    bool createCommandPool();
-    void destroyCommandPool();
-
     bool createUniformBuffers();
     void destroyUniformBuffers();
 
@@ -83,8 +75,6 @@ private:
     vk::DescriptorPool m_descriptorPool;
     std::vector<vk::DescriptorSet> m_descriptorSets;
 
-    std::vector<vk::Framebuffer> m_swapChainFramebuffers;
-    vk::CommandPool m_commandPool;
     std::vector<vk::CommandBuffer> m_commandBuffers;
 
     vk::Buffer m_vertexBuffer;

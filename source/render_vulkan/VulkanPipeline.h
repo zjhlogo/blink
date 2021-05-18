@@ -26,6 +26,11 @@ public:
     bool initialize(VulkanContext* context, VulkanLogicalDevice* logicalDevice, VulkanSwapchain* swapchain);
     void terminate();
 
+    const vk::RenderPass& getRenderPass() const { return m_renderPass; };
+    const vk::DescriptorSetLayout& getDestriptorSetLayout() const { return m_descriptorSetLayout; };
+    const vk::PipelineLayout& getPipelineLayout() const { return m_pipelineLayout; };
+    const vk::Pipeline& getPipeline() const { return m_pipeline; };
+
 private:
     bool createRenderPass(const vk::Format& colorAttachmentFormat, const vk::Format& depthAttachmentFormat);
     void destroyRenderPass();
@@ -35,11 +40,6 @@ private:
 
     bool createGraphicsPipeline(uint32_t width, uint32_t height);
     void destroyGraphicsPipeline();
-
-    const vk::RenderPass& getRenderPass() const { return m_renderPass; };
-    const vk::DescriptorSetLayout& getDestriptorSetLayout() const { return m_descriptorSetLayout; };
-    const vk::PipelineLayout& getPipelineLayout() const { return m_pipelineLayout; };
-    const vk::Pipeline& getPipeline() const { return m_pipeline; };
 
     vk::ShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
 

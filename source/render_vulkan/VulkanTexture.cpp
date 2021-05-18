@@ -7,13 +7,15 @@
  *
  */
 #include "VulkanTexture.h"
-#include "VulkanRenderModule.h"
+#include "VulkanBuffer.h"
+#include "VulkanImage.h"
 
 NS_BEGIN
 
-VulkanTexture::VulkanTexture(VulkanRenderModule* renderModule)
+VulkanTexture::VulkanTexture(VkDevice logicalDevice, VkCommandPool pool)
     : Texture(EMPTY_STRING)
-    , m_renderModule(renderModule)
+    , m_logicalDevice(logicalDevice)
+    , m_commandPool(pool)
 {
 }
 
@@ -84,61 +86,19 @@ void VulkanTexture::destroy()
 
 bool VulkanTexture::createTextureImage(void* pixels, int width, int height, int channels)
 {
-    vk::DeviceSize imageSize = width * height * 4;
-    auto& logicalDevice = m_renderModule->getLogicalDevice();
+    VkDeviceSize imageSize = width * height * 4;
 
     // create staging buffer
-    vk::Buffer stagingBuffer;
-    vk::DeviceMemory stagingBufferMemory;
-    {
-        vk::BufferCreateInfo bufferInfo;
-        bufferInfo.size = imageSize;
-        bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
-        bufferInfo.sharingMode = vk::SharingMode::eExclusive;
-        stagingBuffer = logicalDevice.createBuffer(bufferInfo);
-
-        vk::MemoryRequirements memRequirements = logicalDevice.getBufferMemoryRequirements(stagingBuffer);
-
-        vk::MemoryAllocateInfo allocInfo;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits,
-                                                   vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-        stagingBufferMemory = logicalDevice.allocateMemory(allocInfo);
-        logicalDevice.bindBufferMemory(stagingBuffer, stagingBufferMemory, 0);
-    }
-
+    VulkanBuffer* stagingBuffer = new VulkanBuffer(m_logicalDevice);
+    stagingBuffer->createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
+    stagingBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     // copy buffer into staging buffer memory
-    {
-        void* mapedBuffer = logicalDevice.mapMemory(stagingBufferMemory, 0, imageSize);
-        memcpy(mapedBuffer, pixels, static_cast<size_t>(imageSize));
-        logicalDevice.unmapMemory(stagingBufferMemory);
-    }
+    stagingBuffer->uploadData(pixels, imageSize);
 
     // create image
-    {
-        vk::ImageCreateInfo imageInfo;
-        imageInfo.imageType = vk::ImageType::e2D;
-        imageInfo.extent.width = static_cast<uint32_t>(width);
-        imageInfo.extent.height = static_cast<uint32_t>(height);
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
-        imageInfo.format = vk::Format::eR8G8B8A8Unorm;
-        imageInfo.tiling = vk::ImageTiling::eOptimal;
-        imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-        imageInfo.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
-        imageInfo.sharingMode = vk::SharingMode::eExclusive;
-        imageInfo.samples = vk::SampleCountFlagBits::e1;
-        m_textureImage = logicalDevice.createImage(imageInfo);
-
-        vk::MemoryRequirements memRequirements = logicalDevice.getImageMemoryRequirements(m_textureImage);
-        vk::MemoryAllocateInfo allocInfo;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal);
-        m_textureImageMemory = logicalDevice.allocateMemory(allocInfo);
-
-        logicalDevice.bindImageMemory(m_textureImage, m_textureImageMemory, 0);
-    }
+    m_textureImage = new VulkanImage(m_logicalDevice);
+    m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    logicalDevice.bindImageMemory(m_textureImage, m_textureImageMemory, 0);
 
     transitionImageLayout(m_textureImage, vk::Format::eR8G8B8A8Unorm, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
@@ -232,20 +192,6 @@ void VulkanTexture::destroyTextureSampler()
     auto& logicalDevice = m_renderModule->getLogicalDevice();
 
     logicalDevice.destroySampler(m_textureSampler);
-}
-
-uint32_t VulkanTexture::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
-{
-    auto& physicalDevice = m_renderModule->getPhysicalDevice();
-
-    vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
-    {
-        if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) return i;
-    }
-
-    assert(false);
-    return 0;
 }
 
 void VulkanTexture::transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)

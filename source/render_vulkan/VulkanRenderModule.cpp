@@ -67,7 +67,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     if (!m_logicalDevice->initialize(m_context)) return false;
 
     m_swapchain = new VulkanSwapchain();
-    if (!m_swapchain->initialize(m_window, m_context, m_logicalDevice)) return false;
+    if (!m_swapchain->initialize(m_window, m_context, m_logicalDevice->getVkLogicalDevice())) return false;
 
     m_pipeline = new VulkanPipeline();
     if (!m_pipeline->initialize(m_context, m_logicalDevice, m_swapchain)) return false;
@@ -77,7 +77,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     const auto& extent = m_swapchain->getImageExtent();
     m_depthTexture = createDepthTexture(extent.width, extent.height);
 
-    if (!createFramebuffers()) return false;
+    if (!m_swapchain->createFramebuffers((VulkanTexture*)m_depthTexture, m_pipeline->getRenderPass())) return false;
 
     m_texture = createTexture2D("resource/texture.jpg");
 
@@ -94,7 +94,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
 void VulkanRenderModule::destroyDevice()
 {
-    destroyFramebuffers();
+    m_swapchain->destroyFramebuffers();
     destroyTexture(m_depthTexture);
     destroyCommandBuffers();
 
@@ -279,57 +279,6 @@ void VulkanRenderModule::drawFrame()
     }
 
     m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-bool VulkanRenderModule::createFramebuffers()
-{
-    m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
-
-    VulkanTexture* vulkanTexture = (VulkanTexture*)m_depthTexture;
-    for (size_t i = 0; i < m_swapChainImageViews.size(); ++i)
-    {
-        std::array<vk::ImageView, 2> attacments = {m_swapChainImageViews[i], vulkanTexture->getTextureImageView()};
-
-        vk::FramebufferCreateInfo frameBufferInfo;
-        frameBufferInfo.renderPass = m_pipeline->getRenderPass();
-        frameBufferInfo.attachmentCount = static_cast<uint32_t>(attacments.size());
-        frameBufferInfo.pAttachments = attacments.data();
-        frameBufferInfo.width = m_swapChainExtent.width;
-        frameBufferInfo.height = m_swapChainExtent.height;
-        frameBufferInfo.layers = 1;
-
-        m_swapChainFramebuffers[i] = m_logicalDevice.createFramebuffer(frameBufferInfo);
-    }
-
-    return true;
-}
-
-void VulkanRenderModule::destroyFramebuffers()
-{
-    for (auto framebuffer : m_swapChainFramebuffers)
-    {
-        m_logicalDevice.destroyFramebuffer(framebuffer);
-    }
-    m_swapChainFramebuffers.clear();
-}
-
-bool VulkanRenderModule::createCommandPool()
-{
-    int graphicsFamilyIndex{};
-    int presentFamilyIndex{};
-    VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, m_physicalDevice, m_surface);
-
-    vk::CommandPoolCreateInfo poolInfo;
-    poolInfo.queueFamilyIndex = static_cast<uint32_t>(graphicsFamilyIndex);
-
-    m_commandPool = m_logicalDevice.createCommandPool(poolInfo);
-
-    return true;
-}
-
-void VulkanRenderModule::destroyCommandPool()
-{
-    m_logicalDevice.destroyCommandPool(m_commandPool);
 }
 
 Shader* VulkanRenderModule::createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)

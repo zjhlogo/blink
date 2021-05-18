@@ -9,16 +9,16 @@
 #pragma once
 
 #include <render_base/Texture.h>
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 NS_BEGIN
 
-class VulkanRenderModule;
+class VulkanImage;
 
 class VulkanTexture : public Texture
 {
 public:
-    VulkanTexture(VulkanRenderModule* renderModule);
+    VulkanTexture(VkDevice logicalDevice, VkCommandPool pool);
     virtual ~VulkanTexture();
 
     bool createTexture2D(void* pixels, int width, int height, int channels);
@@ -26,10 +26,8 @@ public:
 
     void destroy();
 
-    vk::Image& getTextureImage() { return m_textureImage; };
-    vk::DeviceMemory& getTextureImageMemory() { return m_textureImageMemory; };
-    vk::ImageView& getTextureImageView() { return m_textureImageView; };
-    vk::Sampler& getTextureSampler() { return m_textureSampler; };
+    VulkanImage* getTextureImage() { return m_textureImage; };
+    VkSampler getTextureSampler() { return m_textureSampler; };
 
 private:
     bool createTextureImage(void* pixels, int width, int height, int channels);
@@ -49,13 +47,11 @@ private:
     void endSingleTimeCommands(vk::CommandBuffer commandBuffer);
 
 private:
-    VulkanRenderModule* m_renderModule{};
+    VkDevice m_logicalDevice;
+    VkCommandPool m_commandPool;
 
-    vk::Image m_textureImage;
-    vk::DeviceMemory m_textureImageMemory;
-
-    vk::ImageView m_textureImageView;
-    vk::Sampler m_textureSampler;
+    VulkanImage* m_textureImage{};
+    VkSampler m_textureSampler;
 };
 
 NS_END

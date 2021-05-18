@@ -9,7 +9,9 @@
 #pragma once
 #include <foundation/BaseTypes.h>
 #include <foundation/BaseTypesGlm.h>
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
+
+#include <vector>
 
 NS_BEGIN
 
@@ -24,13 +26,15 @@ public:
     bool initialize(VulkanWindow* window);
     void terminate();
 
-    const std::vector<vk::PhysicalDevice>& getPhysicalDevices() const { return m_physicalDevices; };
-    const vk::PhysicalDevice& getPickedPhysicalDevice() const { return m_pickedPhysicalDevice; };
-    const vk::SurfaceKHR& getVkSurface() const { return m_surface; };
-    const vk::PhysicalDeviceMemoryProperties& getMemoryProperties() const { return m_memoryProperties; };
-    const std::vector<vk::QueueFamilyProperties>& getQueueFamilyProperties() const { return m_queueFamilyProperties; };
-    const std::vector<vk::LayerProperties>& getLayerProperties() const { return m_layerProperties; };
-    const std::vector<vk::ExtensionProperties>& getExtensionProperties() const { return m_extensionProperties; };
+    uint32_t findMemoryType(VkMemoryPropertyFlags typeFilter, VkMemoryPropertyFlags properties);
+
+    const std::vector<VkPhysicalDevice>& getPhysicalDevices() const { return m_physicalDevices; };
+    VkPhysicalDevice getPickedPhysicalDevice() const { return m_pickedPhysicalDevice; };
+    VkSurfaceKHR getVkSurface() const { return m_surface; };
+    VkPhysicalDeviceMemoryProperties getMemoryProperties() const { return m_memoryProperties; };
+    const std::vector<VkQueueFamilyProperties>& getQueueFamilyProperties() const { return m_queueFamilyProperties; };
+    const std::vector<VkLayerProperties>& getLayerProperties() const { return m_layerProperties; };
+    const std::vector<VkExtensionProperties>& getExtensionProperties() const { return m_extensionProperties; };
 
 private:
     bool createInstance();
@@ -44,24 +48,23 @@ private:
 
     bool pickPhysicalDevice();
 
-    static int getBestFitPhysicalDeviceIndex(const std::vector<vk::PhysicalDevice>& physicalDevices, const vk::SurfaceKHR& surface);
+    static int getBestFitPhysicalDeviceIndex(const std::vector<VkPhysicalDevice>& physicalDevices, VkSurfaceKHR surface);
 
 private:
     VulkanWindow* m_window{};
 
-    vk::Instance m_instance;
-    vk::DispatchLoaderDynamic m_dispatchLoader;
-    vk::DebugUtilsMessengerEXT m_debugMessenger;
-    std::vector<vk::PhysicalDevice> m_physicalDevices;
+    VkInstance m_instance;
+    VkDebugUtilsMessengerEXT m_debugMessenger;
+    std::vector<VkPhysicalDevice> m_physicalDevices;
 
-    vk::SurfaceKHR m_surface;
+    VkSurfaceKHR m_surface;
 
-    vk::PhysicalDevice m_pickedPhysicalDevice;
-    vk::PhysicalDeviceProperties m_properties;
-    vk::PhysicalDeviceFeatures m_features;
-    vk::PhysicalDeviceMemoryProperties m_memoryProperties;
-    std::vector<vk::QueueFamilyProperties> m_queueFamilyProperties;
-    std::vector<vk::LayerProperties> m_layerProperties;
-    std::vector<vk::ExtensionProperties> m_extensionProperties;
+    VkPhysicalDevice m_pickedPhysicalDevice;
+    VkPhysicalDeviceProperties m_properties;
+    VkPhysicalDeviceFeatures m_features;
+    VkPhysicalDeviceMemoryProperties m_memoryProperties;
+    std::vector<VkQueueFamilyProperties> m_queueFamilyProperties;
+    std::vector<VkLayerProperties> m_layerProperties;
+    std::vector<VkExtensionProperties> m_extensionProperties;
 };
 NS_END

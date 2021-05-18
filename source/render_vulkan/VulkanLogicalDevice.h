@@ -8,8 +8,7 @@
  */
 #pragma once
 #include <foundation/BaseTypes.h>
-#include <foundation/BaseTypesGlm.h>
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 NS_BEGIN
 
@@ -24,35 +23,42 @@ public:
     bool initialize(VulkanContext* context);
     void terminate();
 
-    vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+    operator VkDevice () { return m_logicalDevice; };
 
-    const vk::Device& getVkLogicalDevice() const { return m_logicalDevice; };
-    const vk::Queue& getGraphicsQueue() const { return m_graphicsQueue; };
+    //vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
 
-    bool createBuffer(vk::Buffer& buffer,
-                      vk::DeviceMemory& bufferMemory,
-                      const vk::DeviceSize& size,
-                      vk::BufferUsageFlags usage,
-                      vk::MemoryPropertyFlags properties);
-    void destroyBuffer(vk::Buffer buffer, vk::DeviceMemory bufferMemory);
-    void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, const vk::DeviceSize& size, vk::CommandPool commandPool);
+    //const vk::Device& getVkLogicalDevice() const { return m_logicalDevice; };
+    //const vk::Queue& getGraphicsQueue() const { return m_graphicsQueue; };
 
-    bool createVertexBuffer(vk::Buffer& vertexBufferOut, vk::DeviceMemory& vertexBufferMemoryOut, vk::CommandPool commandPool, const void* buffer, const vk::DeviceSize& size);
-    bool createIndexBuffer(vk::Buffer& indexBufferOut, vk::DeviceMemory& indexBufferMemoryOut, vk::CommandPool commandPool, const void* buffer, const vk::DeviceSize& size);
+    //bool createBuffer(vk::Buffer& buffer,
+    //                  vk::DeviceMemory& bufferMemory,
+    //                  const vk::DeviceSize& size,
+    //                  vk::BufferUsageFlags usage,
+    //                  vk::MemoryPropertyFlags properties);
+    //void destroyBuffer(vk::Buffer buffer, vk::DeviceMemory bufferMemory);
+    //void copyBuffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, const vk::DeviceSize& size, vk::CommandPool commandPool);
 
+    //bool createVertexBuffer(vk::Buffer& vertexBufferOut, vk::DeviceMemory& vertexBufferMemoryOut, vk::CommandPool commandPool, const void* buffer, const vk::DeviceSize& size);
+    //bool createIndexBuffer(vk::Buffer& indexBufferOut, vk::DeviceMemory& indexBufferMemoryOut, vk::CommandPool commandPool, const void* buffer, const vk::DeviceSize& size);
+
+    //vk::Framebuffer createFramebuffer(vk::ImageView imageView, VulkanTexture* texture, vk::RenderPass renderPass, const vk::Extent2D& extent);
+    //void destroyFramebuffer(vk::Framebuffer frameBuffer);
+
+    VulkanContext* getContext() { return m_context; };
+    
 private:
     bool createLogicalDevice();
     void destroyLogicalDevice();
 
-    vk::CommandBuffer beginSingleTimeCommands(vk::CommandPool commandPool);
-    void endSingleTimeCommands(vk::CommandPool commandPool, vk::CommandBuffer commandBuffer);
+    //vk::CommandBuffer beginSingleTimeCommands(vk::CommandPool commandPool);
+    //void endSingleTimeCommands(vk::CommandPool commandPool, vk::CommandBuffer commandBuffer);
 
 private:
     VulkanContext* m_context{};
 
-    vk::Device m_logicalDevice;
-    vk::Queue m_graphicsQueue;
-    vk::Queue m_presentQueue;
+    VkDevice m_logicalDevice{};
+    VkQueue m_graphicsQueue{};
+    VkQueue m_presentQueue{};
 };
 
 NS_END

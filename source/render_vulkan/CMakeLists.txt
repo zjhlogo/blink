@@ -12,10 +12,18 @@ utils/VulkanUtils.cpp
 utils/VulkanUtils.h
 Types.cpp
 Types.h
+VulkanBuffer.cpp
+VulkanBuffer.h
+VulkanCommandPool.cpp
+VulkanCommandPool.h
 VulkanContext.cpp
 VulkanContext.h
+VulkanImage.cpp
+VulkanImage.h
 VulkanLogicalDevice.cpp
 VulkanLogicalDevice.h
+VulkanMemory.cpp
+VulkanMemory.h
 VulkanPipeline.cpp
 VulkanPipeline.h
 VulkanRenderModule.cpp
@@ -36,7 +44,7 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>>
-	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>>
+	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glm::glm,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:$<TARGET_PROPERTY:fmt::fmt,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/source>

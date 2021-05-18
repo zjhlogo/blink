@@ -9,13 +9,15 @@
 #pragma once
 #include <foundation/BaseTypes.h>
 #include <foundation/BaseTypesGlm.h>
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
+#include <vector>
 NS_BEGIN
 
 class VulkanWindow;
 class VulkanContext;
 class VulkanLogicalDevice;
+class VulkanImage;
 
 class VulkanSwapchain
 {
@@ -23,14 +25,17 @@ public:
     VulkanSwapchain();
     ~VulkanSwapchain();
 
-    bool initialize(VulkanWindow* window, VulkanContext* context, VulkanLogicalDevice* logicalDevice);
+    bool initialize(VulkanWindow* window, VulkanContext* context, VkDevice logicalDevice);
     void terminate();
 
-    vk::Format getImageFormat() const { return m_swapChainImageFormat; };
-    const vk::Extent2D& getImageExtent() const { return m_swapChainExtent; };
-    std::size_t getImageCount() const { return m_swapChainImages.size(); };
+    VkFormat getImageFormat() const { return m_swapChainImageFormat; };
+    const VkExtent2D& getImageExtent() const { return m_swapChainExtent; };
+    std::size_t getImageCount() const { return m_images.size(); };
 
-//     bool recreateSwapChain();
+    //     bool recreateSwapChain();
+
+    bool createFramebuffers(VulkanTexture* depthTexture, VkRenderPass renderPass);
+    void destroyFramebuffers();
 
 private:
     bool createSwapChain();
@@ -42,15 +47,14 @@ private:
 private:
     VulkanWindow* m_window{};
     VulkanContext* m_context{};
-    VulkanLogicalDevice* m_logicalDevice{};
+    VkDevice m_logicalDevice{};
 
-    vk::SwapchainKHR m_swapChain;
-    std::vector<vk::Image> m_swapChainImages;
-    std::vector<vk::ImageView> m_swapChainImageViews;
+    VkSwapchainKHR m_swapChain;
+    VkFormat m_swapChainImageFormat;
+    VkExtent2D m_swapChainExtent;
 
-    vk::Format m_swapChainImageFormat;
-    vk::Extent2D m_swapChainExtent;
-
+    std::vector<VulkanImage*> m_images;
+    std::vector<VkFramebuffer> m_swapChainFramebuffers;
 };
 
 NS_END
