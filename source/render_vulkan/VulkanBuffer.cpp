@@ -7,6 +7,7 @@
  *
  */
 #include "VulkanBuffer.h"
+#include "VulkanCommandPool.h"
 #include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanMemory.h"
@@ -25,7 +26,7 @@ VulkanBuffer::~VulkanBuffer()
     destroyBuffer();
 }
 
-bool VulkanBuffer::createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode)
+VkBuffer VulkanBuffer::createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode)
 {
     destroyBuffer();
 
@@ -38,18 +39,47 @@ bool VulkanBuffer::createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usag
     if (vkCreateBuffer(m_logicalDevice, &bufferInfo, nullptr, &m_buffer) != VK_SUCCESS)
     {
         LOGE("create buffer failed");
-        return false;
+        return nullptr;
     }
 
-    return true;
+    m_bufferSize = bufferSize;
+
+    return m_buffer;
 }
 
-bool VulkanBuffer::allocateBufferMemory(VkMemoryPropertyFlags memProperties)
+VkBuffer VulkanBuffer::createBufferAndUpload(void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode, VulkanCommandPool& pool)
+{
+    VulkanBuffer stagingBuffer(m_logicalDevice);
+    stagingBuffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
+
+    auto mem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    mem->uploadData(data, bufferSize);
+
+    createBuffer(bufferSize, usage, mode);
+
+    copyBuffer(&stagingBuffer, pool);
+
+    return m_buffer;
+}
+
+void VulkanBuffer::copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool)
+{
+    auto commandBuffer = pool.beginSingleTimeCommands();
+
+    VkBufferCopy copyRegion{};
+    copyRegion.srcOffset = 0;
+    copyRegion.dstOffset = 0;
+    copyRegion.size = src->m_bufferSize;
+    vkCmdCopyBuffer(commandBuffer, *src, m_buffer, 1, &copyRegion);
+
+    pool.endSingleTimeCommands(commandBuffer);
+}
+
+VulkanMemory* VulkanBuffer::allocateBufferMemory(VkMemoryPropertyFlags memProperties)
 {
     if (m_bufferMemory != nullptr)
     {
-        LOGE("can not allocate buffer memory again, destroy its memory first");
-        return false;
+        return m_bufferMemory;
     }
 
     VkMemoryRequirements memRequirements{};
@@ -61,10 +91,10 @@ bool VulkanBuffer::allocateBufferMemory(VkMemoryPropertyFlags memProperties)
     if (vkBindBufferMemory(m_logicalDevice, m_buffer, *m_bufferMemory, 0) != VK_SUCCESS)
     {
         LOGE("bind buffer memory failed");
-        return false;
+        return nullptr;
     }
 
-    return true;
+    return m_bufferMemory;
 }
 
 void VulkanBuffer::destroyBufferMemory()

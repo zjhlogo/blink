@@ -24,10 +24,10 @@ public:
     VulkanWindow();
     ~VulkanWindow();
 
-    bool initialize(const glm::ivec2& windowSize);
-    void terminate();
+    bool create(const glm::ivec2& windowSize);
+    void destroy();
 
-    GLFWwindow* getWindow() { return m_window; };
+    operator GLFWwindow*() { return m_window; };
 
 private:
     bool createWindow(const glm::ivec2& windowSize);

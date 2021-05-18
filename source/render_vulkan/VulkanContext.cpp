@@ -30,18 +30,19 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
     return VK_FALSE;
 }
 
-VulkanContext::VulkanContext()
+VulkanContext::VulkanContext(VulkanWindow* window)
+    : m_window(window)
+
 {
 }
 
 VulkanContext::~VulkanContext()
 {
+    destroy();
 }
 
-bool VulkanContext::initialize(VulkanWindow* window)
+bool VulkanContext::create()
 {
-    m_window = window;
-
     if (!createInstance()) return false;
     if (!setupDebugMessenger()) return false;
     if (!createSurface()) return false;
@@ -50,14 +51,14 @@ bool VulkanContext::initialize(VulkanWindow* window)
     return true;
 }
 
-void VulkanContext::terminate()
+void VulkanContext::destroy()
 {
     destroySurface();
     destroyDebugMessenger();
     destroyInstance();
 }
 
-uint32_t NS::VulkanContext::findMemoryType(VkMemoryPropertyFlags typeFilter, VkMemoryPropertyFlags properties)
+uint32_t VulkanContext::findMemoryType(VkMemoryPropertyFlags typeFilter, VkMemoryPropertyFlags properties)
 {
     return VulkanUtils::findMemoryType(m_memoryProperties, typeFilter, properties);
 }
@@ -149,6 +150,11 @@ bool VulkanContext::createSurface()
 
 void VulkanContext::destroySurface()
 {
+    if (m_surface != nullptr)
+    {
+        vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+        m_surface = nullptr;
+    }
 }
 
 bool VulkanContext::pickPhysicalDevice()

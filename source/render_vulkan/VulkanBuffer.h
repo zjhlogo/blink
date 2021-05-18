@@ -13,6 +13,7 @@
 NS_BEGIN
 
 class VulkanLogicalDevice;
+class VulkanCommandPool;
 class VulkanMemory;
 
 class VulkanBuffer
@@ -21,19 +22,26 @@ public:
     VulkanBuffer(VulkanLogicalDevice& logicalDevice);
     ~VulkanBuffer();
 
-    bool createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
+    operator VkBuffer () { return m_buffer; };
+
+    VkBuffer createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
     void destroyBuffer();
 
-    bool allocateBufferMemory(VkMemoryPropertyFlags memProperties);
+    VkBuffer createBufferAndUpload(void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode, VulkanCommandPool& pool);
+    void copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool);
+
+    VulkanMemory* allocateBufferMemory(VkMemoryPropertyFlags memProperties);
     void destroyBufferMemory();
 
     VulkanMemory* getBufferMemory() { return m_bufferMemory; };
+    VkDeviceSize getBufferSize() { return m_bufferSize; };
 
 private:
     VulkanLogicalDevice& m_logicalDevice;
 
     VkBuffer m_buffer{};
     VulkanMemory* m_bufferMemory{};
+    VkDeviceSize m_bufferSize;
 
 };
 

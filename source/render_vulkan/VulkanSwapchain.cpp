@@ -9,18 +9,22 @@
 #include "VulkanSwapchain.h"
 #include "VulkanContext.h"
 #include "VulkanImage.h"
+#include "VulkanLogicalDevice.h"
 #include "VulkanTexture.h"
 #include "VulkanWindow.h"
 #include "utils/VulkanUtils.h"
 
 #include <foundation/Log.h>
 
+#include <array>
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 NS_BEGIN
 
-VulkanSwapchain::VulkanSwapchain()
+VulkanSwapchain::VulkanSwapchain(VulkanLogicalDevice& logicalDevice)
+    : m_logicalDevice(logicalDevice)
 {
 }
 
@@ -28,19 +32,15 @@ VulkanSwapchain::~VulkanSwapchain()
 {
 }
 
-bool VulkanSwapchain::initialize(VulkanWindow* window, VulkanContext* context, VkDevice logicalDevice)
+bool VulkanSwapchain::create()
 {
-    m_window = window;
-    m_context = context;
-    m_logicalDevice = logicalDevice;
-
     if (!createSwapChain()) return false;
     if (!createSwapchainImageViews()) return false;
 
     return true;
 }
 
-void VulkanSwapchain::terminate()
+void VulkanSwapchain::destroy()
 {
     destroySwapchainImageViews();
     destroySwapChain();
@@ -48,11 +48,27 @@ void VulkanSwapchain::terminate()
 
 bool VulkanSwapchain::createFramebuffers(VulkanTexture* depthTexture, VkRenderPass renderPass)
 {
-    m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
+    auto count = m_images.size();
+    m_swapChainFramebuffers.resize(count);
 
-    for (size_t i = 0; i < m_swapChainImageViews.size(); ++i)
+    for (size_t i = 0; i < count; ++i)
     {
-        m_swapChainFramebuffers[i] = m_logicalDevice->createFramebuffer(m_swapChainImageViews[i], depthTexture, renderPass, m_swapChainExtent);
+        auto imageView = m_images[i]->getImageView();
+
+        std::array<VkImageView, 2> attacments = {imageView, depthTexture->getTextureImage()->getImageView()};
+
+        VkFramebufferCreateInfo frameBufferInfo{};
+        frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        frameBufferInfo.renderPass = renderPass;
+        frameBufferInfo.attachmentCount = static_cast<uint32_t>(attacments.size());
+        frameBufferInfo.pAttachments = attacments.data();
+        frameBufferInfo.width = m_swapChainExtent.width;
+        frameBufferInfo.height = m_swapChainExtent.height;
+        frameBufferInfo.layers = 1;
+        if (vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
+        {
+            LOGE("create swapchain frame buffer failed");
+        }
     }
 
     return true;
@@ -62,7 +78,7 @@ void VulkanSwapchain::destroyFramebuffers()
 {
     for (auto framebuffer : m_swapChainFramebuffers)
     {
-        m_logicalDevice->destroyFramebuffer(framebuffer);
+        vkDestroyFramebuffer(m_logicalDevice, framebuffer, nullptr);
     }
     m_swapChainFramebuffers.clear();
 }
@@ -92,8 +108,9 @@ void VulkanSwapchain::destroyFramebuffers()
 
 bool VulkanSwapchain::createSwapChain()
 {
-    auto physicalDevice = m_context->getPickedPhysicalDevice();
-    auto surface = m_context->getVkSurface();
+    auto context = m_logicalDevice.getContext();
+    auto physicalDevice = context->getPickedPhysicalDevice();
+    auto surface = context->getVkSurface();
 
     // select format
     std::vector<VkSurfaceFormatKHR> formats;
@@ -131,7 +148,7 @@ bool VulkanSwapchain::createSwapChain()
     VkSurfaceCapabilitiesKHR capabilities{};
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
 
-    vk::Extent2D selExtent;
+    VkExtent2D selExtent;
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
         selExtent = capabilities.currentExtent;
@@ -139,9 +156,9 @@ bool VulkanSwapchain::createSwapChain()
     else
     {
         int width, height;
-        glfwGetFramebufferSize(m_window->getWindow(), &width, &height);
-        vk::Extent2D actualExtent(width, height);
-        selExtent = actualExtent;
+        glfwGetFramebufferSize(*context->getWindow(), &width, &height);
+        selExtent.width = width;
+        selExtent.height = height;
     }
 
     // select image count

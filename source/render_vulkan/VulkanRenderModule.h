@@ -8,10 +8,10 @@
  */
 #pragma once
 #include <render_base/RenderModule.h>
+#include <vulkan/vulkan.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <vulkan/vulkan.hpp>
 
 NS_BEGIN
 
@@ -20,6 +20,10 @@ class VulkanContext;
 class VulkanLogicalDevice;
 class VulkanSwapchain;
 class VulkanPipeline;
+class VulkanBuffer;
+class VulkanDescriptorPool;
+class VulkanDescriptorSets;
+class VulkanCommandPool;
 
 class VulkanRenderModule : public RenderModule
 {
@@ -54,15 +58,6 @@ public:
     void setFrameBBufferResized(bool resized) { m_frameBufferResized = resized; };
 
 private:
-    bool createUniformBuffers();
-    void destroyUniformBuffers();
-
-    bool createDescriptorPool();
-    void destroyDescriptorPool();
-
-    bool createDescriptorSets();
-    void destroyDescriptorSets();
-
     bool createCommandBuffers();
     void destroyCommandBuffers();
 
@@ -72,36 +67,30 @@ private:
     void updateUniformBuffer(uint32_t currentImage);
 
 private:
-    vk::DescriptorPool m_descriptorPool;
-    std::vector<vk::DescriptorSet> m_descriptorSets;
-
     std::vector<vk::CommandBuffer> m_commandBuffers;
-
-    vk::Buffer m_vertexBuffer;
-    vk::DeviceMemory m_vertexBufferMemory;
-
-    vk::Buffer m_indexBuffer;
-    vk::DeviceMemory m_indexBufferMemory;
-
-    std::vector<vk::Buffer> m_uniformBuffers;
-    std::vector<vk::DeviceMemory> m_uniformBuffersMemory;
-
     std::vector<vk::Semaphore> m_imageAvailableSemaphores;
     std::vector<vk::Semaphore> m_renderFinishedSemaphores;
     std::vector<vk::Fence> m_inFlightFences;
     std::vector<vk::Fence> m_imagesInFlight;
-    std::size_t m_currentFrame{};
 
+    std::size_t m_currentFrame{};
     bool m_frameBufferResized{};
 
     VulkanWindow* m_window{};
     VulkanContext* m_context{};
     VulkanLogicalDevice* m_logicalDevice{};
     VulkanSwapchain* m_swapchain{};
+    VulkanPipeline* m_pipeline{};
+    VulkanCommandPool* m_commandPool{};
 
     Texture* m_texture{};
     Texture* m_depthTexture{};
-    VulkanPipeline* m_pipeline{};
+    VulkanBuffer* m_vertexBuffer{};
+    VulkanBuffer* m_indexBuffer{};
+    std::vector<VulkanBuffer*> m_uniformBuffers;
+
+    VulkanDescriptorPool* m_descriptorPool{};
+    VulkanDescriptorSets* m_descriptorSets{};
 };
 
 NS_END

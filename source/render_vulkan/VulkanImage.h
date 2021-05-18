@@ -14,6 +14,7 @@ NS_BEGIN
 
 class VulkanLogicalDevice;
 class VulkanMemory;
+class VulkanCommandPool;
 
 class VulkanImage
 {
@@ -22,16 +23,19 @@ public:
     VulkanImage(VulkanLogicalDevice& logicalDevice, VkImage image);
     ~VulkanImage();
 
-    bool createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
+    operator VkImage() { return m_image; };
+
+    VkImage createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
     void destroyImage();
 
-    bool createImageView(VkFormat format, VkImageAspectFlags aspectFlags);
+    VkImageView createImageView(VkFormat format, VkImageAspectFlags aspectFlags);
     void destroyImageView();
 
-    bool createImageMemory();
-    void destroyImageMemory();
+    VulkanMemory* allocateImageMemory();
+    void freeImageMemory();
 
-    operator VkImage () { return m_image; };
+    void transitionImageLayout(VulkanCommandPool& pool, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
     VkImageView getImageView() const { return m_imageView; };
 
 private:

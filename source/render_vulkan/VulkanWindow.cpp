@@ -42,16 +42,17 @@ VulkanWindow::VulkanWindow()
 
 VulkanWindow::~VulkanWindow()
 {
+    destroy();
 }
 
-bool VulkanWindow::initialize(const glm::ivec2& windowSize)
+bool VulkanWindow::create(const glm::ivec2& windowSize)
 {
     if (!createWindow(windowSize)) return false;
 
     return true;
 }
 
-void VulkanWindow::terminate()
+void VulkanWindow::destroy()
 {
     destroyWindow();
 }
@@ -84,7 +85,11 @@ bool VulkanWindow::createWindow(const glm::ivec2& windowSize)
 
 void VulkanWindow::destroyWindow()
 {
-    glfwDestroyWindow(m_window);
+    if (m_window != nullptr)
+    {
+        glfwDestroyWindow(m_window);
+        m_window = nullptr;
+    }
 }
 
 NS_END

@@ -8,8 +8,13 @@
  */
 #include "VulkanRenderModule.h"
 #include "Types.h"
+#include "VulkanBuffer.h"
+#include "VulkanCommandPool.h"
 #include "VulkanContext.h"
+#include "VulkanDescriptorPool.h"
+#include "VulkanDescriptorSets.h"
 #include "VulkanLogicalDevice.h"
+#include "VulkanMemory.h"
 #include "VulkanPipeline.h"
 #include "VulkanSwapchain.h"
 #include "VulkanTexture.h"
@@ -17,6 +22,7 @@
 #include "utils/VulkanUtils.h"
 
 #include <foundation/File.h>
+#include <glm/ext/matrix_clip_space.hpp>
 #include <render_base/util/stb_image.h>
 
 #include <chrono>
@@ -58,21 +64,22 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     if (!glfwInit()) return false;
 
     m_window = new VulkanWindow();
-    if (!m_window->initialize(deviceSize)) return false;
+    if (!m_window->create(deviceSize)) return false;
 
-    m_context = new VulkanContext();
-    if (!m_context->initialize(m_window)) return false;
+    m_context = new VulkanContext(m_window);
+    if (!m_context->create()) return false;
 
-    m_logicalDevice = new VulkanLogicalDevice();
-    if (!m_logicalDevice->initialize(m_context)) return false;
+    m_logicalDevice = new VulkanLogicalDevice(m_context);
+    if (!m_logicalDevice->create()) return false;
 
-    m_swapchain = new VulkanSwapchain();
-    if (!m_swapchain->initialize(m_window, m_context, m_logicalDevice->getVkLogicalDevice())) return false;
+    m_swapchain = new VulkanSwapchain(*m_logicalDevice);
+    if (!m_swapchain->create()) return false;
 
-    m_pipeline = new VulkanPipeline();
-    if (!m_pipeline->initialize(m_context, m_logicalDevice, m_swapchain)) return false;
+    m_pipeline = new VulkanPipeline(*m_logicalDevice, *m_swapchain);
+    if (!m_pipeline->create()) return false;
 
-    if (!createCommandPool()) return false;
+    m_commandPool = new VulkanCommandPool(*m_logicalDevice);
+    if (!m_commandPool->create()) return false;
 
     const auto& extent = m_swapchain->getImageExtent();
     m_depthTexture = createDepthTexture(extent.width, extent.height);
@@ -81,11 +88,43 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
     m_texture = createTexture2D("resource/texture.jpg");
 
-    if (!m_logicalDevice->createVertexBuffer(m_vertexBuffer, m_vertexBufferMemory, m_commandPool, g_vertices.data(), g_vertices.size())) return false;
-    if (!m_logicalDevice->createVertexBuffer(m_indexBuffer, m_indexBufferMemory, m_commandPool, g_indices.data(), g_indices.size())) return false;
-    if (!createUniformBuffers()) return false;
-    if (!createDescriptorPool()) return false;
-    if (!createDescriptorSets()) return false;
+    m_vertexBuffer = new VulkanBuffer(*m_logicalDevice);
+    if (!m_vertexBuffer->createBufferAndUpload((void*)g_vertices.data(),
+                                               g_vertices.size(),
+                                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                                               VK_SHARING_MODE_EXCLUSIVE,
+                                               *m_commandPool))
+    {
+        return false;
+    }
+
+    m_indexBuffer = new VulkanBuffer(*m_logicalDevice);
+    if (!m_indexBuffer->createBufferAndUpload((void*)g_indices.data(),
+                                              g_indices.size(),
+                                              VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                                              VK_SHARING_MODE_EXCLUSIVE,
+                                              *m_commandPool))
+    {
+        return false;
+    }
+
+    m_uniformBuffers.resize(m_swapchain->getImageCount());
+    for (int i = 0; i < m_uniformBuffers.size(); ++i)
+    {
+        m_uniformBuffers[i] = new VulkanBuffer(*m_logicalDevice);
+        if (!m_uniformBuffers[i]->createBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_SHARING_MODE_EXCLUSIVE))
+        {
+            return false;
+        }
+        m_uniformBuffers[i]->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    }
+
+    m_descriptorPool = new VulkanDescriptorPool(*m_logicalDevice);
+    if (!m_descriptorPool->create(m_swapchain->getImageCount())) return false;
+
+    m_descriptorSets = new VulkanDescriptorSets(*m_logicalDevice, *m_descriptorPool, *m_pipeline);
+    if (!m_descriptorSets->create(m_swapchain->getImageCount(), m_uniformBuffers, (VulkanTexture*)m_texture)) return false;
+
     if (!createCommandBuffers()) return false;
     if (!createSyncObjects()) return false;
 
@@ -100,18 +139,23 @@ void VulkanRenderModule::destroyDevice()
 
     destroyTexture(m_texture);
 
-    SAFE_DELETE_AND_TERMINATE(m_pipeline);
+    SAFE_DELETE(m_pipeline);
 
-    destroyUniformBuffers();
-    destroyDescriptorSets();
-    destroyDescriptorPool();
-    m_logicalDevice->destroyBuffer(m_indexBuffer, m_indexBufferMemory);
-    m_logicalDevice->destroyBuffer(m_vertexBuffer, m_vertexBufferMemory);
+    for (auto uniformBuffer : m_uniformBuffers)
+    {
+        SAFE_DELETE(uniformBuffer);
+    }
+    m_uniformBuffers.clear();
+
+    SAFE_DELETE(m_descriptorSets);
+    SAFE_DELETE(m_descriptorPool);
+    SAFE_DELETE(m_indexBuffer);
+    SAFE_DELETE(m_vertexBuffer);
     destroySyncObjects();
-    destroyCommandPool();
-    SAFE_DELETE_AND_TERMINATE(m_logicalDevice);
-    SAFE_DELETE_AND_TERMINATE(m_context);
-    SAFE_DELETE_AND_TERMINATE(m_window);
+    SAFE_DELETE(m_commandPool);
+    SAFE_DELETE(m_logicalDevice);
+    SAFE_DELETE(m_context);
+    SAFE_DELETE(m_window);
 
     glfwTerminate();
 }
@@ -125,14 +169,13 @@ Texture* VulkanRenderModule::createTexture2D(const tstring& texFile)
     stbi_uc* pixels = stbi_load(texFile.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     if (!pixels) return nullptr;
 
-    VulkanTexture* vulkanTexture = new VulkanTexture(this);
+    VulkanTexture* vulkanTexture = new VulkanTexture(*m_logicalDevice, *m_commandPool);
     bool success = vulkanTexture->createTexture2D(pixels, texWidth, texHeight, texChannels);
     stbi_image_free(pixels);
 
     if (!success)
     {
-        delete vulkanTexture;
-        vulkanTexture = nullptr;
+        SAFE_DELETE(vulkanTexture);
     }
 
     return vulkanTexture;
@@ -140,7 +183,7 @@ Texture* VulkanRenderModule::createTexture2D(const tstring& texFile)
 
 Texture* VulkanRenderModule::createDepthTexture(int width, int height)
 {
-    VulkanTexture* vulkanTexture = new VulkanTexture(this);
+    VulkanTexture* vulkanTexture = new VulkanTexture(*m_logicalDevice, *m_commandPool);
     if (!vulkanTexture->createDepthTexture(width, height))
     {
         delete vulkanTexture;
@@ -168,7 +211,7 @@ bool VulkanRenderModule::gameLoop()
     double begin = glfwGetTime();
 
     /* Loop until the user closes the window */
-    if (glfwWindowShouldClose(m_window->getWindow())) return false;
+    if (glfwWindowShouldClose(*m_window)) return false;
 
     /* Poll for and process events */
     glfwPollEvents();
@@ -287,108 +330,6 @@ Shader* VulkanRenderModule::createShaderFromBuffer(const char* vsBuffer, const c
     return nullptr;
 }
 
-bool VulkanRenderModule::createUniformBuffers()
-{
-    auto imageCount = m_swapchain->getImageCount();
-
-    vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
-    m_uniformBuffers.resize(imageCount);
-    m_uniformBuffersMemory.resize(imageCount);
-
-    for (int i = 0; i < imageCount; ++i)
-    {
-        m_logicalDevice->createBuffer(m_uniformBuffers[i],
-                                      m_uniformBuffersMemory[i],
-                                      bufferSize,
-                                      vk::BufferUsageFlagBits::eUniformBuffer,
-                                      vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
-    }
-
-    return true;
-}
-
-void VulkanRenderModule::destroyUniformBuffers()
-{
-    auto imageCount = m_swapchain->getImageCount();
-
-    for (int i = 0; i < imageCount; ++i)
-    {
-        m_logicalDevice->destroyBuffer(m_uniformBuffers[i], m_uniformBuffersMemory[i]);
-    }
-}
-
-bool VulkanRenderModule::createDescriptorPool()
-{
-    std::array<vk::DescriptorPoolSize, 2> poolSizes;
-    poolSizes[0].type = vk::DescriptorType::eUniformBuffer;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(m_swapChainImages.size());
-    poolSizes[1].type = vk::DescriptorType::eCombinedImageSampler;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(m_swapChainImages.size());
-
-    vk::DescriptorPoolCreateInfo poolInfo;
-    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-    poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(m_swapChainImages.size());
-    m_descriptorPool = m_logicalDevice.createDescriptorPool(poolInfo);
-
-    return true;
-}
-
-void VulkanRenderModule::destroyDescriptorPool()
-{
-    m_logicalDevice.destroyDescriptorPool(m_descriptorPool);
-}
-
-bool VulkanRenderModule::createDescriptorSets()
-{
-    std::vector<vk::DescriptorSetLayout> layouts(m_swapChainImages.size(), m_pipeline->getDestriptorSetLayout());
-
-    vk::DescriptorSetAllocateInfo allocInfo;
-    allocInfo.descriptorPool = m_descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(m_swapChainImages.size());
-    allocInfo.pSetLayouts = layouts.data();
-    m_descriptorSets.resize(m_swapChainImages.size());
-    m_descriptorSets = m_logicalDevice.allocateDescriptorSets(allocInfo);
-
-    VulkanTexture* vulkanTexture = (VulkanTexture*)m_texture;
-
-    for (size_t i = 0; i < m_swapChainImages.size(); ++i)
-    {
-        vk::DescriptorBufferInfo bufferInfo;
-        bufferInfo.buffer = m_uniformBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(UniformBufferObject);
-
-        vk::DescriptorImageInfo imageInfo;
-        imageInfo.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-        imageInfo.imageView = vulkanTexture->getTextureImageView();
-        imageInfo.sampler = vulkanTexture->getTextureSampler();
-
-        std::array<vk::WriteDescriptorSet, 2> descriptorWrites;
-        descriptorWrites[0].dstSet = m_descriptorSets[i];
-        descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType = vk::DescriptorType::eUniformBuffer;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-        descriptorWrites[1].dstSet = m_descriptorSets[i];
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = vk::DescriptorType::eCombinedImageSampler;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
-
-        m_logicalDevice.updateDescriptorSets(static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-    }
-
-    return true;
-}
-
-void VulkanRenderModule::destroyDescriptorSets()
-{
-}
-
 bool VulkanRenderModule::createCommandBuffers()
 {
     vk::CommandBufferAllocateInfo allocInfo;
@@ -484,11 +425,11 @@ void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)
     UniformBufferObject ubo;
     ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj = glm::perspective(glm::radians(45.0f), m_swapChainExtent.width / (float)m_swapChainExtent.height, 0.1f, 10.0f);
 
-    void* data = m_logicalDevice.mapMemory(m_uniformBuffersMemory[currentImage], 0, sizeof(ubo));
-    memcpy(data, &ubo, sizeof(ubo));
-    m_logicalDevice.unmapMemory(m_uniformBuffersMemory[currentImage]);
+    const auto& extent = m_swapchain->getImageExtent();
+    ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+
+    m_uniformBuffers[currentImage]->getBufferMemory()->uploadData(&ubo, sizeof(ubo));
 }
 
 NS_END

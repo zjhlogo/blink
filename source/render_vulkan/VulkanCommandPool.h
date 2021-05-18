@@ -8,21 +8,29 @@
  */
 #pragma once
 #include <foundation/BaseTypes.h>
-#include <foundation/BaseTypesGlm.h>
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 NS_BEGIN
 
-class VulkanContext;
+class VulkanLogicalDevice;
 
 class VulkanCommandPool
 {
 public:
-    VulkanCommandPool(VulkanContext* context);
+    VulkanCommandPool(VulkanLogicalDevice& logicalDevice);
     ~VulkanCommandPool();
 
+    operator VkCommandPool() { return m_commandPool; };
+
+    bool create();
+    void destroy();
+
+    VkCommandBuffer beginSingleTimeCommands();
+    void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+
 private:
-    vk::CommandPool m_commandPool;
+    VulkanLogicalDevice& m_logicalDevice;
+    VkCommandPool m_commandPool{};
 
 };
 

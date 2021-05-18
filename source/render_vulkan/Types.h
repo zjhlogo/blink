@@ -9,7 +9,9 @@
 #pragma once
 
 #include <foundation/BaseTypesGlm.h>
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
+
+#include <array>
 
 NS_BEGIN
 
@@ -20,8 +22,8 @@ public:
     glm::vec3 color;
     glm::vec2 texCoord;
 
-    static vk::VertexInputBindingDescription getBindingDescription();
-    static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions();
+    static VkVertexInputBindingDescription getBindingDescription();
+    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
 };
 
 NS_END

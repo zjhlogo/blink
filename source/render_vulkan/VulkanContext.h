@@ -20,14 +20,15 @@ class VulkanWindow;
 class VulkanContext
 {
 public:
-    VulkanContext();
+    VulkanContext(VulkanWindow* window);
     ~VulkanContext();
 
-    bool initialize(VulkanWindow* window);
-    void terminate();
+    bool create();
+    void destroy();
 
     uint32_t findMemoryType(VkMemoryPropertyFlags typeFilter, VkMemoryPropertyFlags properties);
 
+    VulkanWindow* getWindow() { return m_window; };
     const std::vector<VkPhysicalDevice>& getPhysicalDevices() const { return m_physicalDevices; };
     VkPhysicalDevice getPickedPhysicalDevice() const { return m_pickedPhysicalDevice; };
     VkSurfaceKHR getVkSurface() const { return m_surface; };

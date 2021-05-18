@@ -18,6 +18,10 @@ VulkanCommandPool.cpp
 VulkanCommandPool.h
 VulkanContext.cpp
 VulkanContext.h
+VulkanDescriptorPool.cpp
+VulkanDescriptorPool.h
+VulkanDescriptorSets.cpp
+VulkanDescriptorSets.h
 VulkanImage.cpp
 VulkanImage.h
 VulkanLogicalDevice.cpp
