@@ -21,12 +21,23 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
                                                     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                                                     void* pUserData)
 {
-    if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+    if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
     {
-        // TODO: Message is important enough to show
+        LOGE(pCallbackData->pMessage);
+    }
+    else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+    {
+        LOGW(pCallbackData->pMessage);
+    }
+    else if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+    {
+        LOGD(pCallbackData->pMessage);
+    }
+    else
+    {
+        LOGI(pCallbackData->pMessage);
     }
 
-    tstring strError = pCallbackData->pMessage;
     return VK_FALSE;
 }
 
@@ -111,7 +122,11 @@ bool VulkanContext::createInstance()
 
 void VulkanContext::destroyInstance()
 {
-    vkDestroyInstance(m_instance, nullptr);
+    if (m_instance != nullptr)
+    {
+        vkDestroyInstance(m_instance, nullptr);
+        m_instance = nullptr;
+    }
 }
 
 bool VulkanContext::setupDebugMessenger()

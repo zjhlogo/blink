@@ -7,6 +7,7 @@
  *
  */
 #include "VulkanBuffer.h"
+#include "VulkanCommandBuffer.h"
 #include "VulkanCommandPool.h"
 #include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
@@ -52,11 +53,11 @@ VkBuffer VulkanBuffer::createBufferAndUpload(void* data, VkDeviceSize bufferSize
     VulkanBuffer stagingBuffer(m_logicalDevice);
     stagingBuffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
 
-    auto mem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    mem->uploadData(data, bufferSize);
+    auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    stagingMem->uploadData(data, bufferSize);
 
     createBuffer(bufferSize, usage, mode);
-
+    allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     copyBuffer(&stagingBuffer, pool);
 
     return m_buffer;
@@ -64,7 +65,9 @@ VkBuffer VulkanBuffer::createBufferAndUpload(void* data, VkDeviceSize bufferSize
 
 void VulkanBuffer::copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool)
 {
-    auto commandBuffer = pool.beginSingleTimeCommands();
+    VulkanCommandBuffer commandBuffer(m_logicalDevice, pool);
+    commandBuffer.create();
+    commandBuffer.beginCommand();
 
     VkBufferCopy copyRegion{};
     copyRegion.srcOffset = 0;
@@ -72,7 +75,10 @@ void VulkanBuffer::copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool)
     copyRegion.size = src->m_bufferSize;
     vkCmdCopyBuffer(commandBuffer, *src, m_buffer, 1, &copyRegion);
 
-    pool.endSingleTimeCommands(commandBuffer);
+    commandBuffer.endCommand();
+    commandBuffer.submitCommand();
+
+    commandBuffer.destroy();
 }
 
 VulkanMemory* VulkanBuffer::allocateBufferMemory(VkMemoryPropertyFlags memProperties)

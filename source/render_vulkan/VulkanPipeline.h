@@ -28,6 +28,8 @@ public:
     bool create();
     void destroy();
 
+    bool recreatePipeline();
+
     VkRenderPass getRenderPass() const { return m_renderPass; };
     VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
     VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };

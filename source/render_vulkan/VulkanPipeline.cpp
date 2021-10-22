@@ -26,6 +26,7 @@ VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapcha
 
 VulkanPipeline::~VulkanPipeline()
 {
+    destroy();
 }
 
 bool VulkanPipeline::create()
@@ -45,6 +46,17 @@ void VulkanPipeline::destroy()
     destroyGraphicsPipeline();
     destroyDescriptorSetLayout();
     destroyRenderPass();
+}
+
+bool VulkanPipeline::recreatePipeline()
+{
+    auto format = m_swapchain.getImageFormat();
+    const auto& extent = m_swapchain.getImageExtent();
+
+    if (!createRenderPass(format, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
+    if (!createGraphicsPipeline(extent.width, extent.height)) return false;
+
+    return true;
 }
 
 VkRenderPass VulkanPipeline::createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
@@ -74,15 +86,15 @@ VkRenderPass VulkanPipeline::createRenderPass(VkFormat colorAttachmentFormat, Vk
     depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     // subpass
-    VkAttachmentReference colorAttachmentRef;
+    VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    VkAttachmentReference depthAttachmentRef;
+    VkAttachmentReference depthAttachmentRef{};
     depthAttachmentRef.attachment = 1;
     depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-    VkSubpassDescription subpass;
+    VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
@@ -107,7 +119,8 @@ VkRenderPass VulkanPipeline::createRenderPass(VkFormat colorAttachmentFormat, Vk
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
+    auto result = vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass);
+    if (result != VK_SUCCESS)
     {
         LOGE("create render pass failed");
         return nullptr;
@@ -136,7 +149,7 @@ VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout()
     uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBinding.pImmutableSamplers = nullptr;
 
-    VkDescriptorSetLayoutBinding samplerLayoutBinding;
+    VkDescriptorSetLayoutBinding samplerLayoutBinding{};
     samplerLayoutBinding.binding = 1;
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -244,7 +257,7 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     depthStencil.stencilTestEnable = VK_FALSE;
 
     // color blending state
-    VkPipelineColorBlendAttachmentState colorBlendAttachment;
+    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     colorBlendAttachment.blendEnable = VK_FALSE;
 

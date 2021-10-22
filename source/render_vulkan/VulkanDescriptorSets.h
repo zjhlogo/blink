@@ -25,6 +25,8 @@ public:
     VulkanDescriptorSets(VulkanLogicalDevice& logicalDevice, VulkanDescriptorPool& pool, VulkanPipeline& pipeline);
     ~VulkanDescriptorSets();
 
+    VkDescriptorSet getDescriptorSet(size_t index) const { return m_descriptorSets[index]; };
+
     bool create(uint32_t count, const std::vector<VulkanBuffer*>& uniformBuffers, VulkanTexture* texture);
     void destroy();
 

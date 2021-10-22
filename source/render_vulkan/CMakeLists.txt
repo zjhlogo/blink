@@ -14,6 +14,8 @@ Types.cpp
 Types.h
 VulkanBuffer.cpp
 VulkanBuffer.h
+VulkanCommandBuffer.cpp
+VulkanCommandBuffer.h
 VulkanCommandPool.cpp
 VulkanCommandPool.h
 VulkanContext.cpp
@@ -22,6 +24,8 @@ VulkanDescriptorPool.cpp
 VulkanDescriptorPool.h
 VulkanDescriptorSets.cpp
 VulkanDescriptorSets.h
+VulkanFence.cpp
+VulkanFence.h
 VulkanImage.cpp
 VulkanImage.h
 VulkanLogicalDevice.cpp
@@ -32,6 +36,8 @@ VulkanPipeline.cpp
 VulkanPipeline.h
 VulkanRenderModule.cpp
 VulkanRenderModule.h
+VulkanSemaphore.cpp
+VulkanSemaphore.h
 VulkanShader.cpp
 VulkanShader.h
 VulkanSwapchain.cpp

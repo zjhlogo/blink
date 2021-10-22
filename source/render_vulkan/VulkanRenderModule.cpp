@@ -9,19 +9,23 @@
 #include "VulkanRenderModule.h"
 #include "Types.h"
 #include "VulkanBuffer.h"
+#include "VulkanCommandBuffer.h"
 #include "VulkanCommandPool.h"
 #include "VulkanContext.h"
 #include "VulkanDescriptorPool.h"
 #include "VulkanDescriptorSets.h"
+#include "VulkanFence.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanMemory.h"
 #include "VulkanPipeline.h"
+#include "VulkanSemaphore.h"
 #include "VulkanSwapchain.h"
 #include "VulkanTexture.h"
 #include "VulkanWindow.h"
 #include "utils/VulkanUtils.h"
 
 #include <foundation/File.h>
+#include <foundation/Log.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <render_base/util/stb_image.h>
 
@@ -72,7 +76,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     m_logicalDevice = new VulkanLogicalDevice(m_context);
     if (!m_logicalDevice->create()) return false;
 
-    m_swapchain = new VulkanSwapchain(*m_logicalDevice);
+    m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice);
     if (!m_swapchain->create()) return false;
 
     m_pipeline = new VulkanPipeline(*m_logicalDevice, *m_swapchain);
@@ -90,7 +94,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
     m_vertexBuffer = new VulkanBuffer(*m_logicalDevice);
     if (!m_vertexBuffer->createBufferAndUpload((void*)g_vertices.data(),
-                                               g_vertices.size(),
+                                               sizeof(Vertex) * g_vertices.size(),
                                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                                                VK_SHARING_MODE_EXCLUSIVE,
                                                *m_commandPool))
@@ -100,7 +104,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
     m_indexBuffer = new VulkanBuffer(*m_logicalDevice);
     if (!m_indexBuffer->createBufferAndUpload((void*)g_indices.data(),
-                                              g_indices.size(),
+                                              sizeof(uint16_t) * g_indices.size(),
                                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                               VK_SHARING_MODE_EXCLUSIVE,
                                               *m_commandPool))
@@ -120,10 +124,10 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     }
 
     m_descriptorPool = new VulkanDescriptorPool(*m_logicalDevice);
-    if (!m_descriptorPool->create(m_swapchain->getImageCount())) return false;
+    if (!m_descriptorPool->create((uint32_t)m_swapchain->getImageCount())) return false;
 
     m_descriptorSets = new VulkanDescriptorSets(*m_logicalDevice, *m_descriptorPool, *m_pipeline);
-    if (!m_descriptorSets->create(m_swapchain->getImageCount(), m_uniformBuffers, (VulkanTexture*)m_texture)) return false;
+    if (!m_descriptorSets->create((uint32_t)m_swapchain->getImageCount(), m_uniformBuffers, (VulkanTexture*)m_texture)) return false;
 
     if (!createCommandBuffers()) return false;
     if (!createSyncObjects()) return false;
@@ -133,13 +137,10 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
 void VulkanRenderModule::destroyDevice()
 {
-    m_swapchain->destroyFramebuffers();
-    destroyTexture(m_depthTexture);
+    destroySyncObjects();
     destroyCommandBuffers();
-
-    destroyTexture(m_texture);
-
-    SAFE_DELETE(m_pipeline);
+    SAFE_DELETE(m_descriptorSets);
+    SAFE_DELETE(m_descriptorPool);
 
     for (auto uniformBuffer : m_uniformBuffers)
     {
@@ -147,12 +148,16 @@ void VulkanRenderModule::destroyDevice()
     }
     m_uniformBuffers.clear();
 
-    SAFE_DELETE(m_descriptorSets);
-    SAFE_DELETE(m_descriptorPool);
     SAFE_DELETE(m_indexBuffer);
     SAFE_DELETE(m_vertexBuffer);
-    destroySyncObjects();
+
+    destroyTexture(m_texture);
+    m_swapchain->destroyFramebuffers();
+    destroyTexture(m_depthTexture);
+
     SAFE_DELETE(m_commandPool);
+    SAFE_DELETE(m_pipeline);
+    SAFE_DELETE(m_swapchain);
     SAFE_DELETE(m_logicalDevice);
     SAFE_DELETE(m_context);
     SAFE_DELETE(m_window);
@@ -211,7 +216,11 @@ bool VulkanRenderModule::gameLoop()
     double begin = glfwGetTime();
 
     /* Loop until the user closes the window */
-    if (glfwWindowShouldClose(*m_window)) return false;
+    if (glfwWindowShouldClose(*m_window))
+    {
+        m_logicalDevice->waitIdle();
+        return false;
+    }
 
     /* Poll for and process events */
     glfwPollEvents();
@@ -224,101 +233,99 @@ bool VulkanRenderModule::gameLoop()
 
     drawFrame();
 
-    m_logicalDevice.waitIdle();
-
     return true;
 }
 
 void VulkanRenderModule::drawFrame()
 {
-    m_logicalDevice.waitForFences(m_inFlightFences[m_currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+    m_inFlightFences[m_currentFrame]->wait();
+    m_inFlightFences[m_currentFrame]->reset();
 
     uint32_t imageIndex{};
-    vk::Result result = m_logicalDevice.acquireNextImageKHR(m_swapChain,
-                                                            std::numeric_limits<uint64_t>::max(),
-                                                            m_imageAvailableSemaphores[m_currentFrame],
-                                                            vk::Fence(),
-                                                            &imageIndex);
+    auto result = vkAcquireNextImageKHR(*m_logicalDevice, *m_swapchain, UINT64_MAX, *m_imageAvailableSemaphores[m_currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-    if (result == vk::Result::eErrorOutOfDateKHR)
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        assert(0 && "not support yet");
-        //         m_swapchain->recreateSwapChain();
-        //         m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
-        //         m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
-        //
-        //         m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
-        //
-        //         createFramebuffers();
-        //         createUniformBuffers();
-        //         createDescriptorPool();
-        //         createDescriptorSets();
-        //         createCommandBuffers();
+        //m_swapchain->recreateSwapChain();
+        //m_pipeline->recreatePipeline();
+
+        //const auto& extent = m_swapchain->getImageExtent();
+        //m_depthTexture = createDepthTexture(extent.width, extent.height);
+        //m_swapchain->createFramebuffers((VulkanTexture*)m_depthTexture, m_pipeline->getRenderPass());
+
+        //createUniformBuffers();
+        //createDescriptorPool();
+        //createDescriptorSets();
+        //createCommandBuffers();
 
         return;
     }
-    else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
     {
-        throw std::runtime_error("failed to acquire swap chain image!");
+        LOGE("failed to acquire swap chain image!");
     }
 
     updateUniformBuffer(imageIndex);
 
     if (m_imagesInFlight[imageIndex])
     {
-        m_logicalDevice.waitForFences(m_imagesInFlight[imageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
+        m_imagesInFlight[imageIndex]->wait();
     }
     m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];
 
-    vk::SubmitInfo submitInfo;
-    vk::Semaphore waitSemaphores[] = {m_imageAvailableSemaphores[m_currentFrame]};
-    vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    VkSemaphore waitSemaphores[] = {*m_imageAvailableSemaphores[m_currentFrame]};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
 
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &m_commandBuffers[imageIndex];
+    VkCommandBuffer commandBuffer = *m_commandBuffers[imageIndex];
+    submitInfo.pCommandBuffers = &commandBuffer;
 
-    vk::Semaphore signalSemaphores[] = {m_renderFinishedSemaphores[m_currentFrame]};
+    VkSemaphore signalSemaphores[] = {*m_renderFinishedSemaphores[m_currentFrame]};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    m_logicalDevice.resetFences(m_inFlightFences[m_currentFrame]);
-    m_graphicsQueue.submit(submitInfo, m_inFlightFences[m_currentFrame]);
+    m_inFlightFences[m_currentFrame]->reset();
+    if (vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, *m_inFlightFences[m_currentFrame]) != VK_SUCCESS)
+    {
+        LOGE("failed to submit draw command buffer!");
+    }
 
-    vk::PresentInfoKHR presentInfo;
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    vk::SwapchainKHR swapChains[] = {m_swapChain};
+    VkSwapchainKHR swapChains[] = {*m_swapchain};
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    result = m_presentQueue.presentKHR(&presentInfo);
-    if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || m_frameBufferResized)
+    result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_frameBufferResized)
     {
-        assert(0 && "not support yet");
-
-        //         m_frameBufferResized = false;
-        //         m_swapchain->recreateSwapChain();
+        //m_frameBufferResized = false;
+        //m_swapchain->recreateSwapChain();
         //
-        //         createImageViews();
-        //         m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
-        //         m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
+        //createImageViews();
+        //m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
+        //m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
         //
-        //         m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
+        //m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
         //
-        //         createFramebuffers();
-        //         createUniformBuffers();
-        //         createDescriptorPool();
-        //         createDescriptorSets();
-        //         createCommandBuffers();
+        //createFramebuffers();
+        //createUniformBuffers();
+        //createDescriptorPool();
+        //createDescriptorSets();
+        //createCommandBuffers();
     }
-    else if (result != vk::Result::eSuccess)
+    else if (result != VK_SUCCESS)
     {
-        throw std::runtime_error("failed to present swap chain image!");
+        LOGE("failed to present swap chain image!");
     }
 
     m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -332,48 +339,43 @@ Shader* VulkanRenderModule::createShaderFromBuffer(const char* vsBuffer, const c
 
 bool VulkanRenderModule::createCommandBuffers()
 {
-    vk::CommandBufferAllocateInfo allocInfo;
-    allocInfo.commandPool = m_commandPool;
-    allocInfo.level = vk::CommandBufferLevel::ePrimary;
-    allocInfo.commandBufferCount = static_cast<uint32_t>(m_swapChainFramebuffers.size());
-    m_commandBuffers = m_logicalDevice.allocateCommandBuffers(allocInfo);
+    for (size_t i = 0; i < m_swapchain->getImageCount(); ++i)
+    {
+        auto commandBuffer = new VulkanCommandBuffer(*m_logicalDevice, *m_commandPool);
+        commandBuffer->create();
+        m_commandBuffers.push_back(commandBuffer);
+    }
 
     for (size_t i = 0; i < m_commandBuffers.size(); ++i)
     {
-        vk::CommandBufferBeginInfo beginInfo;
-        beginInfo.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse;
-
-        m_commandBuffers[i].begin(beginInfo);
-
+        m_commandBuffers[i]->beginCommand();
         {
-            vk::RenderPassBeginInfo renderPassInfo;
-            renderPassInfo.renderPass = m_pipeline->getRenderPass();
-            renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = m_swapChainExtent;
-
-            std::array<vk::ClearValue, 2> clearValues;
-            clearValues[0].color.setFloat32({0.0f, 0.0f, 0.0f, 1.0f});
-            clearValues[1].depthStencil = {1.0f, 0};
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-            m_commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+            VkRect2D rect{{0, 0}, m_swapchain->getImageExtent()};
+            m_commandBuffers[i]->beginRenderPass(m_pipeline->getRenderPass(), m_swapchain->getFramebuffers(i), rect);
 
             {
-                m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline->getPipeline());
-                vk::DeviceSize offset = 0;
-                m_commandBuffers[i].bindVertexBuffers(0, m_vertexBuffer, offset);
-                m_commandBuffers[i].bindIndexBuffer(m_indexBuffer, 0, vk::IndexType::eUint16);
-                m_commandBuffers[i]
-                    .bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipeline->getPipelineLayout(), 0, 1, &m_descriptorSets[i], 0, nullptr);
-                m_commandBuffers[i].drawIndexed(static_cast<uint32_t>(g_indices.size()), 1, 0, 0, 0);
+                // TODO:
+                vkCmdBindPipeline(*m_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
+                VkDeviceSize offset = 0;
+                VkBuffer vertexBuffer = *m_vertexBuffer;
+                vkCmdBindVertexBuffers(*m_commandBuffers[i], 0, 1, &vertexBuffer, &offset);
+                vkCmdBindIndexBuffer(*m_commandBuffers[i], *m_indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+                VkDescriptorSet descriptorSet = m_descriptorSets->getDescriptorSet(i);
+                vkCmdBindDescriptorSets(*m_commandBuffers[i],
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        m_pipeline->getPipelineLayout(),
+                                        0,
+                                        1,
+                                        &descriptorSet,
+                                        0,
+                                        nullptr);
+                vkCmdDrawIndexed(*m_commandBuffers[i], static_cast<uint32_t>(g_indices.size()), 1, 0, 0, 0);
             }
 
-            m_commandBuffers[i].endRenderPass();
+            m_commandBuffers[i]->endRenderPass();
         }
 
-        m_commandBuffers[i].end();
+        m_commandBuffers[i]->endCommand();
     }
 
     return true;
@@ -381,25 +383,30 @@ bool VulkanRenderModule::createCommandBuffers()
 
 void VulkanRenderModule::destroyCommandBuffers()
 {
-    m_logicalDevice.freeCommandBuffers(m_commandPool, m_commandBuffers);
+    for (auto commandBuffer : m_commandBuffers)
+    {
+        SAFE_DELETE(commandBuffer);
+    }
+    m_commandBuffers.clear();
 }
 
 bool VulkanRenderModule::createSyncObjects()
 {
-    m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-    m_imagesInFlight.resize(m_swapChainImages.size());
-
-    vk::SemaphoreCreateInfo semaphoreInfo;
-    vk::FenceCreateInfo fenceInfo;
-    fenceInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+    m_imagesInFlight.resize(m_swapchain->getImageCount(), nullptr);
 
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        m_imageAvailableSemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
-        m_renderFinishedSemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
-        m_inFlightFences[i] = m_logicalDevice.createFence(fenceInfo);
+        auto imageAvailable = new VulkanSemaphore(*m_logicalDevice);
+        imageAvailable->create();
+        m_imageAvailableSemaphores.push_back(imageAvailable);
+
+        auto renderFinished = new VulkanSemaphore(*m_logicalDevice);
+        renderFinished->create();
+        m_renderFinishedSemaphores.push_back(renderFinished);
+
+        auto inFlight = new VulkanFence(*m_logicalDevice);
+        inFlight->create(true);
+        m_inFlightFences.push_back(inFlight);
     }
 
     return true;
@@ -407,12 +414,25 @@ bool VulkanRenderModule::createSyncObjects()
 
 void VulkanRenderModule::destroySyncObjects()
 {
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    for (auto semaphores : m_imageAvailableSemaphores)
     {
-        m_logicalDevice.destroySemaphore(m_renderFinishedSemaphores[i]);
-        m_logicalDevice.destroySemaphore(m_imageAvailableSemaphores[i]);
-        m_logicalDevice.destroyFence(m_inFlightFences[i]);
+        SAFE_DELETE(semaphores);
     }
+
+    for (auto semaphores : m_renderFinishedSemaphores)
+    {
+        SAFE_DELETE(semaphores);
+    }
+
+    for (auto fence : m_inFlightFences)
+    {
+        SAFE_DELETE(fence);
+    }
+
+    m_imageAvailableSemaphores.clear();
+    m_renderFinishedSemaphores.clear();
+    m_inFlightFences.clear();
+    m_imagesInFlight.clear();
 }
 
 void VulkanRenderModule::updateUniformBuffer(uint32_t currentImage)

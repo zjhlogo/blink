@@ -7,6 +7,7 @@
  *
  */
 #include "VulkanImage.h"
+#include "VulkanCommandBuffer.h"
 #include "VulkanCommandPool.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanMemory.h"
@@ -144,9 +145,12 @@ void VulkanImage::freeImageMemory()
 
 void VulkanImage::transitionImageLayout(VulkanCommandPool& pool, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-    VkCommandBuffer commandBuffer = pool.beginSingleTimeCommands();
+    VulkanCommandBuffer commandBuffer(m_logicalDevice, pool);
+    commandBuffer.create();
+    commandBuffer.beginCommand();
 
-    VkImageMemoryBarrier barrier;
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.oldLayout = oldLayout;
     barrier.newLayout = newLayout;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -172,8 +176,8 @@ void VulkanImage::transitionImageLayout(VulkanCommandPool& pool, VkFormat format
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
 
-    VkPipelineStageFlags sourceStage;
-    VkPipelineStageFlags destinationStage;
+    VkPipelineStageFlags sourceStage{};
+    VkPipelineStageFlags destinationStage{};
 
     if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
     {
@@ -202,7 +206,10 @@ void VulkanImage::transitionImageLayout(VulkanCommandPool& pool, VkFormat format
 
     vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, {}, 0, nullptr, 0, nullptr, 1, &barrier);
 
-    pool.endSingleTimeCommands(commandBuffer);
+    commandBuffer.endCommand();
+    commandBuffer.submitCommand();
+
+    commandBuffer.destroy();
 }
 
 NS_END

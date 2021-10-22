@@ -37,6 +37,7 @@ bool VulkanDescriptorSets::create(uint32_t count, const std::vector<VulkanBuffer
     std::vector<VkDescriptorSetLayout> layouts(count, m_pipeline.getDestriptorSetLayout());
 
     VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = m_descriptorPool;
     allocInfo.descriptorSetCount = count;
     allocInfo.pSetLayouts = layouts.data();
@@ -50,12 +51,13 @@ bool VulkanDescriptorSets::create(uint32_t count, const std::vector<VulkanBuffer
 
     for (size_t i = 0; i < count; ++i)
     {
-        VkDescriptorBufferInfo bufferInfo;
+        VkDescriptorBufferInfo bufferInfo{};
         bufferInfo.buffer = *(uniformBuffers[i]);
         bufferInfo.offset = 0;
         bufferInfo.range = uniformBuffers[i]->getBufferSize();
 
-        std::array<VkWriteDescriptorSet, 2> descriptorWrites;
+        VkWriteDescriptorSet descriptorWrites[2]{};
+        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = m_descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;
         descriptorWrites[0].dstArrayElement = 0;
@@ -63,11 +65,12 @@ bool VulkanDescriptorSets::create(uint32_t count, const std::vector<VulkanBuffer
         descriptorWrites[0].descriptorCount = 1;
         descriptorWrites[0].pBufferInfo = &bufferInfo;
 
-        VkDescriptorImageInfo imageInfo;
+        VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = texture->getTextureImage()->getImageView();
         imageInfo.sampler = texture->getTextureSampler();
 
+        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = m_descriptorSets[i];
         descriptorWrites[1].dstBinding = 1;
         descriptorWrites[1].dstArrayElement = 0;
@@ -75,7 +78,7 @@ bool VulkanDescriptorSets::create(uint32_t count, const std::vector<VulkanBuffer
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pImageInfo = &imageInfo;
 
-        vkUpdateDescriptorSets(m_logicalDevice, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(m_logicalDevice, (uint32_t)2, descriptorWrites, 0, nullptr);
     }
 
     return true;

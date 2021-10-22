@@ -8,6 +8,7 @@
  */
 #include "VulkanTexture.h"
 #include "VulkanBuffer.h"
+#include "VulkanCommandBuffer.h"
 #include "VulkanCommandPool.h"
 #include "VulkanContext.h"
 #include "VulkanImage.h"
@@ -89,7 +90,9 @@ VulkanImage* VulkanTexture::createTextureImage(void* pixels, int width, int heig
 
     // copy buffer to image
     {
-        VkCommandBuffer commandBuffer = m_commandPool.beginSingleTimeCommands();
+        VulkanCommandBuffer commandBuffer(m_logicalDevice, m_commandPool);
+        commandBuffer.create();
+        commandBuffer.beginCommand();
 
         VkBufferImageCopy region;
         region.bufferOffset = 0;
@@ -106,7 +109,9 @@ VulkanImage* VulkanTexture::createTextureImage(void* pixels, int width, int heig
 
         vkCmdCopyBufferToImage(commandBuffer, *stagingBuffer, *m_textureImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-        m_commandPool.endSingleTimeCommands(commandBuffer);
+        commandBuffer.endCommand();
+        commandBuffer.submitCommand();
+        commandBuffer.destroy();
     }
 
     m_textureImage->transitionImageLayout(m_commandPool,

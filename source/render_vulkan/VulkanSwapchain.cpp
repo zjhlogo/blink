@@ -23,13 +23,15 @@
 
 NS_BEGIN
 
-VulkanSwapchain::VulkanSwapchain(VulkanLogicalDevice& logicalDevice)
-    : m_logicalDevice(logicalDevice)
+VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice)
+    : m_window(window)
+    , m_logicalDevice(logicalDevice)
 {
 }
 
 VulkanSwapchain::~VulkanSwapchain()
 {
+    destroy();
 }
 
 bool VulkanSwapchain::create()
@@ -83,28 +85,28 @@ void VulkanSwapchain::destroyFramebuffers()
     m_swapChainFramebuffers.clear();
 }
 
-// bool VulkanSwapchain::recreateSwapChain()
-// {
-//     int width = 0;
-//     int height = 0;
-//     glfwGetFramebufferSize(m_window->getWindow(), &width, &height);
-//
-//     while (width == 0 || height == 0)
-//     {
-//         glfwGetFramebufferSize(m_window->getWindow(), &width, &height);
-//         glfwWaitEvents();
-//     }
-//
-//     m_logicalDevice->getVkLogicalDevice().waitIdle();
-//
-//     destroySwapchainImageViews();
-//     destroySwapChain();
-//
-//     if (!createSwapChain()) return false;
-//     if (!createSwapchainImageViews()) return false;
-//
-//     return true;
-// }
+bool VulkanSwapchain::recreateSwapChain()
+{
+    int width = 0;
+    int height = 0;
+    glfwGetFramebufferSize(m_window, &width, &height);
+
+    while (width == 0 || height == 0)
+    {
+        glfwGetFramebufferSize(m_window, &width, &height);
+        glfwWaitEvents();
+    }
+
+    m_logicalDevice.waitIdle();
+
+    destroySwapchainImageViews();
+    destroySwapChain();
+
+    if (!createSwapChain()) return false;
+    if (!createSwapchainImageViews()) return false;
+
+    return true;
+}
 
 bool VulkanSwapchain::createSwapChain()
 {

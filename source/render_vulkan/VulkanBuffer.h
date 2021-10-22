@@ -22,7 +22,7 @@ public:
     VulkanBuffer(VulkanLogicalDevice& logicalDevice);
     ~VulkanBuffer();
 
-    operator VkBuffer () { return m_buffer; };
+    operator VkBuffer () const { return m_buffer; };
 
     VkBuffer createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
     void destroyBuffer();

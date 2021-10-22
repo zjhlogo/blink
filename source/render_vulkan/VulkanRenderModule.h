@@ -24,6 +24,9 @@ class VulkanBuffer;
 class VulkanDescriptorPool;
 class VulkanDescriptorSets;
 class VulkanCommandPool;
+class VulkanCommandBuffer;
+class VulkanSemaphore;
+class VulkanFence;
 
 class VulkanRenderModule : public RenderModule
 {
@@ -67,11 +70,11 @@ private:
     void updateUniformBuffer(uint32_t currentImage);
 
 private:
-    std::vector<vk::CommandBuffer> m_commandBuffers;
-    std::vector<vk::Semaphore> m_imageAvailableSemaphores;
-    std::vector<vk::Semaphore> m_renderFinishedSemaphores;
-    std::vector<vk::Fence> m_inFlightFences;
-    std::vector<vk::Fence> m_imagesInFlight;
+    std::vector<VulkanCommandBuffer*> m_commandBuffers;
+    std::vector<VulkanSemaphore*> m_imageAvailableSemaphores;
+    std::vector<VulkanSemaphore*> m_renderFinishedSemaphores;
+    std::vector<VulkanFence*> m_inFlightFences;
+    std::vector<VulkanFence*> m_imagesInFlight;
 
     std::size_t m_currentFrame{};
     bool m_frameBufferResized{};

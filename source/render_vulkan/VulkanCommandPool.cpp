@@ -52,42 +52,11 @@ bool VulkanCommandPool::create()
 
 void VulkanCommandPool::destroy()
 {
-    vkDestroyCommandPool(m_logicalDevice, m_commandPool, nullptr);
-}
-
-VkCommandBuffer VulkanCommandPool::beginSingleTimeCommands()
-{
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = m_commandPool;
-    allocInfo.commandBufferCount = 1;
-
-    VkCommandBuffer commandBuffer{};
-    vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &commandBuffer);
-
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
-    return commandBuffer;
-}
-
-void VulkanCommandPool::endSingleTimeCommands(VkCommandBuffer commandBuffer)
-{
-    vkEndCommandBuffer(commandBuffer);
-
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    auto graphicsQueue = m_logicalDevice.getGraphicsQueue();
-    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(graphicsQueue);
-
-    vkFreeCommandBuffers(m_logicalDevice, m_commandPool, 1, &commandBuffer);
+    if (m_commandPool != nullptr)
+    {
+        vkDestroyCommandPool(m_logicalDevice, m_commandPool, nullptr);
+        m_commandPool = nullptr;
+    }
 }
 
 NS_END

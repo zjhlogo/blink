@@ -37,6 +37,11 @@ void VulkanLogicalDevice::destroy()
     destroyLogicalDevice();
 }
 
+void VulkanLogicalDevice::waitIdle()
+{
+    vkDeviceWaitIdle(m_logicalDevice);
+}
+
 bool VulkanLogicalDevice::createLogicalDevice()
 {
     // get best fit queue index from queue families
@@ -104,7 +109,11 @@ bool VulkanLogicalDevice::createLogicalDevice()
 
 void VulkanLogicalDevice::destroyLogicalDevice()
 {
-    vkDestroyDevice(m_logicalDevice, nullptr);
+    if (m_logicalDevice != nullptr)
+    {
+        vkDestroyDevice(m_logicalDevice, nullptr);
+        m_logicalDevice = nullptr;
+    }
 }
 
 NS_END

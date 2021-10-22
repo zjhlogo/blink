@@ -1,35 +1,34 @@
 /*!
- * \file VulkanCommandPool.h
+ * \file VulkanSemaphore.h
  *
  * \author zjhlogo
  * \date 2021/05/18
  *
- * 
+ *
  */
 #pragma once
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
-#include <vector>
 
 NS_BEGIN
 
 class VulkanLogicalDevice;
 
-class VulkanCommandPool
+class VulkanSemaphore
 {
 public:
-    VulkanCommandPool(VulkanLogicalDevice& logicalDevice);
-    ~VulkanCommandPool();
+    VulkanSemaphore(VulkanLogicalDevice& logicalDevice);
+    ~VulkanSemaphore();
 
-    operator VkCommandPool() { return m_commandPool; };
+    operator VkSemaphore() { return m_semaphore; };
 
     bool create();
     void destroy();
 
 private:
     VulkanLogicalDevice& m_logicalDevice;
-    VkCommandPool m_commandPool{};
 
+    VkSemaphore m_semaphore{};
 };
 
 NS_END
