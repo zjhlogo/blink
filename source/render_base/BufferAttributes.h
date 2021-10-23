@@ -9,7 +9,6 @@
 #pragma once
 #include <foundation/BaseTypes.h>
 
-#include <rttr/registration_friend>
 #include <vector>
 
 NS_BEGIN
@@ -75,7 +74,6 @@ private:
 private:
     AttributeItemList m_attributeItems;
 
-    RTTR_REGISTRATION_FRIEND
 };
 
 NS_END

@@ -7,7 +7,6 @@ set(SOURCE_FILES
 main.cpp
 MathTestCase.cpp
 PathParserTestCase.cpp
-ReflectionTestCase.cpp
 StringBuilderTestCase.cpp
 )
 

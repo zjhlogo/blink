@@ -9,28 +9,6 @@
 #include "BufferAttributes.h"
 
 #include <foundation/File.h>
-#include <foundation/JsonSerializer.h>
-
-#include <rttr/registration>
-#include <rttr/registration_friend>
-#include <rttr/type>
-
-RTTR_REGISTRATION
-{
-    rttr::registration::enumeration<NS::BufferAttributes::AttributeItemType>(
-        "AttributeItemType")(rttr::value("byte", NS::BufferAttributes::AttributeItemType::Byte),
-                             rttr::value("unsigned_byte", NS::BufferAttributes::AttributeItemType::UnsignedByte),
-                             rttr::value("short", NS::BufferAttributes::AttributeItemType::Short),
-                             rttr::value("unsigned_short", NS::BufferAttributes::AttributeItemType::UnsignedShort),
-                             rttr::value("float", NS::BufferAttributes::AttributeItemType::Float));
-
-    rttr::registration::class_<NS::BufferAttributes::AttributeItem>("AttributeItem")(rttr::policy::ctor::as_object)
-        .property("size", &NS::BufferAttributes::AttributeItem::size)
-        .property("type", &NS::BufferAttributes::AttributeItem::type)
-        .property("offset", &NS::BufferAttributes::AttributeItem::offset);
-
-    rttr::registration::class_<NS::BufferAttributes>("BufferAttributes").property("attribute_items", &NS::BufferAttributes::m_attributeItems);
-}
 
 NS_BEGIN
 
@@ -114,17 +92,18 @@ BufferAttributes::AttributeItemType BufferAttributes::getAttributeItemType(const
 
 BufferAttributes* BufferAttributes::fromFile(const tstring& filePath)
 {
-    tstring strJson;
-    if (!File::readFileIntoString(strJson, filePath)) return nullptr;
+    return nullptr;
+    //tstring strJson;
+    //if (!File::readFileIntoString(strJson, filePath)) return nullptr;
 
-    BufferAttributes* attrs = new BufferAttributes();
-    if (!JsonSerializer::fromJson(strJson, *attrs))
-    {
-        SAFE_DELETE(attrs);
-        return nullptr;
-    }
+    //BufferAttributes* attrs = new BufferAttributes();
+    //if (!JsonSerializer::fromJson(strJson, *attrs))
+    //{
+    //    SAFE_DELETE(attrs);
+    //    return nullptr;
+    //}
 
-    return attrs;
+    //return attrs;
 }
 
 BufferAttributes* BufferAttributes::fromStock(StockAttributes stockAttrs)

@@ -20,7 +20,7 @@ App::~App()
 
 void App::step(float dt)
 {
-    m_ex.systems.update_all(dt);
+    m_world.progress(dt);
 }
 
 int run(const tstring& renderEngine)

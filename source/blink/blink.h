@@ -8,7 +8,7 @@
  */
 #pragma once
 #include <foundation/BaseTypes.h>
-#include <entityx/entityx.h>
+#include <flecs/flecs.h>
 
 NS_BEGIN
 
@@ -25,7 +25,8 @@ public:
     virtual void step(float dt);
 
 public:
-    entityx::EntityX m_ex;
+    flecs::world m_world;
+
 };
 
 int run(const tstring& renderEngine);

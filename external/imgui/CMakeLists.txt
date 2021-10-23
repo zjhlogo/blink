@@ -3,8 +3,6 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 
 project(libimgui)
 
-find_package(glfw3 PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH REQUIRED)
-
 set(SOURCE_FILES
 imconfig.h
 imgui.cpp
@@ -25,7 +23,6 @@ imstb_truetype.h
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-	$<BUILD_INTERFACE:$<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>>
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
 )
 
