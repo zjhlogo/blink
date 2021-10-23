@@ -1,8 +1,9 @@
 #include "Step.h"
+
 #include <algorithm>
 
 Step::Step()
-    :Module(1)
+    : ModuleBase(1)
 {
 }
 
@@ -10,30 +11,27 @@ Step::~Step()
 {
 }
 
-int Step::GetSourceModuleCount() const
+int Step::getSourceModuleCount() const
 {
     return 1;
 }
 
-double Step::GetValue(double x, double y, double z) const
+double Step::getValue(double x, double y, double z) const
 {
     assert(m_pSourceModule[0] != nullptr && "must hava a source module");
     assert(m_stepInfoList.size() > 0 && "must hava step informations");
 
-    double value = m_pSourceModule[0]->GetValue(x, y, z);
-    return GetStepValue(value);
+    double value = m_pSourceModule[0]->getValue(x, y, z);
+    return getStepValue(value);
 }
 
-void Step::AddStep(double step, double value)
+void Step::addStep(double step, double value)
 {
-    m_stepInfoList.push_back({ step, value });
-    std::sort(m_stepInfoList.begin(), m_stepInfoList.end(), [](const StepInfo& info1, const StepInfo& info2)
-    {
-        return info1.step < info2.step;
-    });
+    m_stepInfoList.push_back({step, value});
+    std::sort(m_stepInfoList.begin(), m_stepInfoList.end(), [](const StepInfo& info1, const StepInfo& info2) { return info1.step < info2.step; });
 }
 
-double Step::GetStepValue(double step) const
+double Step::getStepValue(double step) const
 {
     for (auto& it = m_stepInfoList.rbegin(); it != m_stepInfoList.rend(); ++it)
     {

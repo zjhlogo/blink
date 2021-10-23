@@ -7,8 +7,9 @@
  *
  */
 #pragma once
-#include <render_base/Texture2D.h>
+#include <render_base/Texture.h>
 
+#include <memory>
 #include <unordered_map>
 
 class Atlas
@@ -32,12 +33,12 @@ public:
 
     virtual bool initialize() = 0;
 
-    std::shared_ptr<NS::Texture2D> getTexture() const { return m_texture; };
+    std::shared_ptr<NS::Texture> getTexture() const { return m_texture; };
     const Piece* findPiece(const NS::tstring& id);
     const Piece* getPiece(int index);
 
 protected:
-    std::shared_ptr<NS::Texture2D> m_texture{};
+    std::shared_ptr<NS::Texture> m_texture{};
     PieceMap m_pieceMap;
 
     const Piece* m_pieceList{};

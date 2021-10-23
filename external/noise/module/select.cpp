@@ -21,8 +21,8 @@
 //
 
 #include "select.h"
-#include "../scalarparameter.h"
 #include "../interp.h"
+#include "../scalarparameter.h"
 
 using namespace noise::module;
 
@@ -35,7 +35,11 @@ Select::Select(const noise::ScalarParameter& low, const noise::ScalarParameter& 
 {
 }
 
-Select::Select(const noise::ScalarParameter& low, const noise::ScalarParameter& high, const noise::ScalarParameter& control, const noise::ScalarParameter& threshold, const noise::ScalarParameter& edgeFalloff)
+Select::Select(const noise::ScalarParameter& low,
+               const noise::ScalarParameter& high,
+               const noise::ScalarParameter& control,
+               const noise::ScalarParameter& threshold,
+               const noise::ScalarParameter& edgeFalloff)
     : m_edgeFalloff(edgeFalloff)
     , m_threshold(threshold)
     , m_low(low)

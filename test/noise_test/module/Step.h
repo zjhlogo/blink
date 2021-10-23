@@ -1,9 +1,10 @@
 #pragma once
 
 #include <noise/module/modulebase.h>
+
 #include <vector>
 
-class Step : public noise::module::Module
+class Step : public noise::module::ModuleBase
 {
 public:
     class StepInfo
@@ -19,15 +20,14 @@ public:
     Step();
     virtual ~Step();
 
-    virtual int GetSourceModuleCount() const override;
-    virtual double GetValue(double x, double y, double z) const override;
+    virtual int getSourceModuleCount() const override;
+    virtual double getValue(double x, double y, double z) const override;
 
-    void AddStep(double step, double value);
+    void addStep(double step, double value);
 
 private:
-    double GetStepValue(double step) const;
+    double getStepValue(double step) const;
 
 private:
     StepInfoList m_stepInfoList;
-
 };

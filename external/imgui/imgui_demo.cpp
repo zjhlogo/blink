@@ -759,9 +759,9 @@ static void ShowDemoWindowWidgets()
         static ImGuiComboFlags flags = 0;
         ImGui::CheckboxFlags("ImGuiComboFlags_PopupAlignLeft", (unsigned int*)&flags, ImGuiComboFlags_PopupAlignLeft);
         if (ImGui::CheckboxFlags("ImGuiComboFlags_NoArrowButton", (unsigned int*)&flags, ImGuiComboFlags_NoArrowButton))
-            flags &= ~ImGuiComboFlags_NoPreview;     // Clear the other flag, as we cannot combine both
+            flags &= ~ImGuiComboFlags_NoPreview;     // clear the other flag, as we cannot combine both
         if (ImGui::CheckboxFlags("ImGuiComboFlags_NoPreview", (unsigned int*)&flags, ImGuiComboFlags_NoPreview))
-            flags &= ~ImGuiComboFlags_NoArrowButton; // Clear the other flag, as we cannot combine both
+            flags &= ~ImGuiComboFlags_NoArrowButton; // clear the other flag, as we cannot combine both
 
         // General BeginCombo() API, you have full control over your selection data and display type.
         // (your selection data could be an index, a pointer to the object, an id for the object, a flag stored in the object itself, etc.)
@@ -836,7 +836,7 @@ static void ShowDemoWindowWidgets()
                 sprintf(buf, "Object %d", n);
                 if (ImGui::Selectable(buf, selection[n]))
                 {
-                    if (!ImGui::GetIO().KeyCtrl)    // Clear selection when CTRL is not held
+                    if (!ImGui::GetIO().KeyCtrl)    // clear selection when CTRL is not held
                         memset(selection, 0, sizeof(selection));
                     selection[n] ^= 1;
                 }
@@ -3276,7 +3276,7 @@ struct ExampleAppConsole
                     word_start--;
                 }
 
-                // Build a list of candidates
+                // build a list of candidates
                 ImVector<const char*> candidates;
                 for (int i = 0; i < Commands.Size; i++)
                     if (Strnicmp(Commands[i], word_start, (int)(word_end-word_start)) == 0)

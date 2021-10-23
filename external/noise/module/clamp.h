@@ -63,7 +63,7 @@ namespace noise
         /// clamps that value to the upper bound.
         ///
         /// To specify the upper and lower bounds of the clamping range, call the
-        /// SetBounds() method.
+        /// setBounds() method.
         ///
         /// This noise module requires one source module.
         class Clamp : public ModuleBase

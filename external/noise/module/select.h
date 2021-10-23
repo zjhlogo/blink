@@ -62,11 +62,11 @@ namespace noise
         ///   this noise module outputs the value from the source module with an
         ///   index value of 0.
         ///
-        /// To specify the bounds of the selection range, call the SetBounds()
+        /// To specify the bounds of the selection range, call the setBounds()
         /// method.
         ///
         /// An application can pass the control module to the SetControlModule()
-        /// method instead of the SetSourceModule() method.  This may make the
+        /// method instead of the setSourceModule() method.  This may make the
         /// application code easier to read.
         ///
         /// By default, there is an abrupt transition between the output values
@@ -86,7 +86,11 @@ namespace noise
             /// The default falloff value at the edge transition is set to
             /// noise::module::DEFAULT_SELECT_EDGE_FALLOFF.
             Select(const noise::ScalarParameter& low, const noise::ScalarParameter& high, const noise::ScalarParameter& control);
-            Select(const noise::ScalarParameter& low, const noise::ScalarParameter& high, const noise::ScalarParameter& control, const noise::ScalarParameter& threshold, const noise::ScalarParameter& edgeFalloff);
+            Select(const noise::ScalarParameter& low,
+                   const noise::ScalarParameter& high,
+                   const noise::ScalarParameter& control,
+                   const noise::ScalarParameter& threshold,
+                   const noise::ScalarParameter& edgeFalloff);
 
             void setLowModule(const noise::ScalarParameter& low);
             const noise::ScalarParameter& getLowModule() const;
@@ -107,7 +111,7 @@ namespace noise
             ///
             /// This method assigns the control module an index value of 2.
             /// Passing the control module to this method produces the same
-            /// results as passing the control module to the SetSourceModule()
+            /// results as passing the control module to the setSourceModule()
             /// method while assigning that noise module an index value of 2.
             ///
             /// This control module must exist throughout the lifetime of this
@@ -120,7 +124,7 @@ namespace noise
             /// @returns A reference to the control module.
             ///
             /// @pre A control module has been added to this noise module via a
-            /// call to SetSourceModule() or SetControlModule().
+            /// call to setSourceModule() or SetControlModule().
             ///
             /// @throw noise::ExceptionNoModule See the preconditions for more
             /// information.

@@ -55,7 +55,7 @@ namespace noise
         /// module returns the cached output value without having the source
         /// module recalculate the output value.
         ///
-        /// If an application passes a new source module to the SetSourceModule()
+        /// If an application passes a new source module to the setSourceModule()
         /// method, the cache is invalidated.
         ///
         /// Caching a noise module is useful if it is used as a source module for
