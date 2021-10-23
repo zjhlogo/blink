@@ -76,19 +76,16 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     m_logicalDevice = new VulkanLogicalDevice(m_context);
     if (!m_logicalDevice->create()) return false;
 
+    m_commandPool = new VulkanCommandPool(*m_logicalDevice);
+    if (!m_commandPool->create()) return false;
+
     m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice);
     if (!m_swapchain->create()) return false;
 
     m_pipeline = new VulkanPipeline(*m_logicalDevice, *m_swapchain);
     if (!m_pipeline->create()) return false;
 
-    m_commandPool = new VulkanCommandPool(*m_logicalDevice);
-    if (!m_commandPool->create()) return false;
-
-    const auto& extent = m_swapchain->getImageExtent();
-    m_depthTexture = createDepthTexture(extent.width, extent.height);
-
-    if (!m_swapchain->createFramebuffers((VulkanTexture*)m_depthTexture, m_pipeline->getRenderPass())) return false;
+    if (!m_swapchain->createFramebuffers(m_pipeline->getRenderPass())) return false;
 
     m_texture = createTexture2D("resource/texture.jpg");
 
@@ -153,11 +150,11 @@ void VulkanRenderModule::destroyDevice()
 
     destroyTexture(m_texture);
     m_swapchain->destroyFramebuffers();
-    destroyTexture(m_depthTexture);
 
-    SAFE_DELETE(m_commandPool);
     SAFE_DELETE(m_pipeline);
+
     SAFE_DELETE(m_swapchain);
+    SAFE_DELETE(m_commandPool);
     SAFE_DELETE(m_logicalDevice);
     SAFE_DELETE(m_context);
     SAFE_DELETE(m_window);

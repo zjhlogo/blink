@@ -35,7 +35,7 @@ public:
 
     bool recreateSwapChain();
 
-    bool createFramebuffers(VulkanTexture* depthTexture, VkRenderPass renderPass);
+    bool createFramebuffers(VkRenderPass renderPass);
     void destroyFramebuffers();
 
 private:
@@ -55,6 +55,9 @@ private:
 
     std::vector<VulkanImage*> m_images;
     std::vector<VkFramebuffer> m_swapChainFramebuffers;
+
+    VulkanTexture* m_depthTexture{};
+
 };
 
 NS_END

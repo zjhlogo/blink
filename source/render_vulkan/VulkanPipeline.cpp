@@ -185,6 +185,18 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
 {
     destroyGraphicsPipeline();
 
+    // layout state
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
+
+    if (vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
+    {
+        LOGE("create pipeline layout failed");
+        return nullptr;
+    }
+
     VkShaderModule vertShaderModule = createShaderModule("resource/shaders/shader_base.vert.spv");
     VkShaderModule fragShaderModule = createShaderModule("resource/shaders/shader_base.frag.spv");
 
@@ -279,18 +291,6 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     //         dynamicState.dynamicStateCount = 2;
     //         dynamicState.pDynamicStates = dynamicStates;
 
-    // layout state
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
-
-    if (vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
-    {
-        LOGE("create pipeline layout failed");
-        return nullptr;
-    }
-
     // create pipeline
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -308,14 +308,15 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     pipelineInfo.renderPass = m_renderPass;
     pipelineInfo.subpass = 0;
 
-    if (vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline) != VK_SUCCESS)
+    auto result = vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
+    vkDestroyShaderModule(m_logicalDevice, fragShaderModule, nullptr);
+    vkDestroyShaderModule(m_logicalDevice, vertShaderModule, nullptr);
+
+    if (result != VK_SUCCESS)
     {
         LOGE("create graphics pipeline failed");
         return nullptr;
     }
-
-    vkDestroyShaderModule(m_logicalDevice, fragShaderModule, nullptr);
-    vkDestroyShaderModule(m_logicalDevice, vertShaderModule, nullptr);
 
     return m_pipeline;
 }

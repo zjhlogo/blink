@@ -83,11 +83,11 @@ private:
     VulkanContext* m_context{};
     VulkanLogicalDevice* m_logicalDevice{};
     VulkanSwapchain* m_swapchain{};
-    VulkanPipeline* m_pipeline{};
     VulkanCommandPool* m_commandPool{};
 
+    VulkanPipeline* m_pipeline{};
+
     Texture* m_texture{};
-    Texture* m_depthTexture{};
     VulkanBuffer* m_vertexBuffer{};
     VulkanBuffer* m_indexBuffer{};
     std::vector<VulkanBuffer*> m_uniformBuffers;

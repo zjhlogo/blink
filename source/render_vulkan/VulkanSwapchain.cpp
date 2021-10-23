@@ -15,6 +15,7 @@
 #include "utils/VulkanUtils.h"
 
 #include <foundation/Log.h>
+#include <render_base/RenderModule.h>
 
 #include <array>
 
@@ -48,8 +49,10 @@ void VulkanSwapchain::destroy()
     destroySwapChain();
 }
 
-bool VulkanSwapchain::createFramebuffers(VulkanTexture* depthTexture, VkRenderPass renderPass)
+bool VulkanSwapchain::createFramebuffers(VkRenderPass renderPass)
 {
+    m_depthTexture = (VulkanTexture*)RenderModule::getInstance().createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
+
     auto count = m_images.size();
     m_swapChainFramebuffers.resize(count);
 
@@ -57,7 +60,7 @@ bool VulkanSwapchain::createFramebuffers(VulkanTexture* depthTexture, VkRenderPa
     {
         auto imageView = m_images[i]->getImageView();
 
-        std::array<VkImageView, 2> attacments = {imageView, depthTexture->getTextureImage()->getImageView()};
+        std::array<VkImageView, 2> attacments = {imageView, m_depthTexture->getTextureImage()->getImageView()};
 
         VkFramebufferCreateInfo frameBufferInfo{};
         frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -83,6 +86,10 @@ void VulkanSwapchain::destroyFramebuffers()
         vkDestroyFramebuffer(m_logicalDevice, framebuffer, nullptr);
     }
     m_swapChainFramebuffers.clear();
+
+    Texture* texture = m_depthTexture;
+    RenderModule::getInstance().destroyTexture(texture);
+    m_depthTexture = nullptr;
 }
 
 bool VulkanSwapchain::recreateSwapChain()
