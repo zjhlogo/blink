@@ -70,7 +70,7 @@ bool VulkanShader::setUniform(const char* pszName, int count, const glm::mat4* v
     return false;
 }
 
-bool VulkanShader::setTexture(const char* pszName, Texture* texture, uint32 slotIndex /*= 0*/)
+bool VulkanShader::setTexture(const char* pszName, VulkanTexture* texture, uint32 slotIndex /*= 0*/)
 {
     return false;
 }

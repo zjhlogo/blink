@@ -7,11 +7,13 @@
  *
  */
 #pragma once
-#include <render_base/RenderModule.h>
+#include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <glfw3/glfw3.h>
+
+#include <vector>
 
 NS_BEGIN
 
@@ -27,8 +29,9 @@ class VulkanCommandPool;
 class VulkanCommandBuffer;
 class VulkanSemaphore;
 class VulkanFence;
+class VulkanTexture;
 
-class VulkanRenderModule : public RenderModule
+class VulkanRenderModule
 {
 public:
     static const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -37,28 +40,14 @@ public:
     VulkanRenderModule();
     virtual ~VulkanRenderModule();
 
-    virtual bool createDevice(const glm::ivec2& deviceSize) override;
-    virtual void destroyDevice() override;
+    bool createDevice(const glm::ivec2& deviceSize);
+    void destroyDevice();
 
-    virtual BufferObject* createBufferObject(BufferObject::BufferType bufferType) override { return nullptr; };
-    virtual bool destroyBufferObject(BufferObject* bufferObject) override { return false; };
-
-    virtual VertexBuffer* createVertexBuffer(BufferAttributes* attributes) override { return nullptr; };
-    virtual bool destroyVertexBuffer(VertexBuffer* vertexBuffer) override { return false; };
-
-    virtual Shader* createShaderFromStock(Shader::StockShaders stockShader, uint32 preprocessDefine) override { return nullptr; };
-    virtual Shader* createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer) override;
-    virtual bool destroyShader(Shader* shader) override { return false; };
-
-    virtual Texture* createTexture2D(const tstring& texFile) override;
-    virtual Texture* createDepthTexture(int width, int height) override;
-    virtual bool destroyTexture(Texture*& texture) override;
-
-    virtual bool gameLoop() override;
+    bool gameLoop();
 
     void drawFrame();
 
-    void setFrameBBufferResized(bool resized) { m_frameBufferResized = resized; };
+    void setFrameBufferResized(bool resized) { m_frameBufferResized = resized; };
 
 private:
     bool createCommandBuffers();
@@ -87,7 +76,7 @@ private:
 
     VulkanPipeline* m_pipeline{};
 
-    Texture* m_texture{};
+    VulkanTexture* m_texture{};
     VulkanBuffer* m_vertexBuffer{};
     VulkanBuffer* m_indexBuffer{};
     std::vector<VulkanBuffer*> m_uniformBuffers;

@@ -27,7 +27,6 @@
 #include <foundation/File.h>
 #include <foundation/Log.h>
 #include <glm/ext/matrix_clip_space.hpp>
-#include <render_base/util/stb_image.h>
 
 #include <chrono>
 #include <set>
@@ -54,7 +53,6 @@ struct UniformBufferObject
 };
 
 VulkanRenderModule::VulkanRenderModule()
-    : RenderModule("Vulkan")
 {
 }
 
@@ -79,7 +77,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     m_commandPool = new VulkanCommandPool(*m_logicalDevice);
     if (!m_commandPool->create()) return false;
 
-    m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice);
+    m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice, *m_commandPool);
     if (!m_swapchain->create()) return false;
 
     m_pipeline = new VulkanPipeline(*m_logicalDevice, *m_swapchain);
@@ -87,7 +85,8 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
     if (!m_swapchain->createFramebuffers(m_pipeline->getRenderPass())) return false;
 
-    m_texture = createTexture2D("resource/texture.jpg");
+    m_texture = new VulkanTexture(*m_logicalDevice, *m_commandPool);
+    if (!m_texture->createTexture2D("resource/texture.jpg")) return false;
 
     m_vertexBuffer = new VulkanBuffer(*m_logicalDevice);
     if (!m_vertexBuffer->createBufferAndUpload((void*)g_vertices.data(),
@@ -148,7 +147,7 @@ void VulkanRenderModule::destroyDevice()
     SAFE_DELETE(m_indexBuffer);
     SAFE_DELETE(m_vertexBuffer);
 
-    destroyTexture(m_texture);
+    SAFE_DELETE(m_texture);
     m_swapchain->destroyFramebuffers();
 
     SAFE_DELETE(m_pipeline);
@@ -160,52 +159,6 @@ void VulkanRenderModule::destroyDevice()
     SAFE_DELETE(m_window);
 
     glfwTerminate();
-}
-
-Texture* VulkanRenderModule::createTexture2D(const tstring& texFile)
-{
-    int texWidth = 0;
-    int texHeight = 0;
-    int texChannels = 0;
-
-    stbi_uc* pixels = stbi_load(texFile.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    if (!pixels) return nullptr;
-
-    VulkanTexture* vulkanTexture = new VulkanTexture(*m_logicalDevice, *m_commandPool);
-    bool success = vulkanTexture->createTexture2D(pixels, texWidth, texHeight, texChannels);
-    stbi_image_free(pixels);
-
-    if (!success)
-    {
-        SAFE_DELETE(vulkanTexture);
-    }
-
-    return vulkanTexture;
-}
-
-Texture* VulkanRenderModule::createDepthTexture(int width, int height)
-{
-    VulkanTexture* vulkanTexture = new VulkanTexture(*m_logicalDevice, *m_commandPool);
-    if (!vulkanTexture->createDepthTexture(width, height))
-    {
-        delete vulkanTexture;
-        vulkanTexture = nullptr;
-    }
-
-    return vulkanTexture;
-}
-
-bool VulkanRenderModule::destroyTexture(Texture*& texture)
-{
-    if (texture)
-    {
-        VulkanTexture* vulkanTexture = (VulkanTexture*)texture;
-        vulkanTexture->destroy();
-        delete vulkanTexture;
-        texture = nullptr;
-    }
-
-    return true;
 }
 
 bool VulkanRenderModule::gameLoop()
@@ -243,17 +196,17 @@ void VulkanRenderModule::drawFrame()
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        //m_swapchain->recreateSwapChain();
-        //m_pipeline->recreatePipeline();
+        // m_swapchain->recreateSwapChain();
+        // m_pipeline->recreatePipeline();
 
-        //const auto& extent = m_swapchain->getImageExtent();
-        //m_depthTexture = createDepthTexture(extent.width, extent.height);
-        //m_swapchain->createFramebuffers((VulkanTexture*)m_depthTexture, m_pipeline->getRenderPass());
+        // const auto& extent = m_swapchain->getImageExtent();
+        // m_depthTexture = createDepthTexture(extent.width, extent.height);
+        // m_swapchain->createFramebuffers((VulkanTexture*)m_depthTexture, m_pipeline->getRenderPass());
 
-        //createUniformBuffers();
-        //createDescriptorPool();
-        //createDescriptorSets();
-        //createCommandBuffers();
+        // createUniformBuffers();
+        // createDescriptorPool();
+        // createDescriptorSets();
+        // createCommandBuffers();
 
         return;
     }
@@ -305,20 +258,20 @@ void VulkanRenderModule::drawFrame()
     result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_frameBufferResized)
     {
-        //m_frameBufferResized = false;
-        //m_swapchain->recreateSwapChain();
+        // m_frameBufferResized = false;
+        // m_swapchain->recreateSwapChain();
         //
-        //createImageViews();
-        //m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
-        //m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
+        // createImageViews();
+        // m_pipeline->createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_context->getPickedPhysicalDevice()));
+        // m_pipeline->createGraphicsPipeline(m_swapChainExtent.width, m_swapChainExtent.height);
         //
-        //m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
+        // m_depthTexture = createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
         //
-        //createFramebuffers();
-        //createUniformBuffers();
-        //createDescriptorPool();
-        //createDescriptorSets();
-        //createCommandBuffers();
+        // createFramebuffers();
+        // createUniformBuffers();
+        // createDescriptorPool();
+        // createDescriptorSets();
+        // createCommandBuffers();
     }
     else if (result != VK_SUCCESS)
     {
@@ -326,12 +279,6 @@ void VulkanRenderModule::drawFrame()
     }
 
     m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-Shader* VulkanRenderModule::createShaderFromBuffer(const char* vsBuffer, const char* gsBuffer, const char* fsBuffer)
-{
-    // TODO:
-    return nullptr;
 }
 
 bool VulkanRenderModule::createCommandBuffers()

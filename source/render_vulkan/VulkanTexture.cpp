@@ -16,17 +16,34 @@
 #include "VulkanMemory.h"
 #include "utils/VulkanUtils.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "utils/stb_image.h"
+
 NS_BEGIN
 
 VulkanTexture::VulkanTexture(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& pool)
-    : Texture(EMPTY_STRING)
-    , m_logicalDevice(logicalDevice)
+    : m_logicalDevice(logicalDevice)
     , m_commandPool(pool)
 {
 }
 
 VulkanTexture::~VulkanTexture()
 {
+}
+
+bool VulkanTexture::createTexture2D(const tstring& texFile)
+{
+    int texWidth = 0;
+    int texHeight = 0;
+    int texChannels = 0;
+
+    stbi_uc* pixels = stbi_load(texFile.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    if (!pixels) return nullptr;
+
+    bool success = createTexture2D(pixels, texWidth, texHeight, texChannels);
+    stbi_image_free(pixels);
+
+    return success;
 }
 
 bool VulkanTexture::createTexture2D(void* pixels, int width, int height, int channels)

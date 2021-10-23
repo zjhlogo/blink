@@ -36,8 +36,6 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	libglm
 	libimgui
 	libfoundation
-    librender_base
-    librender_opengl
     librender_vulkan
 	libblink
 	)

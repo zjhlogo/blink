@@ -4,6 +4,7 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(librender_vulkan)
 
 set(SOURCE_FILES
+utils/stb_image.h
 utils/VulkanUtils.cpp
 utils/VulkanUtils.h
 Types.cpp

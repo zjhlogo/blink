@@ -6,29 +6,31 @@
  *
  *
  */
-#include <render_base/Shader.h>
+#include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.hpp>
 
 NS_BEGIN
 
-class VulkanShader : public Shader
+class VulkanTexture;
+
+class VulkanShader
 {
 public:
-    virtual bool reload() override;
-    virtual bool setUniform(const char* pszName, int value) override;
-    virtual bool setUniform(const char* pszName, float value) override;
-    virtual bool setUniform(const char* pszName, const glm::vec2& v) override;
-    virtual bool setUniform(const char* pszName, const glm::vec3& v) override;
-    virtual bool setUniform(const char* pszName, const glm::vec4& v) override;
-    virtual bool setUniform(const char* pszName, const glm::mat3& mat3) override;
-    virtual bool setUniform(const char* pszName, const glm::mat4& mat4) override;
-    virtual bool setUniform(const char* pszName, const std::vector<glm::mat4>& matList) override;
+    bool reload();
+    bool setUniform(const char* pszName, int value);
+    bool setUniform(const char* pszName, float value);
+    bool setUniform(const char* pszName, const glm::vec2& v);
+    bool setUniform(const char* pszName, const glm::vec3& v);
+    bool setUniform(const char* pszName, const glm::vec4& v);
+    bool setUniform(const char* pszName, const glm::mat3& mat3);
+    bool setUniform(const char* pszName, const glm::mat4& mat4);
+    bool setUniform(const char* pszName, const std::vector<glm::mat4>& matList);
 
-    virtual bool setUniform(const char* pszName, int count, const glm::vec3* v) override;
-    virtual bool setUniform(const char* pszName, int count, const glm::vec4* v) override;
-    virtual bool setUniform(const char* pszName, int count, const glm::mat4* v) override;
+    bool setUniform(const char* pszName, int count, const glm::vec3* v);
+    bool setUniform(const char* pszName, int count, const glm::vec4* v);
+    bool setUniform(const char* pszName, int count, const glm::mat4* v);
 
-    virtual bool setTexture(const char* pszName, Texture* texture, uint32 slotIndex = 0) override;
+    bool setTexture(const char* pszName, VulkanTexture* texture, uint32 slotIndex = 0);
 
 private:
     vk::PipelineShaderStageCreateInfo m_shaderCreateInfo;

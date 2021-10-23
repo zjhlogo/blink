@@ -8,22 +8,24 @@
  */
 #pragma once
 
-#include <render_base/Texture.h>
+#include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
 
 #include <vector>
+
 NS_BEGIN
 
 class VulkanImage;
 class VulkanLogicalDevice;
 class VulkanCommandPool;
 
-class VulkanTexture : public Texture
+class VulkanTexture
 {
 public:
     VulkanTexture(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& pool);
     virtual ~VulkanTexture();
 
+    bool createTexture2D(const tstring& texFile);
     bool createTexture2D(void* pixels, int width, int height, int channels);
     bool createDepthTexture(int width, int height);
 

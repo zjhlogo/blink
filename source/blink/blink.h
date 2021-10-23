@@ -12,8 +12,6 @@
 
 NS_BEGIN
 
-class RenderModule;
-
 class App
 {
 public:

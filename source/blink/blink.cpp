@@ -8,8 +8,6 @@
  */
 #include "blink.h"
 
-#include <render_base/RenderModule.h>
-#include <render_opengl/OpenGLRenderModule.h>
 #include <render_vulkan/VulkanRenderModule.h>
 
 NS_BEGIN
@@ -25,16 +23,7 @@ void App::step(float dt)
 
 int run(const tstring& renderEngine)
 {
-    RenderModule* renderModule = nullptr;
-
-    if (renderEngine == "Vulkan")
-    {
-        renderModule = new VulkanRenderModule();
-    }
-    else if (renderEngine == "OpenGL")
-    {
-        renderModule = new OpenGLRenderModule();
-    }
+    VulkanRenderModule* renderModule = new VulkanRenderModule();
 
     if (!renderModule) return -1;
 

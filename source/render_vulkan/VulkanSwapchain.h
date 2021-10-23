@@ -15,13 +15,14 @@ NS_BEGIN
 
 class VulkanWindow;
 class VulkanLogicalDevice;
+class VulkanCommandPool;
 class VulkanImage;
 class VulkanTexture;
 
 class VulkanSwapchain
 {
 public:
-    VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice);
+    VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
     ~VulkanSwapchain();
 
     bool create();
@@ -48,6 +49,7 @@ private:
 private:
     VulkanWindow& m_window;
     VulkanLogicalDevice& m_logicalDevice;
+    VulkanCommandPool& m_commandPool;
 
     VkSwapchainKHR m_swapChain{};
     VkFormat m_swapChainImageFormat;
@@ -57,7 +59,6 @@ private:
     std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
     VulkanTexture* m_depthTexture{};
-
 };
 
 NS_END

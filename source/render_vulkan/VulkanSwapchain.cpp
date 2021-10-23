@@ -15,7 +15,6 @@
 #include "utils/VulkanUtils.h"
 
 #include <foundation/Log.h>
-#include <render_base/RenderModule.h>
 
 #include <array>
 
@@ -24,9 +23,10 @@
 
 NS_BEGIN
 
-VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice)
+VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
     : m_window(window)
     , m_logicalDevice(logicalDevice)
+    , m_commandPool(commandPool)
 {
 }
 
@@ -51,7 +51,10 @@ void VulkanSwapchain::destroy()
 
 bool VulkanSwapchain::createFramebuffers(VkRenderPass renderPass)
 {
-    m_depthTexture = (VulkanTexture*)RenderModule::getInstance().createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height);
+    SAFE_DELETE(m_depthTexture);
+
+    m_depthTexture = new VulkanTexture(m_logicalDevice, m_commandPool);
+    if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
 
     auto count = m_images.size();
     m_swapChainFramebuffers.resize(count);
@@ -87,9 +90,7 @@ void VulkanSwapchain::destroyFramebuffers()
     }
     m_swapChainFramebuffers.clear();
 
-    Texture* texture = m_depthTexture;
-    RenderModule::getInstance().destroyTexture(texture);
-    m_depthTexture = nullptr;
+    SAFE_DELETE(m_depthTexture);
 }
 
 bool VulkanSwapchain::recreateSwapChain()
