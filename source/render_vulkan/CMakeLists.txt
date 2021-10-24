@@ -5,6 +5,7 @@ project(librender_vulkan)
 
 set(SOURCE_FILES
 utils/stb_image.h
+utils/tiny_obj_loader.h
 utils/VulkanUtils.cpp
 utils/VulkanUtils.h
 Types.cpp
@@ -41,8 +42,6 @@ VulkanSwapchain.cpp
 VulkanSwapchain.h
 VulkanTexture.cpp
 VulkanTexture.h
-VulkanVertexInput.cpp
-VulkanVertexInput.h
 VulkanWindow.cpp
 VulkanWindow.h
 )

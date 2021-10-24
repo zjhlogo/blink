@@ -5,6 +5,8 @@ project(libblink)
 
 set(SOURCE_FILES
 base/ISystemBase.h
+geometry/Mesh.cpp
+geometry/Mesh.h
 blink.cpp
 blink.h
 )

@@ -51,7 +51,7 @@ void VulkanMemory::freeMemory()
     }
 }
 
-bool VulkanMemory::uploadData(void* data, VkDeviceSize size)
+bool VulkanMemory::uploadData(const void* data, VkDeviceSize size)
 {
     void* mapedBuffer{};
     vkMapMemory(m_logicalDevice, m_memory, 0, size, 0, &mapedBuffer);

@@ -10,35 +10,21 @@
 
 NS_BEGIN
 
-VkVertexInputBindingDescription Vertex::getBindingDescription()
+const std::vector<VkVertexInputBindingDescription>& VertexPosColorUv1::getBindingDescription()
 {
-    VkVertexInputBindingDescription bindingDescription;
-    bindingDescription.binding = 0;
-    bindingDescription.stride = sizeof(Vertex);
-    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    return bindingDescription;
+    static const std::vector<VkVertexInputBindingDescription> s_bindingDescription = {{0, sizeof(VertexPosColorUv1), VK_VERTEX_INPUT_RATE_VERTEX}};
+    return s_bindingDescription;
 }
 
-std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescriptions()
+const std::vector<VkVertexInputAttributeDescription>& VertexPosColorUv1::getAttributeDescriptions()
 {
-    std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions;
+    static const std::vector<VkVertexInputAttributeDescription> s_attributeDescriptions = {
+        {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexPosColorUv1, pos)},
+        {1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(VertexPosColorUv1, color)},
+        {2, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(VertexPosColorUv1, texCoord)},
+    };
 
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-    attributeDescriptions[1].binding = 0;
-    attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-    attributeDescriptions[2].binding = 0;
-    attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-    return attributeDescriptions;
+    return s_attributeDescriptions;
 }
 
 NS_END

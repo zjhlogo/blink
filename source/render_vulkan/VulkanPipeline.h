@@ -30,14 +30,10 @@ public:
 
     bool recreatePipeline();
 
-    VkRenderPass getRenderPass() const { return m_renderPass; };
     VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
     VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };
 
 private:
-    VkRenderPass createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
-    void destroyRenderPass();
-
     VkDescriptorSetLayout createDescriptorSetLayout();
     void destroyDescriptorSetLayout();
 
@@ -50,7 +46,6 @@ private:
     VulkanLogicalDevice& m_logicalDevice;
     VulkanSwapchain& m_swapchain;
 
-    VkRenderPass m_renderPass{};
     VkDescriptorSetLayout m_descriptorSetLayout{};
     VkPipelineLayout m_pipelineLayout{};
     VkPipeline m_pipeline{};

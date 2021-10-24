@@ -23,7 +23,7 @@ public:
     bool allocateMemory(VkMemoryPropertyFlags memoryProperties, const VkMemoryRequirements& requirement);
     void freeMemory();
 
-    bool uploadData(void* data, VkDeviceSize size);
+    bool uploadData(const void* data, VkDeviceSize size);
 
     operator VkDeviceMemory () { return m_memory; };
 

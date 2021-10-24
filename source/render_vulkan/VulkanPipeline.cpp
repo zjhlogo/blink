@@ -31,10 +31,8 @@ VulkanPipeline::~VulkanPipeline()
 
 bool VulkanPipeline::create()
 {
-    auto format = m_swapchain.getImageFormat();
     const auto& extent = m_swapchain.getImageExtent();
 
-    if (!createRenderPass(format, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
     if (!createDescriptorSetLayout()) return false;
     if (!createGraphicsPipeline(extent.width, extent.height)) return false;
 
@@ -45,97 +43,14 @@ void VulkanPipeline::destroy()
 {
     destroyGraphicsPipeline();
     destroyDescriptorSetLayout();
-    destroyRenderPass();
 }
 
 bool VulkanPipeline::recreatePipeline()
 {
-    auto format = m_swapchain.getImageFormat();
     const auto& extent = m_swapchain.getImageExtent();
-
-    if (!createRenderPass(format, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
     if (!createGraphicsPipeline(extent.width, extent.height)) return false;
 
     return true;
-}
-
-VkRenderPass VulkanPipeline::createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
-{
-    destroyRenderPass();
-
-    // color attachment
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = colorAttachmentFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    // depth attachment
-    VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = depthAttachmentFormat;
-    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    // subpass
-    VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference depthAttachmentRef{};
-    depthAttachmentRef.attachment = 1;
-    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-    // create render pass
-    std::array<VkAttachmentDescription, 2> attacments = {colorAttachment, depthAttachment};
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = static_cast<uint32_t>(attacments.size());
-    renderPassInfo.pAttachments = attacments.data();
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
-
-    auto result = vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass);
-    if (result != VK_SUCCESS)
-    {
-        LOGE("create render pass failed");
-        return nullptr;
-    }
-
-    return m_renderPass;
-}
-
-void VulkanPipeline::destroyRenderPass()
-{
-    if (m_renderPass != nullptr)
-    {
-        vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
-        m_renderPass = nullptr;
-    }
 }
 
 VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout()
@@ -156,12 +71,12 @@ VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout()
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
 
-    std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
+    VkDescriptorSetLayoutBinding bindings[2] = {uboLayoutBinding, samplerLayoutBinding};
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-    layoutInfo.pBindings = bindings.data();
+    layoutInfo.bindingCount = 2;
+    layoutInfo.pBindings = bindings;
 
     if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
     {
@@ -215,17 +130,17 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     // shader state
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
-    // TODO:
     // vertex input state
-    auto bindingDescription = Vertex::getBindingDescription();
-    auto attributeDescriptions = Vertex::getAttributeDescriptions();
-
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+    const auto& bindingDesc = VertexPosColorUv1::getBindingDescription();
+    vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDesc.size());
+    vertexInputInfo.pVertexBindingDescriptions = bindingDesc.data();
+
+    const auto& attributeDesc = VertexPosColorUv1::getAttributeDescriptions();
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDesc.size());
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDesc.data();
 
     // input assembly state
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -305,7 +220,7 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     pipelineInfo.pColorBlendState = &colorBlending;
     //        pipelineInfo.pDynamicState = nullptr;
     pipelineInfo.layout = m_pipelineLayout;
-    pipelineInfo.renderPass = m_renderPass;
+    pipelineInfo.renderPass = m_swapchain.getRenderPass();
     pipelineInfo.subpass = 0;
 
     auto result = vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);

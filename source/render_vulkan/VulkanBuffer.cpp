@@ -48,7 +48,7 @@ VkBuffer VulkanBuffer::createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags 
     return m_buffer;
 }
 
-VkBuffer VulkanBuffer::createBufferAndUpload(void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode, VulkanCommandPool& pool)
+VkBuffer VulkanBuffer::createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode, VulkanCommandPool& pool)
 {
     VulkanBuffer stagingBuffer(m_logicalDevice);
     stagingBuffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);

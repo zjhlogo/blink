@@ -33,11 +33,9 @@ public:
     const VkExtent2D& getImageExtent() const { return m_swapChainExtent; };
     std::size_t getImageCount() const { return m_images.size(); };
     VkFramebuffer getFramebuffers(size_t index) { return m_swapChainFramebuffers[index]; };
+    VkRenderPass getRenderPass() const { return m_renderPass; };
 
     bool recreateSwapChain();
-
-    bool createFramebuffers(VkRenderPass renderPass);
-    void destroyFramebuffers();
 
 private:
     bool createSwapChain();
@@ -45,6 +43,12 @@ private:
 
     bool createSwapchainImageViews();
     void destroySwapchainImageViews();
+
+    VkRenderPass createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
+    void destroyRenderPass();
+
+    bool createFramebuffers(VkRenderPass renderPass);
+    void destroyFramebuffers();
 
 private:
     VulkanWindow& m_window;
@@ -59,6 +63,8 @@ private:
     std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
     VulkanTexture* m_depthTexture{};
+
+    VkRenderPass m_renderPass{};
 };
 
 NS_END

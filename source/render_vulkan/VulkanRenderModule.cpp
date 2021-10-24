@@ -33,7 +33,7 @@
 
 NS_BEGIN
 
-const std::vector<Vertex> g_vertices = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+const std::vector<VertexPosColorUv1> g_vertices = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
                                         {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
                                         {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
                                         {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
@@ -83,14 +83,12 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     m_pipeline = new VulkanPipeline(*m_logicalDevice, *m_swapchain);
     if (!m_pipeline->create()) return false;
 
-    if (!m_swapchain->createFramebuffers(m_pipeline->getRenderPass())) return false;
-
     m_texture = new VulkanTexture(*m_logicalDevice, *m_commandPool);
     if (!m_texture->createTexture2D("resource/texture.jpg")) return false;
 
     m_vertexBuffer = new VulkanBuffer(*m_logicalDevice);
     if (!m_vertexBuffer->createBufferAndUpload((void*)g_vertices.data(),
-                                               sizeof(Vertex) * g_vertices.size(),
+                                               sizeof(VertexPosColorUv1) * g_vertices.size(),
                                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                                                VK_SHARING_MODE_EXCLUSIVE,
                                                *m_commandPool))
@@ -148,8 +146,6 @@ void VulkanRenderModule::destroyDevice()
     SAFE_DELETE(m_vertexBuffer);
 
     SAFE_DELETE(m_texture);
-    m_swapchain->destroyFramebuffers();
-
     SAFE_DELETE(m_pipeline);
 
     SAFE_DELETE(m_swapchain);
@@ -295,7 +291,7 @@ bool VulkanRenderModule::createCommandBuffers()
         m_commandBuffers[i]->beginCommand();
         {
             VkRect2D rect{{0, 0}, m_swapchain->getImageExtent()};
-            m_commandBuffers[i]->beginRenderPass(m_pipeline->getRenderPass(), m_swapchain->getFramebuffers(i), rect);
+            m_commandBuffers[i]->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(i), rect);
 
             {
                 // TODO:

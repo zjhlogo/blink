@@ -16,8 +16,6 @@
 
 #include <foundation/Log.h>
 
-#include <array>
-
 #define GLFW_INCLUDE_VULKAN
 #include <glfw3/glfw3.h>
 
@@ -39,58 +37,18 @@ bool VulkanSwapchain::create()
 {
     if (!createSwapChain()) return false;
     if (!createSwapchainImageViews()) return false;
+    if (!createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
+    if (!createFramebuffers(m_renderPass)) return false;
 
     return true;
 }
 
 void VulkanSwapchain::destroy()
 {
+    destroyFramebuffers();
+    destroyRenderPass();
     destroySwapchainImageViews();
     destroySwapChain();
-}
-
-bool VulkanSwapchain::createFramebuffers(VkRenderPass renderPass)
-{
-    SAFE_DELETE(m_depthTexture);
-
-    m_depthTexture = new VulkanTexture(m_logicalDevice, m_commandPool);
-    if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
-
-    auto count = m_images.size();
-    m_swapChainFramebuffers.resize(count);
-
-    for (size_t i = 0; i < count; ++i)
-    {
-        auto imageView = m_images[i]->getImageView();
-
-        std::array<VkImageView, 2> attacments = {imageView, m_depthTexture->getTextureImage()->getImageView()};
-
-        VkFramebufferCreateInfo frameBufferInfo{};
-        frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        frameBufferInfo.renderPass = renderPass;
-        frameBufferInfo.attachmentCount = static_cast<uint32_t>(attacments.size());
-        frameBufferInfo.pAttachments = attacments.data();
-        frameBufferInfo.width = m_swapChainExtent.width;
-        frameBufferInfo.height = m_swapChainExtent.height;
-        frameBufferInfo.layers = 1;
-        if (vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
-        {
-            LOGE("create swapchain frame buffer failed");
-        }
-    }
-
-    return true;
-}
-
-void VulkanSwapchain::destroyFramebuffers()
-{
-    for (auto framebuffer : m_swapChainFramebuffers)
-    {
-        vkDestroyFramebuffer(m_logicalDevice, framebuffer, nullptr);
-    }
-    m_swapChainFramebuffers.clear();
-
-    SAFE_DELETE(m_depthTexture);
 }
 
 bool VulkanSwapchain::recreateSwapChain()
@@ -112,6 +70,8 @@ bool VulkanSwapchain::recreateSwapChain()
 
     if (!createSwapChain()) return false;
     if (!createSwapchainImageViews()) return false;
+    if (!createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
+    if (!createFramebuffers(m_renderPass)) return false;
 
     return true;
 }
@@ -259,6 +219,129 @@ void VulkanSwapchain::destroySwapchainImageViews()
     {
         vulkanImage->destroyImageView();
     }
+}
+
+VkRenderPass VulkanSwapchain::createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
+{
+    destroyRenderPass();
+
+    // color attachment
+    VkAttachmentDescription colorAttachment{};
+    colorAttachment.format = colorAttachmentFormat;
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    // depth attachment
+    VkAttachmentDescription depthAttachment{};
+    depthAttachment.format = depthAttachmentFormat;
+    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    // subpass
+    VkAttachmentReference colorAttachmentRef{};
+    colorAttachmentRef.attachment = 0;
+    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depthAttachmentRef{};
+    depthAttachmentRef.attachment = 1;
+    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &colorAttachmentRef;
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+    // create render pass
+    VkAttachmentDescription attacments[2] = {colorAttachment, depthAttachment};
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = 2;
+    renderPassInfo.pAttachments = attacments;
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
+
+    auto result = vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass);
+    if (result != VK_SUCCESS)
+    {
+        LOGE("create render pass failed");
+        return nullptr;
+    }
+
+    return m_renderPass;
+}
+
+void VulkanSwapchain::destroyRenderPass()
+{
+    if (m_renderPass != nullptr)
+    {
+        vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
+        m_renderPass = nullptr;
+    }
+}
+
+bool VulkanSwapchain::createFramebuffers(VkRenderPass renderPass)
+{
+    SAFE_DELETE(m_depthTexture);
+
+    m_depthTexture = new VulkanTexture(m_logicalDevice, m_commandPool);
+    if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
+
+    auto count = m_images.size();
+    m_swapChainFramebuffers.resize(count);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        auto imageView = m_images[i]->getImageView();
+
+        VkImageView attacments[2] = {imageView, m_depthTexture->getTextureImage()->getImageView()};
+
+        VkFramebufferCreateInfo frameBufferInfo{};
+        frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        frameBufferInfo.renderPass = renderPass;
+        frameBufferInfo.attachmentCount = 2;
+        frameBufferInfo.pAttachments = attacments;
+        frameBufferInfo.width = m_swapChainExtent.width;
+        frameBufferInfo.height = m_swapChainExtent.height;
+        frameBufferInfo.layers = 1;
+        if (vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
+        {
+            LOGE("create swapchain frame buffer failed");
+        }
+    }
+
+    return true;
+}
+
+void VulkanSwapchain::destroyFramebuffers()
+{
+    for (auto framebuffer : m_swapChainFramebuffers)
+    {
+        vkDestroyFramebuffer(m_logicalDevice, framebuffer, nullptr);
+    }
+    m_swapChainFramebuffers.clear();
+
+    SAFE_DELETE(m_depthTexture);
 }
 
 NS_END
