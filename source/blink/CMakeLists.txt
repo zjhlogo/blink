@@ -7,6 +7,10 @@ set(SOURCE_FILES
 base/ISystemBase.h
 geometry/Mesh.cpp
 geometry/Mesh.h
+material/Material.cpp
+material/material.h
+util/RenderUtil.cpp
+util/RenderUtil.h
 blink.cpp
 blink.h
 )

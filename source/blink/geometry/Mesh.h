@@ -28,9 +28,13 @@ public:
     bool uploadData(const void* vertexData,
                     uint32 vertexDataSize,
                     const uint16* indexData,
-                    uint16 numIndex,
+                    uint32 numIndices,
                     const std::vector<VkVertexInputBindingDescription>& vertexBindingDesc,
                     const std::vector<VkVertexInputAttributeDescription>& vertexAttributeDesc);
+
+    VulkanBuffer* getVertexBuffer() { return m_vertexBuffer; };
+    VulkanBuffer* getIndexBuffer() { return m_indexBuffer; };
+    uint32 getNumIndices() { return m_numIndices; };
 
 private:
     void destroy();
@@ -41,6 +45,7 @@ private:
 
     VulkanBuffer* m_vertexBuffer{};
     VulkanBuffer* m_indexBuffer{};
+    uint32_t m_numIndices{};
 
     // TODO: reuse the description to save memory
     const std::vector<VkVertexInputBindingDescription>* m_vertexBindingDescs{};

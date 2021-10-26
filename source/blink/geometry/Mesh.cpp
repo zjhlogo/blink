@@ -93,7 +93,7 @@ bool Mesh::loadFromFile(const tstring& filePath)
 bool Mesh::uploadData(const void* vertexData,
                       uint32 vertexDataSize,
                       const uint16* indexData,
-                      uint16 numIndex,
+                      uint32 numIndices,
                       const std::vector<VkVertexInputBindingDescription>& vertexBindingDesc,
                       const std::vector<VkVertexInputAttributeDescription>& vertexAttributeDesc)
 {
@@ -111,7 +111,7 @@ bool Mesh::uploadData(const void* vertexData,
 
     m_indexBuffer = new VulkanBuffer(m_logicalDevice);
     if (!m_indexBuffer->createBufferAndUpload(indexData,
-                                              sizeof(uint16) * numIndex,
+                                              sizeof(uint16) * numIndices,
                                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                               VK_SHARING_MODE_EXCLUSIVE,
                                               m_commandPool))
@@ -121,6 +121,7 @@ bool Mesh::uploadData(const void* vertexData,
 
     m_vertexAttributeDescs = &vertexAttributeDesc;
     m_vertexBindingDescs = &vertexBindingDesc;
+    m_numIndices = numIndices;
 
     return true;
 }

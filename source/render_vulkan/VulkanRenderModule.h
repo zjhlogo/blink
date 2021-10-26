@@ -29,7 +29,6 @@ class VulkanCommandPool;
 class VulkanCommandBuffer;
 class VulkanSemaphore;
 class VulkanFence;
-class VulkanTexture;
 
 class VulkanRenderModule
 {
@@ -56,10 +55,7 @@ private:
     bool createSyncObjects();
     void destroySyncObjects();
 
-    void updateUniformBuffer(uint32_t currentImage);
-
 private:
-    std::vector<VulkanCommandBuffer*> m_commandBuffers;
     std::vector<VulkanSemaphore*> m_imageAvailableSemaphores;
     std::vector<VulkanSemaphore*> m_renderFinishedSemaphores;
     std::vector<VulkanFence*> m_inFlightFences;
@@ -73,16 +69,9 @@ private:
     VulkanLogicalDevice* m_logicalDevice{};
     VulkanSwapchain* m_swapchain{};
     VulkanCommandPool* m_commandPool{};
-
-    VulkanPipeline* m_pipeline{};
-
-    VulkanTexture* m_texture{};
-    VulkanBuffer* m_vertexBuffer{};
-    VulkanBuffer* m_indexBuffer{};
-    std::vector<VulkanBuffer*> m_uniformBuffers;
-
     VulkanDescriptorPool* m_descriptorPool{};
-    VulkanDescriptorSets* m_descriptorSets{};
+
+    std::vector<VulkanCommandBuffer*> m_commandBuffers;
 };
 
 NS_END

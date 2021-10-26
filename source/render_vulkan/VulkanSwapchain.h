@@ -35,6 +35,9 @@ public:
     VkFramebuffer getFramebuffers(size_t index) { return m_swapChainFramebuffers[index]; };
     VkRenderPass getRenderPass() const { return m_renderPass; };
 
+    void setCurrentActivedImageIndex(uint32_t imageIndex) { m_activedImageIndex = imageIndex; };
+    uint32_t getCurrentActivedImageIndex() { return m_activedImageIndex; };
+
     bool recreateSwapChain();
 
 private:
@@ -65,6 +68,8 @@ private:
     VulkanTexture* m_depthTexture{};
 
     VkRenderPass m_renderPass{};
+
+    uint32_t m_activedImageIndex{};
 };
 
 NS_END
