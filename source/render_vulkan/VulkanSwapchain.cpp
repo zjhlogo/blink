@@ -63,7 +63,7 @@ bool VulkanSwapchain::recreateSwapChain()
         glfwWaitEvents();
     }
 
-    m_logicalDevice.waitIdle();
+    m_logicalDevice.waitDeviceIdle();
 
     destroySwapchainImageViews();
     destroySwapChain();
@@ -101,18 +101,18 @@ bool VulkanSwapchain::createSwapChain()
     VulkanUtils::getSurfacePresentModes(presentModes, physicalDevice, surface);
 
     VkPresentModeKHR selPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-    for (const auto& presentMode : presentModes)
-    {
-        if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-        {
-            selPresentMode = presentMode;
-            break;
-        }
-        else if (presentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
-        {
-            selPresentMode = presentMode;
-        }
-    }
+    //for (const auto& presentMode : presentModes)
+    //{
+    //    if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+    //    {
+    //        selPresentMode = presentMode;
+    //        break;
+    //    }
+    //    else if (presentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+    //    {
+    //        selPresentMode = presentMode;
+    //    }
+    //}
 
     // select extent
     VkSurfaceCapabilitiesKHR capabilities{};
@@ -132,7 +132,7 @@ bool VulkanSwapchain::createSwapChain()
     }
 
     // select image count
-    uint32_t imageCount = capabilities.minImageCount + 1;
+    uint32_t imageCount = capabilities.minImageCount;
     if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
     {
         imageCount = capabilities.maxImageCount;
@@ -200,6 +200,13 @@ bool VulkanSwapchain::createSwapChain()
 
 void VulkanSwapchain::destroySwapChain()
 {
+    for (auto image : m_images)
+    {
+        image->destroyImage(false);
+        SAFE_DELETE(image);
+    }
+    m_images.clear();
+
     vkDestroySwapchainKHR(m_logicalDevice, m_swapChain, nullptr);
 }
 

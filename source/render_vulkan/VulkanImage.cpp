@@ -60,17 +60,17 @@ VkImage VulkanImage::createImage(VkImageType type, uint32_t width, uint32_t heig
     return m_image;
 }
 
-void VulkanImage::destroyImage()
+void VulkanImage::destroyImage(bool destroyImageHandle)
 {
     freeImageMemory();
 
     destroyImageView();
 
-    if (m_image != nullptr)
+    if (destroyImageHandle && m_image != nullptr)
     {
         vkDestroyImage(m_logicalDevice, m_image, nullptr);
-        m_image = nullptr;
     }
+    m_image = nullptr;
 }
 
 VkImageView VulkanImage::createImageView(VkFormat format, VkImageAspectFlags aspectFlags)

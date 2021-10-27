@@ -39,11 +39,12 @@ public:
     bool create();
     void destroy();
 
-    VulkanDescriptorSet& getCurrentDescriptorSet();
+    VulkanBuffer& getUniformBuffer() const { return *m_uniformBuffer; };
+    VulkanDescriptorSet& getDescriptorSet() const { return *m_descriptorSet; };
     VulkanPipeline& getPipeline() { return *m_pipeline; };
 
 private:
-    void updateUniformBuffer(uint32_t index);
+    void updateUniformBuffer();
 
 private:
     VulkanLogicalDevice& m_logicalDevice;
@@ -52,14 +53,12 @@ private:
     VulkanDescriptorPool& m_descriptorPool;
 
     VulkanPipeline* m_pipeline{};
-
-    std::vector<VulkanBuffer*> m_uniformBuffers;
-    std::vector<VulkanDescriptorSet*> m_descriptorSets;
+    VulkanBuffer* m_uniformBuffer{};
+    VulkanDescriptorSet* m_descriptorSet{};
 
     VulkanTexture* m_texture{};
 
     Uniforms m_uniformBufferObject{};
-
 };
 
 NS_END

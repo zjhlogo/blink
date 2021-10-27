@@ -29,6 +29,7 @@ VulkanTexture::VulkanTexture(VulkanLogicalDevice& logicalDevice, VulkanCommandPo
 
 VulkanTexture::~VulkanTexture()
 {
+    destroy();
 }
 
 bool VulkanTexture::createTexture2D(const tstring& texFile)

@@ -26,7 +26,7 @@ public:
     operator VkImage() { return m_image; };
 
     VkImage createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
-    void destroyImage();
+    void destroyImage(bool destroyImageHandle = true);
 
     VkImageView createImageView(VkFormat format, VkImageAspectFlags aspectFlags);
     void destroyImageView();
@@ -40,11 +40,11 @@ public:
 
 private:
     VulkanLogicalDevice& m_logicalDevice;
-    VkImage m_image{};
+    VkImage m_image{ VK_NULL_HANDLE };
     VkFormat m_format{VkFormat::VK_FORMAT_UNDEFINED};
     VkImageAspectFlags m_aspectFlags{};
 
-    VkImageView m_imageView{};
+    VkImageView m_imageView{ VK_NULL_HANDLE };
     VulkanMemory* m_imageMemory{};
 
 };

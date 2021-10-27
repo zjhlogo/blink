@@ -25,10 +25,12 @@ void RenderUtil::drawMesh(VulkanCommandBuffer& commandBuffer, Mesh* mesh, Materi
     VkDeviceSize offset = 0;
     VkBuffer vertexBuffer = *(mesh->getVertexBuffer());
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(commandBuffer, *mesh->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
+
+    VkBuffer indexBuffer = *(mesh->getIndexBuffer());
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
     // uniforms, textures binding
-    VkDescriptorSet descriptorSet = material->getCurrentDescriptorSet();
+    VkDescriptorSet descriptorSet = material->getDescriptorSet();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipeline().getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
     // draw

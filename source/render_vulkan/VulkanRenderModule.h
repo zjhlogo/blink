@@ -33,9 +33,6 @@ class VulkanFence;
 class VulkanRenderModule
 {
 public:
-    static const int MAX_FRAMES_IN_FLIGHT = 2;
-
-public:
     VulkanRenderModule();
     virtual ~VulkanRenderModule();
 
@@ -46,23 +43,12 @@ public:
 
     void drawFrame();
 
-    void setFrameBufferResized(bool resized) { m_frameBufferResized = resized; };
-
 private:
-    bool createCommandBuffers();
-    void destroyCommandBuffers();
-
     bool createSyncObjects();
     void destroySyncObjects();
 
 private:
-    std::vector<VulkanSemaphore*> m_imageAvailableSemaphores;
-    std::vector<VulkanSemaphore*> m_renderFinishedSemaphores;
-    std::vector<VulkanFence*> m_inFlightFences;
-    std::vector<VulkanFence*> m_imagesInFlight;
-
-    std::size_t m_currentFrame{};
-    bool m_frameBufferResized{};
+    VulkanFence* m_acquireImageFence{};
 
     VulkanWindow* m_window{};
     VulkanContext* m_context{};
@@ -71,7 +57,7 @@ private:
     VulkanCommandPool* m_commandPool{};
     VulkanDescriptorPool* m_descriptorPool{};
 
-    std::vector<VulkanCommandBuffer*> m_commandBuffers;
+    VulkanCommandBuffer* m_commandBuffer{};
 };
 
 NS_END

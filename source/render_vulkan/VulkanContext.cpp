@@ -33,10 +33,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
     {
         LOGD(pCallbackData->pMessage);
     }
-    else
-    {
-        LOGI(pCallbackData->pMessage);
-    }
+    //else
+    //{
+    //    LOGI(pCallbackData->pMessage);
+    //}
 
     return VK_FALSE;
 }

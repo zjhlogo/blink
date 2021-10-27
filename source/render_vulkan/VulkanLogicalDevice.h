@@ -24,7 +24,8 @@ public:
     void destroy();
 
     operator VkDevice() { return m_logicalDevice; };
-    void waitIdle();
+    void waitDeviceIdle();
+    void waitGraphicsQueueIdle();
 
     VulkanContext* getContext() { return m_context; };
     VkQueue getGraphicsQueue() { return m_graphicsQueue; };

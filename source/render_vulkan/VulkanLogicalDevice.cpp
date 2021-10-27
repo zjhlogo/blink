@@ -37,9 +37,14 @@ void VulkanLogicalDevice::destroy()
     destroyLogicalDevice();
 }
 
-void VulkanLogicalDevice::waitIdle()
+void VulkanLogicalDevice::waitDeviceIdle()
 {
     vkDeviceWaitIdle(m_logicalDevice);
+}
+
+void VulkanLogicalDevice::waitGraphicsQueueIdle()
+{
+    vkQueueWaitIdle(m_graphicsQueue);
 }
 
 bool VulkanLogicalDevice::createLogicalDevice()

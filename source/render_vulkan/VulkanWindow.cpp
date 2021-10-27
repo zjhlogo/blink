@@ -17,7 +17,7 @@ NS_BEGIN
 static void frameBufferResizeCallback(GLFWwindow* window, int width, int height)
 {
     VulkanRenderModule* renderModule = reinterpret_cast<VulkanRenderModule*>(glfwGetWindowUserPointer(window));
-    renderModule->setFrameBufferResized(true);
+    //renderModule->setFrameBufferResized(true);
 }
 
 static void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
