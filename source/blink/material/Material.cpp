@@ -29,6 +29,7 @@ Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchai
 
 Material::~Material()
 {
+    destroy();
 }
 
 bool Material::create()
@@ -43,19 +44,19 @@ bool Material::create()
     }
     m_uniformBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
+    m_texture = new VulkanTexture(m_logicalDevice, m_commandPool);
+    if (!m_texture->createTexture2D("resource/viking_room.png")) return false;
+
     m_descriptorSet = new VulkanDescriptorSet(m_logicalDevice, m_descriptorPool, *m_pipeline);
     if (!m_descriptorSet->create(*m_uniformBuffer, *m_texture)) return false;
-
-    m_texture = new VulkanTexture(m_logicalDevice, m_commandPool);
-    if (!m_texture->createTexture2D("resource/texture.jpg")) return false;
 
     return true;
 }
 
 void Material::destroy()
 {
-    SAFE_DELETE(m_texture);
     SAFE_DELETE(m_descriptorSet);
+    SAFE_DELETE(m_texture);
     SAFE_DELETE(m_uniformBuffer);
     SAFE_DELETE(m_pipeline);
 }
@@ -72,6 +73,7 @@ void Material::updateUniformBuffer()
 
     const auto& extent = m_swapchain.getImageExtent();
     m_uniformBufferObject.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+    m_uniformBufferObject.proj[1][1] = -m_uniformBufferObject.proj[1][1];
 
     m_uniformBuffer->getBufferMemory()->uploadData(&m_uniformBufferObject, sizeof(m_uniformBufferObject));
 }

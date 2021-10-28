@@ -43,7 +43,6 @@ public:
     VulkanDescriptorSet& getDescriptorSet() const { return *m_descriptorSet; };
     VulkanPipeline& getPipeline() { return *m_pipeline; };
 
-private:
     void updateUniformBuffer();
 
 private:

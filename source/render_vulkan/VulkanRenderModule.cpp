@@ -66,8 +66,7 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
 void VulkanRenderModule::destroyDevice()
 {
-    m_logicalDevice->waitGraphicsQueueIdle();
-    m_logicalDevice->waitDeviceIdle();
+    waitIdle();
 
     destroySyncObjects();
 
@@ -82,10 +81,8 @@ void VulkanRenderModule::destroyDevice()
     glfwTerminate();
 }
 
-bool VulkanRenderModule::gameLoop()
+bool VulkanRenderModule::update()
 {
-    double begin = glfwGetTime();
-
     /* Loop until the user closes the window */
     if (glfwWindowShouldClose(*m_window))
     {
@@ -95,18 +92,10 @@ bool VulkanRenderModule::gameLoop()
     /* Poll for and process events */
     glfwPollEvents();
 
-    double end = glfwGetTime();
-    double duration = end - begin;
-    begin = end;
-
-    // app->step(static_cast<float>(duration));
-
-    drawFrame();
-
     return true;
 }
 
-void VulkanRenderModule::drawFrame()
+void VulkanRenderModule::render(const RenderCb& cb)
 {
     // acquire an image and wait for it became ready to use
     uint32_t imageIndex{};
@@ -126,6 +115,9 @@ void VulkanRenderModule::drawFrame()
         {
             VkRect2D rect{ {0, 0}, m_swapchain->getImageExtent() };
             m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(imageIndex), rect);
+
+            // record commands
+            cb(*m_commandBuffer);
 
             m_commandBuffer->endRenderPass();
         }
@@ -157,6 +149,15 @@ void VulkanRenderModule::drawFrame()
     presentInfo.pImageIndices = &imageIndex;
 
     result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
+}
+
+void VulkanRenderModule::waitIdle()
+{
+    if (m_logicalDevice)
+    {
+        m_logicalDevice->waitGraphicsQueueIdle();
+        m_logicalDevice->waitDeviceIdle();
+    }
 }
 
 bool VulkanRenderModule::createSyncObjects()

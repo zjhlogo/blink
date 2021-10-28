@@ -164,7 +164,7 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+    rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -195,16 +195,12 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
 
-    // dynamic state
-    //         VkDynamicState dynamicStates[] = {
-    //             VK_DYNAMIC_STATE_VIEWPORT,
-    //             VK_DYNAMIC_STATE_LINE_WIDTH
-    //         };
-    //
-    //         VkPipelineDynamicStateCreateInfo dynamicState = {};
-    //         dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    //         dynamicState.dynamicStateCount = 2;
-    //         dynamicState.pDynamicStates = dynamicStates;
+    //// dynamic state
+    //VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
+    //VkPipelineDynamicStateCreateInfo dynamicState = {};
+    //dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    //dynamicState.dynamicStateCount = 2;
+    //dynamicState.pDynamicStates = dynamicStates;
 
     // create pipeline
     VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -218,7 +214,7 @@ VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t heigh
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pColorBlendState = &colorBlending;
-    //        pipelineInfo.pDynamicState = nullptr;
+    //pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = m_pipelineLayout;
     pipelineInfo.renderPass = m_swapchain.getRenderPass();
     pipelineInfo.subpass = 0;

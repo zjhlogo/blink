@@ -12,35 +12,48 @@
 
 NS_BEGIN
 
-App::~App()
+IApp::~IApp()
 {
 }
 
-void App::step(float dt)
+void IApp::update(float dt)
 {
     m_world.progress(dt);
 }
 
-int run(const tstring& renderEngine)
+void IApp::render(VulkanCommandBuffer& commandBuffer)
 {
-    VulkanRenderModule* renderModule = new VulkanRenderModule();
 
-    if (!renderModule) return -1;
+}
 
-    if (!renderModule->createDevice({ 1280, 720 }))
+void recordCommands(IApp* app, VulkanCommandBuffer& commandBuffer)
+{
+    app->render(commandBuffer);
+}
+
+int run(IApp& app)
+{
+    VulkanRenderModule renderModule;
+
+    if (!renderModule.createDevice({ 1280, 720 }))
     {
-        renderModule->destroyDevice();
-        SAFE_DELETE(renderModule);
+        renderModule.destroyDevice();
         return -1;
     }
 
-    while (renderModule->gameLoop())
+    app.initialize(renderModule);
+
+    while (renderModule.update())
     {
-        // TODO: sleep ?
+        app.update(0.016f);
+
+        renderModule.render(std::bind(recordCommands, &app, std::placeholders::_1));
     }
 
-    renderModule->destroyDevice();
-    SAFE_DELETE(renderModule);
+    renderModule.waitIdle();
+    app.terminate();
+
+    renderModule.destroyDevice();
 
     return 0;
 }

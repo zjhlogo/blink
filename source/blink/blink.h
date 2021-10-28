@@ -12,21 +12,25 @@
 
 NS_BEGIN
 
-class App
+class VulkanRenderModule;
+class VulkanCommandBuffer;
+
+class IApp
 {
 public:
-    virtual ~App();
+    virtual ~IApp();
 
-    virtual bool initialize() = 0;
+    virtual bool initialize(VulkanRenderModule& renderModule) = 0;
     virtual void terminate() = 0;
 
-    virtual void step(float dt);
+    virtual void update(float dt);
+    virtual void render(VulkanCommandBuffer& commandBuffer);
 
-public:
+protected:
     flecs::world m_world;
 
 };
 
-int run(const tstring& renderEngine);
+int run(IApp& app);
 
 NS_END

@@ -20,6 +20,9 @@ NS_BEGIN
 void RenderUtil::drawMesh(VulkanCommandBuffer& commandBuffer, Mesh* mesh, Material* material, const glm::vec3& pos, const glm::quat& rot)
 {
     // TODO: update uniform data, texture data
+    auto& pipeline = material->getPipeline();
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
     // vertex, index binding
     VkDeviceSize offset = 0;
@@ -31,7 +34,7 @@ void RenderUtil::drawMesh(VulkanCommandBuffer& commandBuffer, Mesh* mesh, Materi
 
     // uniforms, textures binding
     VkDescriptorSet descriptorSet = material->getDescriptorSet();
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipeline().getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
     // draw
     vkCmdDrawIndexed(commandBuffer, mesh->getNumIndices(), 1, 0, 0, 0);
