@@ -1,1 +1,1 @@
-an easy use, cross-platform, flexible and open source game engine
+an open source game engine using vulkan + flecs
