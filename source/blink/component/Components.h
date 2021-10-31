@@ -5,7 +5,7 @@
     @details   ~
     @author    zjhlogo
     @date      31.10.2021
-    @copyright © Cool Guy, 2021. All right reserved.
+    @copyright © zjhlogo, 2021. All right reserved.
 
 **/
 #pragma once

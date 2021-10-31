@@ -1,36 +1,18 @@
-/*!
- * \file blink.h
- *
- * \author zjhlogo
- * \date 2019/07/29
- *
- *
- */
+/**
+
+    @file      blink.h
+    @brief     
+    @details   ~
+    @author    zjhlogo
+    @date      31.10.2021
+    @copyright © zjhlogo, 2021. All right reserved.
+
+**/
 #pragma once
-#include <foundation/BaseTypes.h>
-#include <flecs/flecs.h>
+
+#include "app.h"
 
 NS_BEGIN
-
-class VulkanRenderModule;
-class VulkanCommandBuffer;
-
-class IApp
-{
-public:
-    IApp() {};
-    virtual ~IApp() {};
-
-    virtual bool initialize(VulkanRenderModule& renderModule) = 0;
-    virtual void terminate() = 0;
-
-    virtual void update(float dt);
-    virtual void render(VulkanCommandBuffer& commandBuffer);
-
-protected:
-    flecs::world m_world;
-
-};
 
 int run(IApp& app);
 

@@ -1,13 +1,16 @@
-/*!
- * \file HelloWorldApp.h
- *
- * \author zjhlogo
- * \date 2019/07/29
- *
- *
- */
+/**
+
+    @file      HelloWorldApp.h
+    @brief
+    @details   ~
+    @author    zjhlogo
+    @date      31.10.2021
+    @copyright © zjhlogo, 2021. All right reserved.
+
+**/
 #pragma once
-#include <blink/blink.h>
+
+#include <blink/app.h>
 #include <blink/geometry/Mesh.h>
 #include <blink/material/Material.h>
 

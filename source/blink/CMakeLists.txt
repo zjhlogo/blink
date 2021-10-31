@@ -12,6 +12,8 @@ material/Material.cpp
 material/material.h
 util/RenderUtil.cpp
 util/RenderUtil.h
+app.cpp
+app.h
 blink.cpp
 blink.h
 )
