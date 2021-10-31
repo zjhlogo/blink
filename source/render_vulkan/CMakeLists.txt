@@ -48,6 +48,8 @@ VulkanWindow.h
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
+target_link_libraries(${PROJECT_NAME} libfoundation libglfw3)
+
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/source>

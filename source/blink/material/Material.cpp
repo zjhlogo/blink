@@ -15,8 +15,6 @@
 #include <render_vulkan/VulkanSwapchain.h>
 #include <render_vulkan/VulkanTexture.h>
 
-#include <chrono>
-
 NS_BEGIN
 
 Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanCommandPool& commandPool, VulkanDescriptorPool& descriptorPool)
@@ -61,19 +59,14 @@ void Material::destroy()
     SAFE_DELETE(m_pipeline);
 }
 
-void Material::updateUniformBuffer()
+void Material::uploadUniformBuffer(const glm::vec3& pos, const glm::quat& rot)
 {
-    static auto startTime = std::chrono::high_resolution_clock::now();
+    m_uniformBufferObject.localToWorld = glm::translate(glm::identity<glm::mat4>(), pos) * glm::mat4_cast(rot);
 
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-    m_uniformBufferObject.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    m_uniformBufferObject.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
+    m_uniformBufferObject.worldToCamera = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     const auto& extent = m_swapchain.getImageExtent();
-    m_uniformBufferObject.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
-    m_uniformBufferObject.proj[1][1] = -m_uniformBufferObject.proj[1][1];
+    m_uniformBufferObject.cameraToProjection = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+    m_uniformBufferObject.cameraToProjection[1][1] = -m_uniformBufferObject.cameraToProjection[1][1];
 
     m_uniformBuffer->getBufferMemory()->uploadData(&m_uniformBufferObject, sizeof(m_uniformBufferObject));
 }

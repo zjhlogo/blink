@@ -20,6 +20,8 @@ NS_BEGIN
 void RenderUtil::drawMesh(VulkanCommandBuffer& commandBuffer, Mesh* mesh, Material* material, const glm::vec3& pos, const glm::quat& rot)
 {
     // TODO: update uniform data, texture data
+    material->uploadUniformBuffer(pos, rot);
+
     auto& pipeline = material->getPipeline();
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);

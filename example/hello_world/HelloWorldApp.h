@@ -19,8 +19,6 @@ public:
 
     virtual bool initialize(NS::VulkanRenderModule& renderModule) override;
     virtual void terminate() override;
-    virtual void update(float dt) override;
-    virtual void render(NS::VulkanCommandBuffer& commandBuffer) override;
 
 private:
     NS::Mesh* m_mesh{};

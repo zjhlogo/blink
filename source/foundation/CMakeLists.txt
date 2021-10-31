@@ -32,6 +32,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 endif ()
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME} libfmt libglm)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>

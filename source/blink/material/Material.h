@@ -27,9 +27,9 @@ class Material
 private:
     struct Uniforms
     {
-        glm::mat4 model;
-        glm::mat4 view;
-        glm::mat4 proj;
+        glm::mat4 localToWorld;
+        glm::mat4 worldToCamera;
+        glm::mat4 cameraToProjection;
     };
 
 public:
@@ -43,7 +43,7 @@ public:
     VulkanDescriptorSet& getDescriptorSet() const { return *m_descriptorSet; };
     VulkanPipeline& getPipeline() { return *m_pipeline; };
 
-    void updateUniformBuffer();
+    void uploadUniformBuffer(const glm::vec3& pos, const glm::quat& rot);
 
 private:
     VulkanLogicalDevice& m_logicalDevice;

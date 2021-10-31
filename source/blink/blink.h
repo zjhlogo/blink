@@ -18,7 +18,8 @@ class VulkanCommandBuffer;
 class IApp
 {
 public:
-    virtual ~IApp();
+    IApp() {};
+    virtual ~IApp() {};
 
     virtual bool initialize(VulkanRenderModule& renderModule) = 0;
     virtual void terminate() = 0;

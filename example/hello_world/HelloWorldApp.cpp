@@ -8,7 +8,7 @@
  */
 #include "HelloWorldApp.h"
 
-#include <blink/util/RenderUtil.h>
+#include <blink/component/Components.h>
 #include <render_vulkan/VulkanRenderModule.h>
 
 HelloWorldApp::HelloWorldApp()
@@ -32,6 +32,11 @@ bool HelloWorldApp::initialize(NS::VulkanRenderModule& renderModule)
     m_material = new NS::Material(logicalDevice, swapchain, commandPool, descriptorPool);
     if (!m_material->create()) return false;
 
+    auto e = m_world.entity();
+    e.set<NS::Position>({glm::zero<glm::vec3>()});
+    e.set<NS::Rotation>({glm::identity<glm::quat>()});
+    e.set<NS::StaticModel>({m_mesh, m_material});
+
     return true;
 }
 
@@ -39,16 +44,6 @@ void HelloWorldApp::terminate()
 {
     SAFE_DELETE(m_material);
     SAFE_DELETE(m_mesh);
-}
-
-void HelloWorldApp::update(float dt)
-{
-    m_material->updateUniformBuffer();
-}
-
-void HelloWorldApp::render(NS::VulkanCommandBuffer& commandBuffer)
-{
-    NS::RenderUtil::drawMesh(commandBuffer, m_mesh, m_material, glm::vec3(), glm::quat());
 }
 
 int main(int argc, char** argv)

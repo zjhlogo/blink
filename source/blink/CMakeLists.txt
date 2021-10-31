@@ -5,6 +5,7 @@ project(libblink)
 
 set(SOURCE_FILES
 base/ISystemBase.h
+component/Components.h
 geometry/Mesh.cpp
 geometry/Mesh.h
 material/Material.cpp
@@ -16,6 +17,8 @@ blink.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
+
+target_link_libraries(${PROJECT_NAME} libfoundation libflecs librender_vulkan)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
