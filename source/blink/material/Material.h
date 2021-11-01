@@ -14,45 +14,45 @@
 
 #include <vector>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-class VulkanSwapchain;
-class VulkanPipeline;
-class VulkanCommandBuffer;
-class VulkanUniformBuffer;
-class VulkanDescriptorPool;
-class VulkanTexture;
-
-class Material
+namespace blink
 {
-public:
-    Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool);
-    ~Material();
+    class VulkanLogicalDevice;
+    class VulkanSwapchain;
+    class VulkanPipeline;
+    class VulkanCommandBuffer;
+    class VulkanUniformBuffer;
+    class VulkanDescriptorPool;
+    class VulkanTexture;
 
-    bool create();
-    void destroy();
+    class Material
+    {
+    public:
+        Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool);
+        ~Material();
 
-    void setTexture(VulkanTexture* texture);
+        bool create();
+        void destroy();
 
-    void bindPipeline(VulkanCommandBuffer& commandBuffer);
-    bool bindUniformBuffer(VulkanCommandBuffer& commandBuffer,
-                           VulkanUniformBuffer& uniformBuffer,
-                           VulkanDescriptorPool& descriptorPool,
-                           const glm::vec3& pos,
-                           const glm::quat& rot);
+        void setTexture(VulkanTexture* texture);
 
-    VulkanPipeline& getPipeline() { return *m_pipeline; };
+        void bindPipeline(VulkanCommandBuffer& commandBuffer);
+        bool bindUniformBuffer(VulkanCommandBuffer& commandBuffer,
+                               VulkanUniformBuffer& uniformBuffer,
+                               VulkanDescriptorPool& descriptorPool,
+                               const glm::vec3& pos,
+                               const glm::quat& rot);
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
-    VulkanSwapchain& m_swapchain;
-    VulkanDescriptorPool& m_descriptorPool;
+        VulkanPipeline& getPipeline() { return *m_pipeline; };
 
-    VulkanPipeline* m_pipeline{};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
+        VulkanSwapchain& m_swapchain;
+        VulkanDescriptorPool& m_descriptorPool;
 
-    // the datas not belong to material
-    VulkanTexture* m_texture{};
-};
+        VulkanPipeline* m_pipeline{};
 
-NS_END
+        // the datas not belong to material
+        VulkanTexture* m_texture{};
+    };
+
+} // namespace blink

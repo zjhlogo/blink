@@ -4,32 +4,32 @@
  * \author zjhlogo
  * \date 2021/05/18
  *
- * 
+ *
  */
 #pragma once
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
+
 #include <vector>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-
-class VulkanCommandPool
+namespace blink
 {
-public:
-    VulkanCommandPool(VulkanLogicalDevice& logicalDevice);
-    ~VulkanCommandPool();
+    class VulkanLogicalDevice;
 
-    operator VkCommandPool() { return m_commandPool; };
+    class VulkanCommandPool
+    {
+    public:
+        VulkanCommandPool(VulkanLogicalDevice& logicalDevice);
+        ~VulkanCommandPool();
 
-    bool create();
-    void destroy();
+        operator VkCommandPool() { return m_commandPool; };
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
-    VkCommandPool m_commandPool{};
+        bool create();
+        void destroy();
 
-};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
+        VkCommandPool m_commandPool{};
+    };
 
-NS_END
+} // namespace blink

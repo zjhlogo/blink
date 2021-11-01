@@ -10,34 +10,34 @@
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-class VulkanCommandPool;
-
-class VulkanCommandBuffer
+namespace blink
 {
-public:
-    VulkanCommandBuffer(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
-    ~VulkanCommandBuffer();
+    class VulkanLogicalDevice;
+    class VulkanCommandPool;
 
-    bool create();
-    void destroy();
+    class VulkanCommandBuffer
+    {
+    public:
+        VulkanCommandBuffer(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+        ~VulkanCommandBuffer();
 
-    operator VkCommandBuffer() { return m_commandBuffer; };
+        bool create();
+        void destroy();
 
-    void submitCommand();
+        operator VkCommandBuffer() { return m_commandBuffer; };
 
-    void beginCommand();
-    void endCommand();
+        void submitCommand();
 
-    void beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, const VkRect2D& renderArea);
-    void endRenderPass();
+        void beginCommand();
+        void endCommand();
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
-    VulkanCommandPool& m_commandPool;
-    VkCommandBuffer m_commandBuffer{};
-};
+        void beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, const VkRect2D& renderArea);
+        void endRenderPass();
 
-NS_END
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
+        VulkanCommandPool& m_commandPool;
+        VkCommandBuffer m_commandBuffer{};
+    };
+
+} // namespace blink

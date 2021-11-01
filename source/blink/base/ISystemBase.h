@@ -13,13 +13,13 @@
 #include <flecs/flecs.h>
 #include <foundation/BaseTypesGlm.h>
 
-NS_BEGIN
-
-class ISystemBase
+namespace blink
 {
-public:
-    virtual bool initialize(flecs::world& world) = 0;
-    virtual void terminate(flecs::world& world){};
-};
+    class ISystemBase
+    {
+    public:
+        virtual bool initialize(flecs::world& world) = 0;
+        virtual void terminate(flecs::world& world){};
+    };
 
-NS_END
+} // namespace blink

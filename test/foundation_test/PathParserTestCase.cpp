@@ -11,7 +11,7 @@
 
 TEST(PathParserTestCase, parseTest)
 {
-    NS::PathParser pp;
+    blink::PathParser pp;
     pp.parse("");
     ASSERT_EQ(pp.root, "");
     ASSERT_EQ(pp.subDirectories.size(), 0);
@@ -60,7 +60,7 @@ TEST(PathParserTestCase, parseTest)
 
 TEST(PathParserTestCase, getDirectoryTest)
 {
-    NS::PathParser pp;
+    blink::PathParser pp;
     pp.parse("c:\\windows/system.32\\filename.txt.log");
     ASSERT_EQ(pp.getDirectory(), "c:/windows/system.32/");
 
@@ -70,7 +70,7 @@ TEST(PathParserTestCase, getDirectoryTest)
 
 TEST(PathParserTestCase, getFullPathTest)
 {
-    NS::PathParser pp;
+    blink::PathParser pp;
     pp.parse("c:\\windows/system.32\\filename.txt.log");
     ASSERT_EQ(pp.getFullPath(), "c:/windows/system.32/filename.txt.log");
 

@@ -10,25 +10,25 @@
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-
-class VulkanSemaphore
+namespace blink
 {
-public:
-    VulkanSemaphore(VulkanLogicalDevice& logicalDevice);
-    ~VulkanSemaphore();
+    class VulkanLogicalDevice;
 
-    operator VkSemaphore() { return m_semaphore; };
+    class VulkanSemaphore
+    {
+    public:
+        VulkanSemaphore(VulkanLogicalDevice& logicalDevice);
+        ~VulkanSemaphore();
 
-    bool create();
-    void destroy();
+        operator VkSemaphore() { return m_semaphore; };
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
+        bool create();
+        void destroy();
 
-    VkSemaphore m_semaphore{};
-};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
 
-NS_END
+        VkSemaphore m_semaphore{};
+    };
+
+} // namespace blink

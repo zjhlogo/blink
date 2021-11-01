@@ -4,37 +4,36 @@
  * \author zjhlogo
  * \date 2021/05/18
  *
- * 
+ *
  */
 #pragma once
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-
-class VulkanDescriptorPool
+namespace blink
 {
-public:
-    static const uint32_t DEFAULT_DESCRIPTOR_COUNT = 1024;
+    class VulkanLogicalDevice;
 
-public:
-    VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice);
-    ~VulkanDescriptorPool();
+    class VulkanDescriptorPool
+    {
+    public:
+        static const uint32_t DEFAULT_DESCRIPTOR_COUNT = 1024;
 
-    operator VkDescriptorPool() { return m_descriptorPool; };
+    public:
+        VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice);
+        ~VulkanDescriptorPool();
 
-    bool create(uint32_t count = DEFAULT_DESCRIPTOR_COUNT);
-    void destroy();
-    void reset();
+        operator VkDescriptorPool() { return m_descriptorPool; };
 
-    VkDescriptorSet allocateDescriptorSet(VkDescriptorSetLayout layout);
+        bool create(uint32_t count = DEFAULT_DESCRIPTOR_COUNT);
+        void destroy();
+        void reset();
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
-    VkDescriptorPool m_descriptorPool{};
+        VkDescriptorSet allocateDescriptorSet(VkDescriptorSetLayout layout);
 
-};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
+        VkDescriptorPool m_descriptorPool{};
+    };
 
-NS_END
+} // namespace blink

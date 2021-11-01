@@ -16,94 +16,85 @@
 
 #include <array>
 
-NS_BEGIN
-
-VulkanCommandBuffer::VulkanCommandBuffer(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
-    : m_logicalDevice(logicalDevice)
-    , m_commandPool(commandPool)
+namespace blink
 {
-}
-
-VulkanCommandBuffer::~VulkanCommandBuffer()
-{
-    destroy();
-}
-
-bool VulkanCommandBuffer::create()
-{
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = m_commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = 1;
-
-    if (vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &m_commandBuffer) != VK_SUCCESS)
+    VulkanCommandBuffer::VulkanCommandBuffer(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
+        : m_logicalDevice(logicalDevice)
+        , m_commandPool(commandPool)
     {
-        LOGE("create command buffer failed");
-        return false;
     }
 
-    return true;
-}
+    VulkanCommandBuffer::~VulkanCommandBuffer() { destroy(); }
 
-void VulkanCommandBuffer::destroy()
-{
-    if (m_commandBuffer != nullptr)
+    bool VulkanCommandBuffer::create()
     {
-        vkFreeCommandBuffers(m_logicalDevice, m_commandPool, 1, &m_commandBuffer);
-        m_commandBuffer = nullptr;
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = m_commandPool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+
+        if (vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &m_commandBuffer) != VK_SUCCESS)
+        {
+            LOGE("create command buffer failed");
+            return false;
+        }
+
+        return true;
     }
-}
 
-void VulkanCommandBuffer::submitCommand()
-{
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &m_commandBuffer;
+    void VulkanCommandBuffer::destroy()
+    {
+        if (m_commandBuffer != nullptr)
+        {
+            vkFreeCommandBuffers(m_logicalDevice, m_commandPool, 1, &m_commandBuffer);
+            m_commandBuffer = nullptr;
+        }
+    }
 
-    auto graphicsQueue = m_logicalDevice.getGraphicsQueue();
-    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    m_logicalDevice.waitGraphicsQueueIdle();
-}
+    void VulkanCommandBuffer::submitCommand()
+    {
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &m_commandBuffer;
 
-void VulkanCommandBuffer::beginCommand()
-{
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+        auto graphicsQueue = m_logicalDevice.getGraphicsQueue();
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        m_logicalDevice.waitGraphicsQueueIdle();
+    }
 
-    vkBeginCommandBuffer(m_commandBuffer, &beginInfo);
-}
+    void VulkanCommandBuffer::beginCommand()
+    {
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-void VulkanCommandBuffer::endCommand()
-{
-    vkEndCommandBuffer(m_commandBuffer);
-}
+        vkBeginCommandBuffer(m_commandBuffer, &beginInfo);
+    }
 
-void VulkanCommandBuffer::beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, const VkRect2D& renderArea)
-{
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = renderPass;
-    beginInfo.framebuffer = frameBuffer;
-    beginInfo.renderArea = renderArea;
+    void VulkanCommandBuffer::endCommand() { vkEndCommandBuffer(m_commandBuffer); }
 
-    std::array<VkClearValue, 2> clearValues;
-    clearValues[0].color.float32[0] = 0.0f;
-    clearValues[0].color.float32[1] = 0.0f;
-    clearValues[0].color.float32[2] = 0.0f;
-    clearValues[0].color.float32[3] = 1.0f;
-    clearValues[1].depthStencil = {1.0f, 0};
-    beginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-    beginInfo.pClearValues = clearValues.data();
+    void VulkanCommandBuffer::beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, const VkRect2D& renderArea)
+    {
+        VkRenderPassBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        beginInfo.renderPass = renderPass;
+        beginInfo.framebuffer = frameBuffer;
+        beginInfo.renderArea = renderArea;
 
-    vkCmdBeginRenderPass(m_commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
-}
+        std::array<VkClearValue, 2> clearValues;
+        clearValues[0].color.float32[0] = 0.0f;
+        clearValues[0].color.float32[1] = 0.0f;
+        clearValues[0].color.float32[2] = 0.0f;
+        clearValues[0].color.float32[3] = 1.0f;
+        clearValues[1].depthStencil = {1.0f, 0};
+        beginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        beginInfo.pClearValues = clearValues.data();
 
-void VulkanCommandBuffer::endRenderPass()
-{
-    vkCmdEndRenderPass(m_commandBuffer);
-}
+        vkCmdBeginRenderPass(m_commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    }
 
-NS_END
+    void VulkanCommandBuffer::endRenderPass() { vkCmdEndRenderPass(m_commandBuffer); }
+
+} // namespace blink

@@ -11,15 +11,15 @@
 
 #include <set>
 
-NS_BEGIN
-
-class Directory
+namespace blink
 {
-public:
-    static void listAllFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive);
+    class Directory
+    {
+    public:
+        static void listAllFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive);
 
-private:
-    static void enumlateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive);
-};
+    private:
+        static void enumlateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive);
+    };
 
-NS_END
+} // namespace blink

@@ -12,27 +12,27 @@
 
 #include <fmt/format.h>
 
-NS_BEGIN
-
-class Log
+namespace blink
 {
-public:
-    enum class LogPriority
+    class Log
     {
-        Info = 0,
-        Debug,
-        Warning,
-        Error,
-        NumPriority,
+    public:
+        enum class LogPriority
+        {
+            Info = 0,
+            Debug,
+            Warning,
+            Error,
+            NumPriority,
+        };
+
+    public:
+        static void print(const char* location, int line, LogPriority prio, const tstring& strMsg);
     };
 
-public:
-    static void print(const char* location, int line, LogPriority prio, const tstring& strMsg);
-};
+} // namespace blink
 
-NS_END
-
-#define LOGI(...) (NS::Log::print(__FILE__, __LINE__, NS::Log::LogPriority::Info, fmt::format(__VA_ARGS__)))
-#define LOGD(...) (NS::Log::print(__FILE__, __LINE__, NS::Log::LogPriority::Debug, fmt::format(__VA_ARGS__)))
-#define LOGW(...) (NS::Log::print(__FILE__, __LINE__, NS::Log::LogPriority::Warning, fmt::format(__VA_ARGS__)))
-#define LOGE(...) (NS::Log::print(__FILE__, __LINE__, NS::Log::LogPriority::Error, fmt::format(__VA_ARGS__)))
+#define LOGI(...) (blink::Log::print(__FILE__, __LINE__, blink::Log::LogPriority::Info, fmt::format(__VA_ARGS__)))
+#define LOGD(...) (blink::Log::print(__FILE__, __LINE__, blink::Log::LogPriority::Debug, fmt::format(__VA_ARGS__)))
+#define LOGW(...) (blink::Log::print(__FILE__, __LINE__, blink::Log::LogPriority::Warning, fmt::format(__VA_ARGS__)))
+#define LOGE(...) (blink::Log::print(__FILE__, __LINE__, blink::Log::LogPriority::Error, fmt::format(__VA_ARGS__)))

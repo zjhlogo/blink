@@ -4,49 +4,49 @@
  * \author zjhlogo
  * \date 2019/11/15
  *
- * 
+ *
  */
 #include "../../Directory.h"
 #include "../../PathParser.h"
-
 #include "dirent_windows.h"
 
-NS_BEGIN
-static const tstring CURRENT_DIR = ".";
-static const tstring PARENT_DIR = "..";
-
-void Directory::enumlateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive)
+namespace blink
 {
-    DIR* pDir = opendir(rootDir.c_str());
-    if (pDir)
+    static const tstring CURRENT_DIR = ".";
+    static const tstring PARENT_DIR = "..";
+
+    void Directory::enumlateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive)
     {
-        /* print all the files and directories within directory */
-        dirent* pEnt = nullptr;
-        while ((pEnt = readdir(pDir)) != nullptr)
+        DIR* pDir = opendir(rootDir.c_str());
+        if (pDir)
         {
-            if (pEnt->d_type == DT_DIR)
+            /* print all the files and directories within directory */
+            dirent* pEnt = nullptr;
+            while ((pEnt = readdir(pDir)) != nullptr)
             {
-                if (CURRENT_DIR != pEnt->d_name && PARENT_DIR != pEnt->d_name)
+                if (pEnt->d_type == DT_DIR)
                 {
-                    tstring currDir = PathParser::combinePath(rootDir, pEnt->d_name);
-                    if (recursive)
+                    if (CURRENT_DIR != pEnt->d_name && PARENT_DIR != pEnt->d_name)
                     {
-                        enumlateFiles(filesOut, currDir, recursive);
-                    }
-                    else
-                    {
-                        filesOut.insert(currDir);
+                        tstring currDir = PathParser::combinePath(rootDir, pEnt->d_name);
+                        if (recursive)
+                        {
+                            enumlateFiles(filesOut, currDir, recursive);
+                        }
+                        else
+                        {
+                            filesOut.insert(currDir);
+                        }
                     }
                 }
+                else if (pEnt->d_type == DT_REG)
+                {
+                    tstring currFilePath = PathParser::combinePath(rootDir, pEnt->d_name);
+                    filesOut.insert(currFilePath);
+                }
             }
-            else if (pEnt->d_type == DT_REG)
-            {
-                tstring currFilePath = PathParser::combinePath(rootDir, pEnt->d_name);
-                filesOut.insert(currFilePath);
-            }
+            closedir(pDir);
         }
-        closedir(pDir);
     }
-}
 
-NS_END
+} // namespace blink

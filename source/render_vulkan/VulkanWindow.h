@@ -12,30 +12,30 @@
 
 struct GLFWwindow;
 
-NS_BEGIN
-
-class VulkanContext;
-
-class VulkanWindow
+namespace blink
 {
-    friend class VulkanContext;
+    class VulkanContext;
 
-public:
-    VulkanWindow();
-    ~VulkanWindow();
+    class VulkanWindow
+    {
+        friend class VulkanContext;
 
-    bool create(const glm::ivec2& windowSize);
-    void destroy();
+    public:
+        VulkanWindow();
+        ~VulkanWindow();
 
-    operator GLFWwindow*() { return m_window; };
+        bool create(const glm::ivec2& windowSize);
+        void destroy();
 
-private:
-    bool createWindow(const glm::ivec2& windowSize);
-    void destroyWindow();
+        operator GLFWwindow*() { return m_window; };
 
-private:
-    glm::ivec2 m_deviceSize;
-    GLFWwindow* m_window{};
-};
+    private:
+        bool createWindow(const glm::ivec2& windowSize);
+        void destroyWindow();
 
-NS_END
+    private:
+        glm::ivec2 m_deviceSize;
+        GLFWwindow* m_window{};
+    };
+
+} // namespace blink

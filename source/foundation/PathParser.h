@@ -12,31 +12,31 @@
 #include <set>
 #include <vector>
 
-NS_BEGIN
-
-class PathParser
+namespace blink
 {
-public:
-    PathParser();
-    ~PathParser();
+    class PathParser
+    {
+    public:
+        PathParser();
+        ~PathParser();
 
-    void parse(const tstring& path);
-    tstring getDirectory();
-    tstring getFullPath();
+        void parse(const tstring& path);
+        tstring getDirectory();
+        tstring getFullPath();
 
-    static void filterFilesByExtension(std::set<tstring>& filesInOut, const std::set<tstring>& includeExts);
-    static bool matchFileExtensions(const tstring& filePath, const std::set<tstring>& exts, bool caseSensitive = false);
-    static tstring getFileLowerExtension(const tstring& path);
-    static tstring combinePath(const tstring& path1, const tstring& path2);
+        static void filterFilesByExtension(std::set<tstring>& filesInOut, const std::set<tstring>& includeExts);
+        static bool matchFileExtensions(const tstring& filePath, const std::set<tstring>& exts, bool caseSensitive = false);
+        static tstring getFileLowerExtension(const tstring& path);
+        static tstring combinePath(const tstring& path1, const tstring& path2);
 
-private:
-    void appendSubDir(std::vector<tstring>& dirList, const tstring& subDir);
+    private:
+        void appendSubDir(std::vector<tstring>& dirList, const tstring& subDir);
 
-public:
-    tstring root;
-    std::vector<tstring> subDirectories;
-    tstring filename;
-    tstring extension;
-};
+    public:
+        tstring root;
+        std::vector<tstring> subDirectories;
+        tstring filename;
+        tstring extension;
+    };
 
-NS_END
+} // namespace blink

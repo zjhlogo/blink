@@ -13,32 +13,32 @@
 
 #include <render_vulkan/VulkanRenderModule.h>
 
-NS_BEGIN
-
-int run(IApp& app)
+namespace blink
 {
-    VulkanRenderModule renderModule;
-
-    if (renderModule.createDevice({1280, 720}))
+    int run(IApp& app)
     {
-        if (app.initialize(renderModule))
-        {
-            while (renderModule.update())
-            {
-                app.update(0.016f);
+        VulkanRenderModule renderModule;
 
-                renderModule.render([&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool)
-                                    { app.render(commandBuffer, uniformBuffer, descriptorPool); });
+        if (renderModule.createDevice({1280, 720}))
+        {
+            if (app.initialize(renderModule))
+            {
+                while (renderModule.update())
+                {
+                    app.update(0.016f);
+
+                    renderModule.render([&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool)
+                                        { app.render(commandBuffer, uniformBuffer, descriptorPool); });
+                }
+
+                renderModule.waitIdle();
             }
 
-            renderModule.waitIdle();
+            app.terminate();
         }
 
-        app.terminate();
+        renderModule.destroyDevice();
+        return 0;
     }
 
-    renderModule.destroyDevice();
-    return 0;
-}
-
-NS_END
+} // namespace blink

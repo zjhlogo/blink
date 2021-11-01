@@ -15,41 +15,38 @@
 
 #include <vector>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-class VulkanCommandPool;
-class VulkanCommandBuffer;
-class VulkanBuffer;
-
-class Mesh
+namespace blink
 {
-public:
-    Mesh(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
-    ~Mesh();
+    class VulkanLogicalDevice;
+    class VulkanCommandPool;
+    class VulkanCommandBuffer;
+    class VulkanBuffer;
 
-    bool loadFromFile(const tstring& filePath);
-    bool uploadData(const void* vertexData,
-                    uint32 vertexDataSize,
-                    const uint16* indexData,
-                    uint32 numIndices);
+    class Mesh
+    {
+    public:
+        Mesh(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+        ~Mesh();
 
-    void bindMesh(VulkanCommandBuffer& commandBuffer);
+        bool loadFromFile(const tstring& filePath);
+        bool uploadData(const void* vertexData, uint32 vertexDataSize, const uint16* indexData, uint32 numIndices);
 
-    VulkanBuffer* getVertexBuffer() { return m_vertexBuffer; };
-    VulkanBuffer* getIndexBuffer() { return m_indexBuffer; };
-    uint32 getNumIndices() { return m_numIndices; };
+        void bindMesh(VulkanCommandBuffer& commandBuffer);
 
-private:
-    void destroy();
+        VulkanBuffer* getVertexBuffer() { return m_vertexBuffer; };
+        VulkanBuffer* getIndexBuffer() { return m_indexBuffer; };
+        uint32 getNumIndices() { return m_numIndices; };
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
-    VulkanCommandPool& m_commandPool;
+    private:
+        void destroy();
 
-    VulkanBuffer* m_vertexBuffer{};
-    VulkanBuffer* m_indexBuffer{};
-    uint32_t m_numIndices{};
-};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
+        VulkanCommandPool& m_commandPool;
 
-NS_END
+        VulkanBuffer* m_vertexBuffer{};
+        VulkanBuffer* m_indexBuffer{};
+        uint32_t m_numIndices{};
+    };
+
+} // namespace blink

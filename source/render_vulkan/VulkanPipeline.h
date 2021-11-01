@@ -12,43 +12,43 @@
 
 #include <vector>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-class VulkanSwapchain;
-
-class VulkanPipeline
+namespace blink
 {
-public:
-    VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
-    ~VulkanPipeline();
+    class VulkanLogicalDevice;
+    class VulkanSwapchain;
 
-    operator VkPipeline() const { return m_pipeline; };
+    class VulkanPipeline
+    {
+    public:
+        VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
+        ~VulkanPipeline();
 
-    bool create();
-    void destroy();
+        operator VkPipeline() const { return m_pipeline; };
 
-    bool recreatePipeline();
+        bool create();
+        void destroy();
 
-    VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
-    VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };
+        bool recreatePipeline();
 
-private:
-    VkDescriptorSetLayout createDescriptorSetLayout();
-    void destroyDescriptorSetLayout();
+        VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
+        VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };
 
-    VkPipeline createGraphicsPipeline(uint32_t width, uint32_t height);
-    void destroyGraphicsPipeline();
+    private:
+        VkDescriptorSetLayout createDescriptorSetLayout();
+        void destroyDescriptorSetLayout();
 
-    VkShaderModule createShaderModule(const tstring& shaderFile);
+        VkPipeline createGraphicsPipeline(uint32_t width, uint32_t height);
+        void destroyGraphicsPipeline();
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
-    VulkanSwapchain& m_swapchain;
+        VkShaderModule createShaderModule(const tstring& shaderFile);
 
-    VkDescriptorSetLayout m_descriptorSetLayout{};
-    VkPipelineLayout m_pipelineLayout{};
-    VkPipeline m_pipeline{};
-};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
+        VulkanSwapchain& m_swapchain;
 
-NS_END
+        VkDescriptorSetLayout m_descriptorSetLayout{};
+        VkPipelineLayout m_pipelineLayout{};
+        VkPipeline m_pipeline{};
+    };
+
+} // namespace blink

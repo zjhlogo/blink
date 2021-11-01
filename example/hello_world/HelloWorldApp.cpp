@@ -24,20 +24,20 @@ HelloWorldApp::~HelloWorldApp()
 {
 }
 
-bool HelloWorldApp::initialize(NS::VulkanRenderModule& renderModule)
+bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 {
     auto& logicalDevice = renderModule.getLogicalDevice();
     auto& swapchain = renderModule.getSwapchain();
     auto& commandPool = renderModule.getCommandPool();
     auto& descriptorPool = renderModule.getDescriptorPool();
 
-    m_mesh = new NS::Mesh(logicalDevice, commandPool);
+    m_mesh = new blink::Mesh(logicalDevice, commandPool);
     if (!m_mesh->loadFromFile("resource/viking_room.obj")) return false;
 
-    m_texture = new NS::VulkanTexture(logicalDevice, commandPool);
+    m_texture = new blink::VulkanTexture(logicalDevice, commandPool);
     if (!m_texture->createTexture2D("resource/viking_room.png")) return false;
 
-    m_material = new NS::Material(logicalDevice, swapchain, descriptorPool);
+    m_material = new blink::Material(logicalDevice, swapchain, descriptorPool);
     if (!m_material->create()) return false;
     m_material->setTexture(m_texture);
 
@@ -61,5 +61,5 @@ void HelloWorldApp::terminate()
 int main(int argc, char** argv)
 {
     HelloWorldApp app;
-    return NS::run(app);
+    return blink::run(app);
 }

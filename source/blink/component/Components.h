@@ -12,25 +12,25 @@
 
 #include <foundation/BaseTypesGlm.h>
 
-NS_BEGIN
-
-class Mesh;
-class Material;
-
-struct Position
+namespace blink
 {
-    glm::vec3 value;
-};
+    class Mesh;
+    class Material;
 
-struct Rotation
-{
-    glm::quat value;
-};
+    struct Position
+    {
+        glm::vec3 value;
+    };
 
-struct StaticModel
-{
-    Mesh* mesh;
-    Material* material;
-};
+    struct Rotation
+    {
+        glm::quat value;
+    };
 
-NS_END
+    struct StaticModel
+    {
+        Mesh* mesh;
+        Material* material;
+    };
+
+} // namespace blink

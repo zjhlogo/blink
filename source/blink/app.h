@@ -15,37 +15,37 @@
 
 #include <vector>
 
-NS_BEGIN
-
-class VulkanRenderModule;
-class VulkanCommandBuffer;
-class VulkanDescriptorPool;
-class VulkanUniformBuffer;
-class ISystemBase;
-
-class IApp
+namespace blink
 {
-public:
-    IApp(){};
-    virtual ~IApp();
+    class VulkanRenderModule;
+    class VulkanCommandBuffer;
+    class VulkanDescriptorPool;
+    class VulkanUniformBuffer;
+    class ISystemBase;
 
-    virtual bool initialize(VulkanRenderModule& renderModule) = 0;
-    virtual void terminate() = 0;
+    class IApp
+    {
+    public:
+        IApp(){};
+        virtual ~IApp();
 
-    virtual void update(float dt);
-    virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool);
+        virtual bool initialize(VulkanRenderModule& renderModule) = 0;
+        virtual void terminate() = 0;
 
-protected:
-    bool addSystem(ISystemBase* sys);
-    bool initializeSystems();
-    void terminateSystems();
-    void destroyAllSystems();
+        virtual void update(float dt);
+        virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool);
 
-protected:
-    flecs::world m_world;
+    protected:
+        bool addSystem(ISystemBase* sys);
+        bool initializeSystems();
+        void terminateSystems();
+        void destroyAllSystems();
 
-private:
-    std::vector<ISystemBase*> m_systems;
-};
+    protected:
+        flecs::world m_world;
 
-NS_END
+    private:
+        std::vector<ISystemBase*> m_systems;
+    };
+
+} // namespace blink

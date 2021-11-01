@@ -13,40 +13,40 @@
 
 #include <vector>
 
-NS_BEGIN
-
-class VulkanImage;
-class VulkanLogicalDevice;
-class VulkanCommandPool;
-
-class VulkanTexture
+namespace blink
 {
-public:
-    VulkanTexture(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& pool);
-    virtual ~VulkanTexture();
+    class VulkanImage;
+    class VulkanLogicalDevice;
+    class VulkanCommandPool;
 
-    bool createTexture2D(const tstring& texFile);
-    bool createTexture2D(void* pixels, int width, int height, int channels);
-    bool createDepthTexture(int width, int height);
+    class VulkanTexture
+    {
+    public:
+        VulkanTexture(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& pool);
+        virtual ~VulkanTexture();
 
-    void destroy();
+        bool createTexture2D(const tstring& texFile);
+        bool createTexture2D(void* pixels, int width, int height, int channels);
+        bool createDepthTexture(int width, int height);
 
-    VulkanImage* getTextureImage() { return m_textureImage; };
-    VkSampler getTextureSampler() { return m_textureSampler; };
+        void destroy();
 
-private:
-    VulkanImage* createTextureImage(void* pixels, int width, int height, int channels);
-    void destroyTextureImage();
+        VulkanImage* getTextureImage() { return m_textureImage; };
+        VkSampler getTextureSampler() { return m_textureSampler; };
 
-    VkSampler createTextureSampler();
-    void destroyTextureSampler();
+    private:
+        VulkanImage* createTextureImage(void* pixels, int width, int height, int channels);
+        void destroyTextureImage();
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
-    VulkanCommandPool& m_commandPool;
+        VkSampler createTextureSampler();
+        void destroyTextureSampler();
 
-    VulkanImage* m_textureImage{};
-    VkSampler m_textureSampler{};
-};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
+        VulkanCommandPool& m_commandPool;
 
-NS_END
+        VulkanImage* m_textureImage{};
+        VkSampler m_textureSampler{};
+    };
+
+} // namespace blink

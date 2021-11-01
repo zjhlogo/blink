@@ -11,50 +11,41 @@
 
 #include <foundation/Log.h>
 
-NS_BEGIN
-
-VulkanFence::VulkanFence(VulkanLogicalDevice& logicalDevice)
-    : m_logicalDevice(logicalDevice)
+namespace blink
 {
-}
-
-VulkanFence::~VulkanFence()
-{
-    destroy();
-}
-
-bool VulkanFence::create(bool signaled)
-{
-    VkFenceCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    if (signaled) info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    if (vkCreateFence(m_logicalDevice, &info, nullptr, &m_fence) != VK_SUCCESS)
+    VulkanFence::VulkanFence(VulkanLogicalDevice& logicalDevice)
+        : m_logicalDevice(logicalDevice)
     {
-        LOGE("create fence failed");
-        return false;
     }
 
-    return true;
-}
+    VulkanFence::~VulkanFence() { destroy(); }
 
-void VulkanFence::destroy()
-{
-    if (m_fence != nullptr)
+    bool VulkanFence::create(bool signaled)
     {
-        vkDestroyFence(m_logicalDevice, m_fence, nullptr);
-        m_fence = nullptr;
+        VkFenceCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        if (signaled) info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        if (vkCreateFence(m_logicalDevice, &info, nullptr, &m_fence) != VK_SUCCESS)
+        {
+            LOGE("create fence failed");
+            return false;
+        }
+
+        return true;
     }
-}
 
-void VulkanFence::wait()
-{
-    vkWaitForFences(m_logicalDevice, 1, &m_fence, VK_TRUE, UINT64_MAX);
-}
+    void VulkanFence::destroy()
+    {
+        if (m_fence != nullptr)
+        {
+            vkDestroyFence(m_logicalDevice, m_fence, nullptr);
+            m_fence = nullptr;
+        }
+    }
 
-void VulkanFence::reset()
-{
-    vkResetFences(m_logicalDevice, 1, &m_fence);
-}
+    void VulkanFence::wait() { vkWaitForFences(m_logicalDevice, 1, &m_fence, VK_TRUE, UINT64_MAX); }
 
-NS_END
+    void VulkanFence::reset() { vkResetFences(m_logicalDevice, 1, &m_fence); }
+
+} // namespace blink

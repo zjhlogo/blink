@@ -12,7 +12,7 @@
 
 #include <blink/base/ISystemBase.h>
 
-class RotationSystem : public NS::ISystemBase
+class RotationSystem : public blink::ISystemBase
 {
 public:
     virtual bool initialize(flecs::world& world) override;

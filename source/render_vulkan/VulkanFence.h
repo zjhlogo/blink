@@ -10,28 +10,28 @@
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-
-class VulkanFence
+namespace blink
 {
-public:
-    VulkanFence(VulkanLogicalDevice& logicalDevice);
-    ~VulkanFence();
+    class VulkanLogicalDevice;
 
-    operator VkFence() { return m_fence; };
+    class VulkanFence
+    {
+    public:
+        VulkanFence(VulkanLogicalDevice& logicalDevice);
+        ~VulkanFence();
 
-    bool create(bool signaled = false);
-    void destroy();
+        operator VkFence() { return m_fence; };
 
-    void wait();
-    void reset();
+        bool create(bool signaled = false);
+        void destroy();
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
+        void wait();
+        void reset();
 
-    VkFence m_fence{};
-};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
 
-NS_END
+        VkFence m_fence{};
+    };
+
+} // namespace blink

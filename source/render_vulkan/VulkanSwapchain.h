@@ -11,65 +11,65 @@
 #include <vulkan/vulkan.h>
 
 #include <vector>
-NS_BEGIN
-
-class VulkanWindow;
-class VulkanLogicalDevice;
-class VulkanCommandPool;
-class VulkanImage;
-class VulkanTexture;
-
-class VulkanSwapchain
+namespace blink
 {
-public:
-    VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
-    ~VulkanSwapchain();
+    class VulkanWindow;
+    class VulkanLogicalDevice;
+    class VulkanCommandPool;
+    class VulkanImage;
+    class VulkanTexture;
 
-    bool create();
-    void destroy();
+    class VulkanSwapchain
+    {
+    public:
+        VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+        ~VulkanSwapchain();
 
-    operator VkSwapchainKHR() const { return m_swapChain; };
-    VkFormat getImageFormat() const { return m_swapChainImageFormat; };
-    const VkExtent2D& getImageExtent() const { return m_swapChainExtent; };
-    std::size_t getImageCount() const { return m_images.size(); };
-    VkFramebuffer getFramebuffers(size_t index) { return m_swapChainFramebuffers[index]; };
-    VkRenderPass getRenderPass() const { return m_renderPass; };
+        bool create();
+        void destroy();
 
-    void setCurrentActivedImageIndex(uint32_t imageIndex) { m_activedImageIndex = imageIndex; };
-    uint32_t getCurrentActivedImageIndex() { return m_activedImageIndex; };
+        operator VkSwapchainKHR() const { return m_swapChain; };
+        VkFormat getImageFormat() const { return m_swapChainImageFormat; };
+        const VkExtent2D& getImageExtent() const { return m_swapChainExtent; };
+        std::size_t getImageCount() const { return m_images.size(); };
+        VkFramebuffer getFramebuffers(size_t index) { return m_swapChainFramebuffers[index]; };
+        VkRenderPass getRenderPass() const { return m_renderPass; };
 
-    bool recreateSwapChain();
+        void setCurrentActivedImageIndex(uint32_t imageIndex) { m_activedImageIndex = imageIndex; };
+        uint32_t getCurrentActivedImageIndex() { return m_activedImageIndex; };
 
-private:
-    bool createSwapChain();
-    void destroySwapChain();
+        bool recreateSwapChain();
 
-    bool createSwapchainImageViews();
-    void destroySwapchainImageViews();
+    private:
+        bool createSwapChain();
+        void destroySwapChain();
 
-    VkRenderPass createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
-    void destroyRenderPass();
+        bool createSwapchainImageViews();
+        void destroySwapchainImageViews();
 
-    bool createFramebuffers(VkRenderPass renderPass);
-    void destroyFramebuffers();
+        VkRenderPass createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
+        void destroyRenderPass();
 
-private:
-    VulkanWindow& m_window;
-    VulkanLogicalDevice& m_logicalDevice;
-    VulkanCommandPool& m_commandPool;
+        bool createFramebuffers(VkRenderPass renderPass);
+        void destroyFramebuffers();
 
-    VkSwapchainKHR m_swapChain{};
-    VkFormat m_swapChainImageFormat;
-    VkExtent2D m_swapChainExtent;
+    private:
+        VulkanWindow& m_window;
+        VulkanLogicalDevice& m_logicalDevice;
+        VulkanCommandPool& m_commandPool;
 
-    std::vector<VulkanImage*> m_images;
-    std::vector<VkFramebuffer> m_swapChainFramebuffers;
+        VkSwapchainKHR m_swapChain{};
+        VkFormat m_swapChainImageFormat;
+        VkExtent2D m_swapChainExtent;
 
-    VulkanTexture* m_depthTexture{};
+        std::vector<VulkanImage*> m_images;
+        std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
-    VkRenderPass m_renderPass{};
+        VulkanTexture* m_depthTexture{};
 
-    uint32_t m_activedImageIndex{};
-};
+        VkRenderPass m_renderPass{};
 
-NS_END
+        uint32_t m_activedImageIndex{};
+    };
+
+} // namespace blink

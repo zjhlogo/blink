@@ -4,34 +4,33 @@
  * \author zjhlogo
  * \date 2021/05/18
  *
- * 
+ *
  */
 #pragma once
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
 
-NS_BEGIN
-
-class VulkanLogicalDevice;
-
-class VulkanMemory
+namespace blink
 {
-public:
-    VulkanMemory(VulkanLogicalDevice& logicalDevice);
-    ~VulkanMemory();
+    class VulkanLogicalDevice;
 
-    bool allocateMemory(VkMemoryPropertyFlags memoryProperties, const VkMemoryRequirements& requirement);
-    void freeMemory();
+    class VulkanMemory
+    {
+    public:
+        VulkanMemory(VulkanLogicalDevice& logicalDevice);
+        ~VulkanMemory();
 
-    bool uploadData(const void* data, VkDeviceSize size);
+        bool allocateMemory(VkMemoryPropertyFlags memoryProperties, const VkMemoryRequirements& requirement);
+        void freeMemory();
 
-    operator VkDeviceMemory () { return m_memory; };
+        bool uploadData(const void* data, VkDeviceSize size);
 
-private:
-    VulkanLogicalDevice& m_logicalDevice;
+        operator VkDeviceMemory() { return m_memory; };
 
-    VkDeviceMemory m_memory{};
+    private:
+        VulkanLogicalDevice& m_logicalDevice;
 
-};
+        VkDeviceMemory m_memory{};
+    };
 
-NS_END
+} // namespace blink

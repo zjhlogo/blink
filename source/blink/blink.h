@@ -12,8 +12,8 @@
 
 #include "app.h"
 
-NS_BEGIN
+namespace blink
+{
+    int run(IApp& app);
 
-int run(IApp& app);
-
-NS_END
+}

@@ -14,8 +14,8 @@
 
 bool RotationSystem::initialize(flecs::world& world)
 {
-    world.system<NS::Rotation>().each(
-        [](flecs::entity e, NS::Rotation& rot)
+    world.system<blink::Rotation>().each(
+        [](flecs::entity e, blink::Rotation& rot)
         {
             float dt = e.delta_time();
             rot.value = glm::rotate(rot.value, 0.1f * dt, glm::vec3(0.0f, 1.0f, 0.0f));

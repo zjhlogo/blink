@@ -10,37 +10,37 @@
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
 
-NS_BEGIN
-
-class VulkanContext;
-
-class VulkanLogicalDevice
+namespace blink
 {
-public:
-    VulkanLogicalDevice(VulkanContext* context);
-    ~VulkanLogicalDevice();
+    class VulkanContext;
 
-    bool create();
-    void destroy();
+    class VulkanLogicalDevice
+    {
+    public:
+        VulkanLogicalDevice(VulkanContext* context);
+        ~VulkanLogicalDevice();
 
-    operator VkDevice() { return m_logicalDevice; };
-    void waitDeviceIdle();
-    void waitGraphicsQueueIdle();
+        bool create();
+        void destroy();
 
-    VulkanContext* getContext() { return m_context; };
-    VkQueue getGraphicsQueue() { return m_graphicsQueue; };
-    VkQueue getPresentQueue() { return m_presentQueue; };
+        operator VkDevice() { return m_logicalDevice; };
+        void waitDeviceIdle();
+        void waitGraphicsQueueIdle();
 
-private:
-    bool createLogicalDevice();
-    void destroyLogicalDevice();
+        VulkanContext* getContext() { return m_context; };
+        VkQueue getGraphicsQueue() { return m_graphicsQueue; };
+        VkQueue getPresentQueue() { return m_presentQueue; };
 
-private:
-    VulkanContext* m_context{};
+    private:
+        bool createLogicalDevice();
+        void destroyLogicalDevice();
 
-    VkDevice m_logicalDevice{};
-    VkQueue m_graphicsQueue{};
-    VkQueue m_presentQueue{};
-};
+    private:
+        VulkanContext* m_context{};
 
-NS_END
+        VkDevice m_logicalDevice{};
+        VkQueue m_graphicsQueue{};
+        VkQueue m_presentQueue{};
+    };
+
+} // namespace blink

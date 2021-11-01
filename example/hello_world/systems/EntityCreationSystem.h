@@ -14,14 +14,14 @@
 #include <blink/geometry/Mesh.h>
 #include <blink/material/Material.h>
 
-class EntityCreationSystem : public NS::ISystemBase
+class EntityCreationSystem : public blink::ISystemBase
 {
 public:
-    EntityCreationSystem(NS::Mesh* mesh, NS::Material* material);
+    EntityCreationSystem(blink::Mesh* mesh, blink::Material* material);
 
     virtual bool initialize(flecs::world& world) override;
 
 private:
-    NS::Mesh* m_mesh{};
-    NS::Material* m_material{};
+    blink::Mesh* m_mesh{};
+    blink::Material* m_material{};
 };

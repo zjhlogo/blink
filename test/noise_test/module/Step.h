@@ -1,3 +1,13 @@
+/**
+
+    @file      Step.h
+    @brief
+    @details   ~
+    @author    zjhlogo
+    @date      2.11.2021
+    @copyright © zjhlogo, 2021. All right reserved.
+
+**/
 #pragma once
 
 #include <noise/module/modulebase.h>

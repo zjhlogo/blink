@@ -11,39 +11,36 @@
 
 #include <foundation/Log.h>
 
-NS_BEGIN
-
-VulkanSemaphore::VulkanSemaphore(VulkanLogicalDevice& logicalDevice)
-    : m_logicalDevice(logicalDevice)
+namespace blink
 {
-}
-
-VulkanSemaphore::~VulkanSemaphore()
-{
-    destroy();
-}
-
-bool VulkanSemaphore::create()
-{
-    VkSemaphoreCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    if (vkCreateSemaphore(m_logicalDevice, &info, nullptr, &m_semaphore) != VK_SUCCESS)
+    VulkanSemaphore::VulkanSemaphore(VulkanLogicalDevice& logicalDevice)
+        : m_logicalDevice(logicalDevice)
     {
-        LOGE("create semaphore failed");
-        return false;
     }
 
-    return true;
-}
+    VulkanSemaphore::~VulkanSemaphore() { destroy(); }
 
-void VulkanSemaphore::destroy()
-{
-    if (m_semaphore != nullptr)
+    bool VulkanSemaphore::create()
     {
-        vkDestroySemaphore(m_logicalDevice, m_semaphore, nullptr);
-        m_semaphore = nullptr;
-    }
-}
+        VkSemaphoreCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-NS_END
+        if (vkCreateSemaphore(m_logicalDevice, &info, nullptr, &m_semaphore) != VK_SUCCESS)
+        {
+            LOGE("create semaphore failed");
+            return false;
+        }
+
+        return true;
+    }
+
+    void VulkanSemaphore::destroy()
+    {
+        if (m_semaphore != nullptr)
+        {
+            vkDestroySemaphore(m_logicalDevice, m_semaphore, nullptr);
+            m_semaphore = nullptr;
+        }
+    }
+
+} // namespace blink

@@ -8,6 +8,6 @@
  */
 #include "Log.h"
 
-NS_BEGIN
-
-NS_END
+namespace blink
+{
+}
