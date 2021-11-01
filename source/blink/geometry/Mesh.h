@@ -1,12 +1,15 @@
-/*!
- * \file Mesh.h
- *
- * \author zjhlogo
- * \date 2021/10/23
- *
- *
- */
+/**
+
+    @file      Mesh.h
+    @brief
+    @details   ~
+    @author    zjhlogo
+    @date      1.11.2021
+    @copyright Copyright zjhlogo, 2021. All right reserved.
+
+**/
 #pragma once
+
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
 
@@ -16,6 +19,7 @@ NS_BEGIN
 
 class VulkanLogicalDevice;
 class VulkanCommandPool;
+class VulkanCommandBuffer;
 class VulkanBuffer;
 
 class Mesh
@@ -31,6 +35,8 @@ public:
                     uint32 numIndices,
                     const std::vector<VkVertexInputBindingDescription>& vertexBindingDesc,
                     const std::vector<VkVertexInputAttributeDescription>& vertexAttributeDesc);
+
+    void bindMesh(VulkanCommandBuffer& commandBuffer);
 
     VulkanBuffer* getVertexBuffer() { return m_vertexBuffer; };
     VulkanBuffer* getIndexBuffer() { return m_indexBuffer; };

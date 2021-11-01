@@ -10,8 +10,6 @@ geometry/Mesh.cpp
 geometry/Mesh.h
 material/Material.cpp
 material/material.h
-util/RenderUtil.cpp
-util/RenderUtil.h
 app.cpp
 app.h
 blink.cpp

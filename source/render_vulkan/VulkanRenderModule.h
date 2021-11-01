@@ -28,13 +28,14 @@ class VulkanDescriptorPool;
 class VulkanDescriptorSets;
 class VulkanCommandPool;
 class VulkanCommandBuffer;
+class VulkanUniformBuffer;
 class VulkanSemaphore;
 class VulkanFence;
 
 class VulkanRenderModule
 {
 public:
-    typedef std::function<void(VulkanCommandBuffer&)> RenderCb;
+    typedef std::function<void(VulkanCommandBuffer&, VulkanUniformBuffer&, VulkanDescriptorPool&)> RenderCb;
 
 public:
     VulkanRenderModule();
@@ -66,8 +67,8 @@ private:
     VulkanSwapchain* m_swapchain{};
     VulkanCommandPool* m_commandPool{};
     VulkanDescriptorPool* m_descriptorPool{};
-
     VulkanCommandBuffer* m_commandBuffer{};
+    VulkanUniformBuffer* m_uniformBuffer{};
 };
 
 NS_END

@@ -36,7 +36,7 @@ public:
     VulkanMemory* getBufferMemory() { return m_bufferMemory; };
     VkDeviceSize getBufferSize() { return m_bufferSize; };
 
-private:
+protected:
     VulkanLogicalDevice& m_logicalDevice;
 
     VkBuffer m_buffer{};

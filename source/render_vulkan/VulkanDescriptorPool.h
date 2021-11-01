@@ -17,13 +17,19 @@ class VulkanLogicalDevice;
 class VulkanDescriptorPool
 {
 public:
+    static const uint32_t DEFAULT_DESCRIPTOR_COUNT = 1024;
+
+public:
     VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice);
     ~VulkanDescriptorPool();
 
     operator VkDescriptorPool() { return m_descriptorPool; };
 
-    bool create(uint32_t count);
+    bool create(uint32_t count = DEFAULT_DESCRIPTOR_COUNT);
     void destroy();
+    void reset();
+
+    VkDescriptorSet allocateDescriptorSet(VkDescriptorSetLayout layout);
 
 private:
     VulkanLogicalDevice& m_logicalDevice;

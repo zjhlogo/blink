@@ -42,6 +42,8 @@ VulkanSwapchain.cpp
 VulkanSwapchain.h
 VulkanTexture.cpp
 VulkanTexture.h
+VulkanUniformBuffer.cpp
+VulkanUniformBuffer.h
 VulkanWindow.cpp
 VulkanWindow.h
 )

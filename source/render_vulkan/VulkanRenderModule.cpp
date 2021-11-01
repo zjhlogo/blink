@@ -18,6 +18,7 @@
 #include "VulkanPipeline.h"
 #include "VulkanSemaphore.h"
 #include "VulkanSwapchain.h"
+#include "VulkanUniformBuffer.h"
 #include "VulkanWindow.h"
 #include "utils/VulkanUtils.h"
 
@@ -54,10 +55,13 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     if (!m_swapchain->create()) return false;
 
     m_descriptorPool = new VulkanDescriptorPool(*m_logicalDevice);
-    if (!m_descriptorPool->create((uint32_t)m_swapchain->getImageCount())) return false;
+    if (!m_descriptorPool->create()) return false;
 
     m_commandBuffer = new VulkanCommandBuffer(*m_logicalDevice, *m_commandPool);
     if (!m_commandBuffer->create()) return false;
+
+    m_uniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
+    if (!m_uniformBuffer->create()) return false;
 
     if (!createSyncObjects()) return false;
 
@@ -70,6 +74,7 @@ void VulkanRenderModule::destroyDevice()
 
     destroySyncObjects();
 
+    SAFE_DELETE(m_uniformBuffer);
     SAFE_DELETE(m_commandBuffer);
     SAFE_DELETE(m_descriptorPool);
     SAFE_DELETE(m_swapchain);
@@ -108,22 +113,27 @@ void VulkanRenderModule::render(const RenderCb& cb)
     // wait graphics queue idle
     m_logicalDevice->waitGraphicsQueueIdle();
 
+    m_descriptorPool->reset();
+    m_uniformBuffer->reset();
+
     // record command buffer
     {
         m_commandBuffer->beginCommand();
 
         {
-            VkRect2D rect{ {0, 0}, m_swapchain->getImageExtent() };
+            VkRect2D rect{{0, 0}, m_swapchain->getImageExtent()};
             m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(imageIndex), rect);
 
             // record commands
-            cb(*m_commandBuffer);
+            cb(*m_commandBuffer, *m_uniformBuffer, *m_descriptorPool);
 
             m_commandBuffer->endRenderPass();
         }
 
         m_commandBuffer->endCommand();
     }
+
+    m_uniformBuffer->flushBuffer();
 
     // submit command
     VkSubmitInfo submitInfo{};

@@ -4,8 +4,8 @@
     @brief
     @details   ~
     @author    zjhlogo
-    @date      31.10.2021
-    @copyright © zjhlogo, 2021. All right reserved.
+    @date      1.11.2021
+    @copyright Copyright zjhlogo, 2021. All right reserved.
 
 **/
 #pragma once
@@ -19,6 +19,8 @@ NS_BEGIN
 
 class VulkanRenderModule;
 class VulkanCommandBuffer;
+class VulkanDescriptorPool;
+class VulkanUniformBuffer;
 class ISystemBase;
 
 class IApp
@@ -28,23 +30,22 @@ public:
     virtual ~IApp();
 
     virtual bool initialize(VulkanRenderModule& renderModule) = 0;
-    bool postInitialize();
-
-    void preTerminate();
     virtual void terminate() = 0;
 
     virtual void update(float dt);
-    virtual void render(VulkanCommandBuffer& commandBuffer);
+    virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool);
 
 protected:
     bool addSystem(ISystemBase* sys);
+    bool initializeSystems();
+    void terminateSystems();
     void destroyAllSystems();
-
-private:
-    std::vector<ISystemBase*> m_systems;
 
 protected:
     flecs::world m_world;
+
+private:
+    std::vector<ISystemBase*> m_systems;
 };
 
 NS_END

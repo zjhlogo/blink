@@ -101,7 +101,7 @@ bool VulkanSwapchain::createSwapChain()
     VulkanUtils::getSurfacePresentModes(presentModes, physicalDevice, surface);
 
     VkPresentModeKHR selPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-    //for (const auto& presentMode : presentModes)
+    // for (const auto& presentMode : presentModes)
     //{
     //    if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
     //    {

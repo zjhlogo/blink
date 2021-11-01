@@ -1,11 +1,14 @@
-/*!
- * \file blink.cpp
- *
- * \author zjhlogo
- * \date 2019/07/29
- *
- *
- */
+/**
+
+    @file      blink.cpp
+    @brief
+    @details   ~
+    @author    zjhlogo
+    @date      1.11.2021
+    @copyright Copyright zjhlogo, 2021. All right reserved.
+
+**/
+
 #include "blink.h"
 
 #include <render_vulkan/VulkanRenderModule.h>
@@ -20,19 +23,15 @@ int run(IApp& app)
     {
         if (app.initialize(renderModule))
         {
-            if (app.postInitialize())
+            while (renderModule.update())
             {
-                while (renderModule.update())
-                {
-                    app.update(0.016f);
+                app.update(0.016f);
 
-                    renderModule.render([&](VulkanCommandBuffer& commandBuffer) { app.render(commandBuffer); });
-                }
-
-                renderModule.waitIdle();
+                renderModule.render([&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool)
+                                    { app.render(commandBuffer, uniformBuffer, descriptorPool); });
             }
 
-            app.preTerminate();
+            renderModule.waitIdle();
         }
 
         app.terminate();

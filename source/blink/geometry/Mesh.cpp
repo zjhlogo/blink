@@ -1,16 +1,20 @@
-/*!
- * \file Mesh.cpp
- *
- * \author zjhlogo
- * \date 2021/10/23
- *
- *
- */
+/**
+
+    @file      Mesh.cpp
+    @brief
+    @details   ~
+    @author    zjhlogo
+    @date      1.11.2021
+    @copyright Copyright zjhlogo, 2021. All right reserved.
+
+**/
+
 #include "Mesh.h"
 
 #include <foundation/Log.h>
 #include <render_vulkan/Types.h>
 #include <render_vulkan/VulkanBuffer.h>
+#include <render_vulkan/VulkanCommandBuffer.h>
 
 #include <unordered_map>
 
@@ -124,6 +128,15 @@ bool Mesh::uploadData(const void* vertexData,
     m_numIndices = numIndices;
 
     return true;
+}
+
+void Mesh::bindMesh(VulkanCommandBuffer& commandBuffer)
+{
+    VkDeviceSize offset = 0;
+    VkBuffer vertexBuffer = *m_vertexBuffer;
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
+
+    vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 }
 
 void Mesh::destroy()

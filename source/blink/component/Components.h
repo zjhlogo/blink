@@ -1,11 +1,11 @@
 /**
 
     @file      Components.h
-    @brief     
+    @brief
     @details   ~
     @author    zjhlogo
-    @date      31.10.2021
-    @copyright © zjhlogo, 2021. All right reserved.
+    @date      1.11.2021
+    @copyright Copyright zjhlogo, 2021. All right reserved.
 
 **/
 #pragma once
