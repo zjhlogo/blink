@@ -1,12 +1,17 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(binding = 0) uniform UniformBufferObject
+layout(binding = 0) uniform PerFrameUniforms
 {
-    mat4 model;
-    mat4 view;
-    mat4 proj;
-} ubo;
+    mat4 matWorldToCamera;
+    mat4 matCameraToProjection;
+    mat4 matWorldToProjection;
+} pfu;
+
+layout(binding = 1) uniform PerInstanceUniforms
+{
+    mat4 matLocalToWorld;
+} piu;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
@@ -17,7 +22,7 @@ layout(location = 1) out vec2 fragTexCoord;
 
 void main()
 {
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
+    gl_Position = pfu.matWorldToProjection * piu.matLocalToWorld * vec4(inPosition, 1.0);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 }

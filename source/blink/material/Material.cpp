@@ -39,11 +39,6 @@ bool Material::create()
     m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
     if (!m_pipeline->create()) return false;
 
-    m_uniformData.worldToCamera = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    const auto& extent = m_swapchain.getImageExtent();
-    m_uniformData.cameraToProjection = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
-    m_uniformData.cameraToProjection[1][1] = -m_uniformData.cameraToProjection[1][1];
-
     return true;
 }
 
@@ -70,43 +65,48 @@ bool Material::bindUniformBuffer(VulkanCommandBuffer& commandBuffer,
 {
     if (!m_texture) return false;
 
-    m_uniformData.localToWorld = glm::translate(glm::identity<glm::mat4>(), pos) * glm::mat4_cast(rot);
+    glm::mat4 localToWorld = glm::translate(glm::identity<glm::mat4>(), pos) * glm::mat4_cast(rot);
 
     auto beginOfData = uniformBuffer.getCurrentPos();
-    auto dataSize = sizeof(m_uniformData);
-    if (!uniformBuffer.appendData(&m_uniformData, dataSize)) return false;
+    auto dataSize = sizeof(localToWorld);
+    if (!uniformBuffer.appendData(&localToWorld, dataSize)) return false;
 
     // uniforms, textures binding
     auto descriptorSet = descriptorPool.allocateDescriptorSet(m_pipeline->getDestriptorSetLayout());
 
-    VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = uniformBuffer;
-    bufferInfo.offset = beginOfData;
-    bufferInfo.range = dataSize;
+    VkWriteDescriptorSet descriptorWrites[3]{};
 
-    VkWriteDescriptorSet descriptorWrites[2]{};
+    const auto& perFrameBufferInfo = uniformBuffer.getPerFrameBufferInfo();
     descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[0].dstSet = descriptorSet;
     descriptorWrites[0].dstBinding = 0;
-    descriptorWrites[0].dstArrayElement = 0;
     descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     descriptorWrites[0].descriptorCount = 1;
-    descriptorWrites[0].pBufferInfo = &bufferInfo;
+    descriptorWrites[0].pBufferInfo = &perFrameBufferInfo;
+
+    VkDescriptorBufferInfo perInstanceBufferInfo{};
+    perInstanceBufferInfo.buffer = uniformBuffer;
+    perInstanceBufferInfo.offset = beginOfData;
+    perInstanceBufferInfo.range = dataSize;
+    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[1].dstSet = descriptorSet;
+    descriptorWrites[1].dstBinding = 1;
+    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrites[1].descriptorCount = 1;
+    descriptorWrites[1].pBufferInfo = &perInstanceBufferInfo;
 
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfo.imageView = m_texture->getTextureImage()->getImageView();
     imageInfo.sampler = m_texture->getTextureSampler();
+    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[2].dstSet = descriptorSet;
+    descriptorWrites[2].dstBinding = 2;
+    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[2].descriptorCount = 1;
+    descriptorWrites[2].pImageInfo = &imageInfo;
 
-    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[1].dstSet = descriptorSet;
-    descriptorWrites[1].dstBinding = 1;
-    descriptorWrites[1].dstArrayElement = 0;
-    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[1].descriptorCount = 1;
-    descriptorWrites[1].pImageInfo = &imageInfo;
-
-    vkUpdateDescriptorSets(m_logicalDevice, (uint32_t)2, descriptorWrites, 0, nullptr);
+    vkUpdateDescriptorSets(m_logicalDevice, (uint32_t)3, descriptorWrites, 0, nullptr);
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
 

@@ -18,7 +18,7 @@ NS_BEGIN
 class ISystemBase
 {
 public:
-    virtual bool initialize(flecs::world& world) { return true; };
+    virtual bool initialize(flecs::world& world) = 0;
     virtual void terminate(flecs::world& world){};
 };
 

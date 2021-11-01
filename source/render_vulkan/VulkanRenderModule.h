@@ -37,6 +37,13 @@ class VulkanRenderModule
 public:
     typedef std::function<void(VulkanCommandBuffer&, VulkanUniformBuffer&, VulkanDescriptorPool&)> RenderCb;
 
+    struct PerFrameUniforms
+    {
+        glm::mat4 matWorldToCamera;
+        glm::mat4 matCameraToProjection;
+        glm::mat4 matWorldToProjection;
+    };
+
 public:
     VulkanRenderModule();
     virtual ~VulkanRenderModule();
@@ -69,6 +76,8 @@ private:
     VulkanDescriptorPool* m_descriptorPool{};
     VulkanCommandBuffer* m_commandBuffer{};
     VulkanUniformBuffer* m_uniformBuffer{};
+    PerFrameUniforms m_perFrameUniforms;
+
 };
 
 NS_END

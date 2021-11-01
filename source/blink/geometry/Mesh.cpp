@@ -89,17 +89,13 @@ bool Mesh::loadFromFile(const tstring& filePath)
     return uploadData(vertices.data(),
                       static_cast<uint32>(sizeof(VertexPosColorUv1) * vertices.size()),
                       indices.data(),
-                      static_cast<uint16>(indices.size()),
-                      VertexPosColorUv1::getBindingDescription(),
-                      VertexPosColorUv1::getAttributeDescriptions());
+                      static_cast<uint16>(indices.size()));
 }
 
 bool Mesh::uploadData(const void* vertexData,
                       uint32 vertexDataSize,
                       const uint16* indexData,
-                      uint32 numIndices,
-                      const std::vector<VkVertexInputBindingDescription>& vertexBindingDesc,
-                      const std::vector<VkVertexInputAttributeDescription>& vertexAttributeDesc)
+                      uint32 numIndices)
 {
     destroy();
 
@@ -123,8 +119,6 @@ bool Mesh::uploadData(const void* vertexData,
         return false;
     }
 
-    m_vertexAttributeDescs = &vertexAttributeDesc;
-    m_vertexBindingDescs = &vertexBindingDesc;
     m_numIndices = numIndices;
 
     return true;
@@ -143,8 +137,6 @@ void Mesh::destroy()
 {
     SAFE_DELETE(m_indexBuffer);
     SAFE_DELETE(m_vertexBuffer);
-    m_vertexAttributeDescs = nullptr;
-    m_vertexBindingDescs = nullptr;
 }
 
 NS_END

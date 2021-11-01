@@ -9,6 +9,8 @@
 
 **/
 #include "HelloWorldApp.h"
+#include "systems/EntityCreationSystem.h"
+#include "systems/RotationSystem.h"
 
 #include <blink/blink.h>
 #include <blink/component/Components.h>
@@ -39,15 +41,8 @@ bool HelloWorldApp::initialize(NS::VulkanRenderModule& renderModule)
     if (!m_material->create()) return false;
     m_material->setTexture(m_texture);
 
-    auto e1 = m_world.entity();
-    e1.set<NS::Position>({glm::zero<glm::vec3>()});
-    e1.set<NS::Rotation>({glm::identity<glm::quat>()});
-    e1.set<NS::StaticModel>({m_mesh, m_material});
-
-    // auto e2 = m_world.entity();
-    // e2.set<NS::Position>({ glm::vec3(0.5f, 0.0f, 0.0f) });
-    // e2.set<NS::Rotation>({ glm::identity<glm::quat>() });
-    // e2.set<NS::StaticModel>({ m_mesh, m_material });
+    addSystem(new EntityCreationSystem(m_mesh, m_material));
+    addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;
 

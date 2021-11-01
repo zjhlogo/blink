@@ -65,6 +65,13 @@ bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
 
     if (!createSyncObjects()) return false;
 
+    // TODO: setup perframe uniforms inside camera
+    m_perFrameUniforms.matWorldToCamera = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    const auto& extent = m_swapchain->getImageExtent();
+    m_perFrameUniforms.matCameraToProjection = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+    m_perFrameUniforms.matCameraToProjection[1][1] *= -1.0f;
+    m_perFrameUniforms.matWorldToProjection = m_perFrameUniforms.matCameraToProjection * m_perFrameUniforms.matWorldToCamera;
+
     return true;
 }
 
@@ -115,6 +122,8 @@ void VulkanRenderModule::render(const RenderCb& cb)
 
     m_descriptorPool->reset();
     m_uniformBuffer->reset();
+
+    m_uniformBuffer->appendPerFrameBufferData(&m_perFrameUniforms, sizeof(m_perFrameUniforms));
 
     // record command buffer
     {

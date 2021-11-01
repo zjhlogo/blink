@@ -32,9 +32,7 @@ public:
     bool uploadData(const void* vertexData,
                     uint32 vertexDataSize,
                     const uint16* indexData,
-                    uint32 numIndices,
-                    const std::vector<VkVertexInputBindingDescription>& vertexBindingDesc,
-                    const std::vector<VkVertexInputAttributeDescription>& vertexAttributeDesc);
+                    uint32 numIndices);
 
     void bindMesh(VulkanCommandBuffer& commandBuffer);
 
@@ -52,10 +50,6 @@ private:
     VulkanBuffer* m_vertexBuffer{};
     VulkanBuffer* m_indexBuffer{};
     uint32_t m_numIndices{};
-
-    // TODO: reuse the description to save memory
-    const std::vector<VkVertexInputBindingDescription>* m_vertexBindingDescs{};
-    const std::vector<VkVertexInputAttributeDescription>* m_vertexAttributeDescs{};
 };
 
 NS_END

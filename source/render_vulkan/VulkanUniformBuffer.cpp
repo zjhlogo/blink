@@ -71,4 +71,16 @@ bool VulkanUniformBuffer::appendData(const void* data, VkDeviceSize size)
     return true;
 }
 
+bool VulkanUniformBuffer::appendPerFrameBufferData(const void* data, VkDeviceSize size)
+{
+    auto beginPos = m_currentPos;
+    if (!appendData(data, size)) return false;
+
+    m_perFrameBufferInfo.buffer = *m_gpuBuffer;
+    m_perFrameBufferInfo.offset = beginPos;
+    m_perFrameBufferInfo.range = size;
+
+    return true;
+}
+
 NS_END

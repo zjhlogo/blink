@@ -26,14 +26,6 @@ class VulkanTexture;
 
 class Material
 {
-private:
-    struct Uniforms
-    {
-        glm::mat4 localToWorld;
-        glm::mat4 worldToCamera;
-        glm::mat4 cameraToProjection;
-    };
-
 public:
     Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool);
     ~Material();
@@ -61,7 +53,6 @@ private:
 
     // the datas not belong to material
     VulkanTexture* m_texture{};
-    Uniforms m_uniformData;
 };
 
 NS_END

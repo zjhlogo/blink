@@ -20,8 +20,6 @@ VulkanContext.cpp
 VulkanContext.h
 VulkanDescriptorPool.cpp
 VulkanDescriptorPool.h
-VulkanDescriptorSet.cpp
-VulkanDescriptorSet.h
 VulkanFence.cpp
 VulkanFence.h
 VulkanImage.cpp

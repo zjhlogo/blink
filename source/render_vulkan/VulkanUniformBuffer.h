@@ -25,7 +25,7 @@ public:
     VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice);
     ~VulkanUniformBuffer();
 
-    operator VkBuffer () const;
+    operator VkBuffer() const;
 
     bool create(VkDeviceSize size = DEFAULT_UBO_SIZE);
     void destroy();
@@ -35,6 +35,9 @@ public:
     size_t getCurrentPos() const { return m_currentPos; };
     bool appendData(const void* data, VkDeviceSize size);
 
+    const VkDescriptorBufferInfo& getPerFrameBufferInfo() const { return m_perFrameBufferInfo; };
+    bool appendPerFrameBufferData(const void* data, VkDeviceSize size);
+
 private:
     VulkanLogicalDevice& m_logicalDevice;
 
@@ -42,6 +45,8 @@ private:
 
     std::vector<uint8_t> m_memBuffer;
     size_t m_currentPos{};
+
+    VkDescriptorBufferInfo m_perFrameBufferInfo{};
 };
 
 NS_END
