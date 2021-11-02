@@ -135,11 +135,11 @@ namespace blink
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-        const auto& bindingDesc = VertexPosNormalUv1::getBindingDescription();
+        const auto& bindingDesc = VertexPosNormalUv0::getBindingDescription();
         vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDesc.size());
         vertexInputInfo.pVertexBindingDescriptions = bindingDesc.data();
 
-        const auto& attributeDesc = VertexPosNormalUv1::getAttributeDescriptions();
+        const auto& attributeDesc = VertexPosNormalUv0::getAttributeDescriptions();
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDesc.size());
         vertexInputInfo.pVertexAttributeDescriptions = attributeDesc.data();
 

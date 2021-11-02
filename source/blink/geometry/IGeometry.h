@@ -36,7 +36,7 @@ namespace blink
     protected:
         void destroy();
 
-        bool uploadData(const void* vertexData, uint32 numVertices, uint32 vertexSize, const uint16* indexData, uint32 numIndices);
+        bool uploadData(const void* vertexData, size_t numVertices, size_t vertexSize, const uint16* indexData, size_t numIndices);
 
     protected:
         VulkanLogicalDevice& m_logicalDevice;

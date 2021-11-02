@@ -41,11 +41,11 @@ namespace blink
         SAFE_DELETE(m_vertexBuffer);
     }
 
-    bool IGeometry::uploadData(const void* vertexData, uint32 numVertices, uint32 vertexSize, const uint16* indexData, uint32 numIndices)
+    bool IGeometry::uploadData(const void* vertexData, size_t numVertices, size_t vertexSize, const uint16* indexData, size_t numIndices)
     {
         destroy();
 
-        uint32 vertexBufferSize = numVertices * vertexSize;
+        VkDeviceSize vertexBufferSize = numVertices * vertexSize;
         m_vertexBuffer = new VulkanBuffer(m_logicalDevice);
         if (!m_vertexBuffer->createBufferAndUpload(vertexData,
                                                    vertexBufferSize,
@@ -55,7 +55,7 @@ namespace blink
         {
             return false;
         }
-        m_numVertices = numVertices;
+        m_numVertices = static_cast<uint32>(numVertices);
 
         m_indexBuffer = new VulkanBuffer(m_logicalDevice);
         if (!m_indexBuffer->createBufferAndUpload(indexData,
@@ -66,7 +66,7 @@ namespace blink
         {
             return false;
         }
-        m_numIndices = numIndices;
+        m_numIndices = static_cast<uint32>(numIndices);
 
         return true;
     }

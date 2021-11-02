@@ -24,30 +24,10 @@ namespace blink
 
     bool Box::create(float width, float height, float depth, int widthSegments, int heightSegments, int depthSegments)
     {
-        // std::vector<VertexPosNormalUv1> vertices;
-        // std::vector<uint16> indices;
-
-        // float halfWidth = width * 0.5f;
-        // float halfHeight = height * 0.5f;
-
-        // vertices.push_back({ glm::vec3(-halfWidth, -halfHeight, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f) });
-        // vertices.push_back({ glm::vec3(-halfWidth, +halfHeight, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f) });
-        // vertices.push_back({ glm::vec3(+halfWidth, +halfHeight, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f) });
-        // vertices.push_back({ glm::vec3(+halfWidth, -halfHeight, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 1.0f) });
-
-        // indices.emplace_back(0);
-        // indices.emplace_back(1);
-        // indices.emplace_back(2);
-        // indices.emplace_back(2);
-        // indices.emplace_back(3);
-        // indices.emplace_back(0);
-
-        // return uploadData(vertices.data(), vertices.size(), sizeof(VertexPosNormalUv1), indices.data(), indices.size());
-
         int count = 0;
         int startIndex = 0;
 
-        std::vector<VertexPosNormalUv1> vertices;
+        std::vector<VertexPosNormalUv0> vertices;
         std::vector<uint16> indices;
 
         count = GeometryBuilder::buildPlaneVertexPosUv1(vertices, 2, 1, 0, depth, height, -1.0f, 1.0f, 0.5f * width, depthSegments, heightSegments);
@@ -79,6 +59,6 @@ namespace blink
         GeometryBuilder::buildNormal(vertices, startIndex, count, VEC3_NZ); // -z
         GeometryBuilder::buildPlaneFaceIndex(indices, startIndex, widthSegments, heightSegments);
 
-        return uploadData(vertices.data(), vertices.size(), sizeof(VertexPosNormalUv1), indices.data(), indices.size());
+        return uploadData(vertices.data(), vertices.size(), sizeof(VertexPosNormalUv0), indices.data(), indices.size());
     }
 } // namespace blink
