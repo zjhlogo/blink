@@ -161,6 +161,7 @@ namespace blink
     {
         static const std::vector<const char*> REQUIRED_EXTENSIONS = {
             "VK_KHR_swapchain",
+            "VK_KHR_maintenance1",
         };
 
         return REQUIRED_EXTENSIONS;

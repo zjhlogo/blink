@@ -6,6 +6,12 @@ project(libblink)
 set(SOURCE_FILES
 base/ISystemBase.h
 component/Components.h
+geometry/Box.cpp
+geometry/Box.h
+geometry/IGeometry.cpp
+geometry/IGeometry.h
+geometry/GeometryBuilder.cpp
+geometry/GeometryBuilder.h
 geometry/Mesh.cpp
 geometry/Mesh.h
 material/Material.cpp

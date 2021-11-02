@@ -11,6 +11,7 @@
 
 #include "Mesh.h"
 
+#include <foundation/File.h>
 #include <foundation/Log.h>
 #include <render_vulkan/Types.h>
 #include <render_vulkan/VulkanBuffer.h>
@@ -18,119 +19,111 @@
 
 #include <unordered_map>
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <render_vulkan/utils/tiny_obj_loader.h>
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
+#include <tinygltf/tiny_gltf.h>
 
 namespace blink
 {
     Mesh::Mesh(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
-        : m_logicalDevice(logicalDevice)
-        , m_commandPool(commandPool)
+        : IGeometry(logicalDevice, commandPool)
     {
     }
-
-    Mesh::~Mesh() { destroy(); }
 
     bool Mesh::loadFromFile(const tstring& filePath)
     {
-        tinyobj::ObjReader reader;
-        if (!reader.ParseFromFile(filePath))
-        {
-            LOGE(reader.Error());
-            return false;
-        }
+        return false;
+        //tstring fileContent;
+        //if (!File::readFileIntoString(fileContent, filePath))
+        //{
+        //    LOGE("Open file failed {0}", filePath);
+        //    return false;
+        //}
 
-        if (!reader.Warning().empty())
-        {
-            LOGW(reader.Warning());
-        }
+        //tinygltf::Model model;
+        //tinygltf::TinyGLTF loader;
+        //tstring err;
+        //tstring warn;
 
-        auto& attrib = reader.GetAttrib();
-        auto& shapes = reader.GetShapes();
-        auto& materials = reader.GetMaterials();
+        //bool ret = loader.LoadASCIIFromString(&model, &err, &warn, fileContent.data(), fileContent.length(), EMPTY_STRING);
+        //if (!warn.empty())
+        //{
+        //    LOGW(warn);
+        //}
 
-        std::vector<VertexPosColorUv1> vertices;
-        std::vector<uint16> indices;
-        std::unordered_map<VertexPosColorUv1, uint16> uniqueVertices;
+        //if (!err.empty())
+        //{
+        //    LOGE(err);
+        //}
 
-        // Loop over shapes
-        for (const auto& shape : shapes)
-        {
-            for (const auto& index : shape.mesh.indices)
-            {
-                VertexPosColorUv1 vertex{{
-                                             attrib.vertices[3 * index.vertex_index + 0],
-                                             attrib.vertices[3 * index.vertex_index + 1],
-                                             attrib.vertices[3 * index.vertex_index + 2],
-                                         },
-                                         {
-                                             1.0f,
-                                             1.0f,
-                                             1.0f,
-                                         },
-                                         {
-                                             attrib.texcoords[2 * index.texcoord_index + 0],
-                                             1.0f - attrib.texcoords[2 * index.texcoord_index + 1],
-                                         }};
+        //if (!ret)
+        //{
+        //    LOGE("Failed to parse glTF file {0}", filePath);
+        //    return false;
+        //}
 
-                if (uniqueVertices.count(vertex) == 0)
-                {
-                    uniqueVertices[vertex] = static_cast<uint16>(vertices.size());
-                    vertices.push_back(vertex);
-                }
+        //const tinygltf::Scene& scene = model.scenes[model.defaultScene];
+        //for (size_t i = 0; i < scene.nodes.size(); ++i)
+        //{
+        //    int nodeIndex = scene.nodes[i];
+        //    const auto& node = model.nodes[nodeIndex];
 
-                indices.push_back(uniqueVertices[vertex]);
-            }
-        }
+        //    if (node.mesh >= 0 && node.mesh < model.meshes.size())
+        //    {
+        //        const auto& mesh = model.meshes[node.mesh];
 
-        return uploadData(vertices.data(),
-                          static_cast<uint32>(sizeof(VertexPosColorUv1) * vertices.size()),
-                          indices.data(),
-                          static_cast<uint16>(indices.size()));
-    }
+        //        for (size_t j = 0; j < mesh.primitives.size(); ++j)
+        //        {
+        //            mesh.primitives[j];
+        //        }
+        //    }
+        //}
 
-    bool Mesh::uploadData(const void* vertexData, uint32 vertexDataSize, const uint16* indexData, uint32 numIndices)
-    {
-        destroy();
+        //auto& attrib = reader.GetAttrib();
+        //auto& shapes = reader.GetShapes();
+        //auto& materials = reader.GetMaterials();
 
-        m_vertexBuffer = new VulkanBuffer(m_logicalDevice);
-        if (!m_vertexBuffer->createBufferAndUpload(vertexData,
-                                                   vertexDataSize,
-                                                   VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                                                   VK_SHARING_MODE_EXCLUSIVE,
-                                                   m_commandPool))
-        {
-            return false;
-        }
+        //std::vector<VertexPosColorUv1> vertices;
+        //std::vector<uint16> indices;
+        //std::unordered_map<VertexPosColorUv1, uint16> uniqueVertices;
 
-        m_indexBuffer = new VulkanBuffer(m_logicalDevice);
-        if (!m_indexBuffer->createBufferAndUpload(indexData,
-                                                  sizeof(uint16) * numIndices,
-                                                  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                                                  VK_SHARING_MODE_EXCLUSIVE,
-                                                  m_commandPool))
-        {
-            return false;
-        }
+        //// Loop over shapes
+        //for (const auto& shape : shapes)
+        //{
+        //    for (const auto& index : shape.mesh.indices)
+        //    {
+        //        VertexPosColorUv1 vertex{{
+        //                                     attrib.vertices[3 * index.vertex_index + 0],
+        //                                     attrib.vertices[3 * index.vertex_index + 1],
+        //                                     attrib.vertices[3 * index.vertex_index + 2],
+        //                                 },
+        //                                 {
+        //                                     1.0f,
+        //                                     1.0f,
+        //                                     1.0f,
+        //                                 },
+        //                                 {
+        //                                     attrib.texcoords[2 * index.texcoord_index + 0],
+        //                                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1],
+        //                                 }};
 
-        m_numIndices = numIndices;
+        //        if (uniqueVertices.count(vertex) == 0)
+        //        {
+        //            uniqueVertices[vertex] = static_cast<uint16>(vertices.size());
+        //            vertices.push_back(vertex);
+        //        }
 
-        return true;
-    }
+        //        indices.push_back(uniqueVertices[vertex]);
+        //    }
+        //}
 
-    void Mesh::bindMesh(VulkanCommandBuffer& commandBuffer)
-    {
-        VkDeviceSize offset = 0;
-        VkBuffer vertexBuffer = *m_vertexBuffer;
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
-
-        vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-    }
-
-    void Mesh::destroy()
-    {
-        SAFE_DELETE(m_indexBuffer);
-        SAFE_DELETE(m_vertexBuffer);
+        //return uploadData(vertices.data(),
+        //                  static_cast<uint32>(vertices.size()),
+        //                  sizeof(VertexPosColorUv1),
+        //                  indices.data(),
+        //                  static_cast<uint16>(indices.size()));
     }
 
 } // namespace blink

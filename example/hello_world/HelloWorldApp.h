@@ -11,7 +11,7 @@
 #pragma once
 
 #include <blink/app.h>
-#include <blink/geometry/Mesh.h>
+#include <blink/geometry/Box.h>
 #include <blink/material/Material.h>
 #include <render_vulkan/VulkanTexture.h>
 
@@ -25,7 +25,7 @@ public:
     virtual void terminate() override;
 
 private:
-    blink::Mesh* m_mesh{};
+    blink::Box* m_box{};
     blink::VulkanTexture* m_texture{};
     blink::Material* m_material{};
 };

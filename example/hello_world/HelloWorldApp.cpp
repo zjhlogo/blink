@@ -31,17 +31,17 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& commandPool = renderModule.getCommandPool();
     auto& descriptorPool = renderModule.getDescriptorPool();
 
-    m_mesh = new blink::Mesh(logicalDevice, commandPool);
-    if (!m_mesh->loadFromFile("resource/viking_room.obj")) return false;
+    m_box = new blink::Box(logicalDevice, commandPool);
+    if (!m_box->create(1.0f, 1.0f, 1.0f)) return false;
 
     m_texture = new blink::VulkanTexture(logicalDevice, commandPool);
-    if (!m_texture->createTexture2D("resource/viking_room.png")) return false;
+    if (!m_texture->createTexture2D("resource/grid.png")) return false;
 
     m_material = new blink::Material(logicalDevice, swapchain, descriptorPool);
     if (!m_material->create()) return false;
     m_material->setTexture(m_texture);
 
-    addSystem(new EntityCreationSystem(m_mesh, m_material));
+    addSystem(new EntityCreationSystem(m_box, m_material));
     addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;
@@ -55,7 +55,7 @@ void HelloWorldApp::terminate()
 
     SAFE_DELETE(m_material);
     SAFE_DELETE(m_texture);
-    SAFE_DELETE(m_mesh);
+    SAFE_DELETE(m_box);
 }
 
 int main(int argc, char** argv)

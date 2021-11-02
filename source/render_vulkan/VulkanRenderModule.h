@@ -76,7 +76,7 @@ namespace blink
         VulkanDescriptorPool* m_descriptorPool{};
         VulkanCommandBuffer* m_commandBuffer{};
         VulkanUniformBuffer* m_uniformBuffer{};
-        PerFrameUniforms m_perFrameUniforms;
+        PerFrameUniforms m_perFrameUniforms{};
     };
 
 } // namespace blink

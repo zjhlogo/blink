@@ -62,10 +62,9 @@ namespace blink
         if (!createSyncObjects()) return false;
 
         // TODO: setup perframe uniforms inside camera
-        m_perFrameUniforms.matWorldToCamera = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        m_perFrameUniforms.matWorldToCamera = glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), glm::zero<glm::vec3>(), glm::vec3(0.0f, 1.0f, 0.0f));
         const auto& extent = m_swapchain->getImageExtent();
         m_perFrameUniforms.matCameraToProjection = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
-        m_perFrameUniforms.matCameraToProjection[1][1] *= -1.0f;
         m_perFrameUniforms.matWorldToProjection = m_perFrameUniforms.matCameraToProjection * m_perFrameUniforms.matWorldToCamera;
 
         return true;
@@ -125,8 +124,13 @@ namespace blink
         {
             m_commandBuffer->beginCommand();
 
+            // using negative height to flip the y axis
+            const auto& extent = m_swapchain->getImageExtent();
+            VkViewport viewport{0.0f, (float)extent.height, (float)extent.width, -(float)extent.height, 0.0f, 1.0f};
+            vkCmdSetViewport(*m_commandBuffer, 0, 1, &viewport);
+
             {
-                VkRect2D rect{{0, 0}, m_swapchain->getImageExtent()};
+                VkRect2D rect{{0, 0}, extent};
                 m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(imageIndex), rect);
 
                 // record commands

@@ -4,8 +4,6 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(librender_vulkan)
 
 set(SOURCE_FILES
-utils/stb_image.h
-utils/tiny_obj_loader.h
 utils/VulkanUtils.cpp
 utils/VulkanUtils.h
 Types.cpp
@@ -34,8 +32,6 @@ VulkanRenderModule.cpp
 VulkanRenderModule.h
 VulkanSemaphore.cpp
 VulkanSemaphore.h
-VulkanShader.cpp
-VulkanShader.h
 VulkanSwapchain.cpp
 VulkanSwapchain.h
 VulkanTexture.cpp

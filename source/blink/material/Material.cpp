@@ -43,7 +43,10 @@ namespace blink
 
     void Material::setTexture(VulkanTexture* texture) { m_texture = texture; }
 
-    void Material::bindPipeline(VulkanCommandBuffer& commandBuffer) { vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline); }
+    void Material::bindPipeline(VulkanCommandBuffer& commandBuffer)
+    {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
+    }
 
     bool Material::bindUniformBuffer(VulkanCommandBuffer& commandBuffer,
                                      VulkanUniformBuffer& uniformBuffer,

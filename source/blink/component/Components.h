@@ -14,7 +14,7 @@
 
 namespace blink
 {
-    class Mesh;
+    class IGeometry;
     class Material;
 
     struct Position
@@ -29,7 +29,7 @@ namespace blink
 
     struct StaticModel
     {
-        Mesh* mesh;
+        IGeometry* geometry;
         Material* material;
     };
 

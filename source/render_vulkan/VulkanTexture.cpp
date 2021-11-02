@@ -16,8 +16,7 @@
 #include "VulkanMemory.h"
 #include "utils/VulkanUtils.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "utils/stb_image.h"
+#include <tinygltf/stb_image.h>
 
 namespace blink
 {

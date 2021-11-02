@@ -10,43 +10,22 @@
 **/
 #pragma once
 
-#include <foundation/BaseTypesGlm.h>
+#include "IGeometry.h"
+
 #include <vulkan/vulkan.h>
 
 #include <vector>
 
 namespace blink
 {
-    class VulkanLogicalDevice;
-    class VulkanCommandPool;
-    class VulkanCommandBuffer;
-    class VulkanBuffer;
-
-    class Mesh
+    class Mesh : public IGeometry
     {
     public:
         Mesh(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
-        ~Mesh();
+        virtual ~Mesh() {};
 
         bool loadFromFile(const tstring& filePath);
-        bool uploadData(const void* vertexData, uint32 vertexDataSize, const uint16* indexData, uint32 numIndices);
 
-        void bindMesh(VulkanCommandBuffer& commandBuffer);
-
-        VulkanBuffer* getVertexBuffer() { return m_vertexBuffer; };
-        VulkanBuffer* getIndexBuffer() { return m_indexBuffer; };
-        uint32 getNumIndices() { return m_numIndices; };
-
-    private:
-        void destroy();
-
-    private:
-        VulkanLogicalDevice& m_logicalDevice;
-        VulkanCommandPool& m_commandPool;
-
-        VulkanBuffer* m_vertexBuffer{};
-        VulkanBuffer* m_indexBuffer{};
-        uint32_t m_numIndices{};
     };
 
 } // namespace blink

@@ -135,11 +135,11 @@ namespace blink
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-        const auto& bindingDesc = VertexPosColorUv1::getBindingDescription();
+        const auto& bindingDesc = VertexPosNormalUv1::getBindingDescription();
         vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDesc.size());
         vertexInputInfo.pVertexBindingDescriptions = bindingDesc.data();
 
-        const auto& attributeDesc = VertexPosColorUv1::getAttributeDescriptions();
+        const auto& attributeDesc = VertexPosNormalUv1::getAttributeDescriptions();
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDesc.size());
         vertexInputInfo.pVertexAttributeDescriptions = attributeDesc.data();
 
@@ -165,7 +165,7 @@ namespace blink
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
-        rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
+        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -196,12 +196,12 @@ namespace blink
         colorBlending.attachmentCount = 1;
         colorBlending.pAttachments = &colorBlendAttachment;
 
-        //// dynamic state
-        // VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
-        // VkPipelineDynamicStateCreateInfo dynamicState = {};
-        // dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        // dynamicState.dynamicStateCount = 2;
-        // dynamicState.pDynamicStates = dynamicStates;
+        // dynamic state
+        VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
+        VkPipelineDynamicStateCreateInfo dynamicState = {};
+        dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        dynamicState.dynamicStateCount = 2;
+        dynamicState.pDynamicStates = dynamicStates;
 
         // create pipeline
         VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -215,7 +215,7 @@ namespace blink
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pDepthStencilState = &depthStencil;
         pipelineInfo.pColorBlendState = &colorBlending;
-        // pipelineInfo.pDynamicState = &dynamicState;
+        pipelineInfo.pDynamicState = &dynamicState;
         pipelineInfo.layout = m_pipelineLayout;
         pipelineInfo.renderPass = m_swapchain.getRenderPass();
         pipelineInfo.subpass = 0;

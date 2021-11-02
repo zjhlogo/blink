@@ -16,13 +16,13 @@
 
 namespace blink
 {
-    struct VertexPosColorUv1
+    struct VertexPosNormalUv1
     {
         glm::vec3 pos;
-        glm::vec3 color;
-        glm::vec2 texCoord;
+        glm::vec3 normal;
+        glm::vec2 uv0;
 
-        bool operator==(const VertexPosColorUv1& other) const { return pos == other.pos && color == other.color && texCoord == other.texCoord; }
+        bool operator==(const VertexPosNormalUv1& other) const { return pos == other.pos && normal == other.normal && uv0 == other.uv0; }
 
         static const std::vector<VkVertexInputBindingDescription>& getBindingDescription();
         static const std::vector<VkVertexInputAttributeDescription>& getAttributeDescriptions();
@@ -32,11 +32,11 @@ namespace blink
 
 namespace std
 {
-    template <> struct hash<blink::VertexPosColorUv1>
+    template <> struct hash<blink::VertexPosNormalUv1>
     {
-        size_t operator()(blink::VertexPosColorUv1 const& vertex) const
+        size_t operator()(blink::VertexPosNormalUv1 const& vertex) const
         {
-            return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
+            return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.uv0) << 1);
         }
     };
 } // namespace std

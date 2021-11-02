@@ -10,7 +10,7 @@
 **/
 
 #include "app.h"
-#include "geometry/Mesh.h"
+#include "geometry/IGeometry.h"
 #include "material/Material.h"
 
 #include <blink/base/ISystemBase.h>
@@ -32,7 +32,7 @@ namespace blink
     {
         glm::vec3 pos;
         glm::quat rot;
-        Mesh* mesh;
+        IGeometry* geometry;
     };
 
     void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool)
@@ -45,12 +45,12 @@ namespace blink
                 auto findIt = renderDatas.find(model.material);
                 if (findIt != renderDatas.end())
                 {
-                    findIt->second.push_back({pos.value, rot.value, model.mesh});
+                    findIt->second.push_back({pos.value, rot.value, model.geometry});
                 }
                 else
                 {
                     std::vector<RenderData> dataLists;
-                    dataLists.push_back({pos.value, rot.value, model.mesh});
+                    dataLists.push_back({pos.value, rot.value, model.geometry});
                     renderDatas.emplace(model.material, dataLists);
                 }
             });
@@ -64,10 +64,10 @@ namespace blink
 
             for (const auto& renderData : kvp.second)
             {
-                renderData.mesh->bindMesh(commandBuffer);
+                renderData.geometry->bindBuffer(commandBuffer);
                 material->bindUniformBuffer(commandBuffer, uniformBuffer, descriptorPool, renderData.pos, renderData.rot);
 
-                vkCmdDrawIndexed(commandBuffer, renderData.mesh->getNumIndices(), 1, 0, 0, 0);
+                vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
             }
         }
     }
