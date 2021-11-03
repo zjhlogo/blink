@@ -21,8 +21,8 @@
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
-#define STBI_MSC_SECURE_CRT
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBI_MSC_SECURE_CRT
 #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include <tinygltf/tiny_gltf.h>
 
@@ -35,63 +35,92 @@ namespace blink
 
     bool Mesh::loadFromFile(const tstring& filePath)
     {
+        tstring fileContent;
+        if (!File::readFileIntoString(fileContent, filePath))
+        {
+            LOGE("Open file failed {0}", filePath);
+            return false;
+        }
+
+        tinygltf::Model model;
+        tinygltf::TinyGLTF loader;
+        tstring err;
+        tstring warn;
+
+        bool ret = loader.LoadASCIIFromString(&model, &err, &warn, fileContent.data(), fileContent.length(), EMPTY_STRING);
+        if (!warn.empty())
+        {
+            LOGW(warn);
+        }
+
+        if (!err.empty())
+        {
+            LOGE(err);
+        }
+
+        if (!ret)
+        {
+            LOGE("Failed to parse glTF file {0}", filePath);
+            return false;
+        }
+
+        if (model.meshes.empty())
+        {
+            LOGE("Empty mesh {0}", filePath);
+            return false;
+        }
+        const auto& mesh = model.meshes[0];
+
+        if (mesh.primitives.empty())
+        {
+            LOGE("Empty primitive {0}", filePath);
+            return false;
+        }
+        const auto& primitive = mesh.primitives[0];
+
+        if (primitive.attributes.size() != 3)
+        {
+            LOGE("Unsupport primitive attributes, size must be 3. {0}", filePath);
+            return false;
+        }
+        auto itPos = primitive.attributes.find("POSITION");
+        auto itNormal = primitive.attributes.find("NORMAL");
+        auto itUv0 = primitive.attributes.find("TEXCOORD_0");
+        if (itPos == primitive.attributes.end() || itNormal == primitive.attributes.end() || itUv0 == primitive.attributes.end())
+        {
+            LOGE("Unsupport primitive attributes, must be POSITION, NORMAL and TEXCOORD_0. {0}", filePath);
+            return false;
+        }
+
+        const auto& accessorPos = model.accessors[itPos->second];
+        const auto& accessorNormal = model.accessors[itNormal->second];
+        const auto& accessorUv0 = model.accessors[itUv0->second];
+        const auto& accessorIndices = model.accessors[primitive.indices];
+
+        const auto& buffViewPos = model.bufferViews[accessorPos.bufferView];
+        const auto& buffViewNormal = model.bufferViews[accessorNormal.bufferView];
+        const auto& buffViewUv0 = model.bufferViews[accessorUv0.bufferView];
+        const auto& buffViewIndices = model.bufferViews[accessorIndices.bufferView];
+
+        if (buffViewPos.buffer != buffViewNormal.buffer || buffViewPos.buffer != buffViewUv0.buffer || buffViewPos.buffer != buffViewIndices.buffer)
+        {
+            LOGE("Only single buffer currently supported. {0}", filePath);
+            return false;
+        }
+
+        const auto& buffer = model.buffers[buffViewPos.buffer];
+
         return false;
-        //tstring fileContent;
-        //if (!File::readFileIntoString(fileContent, filePath))
-        //{
-        //    LOGE("Open file failed {0}", filePath);
-        //    return false;
-        //}
+        // auto& attrib = reader.GetAttrib();
+        // auto& shapes = reader.GetShapes();
+        // auto& materials = reader.GetMaterials();
 
-        //tinygltf::Model model;
-        //tinygltf::TinyGLTF loader;
-        //tstring err;
-        //tstring warn;
-
-        //bool ret = loader.LoadASCIIFromString(&model, &err, &warn, fileContent.data(), fileContent.length(), EMPTY_STRING);
-        //if (!warn.empty())
-        //{
-        //    LOGW(warn);
-        //}
-
-        //if (!err.empty())
-        //{
-        //    LOGE(err);
-        //}
-
-        //if (!ret)
-        //{
-        //    LOGE("Failed to parse glTF file {0}", filePath);
-        //    return false;
-        //}
-
-        //const tinygltf::Scene& scene = model.scenes[model.defaultScene];
-        //for (size_t i = 0; i < scene.nodes.size(); ++i)
-        //{
-        //    int nodeIndex = scene.nodes[i];
-        //    const auto& node = model.nodes[nodeIndex];
-
-        //    if (node.mesh >= 0 && node.mesh < model.meshes.size())
-        //    {
-        //        const auto& mesh = model.meshes[node.mesh];
-
-        //        for (size_t j = 0; j < mesh.primitives.size(); ++j)
-        //        {
-        //            mesh.primitives[j];
-        //        }
-        //    }
-        //}
-
-        //auto& attrib = reader.GetAttrib();
-        //auto& shapes = reader.GetShapes();
-        //auto& materials = reader.GetMaterials();
-
-        //std::vector<VertexPosColorUv1> vertices;
-        //std::vector<uint16> indices;
-        //std::unordered_map<VertexPosColorUv1, uint16> uniqueVertices;
+        // std::vector<VertexPosColorUv1> vertices;
+        // std::vector<uint16> indices;
+        // std::unordered_map<VertexPosColorUv1, uint16> uniqueVertices;
 
         //// Loop over shapes
-        //for (const auto& shape : shapes)
+        // for (const auto& shape : shapes)
         //{
         //    for (const auto& index : shape.mesh.indices)
         //    {
@@ -120,7 +149,7 @@ namespace blink
         //    }
         //}
 
-        //return uploadData(vertices.data(),
+        // return uploadData(vertices.data(),
         //                  static_cast<uint32>(vertices.size()),
         //                  sizeof(VertexPosColorUv1),
         //                  indices.data(),

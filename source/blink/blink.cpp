@@ -23,9 +23,9 @@ namespace blink
         {
             if (app.initialize(renderModule))
             {
-                while (renderModule.update())
+                while (renderModule.processEvent())
                 {
-                    app.update(0.016f);
+                    app.update(0.0f);
 
                     renderModule.render([&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool)
                                         { app.render(commandBuffer, uniformBuffer, descriptorPool); });

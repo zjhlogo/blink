@@ -88,7 +88,7 @@ namespace blink
         glfwTerminate();
     }
 
-    bool VulkanRenderModule::update()
+    bool VulkanRenderModule::processEvent()
     {
         /* Loop until the user closes the window */
         if (glfwWindowShouldClose(*m_window))

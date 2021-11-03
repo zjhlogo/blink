@@ -51,7 +51,7 @@ namespace blink
         bool createDevice(const glm::ivec2& deviceSize);
         void destroyDevice();
 
-        bool update();
+        bool processEvent();
         void render(const RenderCb& cb);
 
         void waitIdle();
