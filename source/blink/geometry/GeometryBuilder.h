@@ -103,7 +103,6 @@ namespace blink
                     vertex.pos = vertTemp;
 
                     vertex.uv0 = uvTemp + VEC2_HALF;
-                    vertex.uv0.y = 1.0f - vertex.uv0.y;     // flip y for vulkan
                 }
             }
 
