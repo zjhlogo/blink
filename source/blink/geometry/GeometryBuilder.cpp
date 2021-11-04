@@ -12,6 +12,59 @@
 
 namespace blink
 {
+    int GeometryBuilder::buildPlaneVertexPosUv(std::vector<glm::vec3>& vertsPos,
+                                               std::vector<glm::vec2>& vertsUv0,
+                                               int ax,
+                                               int ay,
+                                               int az,
+                                               float width,
+                                               float height,
+                                               float udir,
+                                               float vdir,
+                                               float posZ,
+                                               int segmentX,
+                                               int segmentY)
+    {
+        float divX = static_cast<float>(segmentX);
+        float divY = static_cast<float>(segmentY);
+
+        glm::vec2 uvTemp;
+        glm::vec3 vertTemp;
+        vertTemp[az] = posZ;
+
+        // build vertex list
+        int startIndex = static_cast<int>(vertsPos.size());
+        vertsPos.resize(startIndex + (segmentX + 1) * (segmentY + 1));
+        vertsUv0.resize(startIndex + (segmentX + 1) * (segmentY + 1));
+        int currIndex = startIndex;
+
+        for (int y = 0; y < (segmentY + 1); ++y)
+        {
+            uvTemp.y = y / divY - 0.5f;
+            vertTemp[ay] = uvTemp.y * height * vdir;
+            for (int x = 0; x < (segmentX + 1); ++x)
+            {
+                uvTemp.x = x / divX - 0.5f;
+                vertTemp[ax] = uvTemp.x * width * udir;
+
+                vertsPos[currIndex] = vertTemp;
+                vertsUv0[currIndex] = uvTemp + VEC2_HALF;
+
+                ++currIndex;
+            }
+        }
+
+        return currIndex - startIndex;
+    }
+
+    void GeometryBuilder::buildNormal(std::vector<glm::vec3>& normals, int startIndex, int count, const glm::vec3& normal)
+    {
+        for (int i = 0; i < count; ++i)
+        {
+            normals[startIndex + i] = normal;
+        }
+    }
+
     void GeometryBuilder::buildPlaneFaceIndex(std::vector<uint16>& indis, uint16 startIndex, int segmentX, int segmentY)
     {
         // build face list

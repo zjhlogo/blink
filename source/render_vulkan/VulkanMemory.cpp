@@ -48,11 +48,21 @@ namespace blink
         }
     }
 
-    bool VulkanMemory::uploadData(const void* data, VkDeviceSize size)
+    bool VulkanMemory::uploadData(const void* srcData, VkDeviceSize srcDataSize, VkDeviceSize destOffset)
     {
         void* mapedBuffer{};
-        vkMapMemory(m_logicalDevice, m_memory, 0, size, 0, &mapedBuffer);
-        memcpy(mapedBuffer, data, static_cast<size_t>(size));
+        vkMapMemory(m_logicalDevice, m_memory, destOffset, srcDataSize, 0, &mapedBuffer);
+        memcpy(mapedBuffer, srcData, static_cast<size_t>(srcDataSize));
+        vkUnmapMemory(m_logicalDevice, m_memory);
+
+        return true;
+    }
+
+    bool VulkanMemory::uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, CustomCopyCb cb)
+    {
+        void* mapedBuffer{};
+        vkMapMemory(m_logicalDevice, m_memory, destOffset, destDataSize, 0, &mapedBuffer);
+        cb(mapedBuffer, destDataSize);
         vkUnmapMemory(m_logicalDevice, m_memory);
 
         return true;

@@ -25,10 +25,8 @@ namespace blink
 
         operator VkPipeline() const { return m_pipeline; };
 
-        bool create();
+        bool create(const std::vector<VkVertexInputBindingDescription>& bindings, const std::vector<VkVertexInputAttributeDescription>& attributes);
         void destroy();
-
-        bool recreatePipeline();
 
         VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
         VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };
@@ -37,7 +35,8 @@ namespace blink
         VkDescriptorSetLayout createDescriptorSetLayout();
         void destroyDescriptorSetLayout();
 
-        VkPipeline createGraphicsPipeline(uint32_t width, uint32_t height);
+        VkPipeline createGraphicsPipeline(const std::vector<VkVertexInputBindingDescription>& bindings,
+                                          const std::vector<VkVertexInputAttributeDescription>& attributes);
         void destroyGraphicsPipeline();
 
         VkShaderModule createShaderModule(const tstring& shaderFile);

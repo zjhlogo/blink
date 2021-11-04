@@ -1,7 +1,7 @@
 /**
 
     @file      GeometryBuilder.h
-    @brief     
+    @brief
     @details   ~
     @author    zjhlogo
     @date      2.11.2021
@@ -21,16 +21,16 @@ namespace blink
     public:
         template <typename T>
         static int buildPlaneVertexPos(std::vector<T>& verts,
-                                        int ax,
-                                        int ay,
-                                        int az,
-                                        float width,
-                                        float height,
-                                        float udir,
-                                        float vdir,
-                                        float posZ,
-                                        int segmentX,
-                                        int segmentY)
+                                       int ax,
+                                       int ay,
+                                       int az,
+                                       float width,
+                                       float height,
+                                       float udir,
+                                       float vdir,
+                                       float posZ,
+                                       int segmentX,
+                                       int segmentY)
         {
             float divX = static_cast<float>(segmentX);
             float divY = static_cast<float>(segmentY);
@@ -64,50 +64,18 @@ namespace blink
             return currIndex - startIndex;
         }
 
-        template <typename T>
-        static int buildPlaneVertexPosUv1(std::vector<T>& verts,
-                                           int ax,
-                                           int ay,
-                                           int az,
-                                           float width,
-                                           float height,
-                                           float udir,
-                                           float vdir,
-                                           float posZ,
-                                           int segmentX,
-                                           int segmentY)
-        {
-            float divX = static_cast<float>(segmentX);
-            float divY = static_cast<float>(segmentY);
-
-            glm::vec2 uvTemp;
-            glm::vec3 vertTemp;
-            vertTemp[az] = posZ;
-
-            // build vertex list
-            int startIndex = static_cast<int>(verts.size());
-            verts.resize(startIndex + (segmentX + 1) * (segmentY + 1));
-            int currIndex = startIndex;
-
-            for (int y = 0; y < (segmentY + 1); ++y)
-            {
-                uvTemp.y = y / divY - 0.5f;
-                vertTemp[ay] = uvTemp.y * height * vdir;
-                for (int x = 0; x < (segmentX + 1); ++x)
-                {
-                    uvTemp.x = x / divX - 0.5f;
-                    vertTemp[ax] = uvTemp.x * width * udir;
-
-                    T& vertex = verts[currIndex++];
-
-                    vertex.pos = vertTemp;
-
-                    vertex.uv0 = uvTemp + VEC2_HALF;
-                }
-            }
-
-            return currIndex - startIndex;
-        }
+        static int buildPlaneVertexPosUv(std::vector<glm::vec3>& vertsPos,
+                                         std::vector<glm::vec2>& vertsUv0,
+                                         int ax,
+                                         int ay,
+                                         int az,
+                                         float width,
+                                         float height,
+                                         float udir,
+                                         float vdir,
+                                         float posZ,
+                                         int segmentX,
+                                         int segmentY);
 
         template <typename T> static int buildSphereVertexPosNormal(std::vector<T>& verts, float radius, int rings, int sections)
         {
@@ -189,14 +157,7 @@ namespace blink
             }
         }
 
-        template <typename T> static void buildNormal(std::vector<T>& verts, int startIndex, int count, const glm::vec3& normal)
-        {
-            for (int i = 0; i < count; ++i)
-            {
-                T& vertex = verts[startIndex + i];
-                vertex.normal = normal;
-            }
-        }
+        static void buildNormal(std::vector<glm::vec3>& normals, int startIndex, int count, const glm::vec3& normal);
 
         template <typename T> static void buildTangent(std::vector<T>& verts, const std::vector<uint16>& indis)
         {

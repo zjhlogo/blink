@@ -6,8 +6,6 @@ project(librender_vulkan)
 set(SOURCE_FILES
 utils/VulkanUtils.cpp
 utils/VulkanUtils.h
-Types.cpp
-Types.h
 VulkanBuffer.cpp
 VulkanBuffer.h
 VulkanCommandBuffer.cpp

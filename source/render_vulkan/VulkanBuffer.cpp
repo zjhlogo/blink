@@ -11,7 +11,6 @@
 #include "VulkanCommandPool.h"
 #include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
-#include "VulkanMemory.h"
 
 #include <foundation/Log.h>
 
@@ -51,17 +50,34 @@ namespace blink
                                                  VkSharingMode mode,
                                                  VulkanCommandPool& pool)
     {
+        createBuffer(bufferSize, usage, mode);
+        uploadBuffer(data, bufferSize, pool);
+
+        return m_buffer;
+    }
+
+    void VulkanBuffer::uploadBuffer(const void* data, VkDeviceSize bufferSize, VulkanCommandPool& pool)
+    {
         VulkanBuffer stagingBuffer(m_logicalDevice);
         stagingBuffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
 
         auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        stagingMem->uploadData(data, bufferSize);
+        stagingMem->uploadData(data, bufferSize, 0);
 
-        createBuffer(bufferSize, usage, mode);
         allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         copyBuffer(&stagingBuffer, pool);
+    }
 
-        return m_buffer;
+    void VulkanBuffer::uploadBuffer(VulkanCommandPool& pool, VulkanMemory::CustomCopyCb cb)
+    {
+        VulkanBuffer stagingBuffer(m_logicalDevice);
+        stagingBuffer.createBuffer(m_bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
+
+        auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        stagingMem->uploadData(0, m_bufferSize, cb);
+
+        allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        copyBuffer(&stagingBuffer, pool);
     }
 
     void VulkanBuffer::copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool)

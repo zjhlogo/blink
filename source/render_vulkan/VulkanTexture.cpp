@@ -93,7 +93,7 @@ namespace blink
         stagingBuffer->createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
         VulkanMemory* bufferMemory = stagingBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         // copy buffer into staging buffer memory
-        bufferMemory->uploadData(pixels, imageSize);
+        bufferMemory->uploadData(pixels, imageSize, 0);
 
         // create image
         m_textureImage = new VulkanImage(m_logicalDevice);

@@ -13,7 +13,6 @@
 
 #include <foundation/File.h>
 #include <foundation/Log.h>
-#include <render_vulkan/Types.h>
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanCommandBuffer.h>
 
@@ -47,7 +46,7 @@ namespace blink
         tstring err;
         tstring warn;
 
-        bool ret = loader.LoadASCIIFromString(&model, &err, &warn, fileContent.data(), fileContent.length(), EMPTY_STRING);
+        bool ret = loader.LoadASCIIFromString(&model, &err, &warn, fileContent.data(), static_cast<unsigned int>(fileContent.length()), EMPTY_STRING);
         if (!warn.empty())
         {
             LOGW(warn);

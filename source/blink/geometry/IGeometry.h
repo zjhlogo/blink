@@ -10,7 +10,10 @@
 **/
 #pragma once
 
-#include <foundation/BaseTypes.h>
+#include <foundation/BaseTypesGlm.h>
+#include <vulkan/vulkan.h>
+
+#include <vector>
 
 namespace blink
 {
@@ -25,27 +28,35 @@ namespace blink
         IGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
         virtual ~IGeometry();
 
-        VulkanBuffer* getVertexBuffer() { return m_vertexBuffer; };
-        uint32 getNumVertices() { return m_numVertices; };
-
-        VulkanBuffer* getIndexBuffer() { return m_indexBuffer; };
-        uint32 getNumIndices() { return m_numIndices; };
-
         void bindBuffer(VulkanCommandBuffer& commandBuffer);
+
+        uint32 getNumIndices() const { return m_numIndices; }
 
     protected:
         void destroy();
 
-        bool uploadData(const void* vertexData, size_t numVertices, size_t vertexSize, const uint16* indexData, size_t numIndices);
+        bool uploadData(const std::vector<uint16>& indices,
+                        const std::vector<glm::vec3>& positions,
+                        const std::vector<glm::vec3>& normals,
+                        const std::vector<glm::vec2>& uv0s);
 
     protected:
         VulkanLogicalDevice& m_logicalDevice;
         VulkanCommandPool& m_commandPool;
 
-        VulkanBuffer* m_vertexBuffer{};
-        uint32 m_numVertices{};
+        VulkanBuffer* m_buffer{};
 
-        VulkanBuffer* m_indexBuffer{};
+        VkDeviceSize m_offsetPositions{};
+        VkDeviceSize m_sizePositions{};
+
+        VkDeviceSize m_offsetNormals{};
+        VkDeviceSize m_sizeNormals{};
+
+        VkDeviceSize m_offsetUv0s{};
+        VkDeviceSize m_sizeUv0s{};
+
+        VkDeviceSize m_offsetIndices{};
+        VkDeviceSize m_sizeIndices{};
         uint32 m_numIndices{};
     };
 } // namespace blink

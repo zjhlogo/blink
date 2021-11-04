@@ -33,8 +33,20 @@ namespace blink
 
     bool Material::create()
     {
+        static const std::vector<VkVertexInputBindingDescription> s_bindingDescription = {
+            {0, sizeof(glm::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // position
+            {1, sizeof(glm::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // normal
+            {2, sizeof(glm::vec2), VK_VERTEX_INPUT_RATE_VERTEX}, // uv0
+        };
+
+        static const std::vector<VkVertexInputAttributeDescription> s_attributeDescriptions = {
+            {0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0},
+            {1, 1, VK_FORMAT_R32G32B32_SFLOAT, 0},
+            {2, 2, VK_FORMAT_R32G32_SFLOAT, 0},
+        };
+
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
-        if (!m_pipeline->create()) return false;
+        if (!m_pipeline->create(s_bindingDescription, s_attributeDescriptions)) return false;
 
         return true;
     }
@@ -43,10 +55,7 @@ namespace blink
 
     void Material::setTexture(VulkanTexture* texture) { m_texture = texture; }
 
-    void Material::bindPipeline(VulkanCommandBuffer& commandBuffer)
-    {
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
-    }
+    void Material::bindPipeline(VulkanCommandBuffer& commandBuffer) { vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline); }
 
     bool Material::bindUniformBuffer(VulkanCommandBuffer& commandBuffer,
                                      VulkanUniformBuffer& uniformBuffer,

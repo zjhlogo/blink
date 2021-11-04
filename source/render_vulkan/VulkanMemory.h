@@ -9,6 +9,7 @@
 #pragma once
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
+#include <functional>
 
 namespace blink
 {
@@ -17,13 +18,17 @@ namespace blink
     class VulkanMemory
     {
     public:
+        typedef std::function<void(void* destBuffer, VkDeviceSize destBufferSize)> CustomCopyCb;
+
+    public:
         VulkanMemory(VulkanLogicalDevice& logicalDevice);
         ~VulkanMemory();
 
         bool allocateMemory(VkMemoryPropertyFlags memoryProperties, const VkMemoryRequirements& requirement);
         void freeMemory();
 
-        bool uploadData(const void* data, VkDeviceSize size);
+        bool uploadData(const void* srcData, VkDeviceSize srcDataSize, VkDeviceSize destOffset);
+        bool uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, CustomCopyCb cb);
 
         operator VkDeviceMemory() { return m_memory; };
 

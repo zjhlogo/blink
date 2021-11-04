@@ -49,7 +49,7 @@ namespace blink
     void VulkanUniformBuffer::flushBuffer()
     {
         auto bufferMemory = m_gpuBuffer->getBufferMemory();
-        bufferMemory->uploadData(m_memBuffer.data(), m_currentPos);
+        bufferMemory->uploadData(m_memBuffer.data(), m_currentPos, 0);
     }
 
     bool VulkanUniformBuffer::appendData(const void* data, VkDeviceSize size)

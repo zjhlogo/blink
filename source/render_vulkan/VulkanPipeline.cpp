@@ -26,12 +26,10 @@ namespace blink
 
     VulkanPipeline::~VulkanPipeline() { destroy(); }
 
-    bool VulkanPipeline::create()
+    bool VulkanPipeline::create(const std::vector<VkVertexInputBindingDescription>& bindings, const std::vector<VkVertexInputAttributeDescription>& attributes)
     {
-        const auto& extent = m_swapchain.getImageExtent();
-
         if (!createDescriptorSetLayout()) return false;
-        if (!createGraphicsPipeline(extent.width, extent.height)) return false;
+        if (!createGraphicsPipeline(bindings, attributes)) return false;
 
         return true;
     }
@@ -40,14 +38,6 @@ namespace blink
     {
         destroyGraphicsPipeline();
         destroyDescriptorSetLayout();
-    }
-
-    bool VulkanPipeline::recreatePipeline()
-    {
-        const auto& extent = m_swapchain.getImageExtent();
-        if (!createGraphicsPipeline(extent.width, extent.height)) return false;
-
-        return true;
     }
 
     VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout()
@@ -97,7 +87,8 @@ namespace blink
         }
     }
 
-    VkPipeline VulkanPipeline::createGraphicsPipeline(uint32_t width, uint32_t height)
+    VkPipeline VulkanPipeline::createGraphicsPipeline(const std::vector<VkVertexInputBindingDescription>& bindings,
+                                                      const std::vector<VkVertexInputAttributeDescription>& attributes)
     {
         destroyGraphicsPipeline();
 
@@ -134,14 +125,10 @@ namespace blink
         // vertex input state
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-        const auto& bindingDesc = VertexPosNormalUv0::getBindingDescription();
-        vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDesc.size());
-        vertexInputInfo.pVertexBindingDescriptions = bindingDesc.data();
-
-        const auto& attributeDesc = VertexPosNormalUv0::getAttributeDescriptions();
-        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDesc.size());
-        vertexInputInfo.pVertexAttributeDescriptions = attributeDesc.data();
+        vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindings.size());
+        vertexInputInfo.pVertexBindingDescriptions = bindings.data();
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size());
+        vertexInputInfo.pVertexAttributeDescriptions = attributes.data();
 
         // input assembly state
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -149,8 +136,9 @@ namespace blink
         inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
         // viewport state
-        VkViewport viewport{0.0f, 0.0f, width * 1.0f, height * 1.0f, 0.0f, 1.0f};
-        VkRect2D sissor{{0, 0}, {width, height}};
+        const auto& extent = m_swapchain.getImageExtent();
+        VkViewport viewport{0.0f, 0.0f, extent.width * 1.0f, extent.height * 1.0f, 0.0f, 1.0f};
+        VkRect2D sissor{{0, 0}, extent};
         VkPipelineViewportStateCreateInfo viewportState{};
         viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportState.viewportCount = 1;

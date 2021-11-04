@@ -7,6 +7,8 @@
  *
  */
 #pragma once
+#include "VulkanMemory.h"
+
 #include <foundation/BaseTypes.h>
 #include <vulkan/vulkan.h>
 
@@ -28,6 +30,8 @@ namespace blink
         void destroyBuffer();
 
         VkBuffer createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode, VulkanCommandPool& pool);
+        void uploadBuffer(const void* data, VkDeviceSize bufferSize, VulkanCommandPool& pool);
+        void uploadBuffer(VulkanCommandPool& pool, VulkanMemory::CustomCopyCb cb);
         void copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool);
 
         VulkanMemory* allocateBufferMemory(VkMemoryPropertyFlags memProperties);
