@@ -14,6 +14,7 @@
 
 namespace blink
 {
+    class Plane;
     class Box;
     class Mesh;
     class VulkanTexture;
@@ -30,6 +31,7 @@ public:
     virtual void terminate() override;
 
 private:
+    blink::Plane* m_plane{};
     blink::Box* m_box{};
     blink::Mesh* m_mesh{};
     blink::VulkanTexture* m_texture{};
