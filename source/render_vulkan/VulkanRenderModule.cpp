@@ -61,7 +61,7 @@ namespace blink
         if (!createSyncObjects()) return false;
 
         // TODO: setup perframe uniforms inside camera
-        m_perFrameUniforms.matWorldToCamera = glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), glm::zero<glm::vec3>(), glm::vec3(0.0f, 1.0f, 0.0f));
+        m_perFrameUniforms.matWorldToCamera = glm::lookAt(glm::vec3(0.0f, 0.0f, 4.0f), glm::zero<glm::vec3>(), glm::vec3(0.0f, 1.0f, 0.0f));
         const auto& extent = m_swapchain->getImageExtent();
         m_perFrameUniforms.matCameraToProjection = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
         m_perFrameUniforms.matWorldToProjection = m_perFrameUniforms.matCameraToProjection * m_perFrameUniforms.matWorldToCamera;

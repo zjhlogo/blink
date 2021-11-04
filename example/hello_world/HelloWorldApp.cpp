@@ -14,7 +14,11 @@
 
 #include <blink/blink.h>
 #include <blink/component/Components.h>
+#include <blink/geometry/Box.h>
+#include <blink/geometry/Mesh.h>
+#include <blink/material/Material.h>
 #include <render_vulkan/VulkanRenderModule.h>
+#include <render_vulkan/VulkanTexture.h>
 
 HelloWorldApp::HelloWorldApp()
 {
@@ -34,6 +38,9 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     m_box = new blink::Box(logicalDevice, commandPool);
     if (!m_box->create(1.0f, 1.0f, 1.0f)) return false;
 
+    m_mesh = new blink::Mesh(logicalDevice, commandPool);
+    if (!m_mesh->loadFromFile("resource/cube.gltf")) return false;
+    
     m_texture = new blink::VulkanTexture(logicalDevice, commandPool);
     if (!m_texture->createTexture2D("resource/grid.png")) return false;
 
@@ -55,6 +62,7 @@ void HelloWorldApp::terminate()
 
     SAFE_DELETE(m_material);
     SAFE_DELETE(m_texture);
+    SAFE_DELETE(m_mesh);
     SAFE_DELETE(m_box);
 }
 

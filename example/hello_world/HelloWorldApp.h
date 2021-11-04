@@ -11,9 +11,14 @@
 #pragma once
 
 #include <blink/app.h>
-#include <blink/geometry/Box.h>
-#include <blink/material/Material.h>
-#include <render_vulkan/VulkanTexture.h>
+
+namespace blink
+{
+    class Box;
+    class Mesh;
+    class VulkanTexture;
+    class Material;
+}
 
 class HelloWorldApp : public blink::IApp
 {
@@ -26,6 +31,7 @@ public:
 
 private:
     blink::Box* m_box{};
+    blink::Mesh* m_mesh{};
     blink::VulkanTexture* m_texture{};
     blink::Material* m_material{};
 };

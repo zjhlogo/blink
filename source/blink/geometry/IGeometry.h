@@ -40,23 +40,27 @@ namespace blink
                         const std::vector<glm::vec3>& normals,
                         const std::vector<glm::vec2>& uv0s);
 
+        bool uploadData(const void* data,
+                        VkDeviceSize dataSize,
+                        uint32 numVertices,
+                        uint32 numIndices,
+                        VkDeviceSize offsetPosition,
+                        VkDeviceSize offsetNormal,
+                        VkDeviceSize offsetUv0,
+                        VkDeviceSize offsetIndices);
+
     protected:
         VulkanLogicalDevice& m_logicalDevice;
         VulkanCommandPool& m_commandPool;
 
         VulkanBuffer* m_buffer{};
 
-        VkDeviceSize m_offsetPositions{};
-        VkDeviceSize m_sizePositions{};
-
-        VkDeviceSize m_offsetNormals{};
-        VkDeviceSize m_sizeNormals{};
-
-        VkDeviceSize m_offsetUv0s{};
-        VkDeviceSize m_sizeUv0s{};
-
-        VkDeviceSize m_offsetIndices{};
-        VkDeviceSize m_sizeIndices{};
+        uint32 m_numVertices{};
         uint32 m_numIndices{};
+
+        VkDeviceSize m_offsetPositions{};
+        VkDeviceSize m_offsetNormals{};
+        VkDeviceSize m_offsetUv0s{};
+        VkDeviceSize m_offsetIndices{};
     };
 } // namespace blink

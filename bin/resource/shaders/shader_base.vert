@@ -24,5 +24,5 @@ void main()
 {
     gl_Position = pfu.matWorldToProjection * piu.matLocalToWorld * vec4(inPosition, 1.0);
     fragNormal = inNormal;
-    fragTexCoord = vec2(inTexCoord.x, 1.0 - inTexCoord.y);
+    fragTexCoord = vec2(inTexCoord.x, 1.0 - inTexCoord.y); // flip y for vulkan
 }

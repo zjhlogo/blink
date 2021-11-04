@@ -39,21 +39,14 @@ namespace blink
     {
         SAFE_DELETE(m_buffer);
 
-        m_offsetPositions = 0;
-        m_sizePositions = 0;
-
-        m_offsetNormals = 0;
-        m_sizeNormals = 0;
-
-        m_offsetUv0s = 0;
-        m_sizeUv0s = 0;
-
-        m_offsetIndices = 0;
-        m_sizeIndices = 0;
+        m_numVertices = 0;
         m_numIndices = 0;
-    }
 
-    static VkDeviceSize align4Bytes(VkDeviceSize size) { return ((size + 3) >> 2) << 2; }
+        m_offsetPositions = 0;
+        m_offsetNormals = 0;
+        m_offsetUv0s = 0;
+        m_offsetIndices = 0;
+    }
 
     bool IGeometry::uploadData(const std::vector<uint16>& indices,
                                const std::vector<glm::vec3>& positions,
@@ -64,30 +57,59 @@ namespace blink
 
         m_offsetIndices = 0;
         m_numIndices = static_cast<uint32>(indices.size());
-        m_sizeIndices = sizeof(uint16) * m_numIndices;
+        VkDeviceSize sizeIndices = sizeof(uint16) * m_numIndices;
 
-        m_offsetPositions = align4Bytes(m_offsetIndices + m_sizeIndices);
-        m_sizePositions = sizeof(glm::vec3) * positions.size();
+        m_offsetPositions = ALIGN_BYTES_4(m_offsetIndices + sizeIndices);
+        VkDeviceSize sizePositions = sizeof(glm::vec3) * positions.size();
 
-        m_offsetNormals = align4Bytes(m_offsetPositions + m_sizePositions);
-        m_sizeNormals = sizeof(glm::vec3) * normals.size();
+        m_offsetNormals = ALIGN_BYTES_4(m_offsetPositions + sizePositions);
+        VkDeviceSize sizeNormals = sizeof(glm::vec3) * normals.size();
 
-        m_offsetUv0s = align4Bytes(m_offsetNormals + m_sizeNormals);
-        m_sizeUv0s = sizeof(glm::vec2) * uv0s.size();
+        m_offsetUv0s = ALIGN_BYTES_4(m_offsetNormals + sizeNormals);
+        VkDeviceSize sizeUv0s = sizeof(glm::vec2) * uv0s.size();
 
         m_buffer = new VulkanBuffer(m_logicalDevice);
-        m_buffer->createBuffer(m_offsetUv0s + m_sizeUv0s,
+        m_buffer->createBuffer(m_offsetUv0s + sizeUv0s,
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(m_commandPool,
                                [&](void* destBuffer, VkDeviceSize destBufferSize)
                                {
-                                   memcpy(((uint8*)destBuffer + m_offsetIndices), indices.data(), m_sizeIndices);
-                                   memcpy(((uint8*)destBuffer + m_offsetPositions), positions.data(), m_sizePositions);
-                                   memcpy(((uint8*)destBuffer + m_offsetNormals), normals.data(), m_sizeNormals);
-                                   memcpy(((uint8*)destBuffer + m_offsetUv0s), uv0s.data(), m_sizeUv0s);
+                                   memcpy(((uint8*)destBuffer + m_offsetIndices), indices.data(), sizeIndices);
+                                   memcpy(((uint8*)destBuffer + m_offsetPositions), positions.data(), sizePositions);
+                                   memcpy(((uint8*)destBuffer + m_offsetNormals), normals.data(), sizeNormals);
+                                   memcpy(((uint8*)destBuffer + m_offsetUv0s), uv0s.data(), sizeUv0s);
                                });
+        return true;
+    }
+
+    bool IGeometry::uploadData(const void* data,
+                               VkDeviceSize dataSize,
+                               uint32 numVertices,
+                               uint32 numIndices,
+                               VkDeviceSize offsetPosition,
+                               VkDeviceSize offsetNormal,
+                               VkDeviceSize offsetUv0,
+                               VkDeviceSize offsetIndices)
+    {
+        destroy();
+
+        m_numVertices = numVertices;
+        m_numIndices = numIndices;
+
+        m_offsetPositions = offsetPosition;
+        m_offsetNormals = offsetNormal;
+        m_offsetUv0s = offsetUv0;
+        m_offsetIndices = offsetIndices;
+
+        m_buffer = new VulkanBuffer(m_logicalDevice);
+        m_buffer->createBuffer(dataSize,
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                               VK_SHARING_MODE_EXCLUSIVE);
+
+        m_buffer->uploadBuffer(data, dataSize, m_commandPool);
+
         return true;
     }
 } // namespace blink

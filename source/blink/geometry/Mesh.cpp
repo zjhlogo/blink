@@ -109,50 +109,14 @@ namespace blink
 
         const auto& buffer = model.buffers[buffViewPos.buffer];
 
-        return false;
-        // auto& attrib = reader.GetAttrib();
-        // auto& shapes = reader.GetShapes();
-        // auto& materials = reader.GetMaterials();
-
-        // std::vector<VertexPosColorUv1> vertices;
-        // std::vector<uint16> indices;
-        // std::unordered_map<VertexPosColorUv1, uint16> uniqueVertices;
-
-        //// Loop over shapes
-        // for (const auto& shape : shapes)
-        //{
-        //    for (const auto& index : shape.mesh.indices)
-        //    {
-        //        VertexPosColorUv1 vertex{{
-        //                                     attrib.vertices[3 * index.vertex_index + 0],
-        //                                     attrib.vertices[3 * index.vertex_index + 1],
-        //                                     attrib.vertices[3 * index.vertex_index + 2],
-        //                                 },
-        //                                 {
-        //                                     1.0f,
-        //                                     1.0f,
-        //                                     1.0f,
-        //                                 },
-        //                                 {
-        //                                     attrib.texcoords[2 * index.texcoord_index + 0],
-        //                                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1],
-        //                                 }};
-
-        //        if (uniqueVertices.count(vertex) == 0)
-        //        {
-        //            uniqueVertices[vertex] = static_cast<uint16>(vertices.size());
-        //            vertices.push_back(vertex);
-        //        }
-
-        //        indices.push_back(uniqueVertices[vertex]);
-        //    }
-        //}
-
-        // return uploadData(vertices.data(),
-        //                  static_cast<uint32>(vertices.size()),
-        //                  sizeof(VertexPosColorUv1),
-        //                  indices.data(),
-        //                  static_cast<uint16>(indices.size()));
+        return uploadData(buffer.data.data(),
+                          buffer.data.size(),
+                          static_cast<uint32>(accessorPos.count),
+                          static_cast<uint32>(accessorIndices.count),
+                          buffViewPos.byteOffset,
+                          buffViewNormal.byteOffset,
+                          buffViewUv0.byteOffset,
+                          buffViewIndices.byteOffset);
     }
 
 } // namespace blink

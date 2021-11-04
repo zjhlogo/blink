@@ -78,12 +78,12 @@ namespace blink
                 uint16 i3 = i2 + 1;
 
                 indis.push_back(startIndex + i0);
-                indis.push_back(startIndex + i2);
                 indis.push_back(startIndex + i1);
+                indis.push_back(startIndex + i2);
 
                 indis.push_back(startIndex + i1);
-                indis.push_back(startIndex + i2);
                 indis.push_back(startIndex + i3);
+                indis.push_back(startIndex + i2);
             }
         }
     }
