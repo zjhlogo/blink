@@ -35,7 +35,7 @@ namespace blink
         return *this;
     }
 
-    void SphereUvBuilder::build(std::vector<glm::vec3>& positionsOut,
+    bool SphereUvBuilder::build(std::vector<glm::vec3>& positionsOut,
                                 std::vector<uint16>& indicesOut,
                                 std::vector<glm::vec3>* normalsOut,
                                 std::vector<glm::vec2>* uvsOut)
@@ -76,5 +76,7 @@ namespace blink
                 indicesOut.push_back(prevRingIndex + s + 1);
             }
         }
+
+        return true;
     }
 } // namespace blink

@@ -10,7 +10,7 @@
 **/
 
 #include "app.h"
-#include "geometry/IGeometry.h"
+#include "geometry/Geometry.h"
 #include "material/Material.h"
 
 #include <blink/base/ISystemBase.h>
@@ -32,7 +32,7 @@ namespace blink
     {
         glm::vec3 pos;
         glm::quat rot;
-        IGeometry* geometry;
+        Geometry* geometry;
     };
 
     void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool)

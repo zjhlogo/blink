@@ -1,6 +1,6 @@
 /**
 
-    @file      IGeometry.h
+    @file      Geometry.h
     @brief
     @details   ~
     @author    zjhlogo
@@ -22,18 +22,15 @@ namespace blink
     class VulkanCommandBuffer;
     class VulkanBuffer;
 
-    class IGeometry
+    class Geometry
     {
     public:
-        IGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
-        virtual ~IGeometry();
+        Geometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+        virtual ~Geometry();
 
         void bindBuffer(VulkanCommandBuffer& commandBuffer);
 
         uint32 getNumIndices() const { return m_numIndices; }
-
-    protected:
-        void destroy();
 
         bool uploadData(const std::vector<uint16>& indices,
                         const std::vector<glm::vec3>& positions,
@@ -48,6 +45,9 @@ namespace blink
                         VkDeviceSize offsetNormal,
                         VkDeviceSize offsetUv0,
                         VkDeviceSize offsetIndices);
+
+    protected:
+        void destroy();
 
     protected:
         VulkanLogicalDevice& m_logicalDevice;

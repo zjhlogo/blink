@@ -10,16 +10,23 @@
 **/
 #pragma once
 
+#include "../Geometry.h"
+
 #include <foundation/BaseTypesGlm.h>
 
 #include <vector>
 
 namespace blink
 {
+    class VulkanLogicalDevice;
+    class VulkanCommandPool;
+
     class IGeometryBuilder
     {
     public:
-        virtual void build(std::vector<glm::vec3>& positionsOut,
+        virtual Geometry* createGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+
+        virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
                            std::vector<glm::vec3>* normalsOut = nullptr,
                            std::vector<glm::vec2>* uvsOut = nullptr) = 0;

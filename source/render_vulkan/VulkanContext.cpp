@@ -221,7 +221,8 @@ namespace blink
                 swapChainAdequate = (surfaceFormatCount > 0) && (presentModeCount > 0);
             }
 
-            if (graphicsFamilyIndex != -1 && presentFamilyIndex != -1 && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy)
+            if (graphicsFamilyIndex != -1 && presentFamilyIndex != -1 && extensionsSupported == true && swapChainAdequate == true
+                && supportedFeatures.samplerAnisotropy == VK_TRUE && supportedFeatures.fillModeNonSolid == VK_TRUE)
             {
                 return index;
             }

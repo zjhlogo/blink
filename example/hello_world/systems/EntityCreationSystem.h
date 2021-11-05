@@ -11,17 +11,17 @@
 #pragma once
 
 #include <blink/base/ISystemBase.h>
-#include <blink/geometry/Mesh.h>
+#include <blink/geometry/Geometry.h>
 #include <blink/material/Material.h>
 
 class EntityCreationSystem : public blink::ISystemBase
 {
 public:
-    EntityCreationSystem(blink::IGeometry* geometry, blink::Material* material);
+    EntityCreationSystem(blink::Geometry* geometry, blink::Material* material);
 
     virtual bool initialize(flecs::world& world) override;
 
 private:
-    blink::IGeometry* m_geometry{};
+    blink::Geometry* m_geometry{};
     blink::Material* m_material{};
 };

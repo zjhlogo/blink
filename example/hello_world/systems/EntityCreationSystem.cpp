@@ -13,7 +13,7 @@
 
 #include <blink/component/Components.h>
 
-EntityCreationSystem::EntityCreationSystem(blink::IGeometry* geometry, blink::Material* material)
+EntityCreationSystem::EntityCreationSystem(blink::Geometry* geometry, blink::Material* material)
     : m_geometry(geometry)
     , m_material(material)
 {

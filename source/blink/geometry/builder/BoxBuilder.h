@@ -1,6 +1,6 @@
 /**
 
-    @file      SphereUvBuilder.h
+    @file      BoxBuilder.h
     @brief
     @details   ~
     @author    zjhlogo
@@ -14,12 +14,11 @@
 
 namespace blink
 {
-    class SphereUvBuilder : public IGeometryBuilder
+    class BoxBuilder : public IGeometryBuilder
     {
     public:
-        SphereUvBuilder& center(float x, float y, float z);
-        SphereUvBuilder& radius(float radius);
-        SphereUvBuilder& ringAndSection(uint16 rings, uint16 sections);
+        BoxBuilder& size(float width, float height, float depth);
+        BoxBuilder& segment(uint16 widthSegment, uint16 heightSegment, uint16 depthSegment);
 
         virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
@@ -27,8 +26,7 @@ namespace blink
                            std::vector<glm::vec2>* uvsOut = nullptr) override;
 
     private:
-        glm::vec3 m_center{};
-        float m_radius{0.5f};
-        glm::u16vec2 m_segments{3, 3};
+        glm::vec3 m_size{1.0f, 1.0f, 1.0f};
+        glm::u16vec3 m_segment{1, 1, 1};
     };
 } // namespace blink

@@ -1,6 +1,6 @@
 /**
 
-    @file      IGeometry.cpp
+    @file      Geometry.cpp
     @brief
     @details   ~
     @author    zjhlogo
@@ -9,22 +9,22 @@
 
 **/
 
-#include "IGeometry.h"
+#include "Geometry.h"
 
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanCommandBuffer.h>
 
 namespace blink
 {
-    IGeometry::IGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
+    Geometry::Geometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
         : m_logicalDevice(logicalDevice)
         , m_commandPool(commandPool)
     {
     }
 
-    IGeometry::~IGeometry() { destroy(); }
+    Geometry::~Geometry() { destroy(); }
 
-    void IGeometry::bindBuffer(VulkanCommandBuffer& commandBuffer)
+    void Geometry::bindBuffer(VulkanCommandBuffer& commandBuffer)
     {
         VkBuffer buffer = *m_buffer;
 
@@ -35,23 +35,10 @@ namespace blink
         vkCmdBindVertexBuffers(commandBuffer, 2, 1, &buffer, &m_offsetUv0s);
     }
 
-    void IGeometry::destroy()
-    {
-        SAFE_DELETE(m_buffer);
-
-        m_numVertices = 0;
-        m_numIndices = 0;
-
-        m_offsetPositions = 0;
-        m_offsetNormals = 0;
-        m_offsetUv0s = 0;
-        m_offsetIndices = 0;
-    }
-
-    bool IGeometry::uploadData(const std::vector<uint16>& indices,
-                               const std::vector<glm::vec3>& positions,
-                               const std::vector<glm::vec3>& normals,
-                               const std::vector<glm::vec2>& uv0s)
+    bool Geometry::uploadData(const std::vector<uint16>& indices,
+                              const std::vector<glm::vec3>& positions,
+                              const std::vector<glm::vec3>& normals,
+                              const std::vector<glm::vec2>& uv0s)
     {
         destroy();
 
@@ -84,14 +71,14 @@ namespace blink
         return true;
     }
 
-    bool IGeometry::uploadData(const void* data,
-                               VkDeviceSize dataSize,
-                               uint32 numVertices,
-                               uint32 numIndices,
-                               VkDeviceSize offsetPosition,
-                               VkDeviceSize offsetNormal,
-                               VkDeviceSize offsetUv0,
-                               VkDeviceSize offsetIndices)
+    bool Geometry::uploadData(const void* data,
+                              VkDeviceSize dataSize,
+                              uint32 numVertices,
+                              uint32 numIndices,
+                              VkDeviceSize offsetPosition,
+                              VkDeviceSize offsetNormal,
+                              VkDeviceSize offsetUv0,
+                              VkDeviceSize offsetIndices)
     {
         destroy();
 
@@ -111,5 +98,18 @@ namespace blink
         m_buffer->uploadBuffer(data, dataSize, m_commandPool);
 
         return true;
+    }
+
+    void Geometry::destroy()
+    {
+        SAFE_DELETE(m_buffer);
+
+        m_numVertices = 0;
+        m_numIndices = 0;
+
+        m_offsetPositions = 0;
+        m_offsetNormals = 0;
+        m_offsetUv0s = 0;
+        m_offsetIndices = 0;
     }
 } // namespace blink

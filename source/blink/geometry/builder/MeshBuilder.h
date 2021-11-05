@@ -1,6 +1,6 @@
 /**
 
-    @file      SphereUvBuilder.h
+    @file      MeshBuilder.h
     @brief
     @details   ~
     @author    zjhlogo
@@ -14,12 +14,14 @@
 
 namespace blink
 {
-    class SphereUvBuilder : public IGeometryBuilder
+    class Geometry;
+
+    class MeshBuilder : public IGeometryBuilder
     {
     public:
-        SphereUvBuilder& center(float x, float y, float z);
-        SphereUvBuilder& radius(float radius);
-        SphereUvBuilder& ringAndSection(uint16 rings, uint16 sections);
+        MeshBuilder& filePath(const tstring& filePath);
+
+        virtual Geometry* createGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool) override;
 
         virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
@@ -27,8 +29,6 @@ namespace blink
                            std::vector<glm::vec2>* uvsOut = nullptr) override;
 
     private:
-        glm::vec3 m_center{};
-        float m_radius{0.5f};
-        glm::u16vec2 m_segments{3, 3};
+        tstring m_filePath;
     };
 } // namespace blink

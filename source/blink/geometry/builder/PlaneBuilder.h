@@ -23,7 +23,7 @@ namespace blink
         PlaneBuilder& orient(const glm::quat& orientation);
         PlaneBuilder& translate(const glm::vec3& translation);
 
-        virtual void build(std::vector<glm::vec3>& positionsOut,
+        virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
                            std::vector<glm::vec3>* normalsOut = nullptr,
                            std::vector<glm::vec2>* uvsOut = nullptr) override;

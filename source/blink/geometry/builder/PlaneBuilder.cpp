@@ -48,7 +48,7 @@ namespace blink
         return *this;
     }
 
-    void PlaneBuilder::build(std::vector<glm::vec3>& positionsOut,
+    bool PlaneBuilder::build(std::vector<glm::vec3>& positionsOut,
                              std::vector<uint16>& indicesOut,
                              std::vector<glm::vec3>* normalsOut,
                              std::vector<glm::vec2>* uvsOut)
@@ -98,5 +98,7 @@ namespace blink
                 indicesOut.push_back(startIndex + i2);
             }
         }
+
+        return true;
     }
 } // namespace blink

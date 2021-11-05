@@ -14,10 +14,11 @@
 
 #include <blink/blink.h>
 #include <blink/component/Components.h>
-#include <blink/geometry/Box.h>
-#include <blink/geometry/Mesh.h>
-#include <blink/geometry/Plane.h>
-#include <blink/geometry/SphereUv.h>
+#include <blink/geometry/builder/BoxBuilder.h>
+#include <blink/geometry/builder/MeshBuilder.h>
+#include <blink/geometry/builder/PlaneBuilder.h>
+#include <blink/geometry/builder/SphereUvBuilder.h>
+#include <blink/geometry/builder/TetrahedronBuilder.h>
 #include <blink/material/Material.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanTexture.h>
@@ -37,17 +38,30 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& commandPool = renderModule.getCommandPool();
     auto& descriptorPool = renderModule.getDescriptorPool();
 
-    m_plane = new blink::Plane(logicalDevice, commandPool);
-    if (!m_plane->create(1.0f, 1.0f, 1, 1)) return false;
+    //{
+    //    blink::PlaneBuilder builder;
+    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
+    //}
 
-    m_box = new blink::Box(logicalDevice, commandPool);
-    if (!m_box->create(1.0f, 1.0f, 1.0f)) return false;
+    //{
+    //    blink::BoxBuilder builder;
+    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
+    //}
 
-    m_sphereUv = new blink::SphereUv(logicalDevice, commandPool);
-    if (!m_sphereUv->create(glm::zero<glm::vec3>(), 0.5f, 15, 15)) return false;
+    //{
+    //    blink::SphereUvBuilder builder;
+    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
+    //}
 
-    m_mesh = new blink::Mesh(logicalDevice, commandPool);
-    if (!m_mesh->loadFromFile("resource/cube.gltf")) return false;
+    {
+        blink::TetrahedronBuilder builder;
+        m_mesh = builder.createGeometry(logicalDevice, commandPool);
+    }
+
+    //{
+    //    blink::MeshBuilder builder;
+    //    m_mesh = builder.filePath("resource/monkey.gltf").createGeometry(logicalDevice, commandPool);
+    //}
 
     m_texture = new blink::VulkanTexture(logicalDevice, commandPool);
     if (!m_texture->createTexture2D("resource/grid.png")) return false;
@@ -56,7 +70,7 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     if (!m_material->create()) return false;
     m_material->setTexture(m_texture);
 
-    addSystem(new EntityCreationSystem(m_sphereUv, m_material));
+    addSystem(new EntityCreationSystem(m_mesh, m_material));
     addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;
@@ -71,9 +85,6 @@ void HelloWorldApp::terminate()
     SAFE_DELETE(m_material);
     SAFE_DELETE(m_texture);
     SAFE_DELETE(m_mesh);
-    SAFE_DELETE(m_sphereUv);
-    SAFE_DELETE(m_box);
-    SAFE_DELETE(m_plane);
 }
 
 int main(int argc, char** argv)
