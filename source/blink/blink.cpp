@@ -10,6 +10,7 @@
 **/
 
 #include "blink.h"
+#include "resource/ResourceMgr.h"
 
 #include <render_vulkan/VulkanRenderModule.h>
 
@@ -21,20 +22,28 @@ namespace blink
 
         if (renderModule.createDevice({1280, 720}))
         {
-            if (app.initialize(renderModule))
+            if (ResourceMgr::getInstance().initialize(renderModule.getLogicalDevice(),
+                                                      renderModule.getSwapchain(),
+                                                      renderModule.getDescriptorPool(),
+                                                      renderModule.getCommandPool()))
             {
-                while (renderModule.processEvent())
+                if (app.initialize(renderModule))
                 {
-                    app.update(0.0f);
+                    while (renderModule.processEvent())
+                    {
+                        app.update(0.0f);
 
-                    renderModule.render([&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
-                                        { app.render(commandBuffer, uniformBuffer); });
+                        renderModule.render([&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
+                                            { app.render(commandBuffer, uniformBuffer); });
+                    }
+
+                    renderModule.waitIdle();
                 }
 
-                renderModule.waitIdle();
+                app.terminate();
             }
 
-            app.terminate();
+            ResourceMgr::getInstance().terminate();
         }
 
         renderModule.destroyDevice();

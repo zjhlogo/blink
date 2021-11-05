@@ -10,6 +10,8 @@
 **/
 
 #include "Material.h"
+#include "../resource/ResourceMgr.h"
+#include "../texture/Texture2d.h"
 
 #include <foundation/File.h>
 #include <foundation/Log.h>
@@ -24,10 +26,11 @@
 
 namespace blink
 {
-    Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool)
+    Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool, VulkanCommandPool& commandPool)
         : m_logicalDevice(logicalDevice)
         , m_swapchain(swapchain)
         , m_descriptorPool(descriptorPool)
+        , m_commandPool(commandPool)
     {
     }
 
@@ -52,8 +55,11 @@ namespace blink
         if (!loadConfigFromFile(filePath)) return false;
         m_filePath = filePath;
 
+        loadTextures();
+
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain, m_descriptorPool);
-        if (!m_pipeline->create(s_bindingDescription, s_attributeDescriptions, m_vertexShader, m_fragmentShader, m_wireframe))
+        if (!m_pipeline
+                 ->create(s_bindingDescription, s_attributeDescriptions, m_vertexShader, m_fragmentShader, static_cast<int>(m_imageInfos.size()), m_wireframe))
         {
             return false;
         }
@@ -63,11 +69,19 @@ namespace blink
 
     void Material::destroy()
     {
+        for (auto texture : m_textures)
+        {
+            ResourceMgr::getInstance().releaseTexture2d(texture);
+        }
+        m_textures.clear();
+        m_imageInfos.clear();
+
         SAFE_DELETE(m_pipeline);
         m_filePath.clear();
         m_vertexShader.clear();
         m_fragmentShader.clear();
         m_wireframe = false;
+        m_texturePaths.clear();
     }
 
     void Material::bindPipeline(VulkanCommandBuffer& commandBuffer) { vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline); }
@@ -87,7 +101,7 @@ namespace blink
         piuBufferInfo.offset = beginOfData;
         piuBufferInfo.range = dataSize;
 
-        auto descriptorSet = m_pipeline->updateDescriptorSet(pfuBufferInfo, piuBufferInfo, m_textures);
+        auto descriptorSet = m_pipeline->updateDescriptorSet(pfuBufferInfo, piuBufferInfo, m_imageInfos);
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
         return true;
@@ -107,6 +121,36 @@ namespace blink
         m_vertexShader = j["vertex_shader"].get<tstring>();
         m_fragmentShader = j["fragment_shader"].get<tstring>();
         m_wireframe = j["wireframe"].get<bool>();
+
+        auto jtextures = j["textures"];
+        if (jtextures.is_array())
+        {
+            for (int i = 0; i < jtextures.size(); ++i)
+            {
+                m_texturePaths.push_back(jtextures[i].get<tstring>());
+            }
+        }
+
+        return true;
+    }
+
+    bool Material::loadTextures()
+    {
+        for (const auto& filePath : m_texturePaths)
+        {
+            auto texture = ResourceMgr::getInstance().createTexture2d(filePath);
+            if (!texture) return false;
+
+            m_textures.push_back(texture);
+
+            auto vulkanTexture = texture->getVulkanTexture();
+
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = vulkanTexture->getTextureImage()->getImageView();
+            imageInfo.sampler = vulkanTexture->getTextureSampler();
+            m_imageInfos.push_back(imageInfo);
+        }
 
         return true;
     }

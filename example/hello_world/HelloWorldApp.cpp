@@ -19,9 +19,8 @@
 #include <blink/geometry/builder/PlaneBuilder.h>
 #include <blink/geometry/builder/SphereUvBuilder.h>
 #include <blink/geometry/builder/TetrahedronBuilder.h>
-#include <blink/material/Material.h>
+#include <blink/resource/ResourceMgr.h>
 #include <render_vulkan/VulkanRenderModule.h>
-#include <render_vulkan/VulkanTexture.h>
 
 HelloWorldApp::HelloWorldApp()
 {
@@ -63,8 +62,8 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     //    m_mesh = builder.filePath("resource/monkey.gltf").createGeometry(logicalDevice, commandPool);
     //}
 
-    m_material = new blink::Material(logicalDevice, swapchain, descriptorPool);
-    if (!m_material->create("resource/materials/wireframe.mat")) return false;
+    m_material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mat");
+    if (!m_material) return false;
 
     addSystem(new EntityCreationSystem(m_mesh, m_material));
     addSystem(new RotationSystem());
@@ -78,7 +77,9 @@ void HelloWorldApp::terminate()
 {
     terminateSystems();
 
-    SAFE_DELETE(m_material);
+    blink::ResourceMgr::getInstance().releaseMaterial(m_material);
+    m_material = nullptr;
+
     SAFE_DELETE(m_mesh);
 }
 

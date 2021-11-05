@@ -21,7 +21,13 @@ geometry/builder/TetrahedronBuilder.h
 geometry/Geometry.cpp
 geometry/Geometry.h
 material/Material.cpp
-material/material.h
+material/Material.h
+resource/IResource.cpp
+resource/IResource.h
+resource/ResourceMgr.cpp
+resource/ResourceMgr.h
+texture/Texture2d.cpp
+texture/Texture2d.h
 app.cpp
 app.h
 blink.cpp

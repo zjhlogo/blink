@@ -45,7 +45,7 @@ namespace blink
 
         VkDescriptorSet updateDescriptorSet(const VkDescriptorBufferInfo& pfuBufferInfo,
                                             const VkDescriptorBufferInfo& piuBufferInfo,
-                                            const std::vector<VulkanTexture*>& textures);
+                                            const std::vector<VkDescriptorImageInfo>& imageInfos);
 
         VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
         VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };

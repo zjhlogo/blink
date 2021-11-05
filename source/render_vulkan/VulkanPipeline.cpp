@@ -50,7 +50,7 @@ namespace blink
 
     VkDescriptorSet VulkanPipeline::updateDescriptorSet(const VkDescriptorBufferInfo& pfuBufferInfo,
                                                         const VkDescriptorBufferInfo& piuBufferInfo,
-                                                        const std::vector<VulkanTexture*>& textures)
+                                                        const std::vector<VkDescriptorImageInfo>& imageInfos)
     {
         // uniforms, textures binding
         auto descriptorSet = m_descriptorPool.allocateDescriptorSet(m_descriptorSetLayout);
@@ -63,13 +63,8 @@ namespace blink
 
         for (int i = 0; i < m_numTextures; ++i)
         {
-            VkDescriptorImageInfo imageInfo{};
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = textures[i]->getTextureImage()->getImageView();
-            imageInfo.sampler = textures[i]->getTextureSampler();
-
             m_writeSets[SamplerUniformIndexBegin + i].dstSet = descriptorSet;
-            m_writeSets[SamplerUniformIndexBegin + i].pImageInfo = &imageInfo;
+            m_writeSets[SamplerUniformIndexBegin + i].pImageInfo = &imageInfos[i];
         }
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
