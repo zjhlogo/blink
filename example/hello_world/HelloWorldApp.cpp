@@ -63,12 +63,8 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     //    m_mesh = builder.filePath("resource/monkey.gltf").createGeometry(logicalDevice, commandPool);
     //}
 
-    m_texture = new blink::VulkanTexture(logicalDevice, commandPool);
-    if (!m_texture->createTexture2D("resource/grid.png")) return false;
-
     m_material = new blink::Material(logicalDevice, swapchain, descriptorPool);
-    if (!m_material->create()) return false;
-    m_material->setTexture(m_texture);
+    if (!m_material->create("resource/materials/wireframe.mat")) return false;
 
     addSystem(new EntityCreationSystem(m_mesh, m_material));
     addSystem(new RotationSystem());
@@ -83,7 +79,6 @@ void HelloWorldApp::terminate()
     terminateSystems();
 
     SAFE_DELETE(m_material);
-    SAFE_DELETE(m_texture);
     SAFE_DELETE(m_mesh);
 }
 

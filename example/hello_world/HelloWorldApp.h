@@ -30,6 +30,5 @@ public:
 
 private:
     blink::Geometry* m_mesh{};
-    blink::VulkanTexture* m_texture{};
     blink::Material* m_material{};
 };

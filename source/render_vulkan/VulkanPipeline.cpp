@@ -8,8 +8,11 @@
  */
 #include "VulkanPipeline.h"
 #include "VulkanContext.h"
+#include "VulkanDescriptorPool.h"
+#include "VulkanImage.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanSwapchain.h"
+#include "VulkanTexture.h"
 #include "utils/VulkanUtils.h"
 
 #include <foundation/File.h>
@@ -17,18 +20,24 @@
 
 namespace blink
 {
-    VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
+    VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool)
         : m_logicalDevice(logicalDevice)
         , m_swapchain(swapchain)
+        , m_descriptorPool(descriptorPool)
     {
     }
 
     VulkanPipeline::~VulkanPipeline() { destroy(); }
 
-    bool VulkanPipeline::create(const std::vector<VkVertexInputBindingDescription>& bindings, const std::vector<VkVertexInputAttributeDescription>& attributes)
+    bool VulkanPipeline::create(const std::vector<VkVertexInputBindingDescription>& bindings,
+                                const std::vector<VkVertexInputAttributeDescription>& attributes,
+                                const tstring& vertexShader,
+                                const tstring& fragmentShader,
+                                int numTextures,
+                                bool wireframe)
     {
-        if (!createDescriptorSetLayout()) return false;
-        if (!createGraphicsPipeline(bindings, attributes)) return false;
+        if (!createDescriptorSetLayout(numTextures)) return false;
+        if (!createGraphicsPipeline(bindings, attributes, vertexShader, fragmentShader, wireframe)) return false;
 
         return true;
     }
@@ -39,34 +48,95 @@ namespace blink
         destroyDescriptorSetLayout();
     }
 
-    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout()
+    VkDescriptorSet VulkanPipeline::updateDescriptorSet(const VkDescriptorBufferInfo& pfuBufferInfo,
+                                                        const VkDescriptorBufferInfo& piuBufferInfo,
+                                                        const std::vector<VulkanTexture*>& textures)
+    {
+        // uniforms, textures binding
+        auto descriptorSet = m_descriptorPool.allocateDescriptorSet(m_descriptorSetLayout);
+
+        m_writeSets[PerFrameUniformIndex].dstSet = descriptorSet;
+        m_writeSets[PerFrameUniformIndex].pBufferInfo = &pfuBufferInfo;
+
+        m_writeSets[PerInstanceUniformIndex].dstSet = descriptorSet;
+        m_writeSets[PerInstanceUniformIndex].pBufferInfo = &piuBufferInfo;
+
+        for (int i = 0; i < m_numTextures; ++i)
+        {
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = textures[i]->getTextureImage()->getImageView();
+            imageInfo.sampler = textures[i]->getTextureSampler();
+
+            m_writeSets[SamplerUniformIndexBegin + i].dstSet = descriptorSet;
+            m_writeSets[SamplerUniformIndexBegin + i].pImageInfo = &imageInfo;
+        }
+
+        vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
+
+        return descriptorSet;
+    }
+
+    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(int numTextures)
     {
         destroyDescriptorSetLayout();
+        m_numTextures = numTextures;
 
-        VkDescriptorSetLayoutBinding pfoLayoutBinding{};
-        pfoLayoutBinding.binding = 0;
-        pfoLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        pfoLayoutBinding.descriptorCount = 1;
-        pfoLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        // pfu
+        {
+            VkDescriptorSetLayoutBinding pfuLayoutBinding{};
+            pfuLayoutBinding.binding = PerFrameUniformIndex;
+            pfuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            pfuLayoutBinding.descriptorCount = 1;
+            pfuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            m_layoutBindings.push_back(pfuLayoutBinding);
 
-        VkDescriptorSetLayoutBinding pioLayoutBinding{};
-        pioLayoutBinding.binding = 1;
-        pioLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        pioLayoutBinding.descriptorCount = 1;
-        pioLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            VkWriteDescriptorSet pfuDescriptorWrites{};
+            pfuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            pfuDescriptorWrites.dstBinding = PerFrameUniformIndex;
+            pfuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            pfuDescriptorWrites.descriptorCount = 1;
+            m_writeSets.push_back(pfuDescriptorWrites);
+        }
 
-        VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-        samplerLayoutBinding.binding = 2;
-        samplerLayoutBinding.descriptorCount = 1;
-        samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        // piu
+        {
+            VkDescriptorSetLayoutBinding piuLayoutBinding{};
+            piuLayoutBinding.binding = PerInstanceUniformIndex;
+            piuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            piuLayoutBinding.descriptorCount = 1;
+            piuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            m_layoutBindings.push_back(piuLayoutBinding);
 
-        VkDescriptorSetLayoutBinding bindings[3] = {pfoLayoutBinding, pioLayoutBinding, samplerLayoutBinding};
+            VkWriteDescriptorSet piuDescriptorWrites{};
+            piuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            piuDescriptorWrites.dstBinding = PerInstanceUniformIndex;
+            piuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            piuDescriptorWrites.descriptorCount = 1;
+            m_writeSets.push_back(piuDescriptorWrites);
+        }
+
+        for (int i = 0; i < m_numTextures; ++i)
+        {
+            VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+            samplerLayoutBinding.binding = SamplerUniformIndexBegin + i;
+            samplerLayoutBinding.descriptorCount = 1;
+            samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+            m_layoutBindings.push_back(samplerLayoutBinding);
+
+            VkWriteDescriptorSet imageDescriptorWrites{};
+            imageDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            imageDescriptorWrites.dstBinding = SamplerUniformIndexBegin + i;
+            imageDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            imageDescriptorWrites.descriptorCount = 1;
+            m_writeSets.push_back(imageDescriptorWrites);
+        }
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = 3;
-        layoutInfo.pBindings = bindings;
+        layoutInfo.bindingCount = static_cast<uint32_t>(m_layoutBindings.size());
+        layoutInfo.pBindings = m_layoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
         {
@@ -79,6 +149,10 @@ namespace blink
 
     void VulkanPipeline::destroyDescriptorSetLayout()
     {
+        m_numTextures = 0;
+        m_layoutBindings.clear();
+        m_writeSets.clear();
+
         if (m_descriptorSetLayout != nullptr)
         {
             vkDestroyDescriptorSetLayout(m_logicalDevice, m_descriptorSetLayout, nullptr);
@@ -87,7 +161,10 @@ namespace blink
     }
 
     VkPipeline VulkanPipeline::createGraphicsPipeline(const std::vector<VkVertexInputBindingDescription>& bindings,
-                                                      const std::vector<VkVertexInputAttributeDescription>& attributes)
+                                                      const std::vector<VkVertexInputAttributeDescription>& attributes,
+                                                      const tstring& vertexShader,
+                                                      const tstring& fragmentShader,
+                                                      bool wireframe)
     {
         destroyGraphicsPipeline();
 
@@ -103,8 +180,8 @@ namespace blink
             return nullptr;
         }
 
-        VkShaderModule vertShaderModule = createShaderModule("resource/shaders/shader_base.vert.spv");
-        VkShaderModule fragShaderModule = createShaderModule("resource/shaders/shader_base.frag.spv");
+        VkShaderModule vertShaderModule = createShaderModule(vertexShader);
+        VkShaderModule fragShaderModule = createShaderModule(fragmentShader);
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -150,7 +227,7 @@ namespace blink
         rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
-        rasterizer.polygonMode = VK_POLYGON_MODE_FILL; // VK_POLYGON_MODE_LINE, VK_POLYGON_MODE_FILL
+        rasterizer.polygonMode = wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;

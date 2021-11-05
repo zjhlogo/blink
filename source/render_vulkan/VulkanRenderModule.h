@@ -35,7 +35,7 @@ namespace blink
     class VulkanRenderModule
     {
     public:
-        typedef std::function<void(VulkanCommandBuffer&, VulkanUniformBuffer&, VulkanDescriptorPool&)> RenderCb;
+        typedef std::function<void(VulkanCommandBuffer&, VulkanUniformBuffer&)> RenderCb;
 
         struct PerFrameUniforms
         {

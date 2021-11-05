@@ -133,7 +133,7 @@ namespace blink
                 m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(imageIndex), rect);
 
                 // record commands
-                cb(*m_commandBuffer, *m_uniformBuffer, *m_descriptorPool);
+                cb(*m_commandBuffer, *m_uniformBuffer);
 
                 m_commandBuffer->endRenderPass();
             }

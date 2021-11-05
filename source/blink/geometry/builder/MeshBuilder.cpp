@@ -15,6 +15,11 @@
 #include <foundation/Log.h>
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanCommandBuffer.h>
+
+#define TINYGLTF_IMPLEMENTATION
+#define STBI_MSC_SECURE_CRT
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include <tinygltf/tiny_gltf.h>
 
 namespace blink

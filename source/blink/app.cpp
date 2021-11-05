@@ -35,7 +35,7 @@ namespace blink
         Geometry* geometry;
     };
 
-    void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool)
+    void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
     {
         // group render object by material
         std::unordered_map<Material*, std::vector<RenderData>> renderDatas;
@@ -65,7 +65,7 @@ namespace blink
             for (const auto& renderData : kvp.second)
             {
                 renderData.geometry->bindBuffer(commandBuffer);
-                material->bindUniformBuffer(commandBuffer, uniformBuffer, descriptorPool, renderData.pos, renderData.rot);
+                material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
 
                 vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
             }

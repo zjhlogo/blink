@@ -19,7 +19,6 @@ namespace blink
 {
     class VulkanRenderModule;
     class VulkanCommandBuffer;
-    class VulkanDescriptorPool;
     class VulkanUniformBuffer;
     class ISystemBase;
 
@@ -33,7 +32,7 @@ namespace blink
         virtual void terminate() = 0;
 
         virtual void update(float dt);
-        virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, VulkanDescriptorPool& descriptorPool);
+        virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer);
 
     protected:
         bool addSystem(ISystemBase* sys);

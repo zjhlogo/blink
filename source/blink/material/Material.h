@@ -30,29 +30,29 @@ namespace blink
         Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool);
         ~Material();
 
-        bool create();
+        bool create(const tstring& filePath);
         void destroy();
 
-        void setTexture(VulkanTexture* texture);
-
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
-        bool bindUniformBuffer(VulkanCommandBuffer& commandBuffer,
-                               VulkanUniformBuffer& uniformBuffer,
-                               VulkanDescriptorPool& descriptorPool,
-                               const glm::vec3& pos,
-                               const glm::quat& rot);
+        bool bindUniformBuffer(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, const glm::vec3& pos, const glm::quat& rot);
 
         VulkanPipeline& getPipeline() { return *m_pipeline; };
+
+    private:
+        bool loadConfigFromFile(const tstring& filePath);
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
         VulkanSwapchain& m_swapchain;
         VulkanDescriptorPool& m_descriptorPool;
 
-        VulkanPipeline* m_pipeline{};
+        tstring m_filePath;
+        tstring m_vertexShader;
+        tstring m_fragmentShader;
+        bool m_wireframe{false};
 
-        // the datas not belong to material
-        VulkanTexture* m_texture{};
+        VulkanPipeline* m_pipeline{};
+        std::vector<VulkanTexture*> m_textures;
     };
 
 } // namespace blink

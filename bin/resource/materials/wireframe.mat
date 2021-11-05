@@ -1,0 +1,5 @@
+{
+    "vertex_shader" : "resource/shaders/shader_base.vert.spv",
+    "fragment_shader" : "resource/shaders/shader_base.frag.spv",
+    "wireframe" : true
+}
