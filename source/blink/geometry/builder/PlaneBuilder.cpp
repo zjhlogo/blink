@@ -22,10 +22,10 @@ namespace blink
         return *this;
     }
 
-    PlaneBuilder& PlaneBuilder::segment(uint32 segmentH, uint32 segmentV)
+    PlaneBuilder& PlaneBuilder::segment(uint16 segmentH, uint16 segmentV)
     {
-        m_segment.x = segmentH;
-        m_segment.y = segmentV;
+        m_segment.x = segmentH < 1 ? 1 : segmentH;
+        m_segment.y = segmentV < 1 ? 1 : segmentV;
         return *this;
     }
 
@@ -48,10 +48,10 @@ namespace blink
         return *this;
     }
 
-    uint32 PlaneBuilder::build(std::vector<glm::vec3>& positionsOut,
-                               std::vector<uint16>& indicesOut,
-                               std::vector<glm::vec3>* normalsOut,
-                               std::vector<glm::vec2>* uvsOut)
+    void PlaneBuilder::build(std::vector<glm::vec3>& positionsOut,
+                             std::vector<uint16>& indicesOut,
+                             std::vector<glm::vec3>* normalsOut,
+                             std::vector<glm::vec2>* uvsOut)
     {
         glm::vec3 normal = glm::rotate(m_orientation, glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -63,12 +63,12 @@ namespace blink
 
         uint16 startIndex = static_cast<uint16>(positionsOut.size());
 
-        for (uint32 y = 0; y < (m_segment.y + 1); ++y)
+        for (uint16 y = 0; y < (m_segment.y + 1); ++y)
         {
             currPos.z = -(y * delta.y - 0.5f) * m_size.y;
             currUv.y = y * delta.y * uvRange.y + m_uvMin.y;
 
-            for (uint32 x = 0; x < (m_segment.x + 1); ++x)
+            for (uint16 x = 0; x < (m_segment.x + 1); ++x)
             {
                 currPos.x = (x * delta.x - 0.5f) * m_size.x;
                 currUv.x = x * delta.x * uvRange.x + m_uvMin.x;
@@ -80,9 +80,9 @@ namespace blink
         }
 
         // build face list
-        for (uint32 y = 0; y < m_segment.y; ++y)
+        for (uint16 y = 0; y < m_segment.y; ++y)
         {
-            for (uint32 x = 0; x < m_segment.x; ++x)
+            for (uint16 x = 0; x < m_segment.x; ++x)
             {
                 uint16 i0 = y * (m_segment.x + 1) + x;
                 uint16 i1 = i0 + 1;
@@ -98,7 +98,5 @@ namespace blink
                 indicesOut.push_back(startIndex + i2);
             }
         }
-
-        return static_cast<uint32>(positionsOut.size()) - startIndex;
     }
 } // namespace blink

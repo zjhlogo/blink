@@ -9,7 +9,7 @@
 
 **/
 #include "Box.h"
-#include "GeometryBuilder.h"
+#include "builder/PlaneBuilder.h"
 
 namespace blink
 {
@@ -27,43 +27,54 @@ namespace blink
         std::vector<glm::vec2> vertsUv0;
         std::vector<uint16> indices;
 
-        int count = 0;
-        int startIndex = 0;
+        PlaneBuilder builder;
 
-        count = GeometryBuilder::buildPlaneVertexPosUv(vertsPos, vertsUv0, 2, 1, 0, depth, height, -1.0f, 1.0f, 0.5f * width, depthSegments, heightSegments);
-        vertsNormal.resize(vertsPos.size());
-        GeometryBuilder::buildNormal(vertsNormal, startIndex, count, VEC3_PX); // +x
-        GeometryBuilder::buildPlaneFaceIndex(indices, startIndex, depthSegments, heightSegments);
+        // top
+        builder
+            .size(width, depth)
+            .segment(widthSegments, depthSegments)
+            .translate(glm::vec3(0.0f, 0.5f * height, 0.0f))
+            .build(vertsPos, indices, &vertsNormal, &vertsUv0);
 
-        startIndex += count;
-        count = GeometryBuilder::buildPlaneVertexPosUv(vertsPos, vertsUv0, 2, 1, 0, depth, height, 1.0f, 1.0f, -0.5f * width, depthSegments, heightSegments);
-        vertsNormal.resize(vertsPos.size());
-        GeometryBuilder::buildNormal(vertsNormal, startIndex, count, VEC3_NX); // -x
-        GeometryBuilder::buildPlaneFaceIndex(indices, startIndex, depthSegments, heightSegments);
+        // bottom
+        builder
+            .size(width, depth)
+            .segment(widthSegments, depthSegments)
+            .orient(glm::angleAxis(glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f)))
+            .translate(glm::vec3(0.0f, -0.5f * height, 0.0f))
+            .build(vertsPos, indices, &vertsNormal, &vertsUv0);
 
-        startIndex += count;
-        count = GeometryBuilder::buildPlaneVertexPosUv(vertsPos, vertsUv0, 0, 2, 1, width, depth, 1.0f, -1.0f, 0.5f * height, widthSegments, depthSegments);
-        vertsNormal.resize(vertsPos.size());
-        GeometryBuilder::buildNormal(vertsNormal, startIndex, count, VEC3_PY); // +y
-        GeometryBuilder::buildPlaneFaceIndex(indices, startIndex, widthSegments, depthSegments);
+        // front
+        builder
+            .size(width, height)
+            .segment(widthSegments, heightSegments)
+            .orient(glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)))
+            .translate(glm::vec3(0.0f, 0.0f, 0.5f * depth))
+            .build(vertsPos, indices, &vertsNormal, &vertsUv0);
 
-        startIndex += count;
-        count = GeometryBuilder::buildPlaneVertexPosUv(vertsPos, vertsUv0, 0, 2, 1, width, depth, 1.0f, 1.0f, -0.5f * height, widthSegments, depthSegments);
-        vertsNormal.resize(vertsPos.size());
-        GeometryBuilder::buildNormal(vertsNormal, startIndex, count, VEC3_NY); // -y
-        GeometryBuilder::buildPlaneFaceIndex(indices, startIndex, widthSegments, depthSegments);
+        // back
+        builder
+            .size(width, height)
+            .segment(widthSegments, heightSegments)
+            .orient(glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)))
+            .translate(glm::vec3(0.0f, 0.0f, -0.5f * depth))
+            .build(vertsPos, indices, &vertsNormal, &vertsUv0);
 
-        startIndex += count;
-        count = GeometryBuilder::buildPlaneVertexPosUv(vertsPos, vertsUv0, 0, 1, 2, width, height, 1.0f, 1.0f, 0.5f * depth, widthSegments, heightSegments);
-        vertsNormal.resize(vertsPos.size());
-        GeometryBuilder::buildNormal(vertsNormal, startIndex, count, VEC3_PZ); // +z
-        GeometryBuilder::buildPlaneFaceIndex(indices, startIndex, widthSegments, heightSegments);
+        // left
+        builder
+            .size(height, depth)
+            .segment(heightSegments, depthSegments)
+            .orient(glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)))
+            .translate(glm::vec3(-0.5f * width, 0.0f, 0.0f))
+            .build(vertsPos, indices, &vertsNormal, &vertsUv0);
 
-        startIndex += count;
-        count = GeometryBuilder::buildPlaneVertexPosUv(vertsPos, vertsUv0, 0, 1, 2, width, height, -1.0f, 1.0f, -0.5f * depth, widthSegments, heightSegments);
-        vertsNormal.resize(vertsPos.size());
-        GeometryBuilder::buildNormal(vertsNormal, startIndex, count, VEC3_NZ); // -z
-        GeometryBuilder::buildPlaneFaceIndex(indices, startIndex, widthSegments, heightSegments);
+        // right
+        builder
+            .size(height, depth)
+            .segment(heightSegments, depthSegments)
+            .orient(glm::angleAxis(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f)))
+            .translate(glm::vec3(0.5f * width, 0.0f, 0.0f))
+            .build(vertsPos, indices, &vertsNormal, &vertsUv0);
 
         return uploadData(indices, vertsPos, vertsNormal, vertsUv0);
     }

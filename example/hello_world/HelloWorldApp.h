@@ -16,6 +16,7 @@ namespace blink
 {
     class Plane;
     class Box;
+    class SphereUv;
     class Mesh;
     class VulkanTexture;
     class Material;
@@ -33,6 +34,7 @@ public:
 private:
     blink::Plane* m_plane{};
     blink::Box* m_box{};
+    blink::SphereUv* m_sphereUv{};
     blink::Mesh* m_mesh{};
     blink::VulkanTexture* m_texture{};
     blink::Material* m_material{};

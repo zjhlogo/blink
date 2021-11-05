@@ -21,12 +21,5 @@ namespace blink
 
         bool create(float width, float height, float depth, int widthSegments = 1, int heightSegments = 1, int depthSegments = 1);
 
-    private:
-        float m_width{};
-        float m_height{};
-        float m_depth{};
-        int m_widthSegments{};
-        int m_heightSegments{};
-        int m_depthSegments{};
     };
 } // namespace blink

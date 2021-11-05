@@ -17,6 +17,7 @@
 #include <blink/geometry/Box.h>
 #include <blink/geometry/Mesh.h>
 #include <blink/geometry/Plane.h>
+#include <blink/geometry/SphereUv.h>
 #include <blink/material/Material.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanTexture.h>
@@ -42,6 +43,9 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     m_box = new blink::Box(logicalDevice, commandPool);
     if (!m_box->create(1.0f, 1.0f, 1.0f)) return false;
 
+    m_sphereUv = new blink::SphereUv(logicalDevice, commandPool);
+    if (!m_sphereUv->create(glm::zero<glm::vec3>(), 0.5f, 15, 15)) return false;
+
     m_mesh = new blink::Mesh(logicalDevice, commandPool);
     if (!m_mesh->loadFromFile("resource/cube.gltf")) return false;
 
@@ -52,7 +56,7 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     if (!m_material->create()) return false;
     m_material->setTexture(m_texture);
 
-    addSystem(new EntityCreationSystem(m_plane, m_material));
+    addSystem(new EntityCreationSystem(m_sphereUv, m_material));
     addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;
@@ -67,6 +71,7 @@ void HelloWorldApp::terminate()
     SAFE_DELETE(m_material);
     SAFE_DELETE(m_texture);
     SAFE_DELETE(m_mesh);
+    SAFE_DELETE(m_sphereUv);
     SAFE_DELETE(m_box);
     SAFE_DELETE(m_plane);
 }
