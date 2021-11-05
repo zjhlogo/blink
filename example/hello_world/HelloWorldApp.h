@@ -30,5 +30,7 @@ public:
 
 private:
     blink::Geometry* m_mesh{};
-    blink::Material* m_material{};
+
+    blink::Material* m_materialWireframe{};
+    blink::Material* m_materialUnlit{};
 };

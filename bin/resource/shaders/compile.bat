@@ -1,2 +1,5 @@
-glslc -o shader_base.frag.spv shader_base.frag
-glslc -o shader_base.vert.spv shader_base.vert
+glslc -o wireframe.frag.spv wireframe.frag
+glslc -o wireframe.vert.spv wireframe.vert
+
+glslc -o unlit.frag.spv unlit.frag
+glslc -o unlit.vert.spv unlit.vert

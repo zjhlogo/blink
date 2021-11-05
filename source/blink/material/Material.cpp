@@ -26,11 +26,10 @@
 
 namespace blink
 {
-    Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool, VulkanCommandPool& commandPool)
+    Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool)
         : m_logicalDevice(logicalDevice)
         , m_swapchain(swapchain)
         , m_descriptorPool(descriptorPool)
-        , m_commandPool(commandPool)
     {
     }
 

@@ -1,0 +1,8 @@
+{
+    "vertex_shader" : "resource/shaders/unlit.vert.spv",
+    "fragment_shader" : "resource/shaders/unlit.frag.spv",
+    "wireframe" : false,
+    "textures" : [
+        "resource/grid.png"
+    ]
+}

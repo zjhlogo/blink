@@ -1,8 +1,5 @@
 {
-    "vertex_shader" : "resource/shaders/shader_base.vert.spv",
-    "fragment_shader" : "resource/shaders/shader_base.frag.spv",
-    "wireframe" : true,
-    "textures" : [
-        "resource/grid.png"
-    ]
+    "vertex_shader" : "resource/shaders/wireframe.vert.spv",
+    "fragment_shader" : "resource/shaders/wireframe.frag.spv",
+    "wireframe" : true
 }

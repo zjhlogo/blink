@@ -62,10 +62,13 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     //    m_mesh = builder.filePath("resource/monkey.gltf").createGeometry(logicalDevice, commandPool);
     //}
 
-    m_material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mat");
-    if (!m_material) return false;
+    m_materialUnlit = blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mat");
+    if (!m_materialUnlit) return false;
 
-    addSystem(new EntityCreationSystem(m_mesh, m_material));
+    m_materialWireframe = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mat");
+    if (!m_materialWireframe) return false;
+
+    addSystem(new EntityCreationSystem(m_mesh, m_materialUnlit, m_materialWireframe));
     addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;
@@ -77,8 +80,11 @@ void HelloWorldApp::terminate()
 {
     terminateSystems();
 
-    blink::ResourceMgr::getInstance().releaseMaterial(m_material);
-    m_material = nullptr;
+    blink::ResourceMgr::getInstance().releaseMaterial(m_materialWireframe);
+    m_materialWireframe = nullptr;
+
+    blink::ResourceMgr::getInstance().releaseMaterial(m_materialUnlit);
+    m_materialUnlit = nullptr;
 
     SAFE_DELETE(m_mesh);
 }

@@ -103,7 +103,7 @@ namespace blink
         }
 
         // create new
-        auto material = new Material(*m_logicalDevice, *m_swapchain, *m_descriptorPool, *m_commandPool);
+        auto material = new Material(*m_logicalDevice, *m_swapchain, *m_descriptorPool);
         if (!material->create(filePath))
         {
             SAFE_DELETE(material);

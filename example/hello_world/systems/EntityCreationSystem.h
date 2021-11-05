@@ -17,11 +17,12 @@
 class EntityCreationSystem : public blink::ISystemBase
 {
 public:
-    EntityCreationSystem(blink::Geometry* geometry, blink::Material* material);
+    EntityCreationSystem(blink::Geometry* geometry, blink::Material* unlit, blink::Material* wireframe);
 
     virtual bool initialize(flecs::world& world) override;
 
 private:
     blink::Geometry* m_geometry{};
-    blink::Material* m_material{};
+    blink::Material* m_unlit{};
+    blink::Material* m_wireframe{};
 };
