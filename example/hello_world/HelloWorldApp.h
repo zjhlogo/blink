@@ -12,13 +12,6 @@
 
 #include <blink/app.h>
 
-namespace blink
-{
-    class Geometry;
-    class VulkanTexture;
-    class Material;
-}
-
 class HelloWorldApp : public blink::IApp
 {
 public:
@@ -27,10 +20,4 @@ public:
 
     virtual bool initialize(blink::VulkanRenderModule& renderModule) override;
     virtual void terminate() override;
-
-private:
-    blink::Geometry* m_mesh{};
-
-    blink::Material* m_materialWireframe{};
-    blink::Material* m_materialUnlit{};
 };

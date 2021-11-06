@@ -24,8 +24,6 @@ namespace blink
     class IGeometryBuilder
     {
     public:
-        virtual Geometry* createGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
-
         virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
                            std::vector<glm::vec3>* normalsOut = nullptr,

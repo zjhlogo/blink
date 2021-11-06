@@ -52,23 +52,17 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
     //}
 
-    {
-        blink::TetrahedronBuilder builder;
-        m_mesh = builder.createGeometry(logicalDevice, commandPool);
-    }
+    //{
+    //    blink::TetrahedronBuilder builder;
+    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
+    //}
 
     //{
     //    blink::MeshBuilder builder;
     //    m_mesh = builder.filePath("resource/monkey.gltf").createGeometry(logicalDevice, commandPool);
     //}
 
-    m_materialUnlit = blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mat");
-    if (!m_materialUnlit) return false;
-
-    m_materialWireframe = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mat");
-    if (!m_materialWireframe) return false;
-
-    addSystem(new EntityCreationSystem(m_mesh, m_materialUnlit, m_materialWireframe));
+    addSystem(new EntityCreationSystem());
     addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;
@@ -79,14 +73,6 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 void HelloWorldApp::terminate()
 {
     terminateSystems();
-
-    blink::ResourceMgr::getInstance().releaseMaterial(m_materialWireframe);
-    m_materialWireframe = nullptr;
-
-    blink::ResourceMgr::getInstance().releaseMaterial(m_materialUnlit);
-    m_materialUnlit = nullptr;
-
-    SAFE_DELETE(m_mesh);
 }
 
 int main(int argc, char** argv)

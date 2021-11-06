@@ -52,6 +52,15 @@ namespace blink
         bufferMemory->uploadData(m_memBuffer.data(), m_currentPos, 0);
     }
 
+    bool VulkanUniformBuffer::memoryAlign()
+    {
+        auto newPos = ((m_currentPos + 63) >> 6) << 6;
+        if (newPos >= m_memBuffer.size()) return false;
+
+        m_currentPos = newPos;
+        return true;
+    }
+
     bool VulkanUniformBuffer::appendData(const void* data, VkDeviceSize size)
     {
         if (size + m_currentPos > m_memBuffer.size()) return false;

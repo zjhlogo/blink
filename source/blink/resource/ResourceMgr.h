@@ -22,6 +22,7 @@ namespace blink
     class VulkanCommandPool;
 
     class Texture2d;
+    class Geometry;
     class Material;
 
     class ResourceMgr
@@ -34,6 +35,9 @@ namespace blink
 
         Texture2d* createTexture2d(const tstring& filePath);
         void releaseTexture2d(Texture2d* texture);
+
+        Geometry* createGeometry(const tstring& filePath);
+        void releaseGeometry(Geometry* geometry);
 
         Material* createMaterial(const tstring& filePath);
         void releaseMaterial(Material* material);
@@ -49,6 +53,7 @@ namespace blink
         VulkanCommandPool* m_commandPool{};
 
         std::unordered_map<tstring, Texture2d*> m_texture2dMap;
+        std::unordered_map<tstring, Geometry*> m_geometryMap;
         std::unordered_map<tstring, Material*> m_materialMap;
     };
 } // namespace blink

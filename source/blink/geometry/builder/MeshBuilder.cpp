@@ -10,11 +10,10 @@
 **/
 
 #include "MeshBuilder.h"
+#include "../../resource/ResourceMgr.h"
 
 #include <foundation/File.h>
 #include <foundation/Log.h>
-#include <render_vulkan/VulkanBuffer.h>
-#include <render_vulkan/VulkanCommandBuffer.h>
 
 #define TINYGLTF_IMPLEMENTATION
 #define STBI_MSC_SECURE_CRT
@@ -30,7 +29,7 @@ namespace blink
         return *this;
     }
 
-    Geometry* MeshBuilder::createGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
+    bool MeshBuilder::build(Geometry* geometry)
     {
         tstring fileContent;
         if (!File::readFileIntoString(fileContent, m_filePath))
@@ -53,6 +52,7 @@ namespace blink
         if (!err.empty())
         {
             LOGE(err);
+            return false;
         }
 
         if (!ret)
@@ -107,7 +107,6 @@ namespace blink
 
         const auto& buffer = model.buffers[buffViewPos.buffer];
 
-        Geometry* geometry = new Geometry(logicalDevice, commandPool);
         if (!geometry->uploadData(buffer.data.data(),
                                   buffer.data.size(),
                                   static_cast<uint32>(accessorPos.count),
@@ -117,11 +116,10 @@ namespace blink
                                   buffViewUv0.byteOffset,
                                   buffViewIndices.byteOffset))
         {
-            SAFE_DELETE(geometry);
-            return nullptr;
+            return false;
         }
 
-        return geometry;
+        return true;
     }
 
     bool MeshBuilder::build(std::vector<glm::vec3>& positionsOut,

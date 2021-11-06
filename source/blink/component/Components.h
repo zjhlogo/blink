@@ -29,8 +29,13 @@ namespace blink
 
     struct StaticModel
     {
-        Geometry* geometry;
-        Material* material;
+        tstring geometryId;
+        tstring materialId;
     };
 
+    struct RenderFeature
+    {
+        int order;
+        tstring materialId;
+    };
 } // namespace blink

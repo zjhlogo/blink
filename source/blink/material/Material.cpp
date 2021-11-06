@@ -87,11 +87,20 @@ namespace blink
 
     bool Material::bindUniformBuffer(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, const glm::vec3& pos, const glm::quat& rot)
     {
-        glm::mat4 localToWorld = glm::translate(glm::identity<glm::mat4>(), pos) * glm::mat4_cast(rot);
+        struct PerInstanceUniforms
+        {
+            alignas(16) glm::mat4 matLocalToWorld;
+            alignas(16) glm::mat3x4 matLocalToWorldInvT;
+        } piu;
+
+        piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos) * glm::mat4_cast(rot);
+        piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
+
+        if (!uniformBuffer.memoryAlign()) return false;
 
         auto beginOfData = uniformBuffer.getCurrentPos();
-        auto dataSize = sizeof(localToWorld);
-        if (!uniformBuffer.appendData(&localToWorld, dataSize)) return false;
+        auto dataSize = sizeof(piu);
+        if (!uniformBuffer.appendData(&piu, dataSize)) return false;
 
         const auto& pfuBufferInfo = uniformBuffer.getPerFrameBufferInfo();
 

@@ -10,6 +10,8 @@
 **/
 #pragma once
 
+#include "../resource/IResource.h"
+
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
 
@@ -21,16 +23,17 @@ namespace blink
     class VulkanCommandPool;
     class VulkanCommandBuffer;
     class VulkanBuffer;
+    class ResourceMgr;
 
-    class Geometry
+    class Geometry : public IResource
     {
-    public:
-        Geometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
-        virtual ~Geometry();
+        friend ResourceMgr;
 
+    public:
         void bindBuffer(VulkanCommandBuffer& commandBuffer);
 
-        uint32 getNumIndices() const { return m_numIndices; }
+        uint32 getNumVertices() const { return m_numVertices; };
+        uint32 getNumIndices() const { return m_numIndices; };
 
         bool uploadData(const std::vector<uint16>& indices,
                         const std::vector<glm::vec3>& positions,
@@ -47,6 +50,9 @@ namespace blink
                         VkDeviceSize offsetIndices);
 
     protected:
+        Geometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+        virtual ~Geometry();
+
         void destroy();
 
     protected:

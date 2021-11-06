@@ -21,7 +21,7 @@ namespace blink
     public:
         MeshBuilder& filePath(const tstring& filePath);
 
-        virtual Geometry* createGeometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool) override;
+        bool build(Geometry* geometry);
 
         virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,

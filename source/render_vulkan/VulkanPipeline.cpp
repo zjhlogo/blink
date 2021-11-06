@@ -83,7 +83,7 @@ namespace blink
             pfuLayoutBinding.binding = PerFrameUniformIndex;
             pfuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             pfuLayoutBinding.descriptorCount = 1;
-            pfuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            pfuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
             m_layoutBindings.push_back(pfuLayoutBinding);
 
             VkWriteDescriptorSet pfuDescriptorWrites{};
@@ -100,7 +100,7 @@ namespace blink
             piuLayoutBinding.binding = PerInstanceUniformIndex;
             piuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             piuLayoutBinding.descriptorCount = 1;
-            piuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+            piuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
             m_layoutBindings.push_back(piuLayoutBinding);
 
             VkWriteDescriptorSet piuDescriptorWrites{};
@@ -111,6 +111,7 @@ namespace blink
             m_writeSets.push_back(piuDescriptorWrites);
         }
 
+        // samplers
         for (int i = 0; i < m_numTextures; ++i)
         {
             VkDescriptorSetLayoutBinding samplerLayoutBinding{};

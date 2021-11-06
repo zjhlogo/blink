@@ -10,6 +10,8 @@
 **/
 
 #include "ResourceMgr.h"
+#include "../geometry/Geometry.h"
+#include "../geometry/builder/MeshBuilder.h"
 #include "../material/Material.h"
 #include "../texture/Texture2d.h"
 
@@ -46,6 +48,12 @@ namespace blink
             SAFE_DELETE(kvp.second);
         }
         m_materialMap.clear();
+
+        for (auto kvp : m_geometryMap)
+        {
+            SAFE_DELETE(kvp.second);
+        }
+        m_geometryMap.clear();
 
         for (auto kvp : m_texture2dMap)
         {
@@ -87,6 +95,40 @@ namespace blink
     {
         auto it = m_texture2dMap.find(texture->getId());
         if (it != m_texture2dMap.end())
+        {
+            it->second->decRef();
+        }
+    }
+
+    Geometry* ResourceMgr::createGeometry(const tstring& filePath)
+    {
+        auto it = m_geometryMap.find(filePath);
+        if (it != m_geometryMap.end())
+        {
+            it->second->incRef();
+            return it->second;
+        }
+
+        // create new
+        auto geometry = new Geometry(*m_logicalDevice, *m_commandPool);
+        MeshBuilder builder;
+        if (!builder.filePath(filePath).build(geometry))
+        {
+            SAFE_DELETE(geometry);
+            return nullptr;
+        }
+
+        geometry->setId(filePath);
+        geometry->incRef();
+        m_geometryMap.emplace(std::make_pair(geometry->getId(), geometry));
+
+        return geometry;
+    }
+
+    void ResourceMgr::releaseGeometry(Geometry* geometry)
+    {
+        auto it = m_geometryMap.find(geometry->getId());
+        if (it != m_geometryMap.end())
         {
             it->second->decRef();
         }

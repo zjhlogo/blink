@@ -12,14 +12,17 @@
 #include "app.h"
 #include "geometry/Geometry.h"
 #include "material/Material.h"
+#include "resource/ResourceMgr.h"
 
 #include <blink/base/ISystemBase.h>
 #include <blink/component/Components.h>
+#include <foundation/Log.h>
 #include <render_vulkan/VulkanCommandBuffer.h>
 #include <render_vulkan/VulkanCommandPool.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanUniformBuffer.h>
 
+#include <map>
 #include <unordered_map>
 
 namespace blink
@@ -35,6 +38,12 @@ namespace blink
         Geometry* geometry;
     };
 
+    struct RenderFeatureData
+    {
+        int order;
+        Material* material;
+    };
+
     void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
     {
         // group render object by material
@@ -42,16 +51,24 @@ namespace blink
         m_world.each(
             [&](flecs::entity e, const Position& pos, const Rotation& rot, const StaticModel& model)
             {
-                auto findIt = renderDatas.find(model.material);
+                auto material = ResourceMgr::getInstance().createMaterial(model.materialId);
+                if (!material) return;
+                material->decRef();
+
+                auto geometry = ResourceMgr::getInstance().createGeometry(model.geometryId);
+                if (!geometry) return;
+                geometry->decRef();
+
+                auto findIt = renderDatas.find(material);
                 if (findIt != renderDatas.end())
                 {
-                    findIt->second.push_back({pos.value, rot.value, model.geometry});
+                    findIt->second.push_back({pos.value, rot.value, geometry});
                 }
                 else
                 {
                     std::vector<RenderData> dataLists;
-                    dataLists.push_back({pos.value, rot.value, model.geometry});
-                    renderDatas.emplace(model.material, dataLists);
+                    dataLists.push_back({pos.value, rot.value, geometry});
+                    renderDatas.emplace(material, dataLists);
                 }
             });
 
@@ -66,8 +83,45 @@ namespace blink
             {
                 renderData.geometry->bindBuffer(commandBuffer);
                 material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
-
                 vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+            }
+        }
+
+        // group render features
+        std::map<int, RenderFeatureData> renderFeatureDatas;
+        m_world.each(
+            [&](flecs::entity e, const RenderFeature& feature)
+            {
+                auto findIt = renderFeatureDatas.find(feature.order);
+                if (findIt != renderFeatureDatas.end())
+                {
+                    LOGE("duplicate render feature order {0} <-> {1}", findIt->second.material->getId(), feature.materialId);
+                }
+                else
+                {
+                    auto material = ResourceMgr::getInstance().createMaterial(feature.materialId);
+                    if (!material) return;
+                    material->decRef();
+
+                    RenderFeatureData renderFeatureData{feature.order, material};
+                    renderFeatureDatas.emplace(feature.order, renderFeatureData);
+                }
+            });
+
+        // render features
+        for (const auto& kvpFeature : renderFeatureDatas)
+        {
+            Material* material = kvpFeature.second.material;
+            material->bindPipeline(commandBuffer);
+
+            for (const auto& kvp : renderDatas)
+            {
+                for (const auto& renderData : kvp.second)
+                {
+                    renderData.geometry->bindBuffer(commandBuffer);
+                    material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
+                    vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                }
             }
         }
     }

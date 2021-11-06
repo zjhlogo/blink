@@ -39,9 +39,12 @@ namespace blink
 
         struct PerFrameUniforms
         {
-            glm::mat4 matWorldToCamera;
-            glm::mat4 matCameraToProjection;
-            glm::mat4 matWorldToProjection;
+            alignas(16) glm::mat4 matWorldToCamera;
+            alignas(16) glm::mat4 matCameraToProjection;
+            alignas(16) glm::mat4 matWorldToProjection;
+            alignas(16) glm::mat3x4 matWorldToCameraInvT;
+            alignas(16) glm::vec3 cameraPos;
+            alignas(16) glm::vec3 cameraDir;
         };
 
     public:
