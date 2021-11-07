@@ -21,6 +21,7 @@
 #include <blink/geometry/builder/TetrahedronBuilder.h>
 #include <blink/resource/ResourceMgr.h>
 #include <render_vulkan/VulkanRenderModule.h>
+#include <render_vulkan/VulkanSwapchain.h>
 
 HelloWorldApp::HelloWorldApp()
 {
@@ -62,7 +63,8 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     //    m_mesh = builder.filePath("resource/monkey.gltf").createGeometry(logicalDevice, commandPool);
     //}
 
-    addSystem(new EntityCreationSystem());
+    const auto& extent = swapchain.getImageExtent();
+    addSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
     addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;

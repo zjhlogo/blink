@@ -37,16 +37,6 @@ namespace blink
     public:
         typedef std::function<void(VulkanCommandBuffer&, VulkanUniformBuffer&)> RenderCb;
 
-        struct PerFrameUniforms
-        {
-            alignas(16) glm::mat4 matWorldToCamera;
-            alignas(16) glm::mat4 matCameraToProjection;
-            alignas(16) glm::mat4 matWorldToProjection;
-            alignas(16) glm::mat3x4 matWorldToCameraInvT;
-            alignas(16) glm::vec3 cameraPos;
-            alignas(16) glm::vec3 cameraDir;
-        };
-
     public:
         VulkanRenderModule();
         virtual ~VulkanRenderModule();
@@ -79,7 +69,6 @@ namespace blink
         VulkanDescriptorPool* m_descriptorPool{};
         VulkanCommandBuffer* m_commandBuffer{};
         VulkanUniformBuffer* m_uniformBuffer{};
-        PerFrameUniforms m_perFrameUniforms{};
     };
 
 } // namespace blink

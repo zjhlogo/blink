@@ -33,6 +33,16 @@ namespace blink
         tstring materialId;
     };
 
+    struct CameraData
+    {
+        glm::vec3 targetPos;
+        glm::vec3 up;
+        float fov;
+        float aspect;
+        float near;
+        float far;
+    };
+
     struct RenderFeature
     {
         int order;

@@ -30,6 +30,7 @@ namespace blink
         VulkanContext* getContext() { return m_context; };
         VkQueue getGraphicsQueue() { return m_graphicsQueue; };
         VkQueue getPresentQueue() { return m_presentQueue; };
+        VkDeviceSize getMinUniformBufferOffsetAlignment() const { return m_minUniformBufferOffsetAlignment; };
 
     private:
         bool createLogicalDevice();
@@ -41,6 +42,7 @@ namespace blink
         VkDevice m_logicalDevice{};
         VkQueue m_graphicsQueue{};
         VkQueue m_presentQueue{};
+        VkDeviceSize m_minUniformBufferOffsetAlignment{};
     };
 
 } // namespace blink

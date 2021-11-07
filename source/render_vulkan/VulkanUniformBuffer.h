@@ -33,7 +33,7 @@ namespace blink
         void flushBuffer();
 
         size_t getCurrentPos() const { return m_currentPos; };
-        bool memoryAlign();
+        bool alignBufferOffset();
         bool appendData(const void* data, VkDeviceSize size);
 
         const VkDescriptorBufferInfo& getPerFrameBufferInfo() const { return m_perFrameBufferInfo; };

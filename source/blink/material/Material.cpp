@@ -12,6 +12,7 @@
 #include "Material.h"
 #include "../resource/ResourceMgr.h"
 #include "../texture/Texture2d.h"
+#include "../type/RenderTypes.h"
 
 #include <foundation/File.h>
 #include <foundation/Log.h>
@@ -87,16 +88,11 @@ namespace blink
 
     bool Material::bindUniformBuffer(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, const glm::vec3& pos, const glm::quat& rot)
     {
-        struct PerInstanceUniforms
-        {
-            alignas(16) glm::mat4 matLocalToWorld;
-            alignas(16) glm::mat3x4 matLocalToWorldInvT;
-        } piu;
-
+        PerInstanceUniforms piu;
         piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos) * glm::mat4_cast(rot);
         piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
 
-        if (!uniformBuffer.memoryAlign()) return false;
+        if (!uniformBuffer.alignBufferOffset()) return false;
 
         auto beginOfData = uniformBuffer.getCurrentPos();
         auto dataSize = sizeof(piu);

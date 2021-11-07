@@ -10,13 +10,16 @@
 **/
 #pragma once
 
-#include <blink/base/ISystemBase.h>
+#include <blink/system/ISystemBase.h>
 
 class EntityCreationSystem : public blink::ISystemBase
 {
 public:
-    EntityCreationSystem();
+    EntityCreationSystem(const glm::vec2& surfaceSize);
 
     virtual bool initialize(flecs::world& world) override;
+
+private:
+    glm::vec2 m_surfaceSize;
 
 };

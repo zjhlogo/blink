@@ -10,7 +10,7 @@
 **/
 #pragma once
 
-#include <blink/base/ISystemBase.h>
+#include <blink/system/ISystemBase.h>
 
 class RotationSystem : public blink::ISystemBase
 {

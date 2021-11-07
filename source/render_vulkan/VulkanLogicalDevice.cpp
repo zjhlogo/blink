@@ -110,11 +110,16 @@ namespace blink
         vkGetDeviceQueue(m_logicalDevice, graphicsFamilyIndex, 0, &m_graphicsQueue);
         vkGetDeviceQueue(m_logicalDevice, presentFamilyIndex, 0, &m_presentQueue);
 
+        const auto& properties = m_context->getProperties();
+        m_minUniformBufferOffsetAlignment = properties.limits.minUniformBufferOffsetAlignment;
+
         return true;
     }
 
     void VulkanLogicalDevice::destroyLogicalDevice()
     {
+        m_minUniformBufferOffsetAlignment = 0;
+
         if (m_logicalDevice != nullptr)
         {
             vkDestroyDevice(m_logicalDevice, nullptr);

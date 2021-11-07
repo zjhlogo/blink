@@ -11,6 +11,8 @@
 #include "VulkanUniformBuffer.h"
 #include "VulkanMemory.h"
 
+#include <render_vulkan/VulkanLogicalDevice.h>
+
 namespace blink
 {
     VulkanUniformBuffer::VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice)
@@ -52,9 +54,10 @@ namespace blink
         bufferMemory->uploadData(m_memBuffer.data(), m_currentPos, 0);
     }
 
-    bool VulkanUniformBuffer::memoryAlign()
+    bool VulkanUniformBuffer::alignBufferOffset()
     {
-        auto newPos = ((m_currentPos + 63) >> 6) << 6;
+        auto align = m_logicalDevice.getMinUniformBufferOffsetAlignment();
+        auto newPos = ((m_currentPos + align - 1) / align) * align;
         if (newPos >= m_memBuffer.size()) return false;
 
         m_currentPos = newPos;

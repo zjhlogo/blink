@@ -13,10 +13,12 @@
 #include "geometry/Geometry.h"
 #include "material/Material.h"
 #include "resource/ResourceMgr.h"
+#include "type/RenderTypes.h"
 
-#include <blink/base/ISystemBase.h>
 #include <blink/component/Components.h>
+#include <blink/system/ISystemBase.h>
 #include <foundation/Log.h>
+#include <glm/gtx/quaternion.hpp>
 #include <render_vulkan/VulkanCommandBuffer.h>
 #include <render_vulkan/VulkanCommandPool.h>
 #include <render_vulkan/VulkanRenderModule.h>
@@ -31,21 +33,24 @@ namespace blink
 
     void IApp::update(float dt) { m_world.progress(dt); }
 
-    struct RenderData
-    {
-        glm::vec3 pos;
-        glm::quat rot;
-        Geometry* geometry;
-    };
-
-    struct RenderFeatureData
-    {
-        int order;
-        Material* material;
-    };
-
     void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
     {
+        // collect camera data into pfus
+        std::vector< PerFrameUniforms> pfus;
+        m_world.each(
+            [&pfus](flecs::entity e, const Position& pos, const CameraData& camera)
+            {
+                // setup perframe uniforms
+                PerFrameUniforms pfu;
+                pfu.cameraPos = pos.value;
+                pfu.cameraDir = glm::normalize(camera.targetPos - pos.value);
+                pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, camera.targetPos, camera.up);
+                pfu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pfu.matWorldToCamera)));
+                pfu.matCameraToProjection = glm::perspective(camera.fov, camera.aspect, camera.near, camera.far);
+                pfu.matWorldToProjection = pfu.matCameraToProjection * pfu.matWorldToCamera;
+                pfus.push_back(pfu);
+            });
+
         // group render object by material
         std::unordered_map<Material*, std::vector<RenderData>> renderDatas;
         m_world.each(
@@ -72,21 +77,6 @@ namespace blink
                 }
             });
 
-        // render mesh group by material
-        for (const auto& kvp : renderDatas)
-        {
-            Material* material = kvp.first;
-
-            material->bindPipeline(commandBuffer);
-
-            for (const auto& renderData : kvp.second)
-            {
-                renderData.geometry->bindBuffer(commandBuffer);
-                material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
-                vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
-            }
-        }
-
         // group render features
         std::map<int, RenderFeatureData> renderFeatureDatas;
         m_world.each(
@@ -103,24 +93,46 @@ namespace blink
                     if (!material) return;
                     material->decRef();
 
-                    RenderFeatureData renderFeatureData{feature.order, material};
+                    RenderFeatureData renderFeatureData{ feature.order, material };
                     renderFeatureDatas.emplace(feature.order, renderFeatureData);
                 }
             });
 
-        // render features
-        for (const auto& kvpFeature : renderFeatureDatas)
+        // starting rendering
+        for (const auto& pfu : pfus)
         {
-            Material* material = kvpFeature.second.material;
-            material->bindPipeline(commandBuffer);
+            if (!uniformBuffer.alignBufferOffset()) return;
+            uniformBuffer.appendPerFrameBufferData(&pfu, sizeof(pfu));
 
+            // render mesh group by material
             for (const auto& kvp : renderDatas)
             {
+                Material* material = kvp.first;
+
+                material->bindPipeline(commandBuffer);
+
                 for (const auto& renderData : kvp.second)
                 {
                     renderData.geometry->bindBuffer(commandBuffer);
                     material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
                     vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                }
+            }
+
+            // render features
+            for (const auto& kvpFeature : renderFeatureDatas)
+            {
+                Material* material = kvpFeature.second.material;
+                material->bindPipeline(commandBuffer);
+
+                for (const auto& kvp : renderDatas)
+                {
+                    for (const auto& renderData : kvp.second)
+                    {
+                        renderData.geometry->bindBuffer(commandBuffer);
+                        material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
+                        vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                    }
                 }
             }
         }

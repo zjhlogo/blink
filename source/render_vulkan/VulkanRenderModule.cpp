@@ -60,15 +60,6 @@ namespace blink
 
         if (!createSyncObjects()) return false;
 
-        // TODO: setup perframe uniforms inside camera
-        m_perFrameUniforms.cameraPos = glm::vec3(0.0f, 1.0f, 2.0f);
-        glm::vec3 targetPos(0.0f, 0.0f, 0.0f);
-        m_perFrameUniforms.cameraDir = glm::normalize(targetPos - m_perFrameUniforms.cameraPos);
-        m_perFrameUniforms.matWorldToCamera = glm::lookAt(m_perFrameUniforms.cameraPos, targetPos, glm::vec3(0.0f, 1.0f, 0.0f));
-        m_perFrameUniforms.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(m_perFrameUniforms.matWorldToCamera)));
-        const auto& extent = m_swapchain->getImageExtent();
-        m_perFrameUniforms.matCameraToProjection = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
-        m_perFrameUniforms.matWorldToProjection = m_perFrameUniforms.matCameraToProjection * m_perFrameUniforms.matWorldToCamera;
         return true;
     }
 
@@ -119,8 +110,6 @@ namespace blink
 
         m_descriptorPool->reset();
         m_uniformBuffer->reset();
-
-        m_uniformBuffer->appendPerFrameBufferData(&m_perFrameUniforms, sizeof(m_perFrameUniforms));
 
         // record command buffer
         {

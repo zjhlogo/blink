@@ -4,7 +4,6 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(libblink)
 
 set(SOURCE_FILES
-base/ISystemBase.h
 component/Components.h
 geometry/builder/BoxBuilder.cpp
 geometry/builder/BoxBuilder.h
@@ -26,8 +25,10 @@ resource/IResource.cpp
 resource/IResource.h
 resource/ResourceMgr.cpp
 resource/ResourceMgr.h
+system/ISystemBase.h
 texture/Texture2d.cpp
 texture/Texture2d.h
+type/RenderTypes.h
 app.cpp
 app.h
 blink.cpp
