@@ -20,12 +20,9 @@
 #include <foundation/Log.h>
 #include <glm/gtx/quaternion.hpp>
 #include <render_vulkan/VulkanCommandBuffer.h>
-#include <render_vulkan/VulkanCommandPool.h>
-#include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanUniformBuffer.h>
 
 #include <map>
-#include <unordered_map>
 
 namespace blink
 {
@@ -36,33 +33,34 @@ namespace blink
     void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
     {
         // collect camera data into pfus
-        std::vector< PerFrameUniforms> pfus;
+        std::vector<PerFrameUniforms> pfus;
         m_world.each(
-            [&pfus](flecs::entity e, const Position& pos, const CameraData& camera)
+            [&pfus](flecs::entity e, const Position& pos, const Rotation& rot, const CameraData& camera)
             {
                 // setup perframe uniforms
                 PerFrameUniforms pfu;
                 pfu.cameraPos = pos.value;
-                pfu.cameraDir = glm::normalize(camera.targetPos - pos.value);
-                pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, camera.targetPos, camera.up);
+
+                pfu.cameraDir = glm::rotate(rot.value, glm::vec3(0.0f, 0.0f, 1.0f));
+                auto up = glm::rotate(rot.value, glm::vec3(0.0f, 1.0f, 0.0f));
+                pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, pfu.cameraPos + pfu.cameraDir, up);
+
                 pfu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pfu.matWorldToCamera)));
                 pfu.matCameraToProjection = glm::perspective(camera.fov, camera.aspect, camera.near, camera.far);
                 pfu.matWorldToProjection = pfu.matCameraToProjection * pfu.matWorldToCamera;
                 pfus.push_back(pfu);
             });
 
-        // group render object by material
+        // group render object by materials
         std::unordered_map<Material*, std::vector<RenderData>> renderDatas;
         m_world.each(
             [&](flecs::entity e, const Position& pos, const Rotation& rot, const StaticModel& model)
             {
-                auto material = ResourceMgr::getInstance().createMaterial(model.materialId);
+                auto material = model.material;
                 if (!material) return;
-                material->decRef();
 
-                auto geometry = ResourceMgr::getInstance().createGeometry(model.geometryId);
+                auto geometry = model.geometry;
                 if (!geometry) return;
-                geometry->decRef();
 
                 auto findIt = renderDatas.find(material);
                 if (findIt != renderDatas.end())
@@ -85,20 +83,19 @@ namespace blink
                 auto findIt = renderFeatureDatas.find(feature.order);
                 if (findIt != renderFeatureDatas.end())
                 {
-                    LOGE("duplicate render feature order {0} <-> {1}", findIt->second.material->getId(), feature.materialId);
+                    LOGE("duplicate render feature order {0} <-> {1}", findIt->second.material->getId(), feature.material->getId());
                 }
                 else
                 {
-                    auto material = ResourceMgr::getInstance().createMaterial(feature.materialId);
+                    auto material = feature.material;
                     if (!material) return;
-                    material->decRef();
 
-                    RenderFeatureData renderFeatureData{ feature.order, material };
+                    RenderFeatureData renderFeatureData{feature.order, material};
                     renderFeatureDatas.emplace(feature.order, renderFeatureData);
                 }
             });
 
-        // starting rendering
+        // start rendering
         for (const auto& pfu : pfus)
         {
             if (!uniformBuffer.alignBufferOffset()) return;

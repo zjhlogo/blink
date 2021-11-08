@@ -9,6 +9,7 @@ BaseTypes.cpp
 BaseTypes.h
 BaseTypesGlm.cpp
 BaseTypesGlm.h
+BuiltinFormatter.h
 Directory.cpp
 Directory.h
 File.cpp

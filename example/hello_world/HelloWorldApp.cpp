@@ -10,16 +10,10 @@
 **/
 #include "HelloWorldApp.h"
 #include "systems/EntityCreationSystem.h"
-#include "systems/RotationSystem.h"
 
 #include <blink/blink.h>
-#include <blink/component/Components.h>
-#include <blink/geometry/builder/BoxBuilder.h>
-#include <blink/geometry/builder/MeshBuilder.h>
-#include <blink/geometry/builder/PlaneBuilder.h>
-#include <blink/geometry/builder/SphereUvBuilder.h>
-#include <blink/geometry/builder/TetrahedronBuilder.h>
-#include <blink/resource/ResourceMgr.h>
+#include <blink/system/AngularVelocitySystem.h>
+#include <blink/system/LinearVelocitySystem.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
 
@@ -38,34 +32,10 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& commandPool = renderModule.getCommandPool();
     auto& descriptorPool = renderModule.getDescriptorPool();
 
-    //{
-    //    blink::PlaneBuilder builder;
-    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
-    //}
-
-    //{
-    //    blink::BoxBuilder builder;
-    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
-    //}
-
-    //{
-    //    blink::SphereUvBuilder builder;
-    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
-    //}
-
-    //{
-    //    blink::TetrahedronBuilder builder;
-    //    m_mesh = builder.createGeometry(logicalDevice, commandPool);
-    //}
-
-    //{
-    //    blink::MeshBuilder builder;
-    //    m_mesh = builder.filePath("resource/monkey.gltf").createGeometry(logicalDevice, commandPool);
-    //}
-
     const auto& extent = swapchain.getImageExtent();
+    addSystem(new blink::LinearVelocitySystem());
+    addSystem(new blink::AngularVelocitySystem());
     addSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
-    addSystem(new RotationSystem());
 
     if (!initializeSystems()) return false;
 

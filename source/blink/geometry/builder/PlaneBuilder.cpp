@@ -11,6 +11,7 @@
 
 #include "PlaneBuilder.h"
 
+#include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace blink
@@ -48,10 +49,15 @@ namespace blink
         return *this;
     }
 
+    tstring PlaneBuilder::getUniqueId() const
+    {
+        return fmt::format("plane_{0}_{1}_{2}_{3}_{4}_{5}", m_size, m_segment, m_uvMin, m_uvMax, m_orientation, m_translation);
+    }
+
     bool PlaneBuilder::build(std::vector<glm::vec3>& positionsOut,
                              std::vector<uint16>& indicesOut,
                              std::vector<glm::vec3>* normalsOut,
-                             std::vector<glm::vec2>* uvsOut)
+                             std::vector<glm::vec2>* uvsOut) const
     {
         glm::vec3 normal = glm::rotate(m_orientation, glm::vec3(0.0f, 1.0f, 0.0f));
 

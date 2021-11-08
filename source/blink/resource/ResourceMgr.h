@@ -24,6 +24,7 @@ namespace blink
     class Texture2d;
     class Geometry;
     class Material;
+    class IGeometryBuilder;
 
     class ResourceMgr
     {
@@ -36,6 +37,7 @@ namespace blink
         Texture2d* createTexture2d(const tstring& filePath);
         void releaseTexture2d(Texture2d* texture);
 
+        Geometry* createGeometry(const IGeometryBuilder& builder);
         Geometry* createGeometry(const tstring& filePath);
         void releaseGeometry(Geometry* geometry);
 

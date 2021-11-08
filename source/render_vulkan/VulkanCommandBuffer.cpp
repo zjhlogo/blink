@@ -84,9 +84,9 @@ namespace blink
         beginInfo.renderArea = renderArea;
 
         std::array<VkClearValue, 2> clearValues;
-        clearValues[0].color.float32[0] = 0.0f;
-        clearValues[0].color.float32[1] = 0.0f;
-        clearValues[0].color.float32[2] = 0.0f;
+        clearValues[0].color.float32[0] = 0.5f;
+        clearValues[0].color.float32[1] = 0.5f;
+        clearValues[0].color.float32[2] = 0.5f;
         clearValues[0].color.float32[3] = 1.0f;
         clearValues[1].depthStencil = {1.0f, 0};
         beginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());

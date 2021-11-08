@@ -21,12 +21,8 @@ namespace blink
     public:
         MeshBuilder& filePath(const tstring& filePath);
 
-        bool build(Geometry* geometry);
-
-        virtual bool build(std::vector<glm::vec3>& positionsOut,
-                           std::vector<uint16>& indicesOut,
-                           std::vector<glm::vec3>* normalsOut = nullptr,
-                           std::vector<glm::vec2>* uvsOut = nullptr) override;
+        virtual tstring getUniqueId() const;
+        bool build(Geometry* geometry) const;
 
     private:
         tstring m_filePath;

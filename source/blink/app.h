@@ -11,9 +11,9 @@
 #pragma once
 
 #include <flecs/flecs.h>
-#include <foundation/BaseTypes.h>
 
 #include <vector>
+
 
 namespace blink
 {

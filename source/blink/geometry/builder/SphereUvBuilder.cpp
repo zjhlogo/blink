@@ -10,6 +10,7 @@
 **/
 #include "SphereUvBuilder.h"
 
+#include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace blink
@@ -35,10 +36,12 @@ namespace blink
         return *this;
     }
 
+    tstring SphereUvBuilder::getUniqueId() const { return fmt::format("sphereuv_{0}_{1}_{2}", m_center, m_radius, m_segments); }
+
     bool SphereUvBuilder::build(std::vector<glm::vec3>& positionsOut,
                                 std::vector<uint16>& indicesOut,
                                 std::vector<glm::vec3>* normalsOut,
-                                std::vector<glm::vec2>* uvsOut)
+                                std::vector<glm::vec2>* uvsOut) const
     {
         float const R = 1.0f / (m_segments.x - 1);
         float const S = 1.0f / m_segments.y;

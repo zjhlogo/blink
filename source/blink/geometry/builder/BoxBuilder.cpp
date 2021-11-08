@@ -12,6 +12,8 @@
 #include "BoxBuilder.h"
 #include "PlaneBuilder.h"
 
+#include <foundation/BuiltinFormatter.h>
+
 namespace blink
 {
     BoxBuilder& BoxBuilder::size(float width, float height, float depth)
@@ -30,10 +32,12 @@ namespace blink
         return *this;
     }
 
+    tstring BoxBuilder::getUniqueId() const { return fmt::format("box_{0}_{1}", m_size, m_segment); }
+
     bool BoxBuilder::build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
                            std::vector<glm::vec3>* normalsOut,
-                           std::vector<glm::vec2>* uvsOut)
+                           std::vector<glm::vec2>* uvsOut) const
     {
         PlaneBuilder builder;
 

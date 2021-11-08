@@ -29,7 +29,12 @@ namespace blink
         return *this;
     }
 
-    bool MeshBuilder::build(Geometry* geometry)
+    tstring MeshBuilder::getUniqueId() const
+    {
+        return fmt::format("file_{0}", m_filePath);
+    }
+
+    bool MeshBuilder::build(Geometry* geometry) const
     {
         tstring fileContent;
         if (!File::readFileIntoString(fileContent, m_filePath))
@@ -120,13 +125,5 @@ namespace blink
         }
 
         return true;
-    }
-
-    bool MeshBuilder::build(std::vector<glm::vec3>& positionsOut,
-                            std::vector<uint16>& indicesOut,
-                            std::vector<glm::vec3>* normalsOut,
-                            std::vector<glm::vec2>* uvsOut)
-    {
-        return false;
     }
 } // namespace blink

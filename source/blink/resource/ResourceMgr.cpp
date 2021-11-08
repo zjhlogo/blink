@@ -11,6 +11,7 @@
 
 #include "ResourceMgr.h"
 #include "../geometry/Geometry.h"
+#include "../geometry/builder/IGeometryBuilder.h"
 #include "../geometry/builder/MeshBuilder.h"
 #include "../material/Material.h"
 #include "../texture/Texture2d.h"
@@ -100,9 +101,49 @@ namespace blink
         }
     }
 
+    Geometry* ResourceMgr::createGeometry(const IGeometryBuilder& builder)
+    {
+        auto uniqueId = builder.getUniqueId();
+
+        auto it = m_geometryMap.find(uniqueId);
+        if (it != m_geometryMap.end())
+        {
+            it->second->incRef();
+            return it->second;
+        }
+
+        // create new
+        std::vector<glm::vec3> vertsPos;
+        std::vector<glm::vec3> vertsNormal;
+        std::vector<glm::vec2> vertsUv0;
+        std::vector<uint16> indices;
+        if (!builder.build(vertsPos, indices, &vertsNormal, &vertsUv0))
+        {
+            return nullptr;
+        }
+
+        auto geometry = new Geometry(*m_logicalDevice, *m_commandPool);
+        if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
+        {
+            SAFE_DELETE(geometry);
+            return nullptr;
+        }
+
+        geometry->setId(uniqueId);
+        geometry->incRef();
+        m_geometryMap.emplace(std::make_pair(geometry->getId(), geometry));
+
+        return geometry;
+    }
+
     Geometry* ResourceMgr::createGeometry(const tstring& filePath)
     {
-        auto it = m_geometryMap.find(filePath);
+        MeshBuilder builder;
+        builder.filePath(filePath);
+
+        auto uniqueId = builder.getUniqueId();
+
+        auto it = m_geometryMap.find(uniqueId);
         if (it != m_geometryMap.end())
         {
             it->second->incRef();
@@ -111,14 +152,13 @@ namespace blink
 
         // create new
         auto geometry = new Geometry(*m_logicalDevice, *m_commandPool);
-        MeshBuilder builder;
-        if (!builder.filePath(filePath).build(geometry))
+        if (!builder.build(geometry))
         {
             SAFE_DELETE(geometry);
             return nullptr;
         }
 
-        geometry->setId(filePath);
+        geometry->setId(uniqueId);
         geometry->incRef();
         m_geometryMap.emplace(std::make_pair(geometry->getId(), geometry));
 

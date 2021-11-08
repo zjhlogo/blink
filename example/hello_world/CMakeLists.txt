@@ -6,8 +6,6 @@ project(hello_world)
 set(SOURCE_FILES
 systems/EntityCreationSystem.cpp
 systems/EntityCreationSystem.h
-systems/RotationSystem.cpp
-systems/RotationSystem.h
 HelloWorldApp.cpp
 HelloWorldApp.h
 )

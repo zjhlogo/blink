@@ -20,10 +20,12 @@ namespace blink
         BoxBuilder& size(float width, float height, float depth);
         BoxBuilder& segment(uint16 widthSegment, uint16 heightSegment, uint16 depthSegment);
 
+        virtual tstring getUniqueId() const override;
+
         virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
                            std::vector<glm::vec3>* normalsOut = nullptr,
-                           std::vector<glm::vec2>* uvsOut = nullptr) override;
+                           std::vector<glm::vec2>* uvsOut = nullptr) const override;
 
     private:
         glm::vec3 m_size{1.0f, 1.0f, 1.0f};

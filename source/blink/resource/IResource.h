@@ -14,15 +14,20 @@
 
 namespace blink
 {
+    class ResourceMgr;
+
     class IResource
     {
-    public:
-        void setId(const tstring& id) { m_id = id; };
-        const tstring& getId() const { return m_id; };
+        friend class ResourceMgr;
 
+    public:
+        const tstring& getId() const { return m_id; };
+        int getRef() { return m_ref; };
+
+    private:
+        void setId(const tstring& id) { m_id = id; };
         int incRef() { return ++m_ref; };
         int decRef() { return --m_ref; };
-        int getRef() { return m_ref; };
 
     private:
         tstring m_id;

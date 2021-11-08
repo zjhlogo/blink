@@ -25,7 +25,11 @@ resource/IResource.cpp
 resource/IResource.h
 resource/ResourceMgr.cpp
 resource/ResourceMgr.h
+system/AngularVelocitySystem.cpp
+system/AngularVelocitySystem.h
 system/ISystemBase.h
+system/LinearVelocitySystem.cpp
+system/LinearVelocitySystem.h
 texture/Texture2d.cpp
 texture/Texture2d.h
 type/RenderTypes.h

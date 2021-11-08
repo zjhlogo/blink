@@ -20,14 +20,20 @@ namespace blink
 {
     class VulkanLogicalDevice;
     class VulkanCommandPool;
+    class Geometry;
 
     class IGeometryBuilder
     {
     public:
+        virtual tstring getUniqueId() const = 0;
+
         virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
                            std::vector<glm::vec3>* normalsOut = nullptr,
-                           std::vector<glm::vec2>* uvsOut = nullptr) = 0;
+                           std::vector<glm::vec2>* uvsOut = nullptr) const
+        {
+            return false;
+        };
 
         template <typename T> static void buildTangent(std::vector<T>& verts, const std::vector<uint16>& indis)
         {

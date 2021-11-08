@@ -10,6 +10,7 @@
 **/
 #include "TetrahedronBuilder.h"
 
+#include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace blink
@@ -28,10 +29,12 @@ namespace blink
         return *this;
     }
 
+    tstring TetrahedronBuilder::getUniqueId() const { return fmt::format("tetrahedron_{0}_{1}", m_center, m_radius); }
+
     bool TetrahedronBuilder::build(std::vector<glm::vec3>& positionsOut,
                                    std::vector<uint16>& indicesOut,
                                    std::vector<glm::vec3>* normalsOut,
-                                   std::vector<glm::vec2>* uvsOut)
+                                   std::vector<glm::vec2>* uvsOut) const
     {
         // build vertex
         glm::vec3 p0(0.0f, m_radius, 0.0f);

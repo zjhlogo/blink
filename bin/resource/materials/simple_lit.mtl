@@ -1,0 +1,16 @@
+{
+    "vertex_shader" : "resource/shaders/simple_lit.vert.spv",
+    "fragment_shader" : "resource/shaders/simple_lit.frag.spv",
+    
+    "vertex_attributes" : [
+        "position",
+        "normal",
+        "uv0"
+    ],
+
+    "textures" : [
+        "resource/grid.png"
+    ],
+
+    "wireframe" : false
+}

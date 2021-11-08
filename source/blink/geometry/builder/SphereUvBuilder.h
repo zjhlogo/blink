@@ -21,14 +21,15 @@ namespace blink
         SphereUvBuilder& radius(float radius);
         SphereUvBuilder& ringAndSection(uint16 rings, uint16 sections);
 
+        virtual tstring getUniqueId() const override;
         virtual bool build(std::vector<glm::vec3>& positionsOut,
                            std::vector<uint16>& indicesOut,
                            std::vector<glm::vec3>* normalsOut = nullptr,
-                           std::vector<glm::vec2>* uvsOut = nullptr) override;
+                           std::vector<glm::vec2>* uvsOut = nullptr) const override;
 
     private:
         glm::vec3 m_center{};
         float m_radius{0.5f};
-        glm::u16vec2 m_segments{3, 3};
+        glm::u16vec2 m_segments{10, 10};
     };
 } // namespace blink

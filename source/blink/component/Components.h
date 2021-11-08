@@ -27,16 +27,24 @@ namespace blink
         glm::quat value;
     };
 
+    struct LinearVelocity
+    {
+        glm::vec3 value;
+    };
+
+    struct AngularVelocity
+    {
+        glm::vec3 value;
+    };
+
     struct StaticModel
     {
-        tstring geometryId;
-        tstring materialId;
+        Geometry* geometry;
+        Material* material;
     };
 
     struct CameraData
     {
-        glm::vec3 targetPos;
-        glm::vec3 up;
         float fov;
         float aspect;
         float near;
@@ -46,6 +54,6 @@ namespace blink
     struct RenderFeature
     {
         int order;
-        tstring materialId;
+        Material* material;
     };
 } // namespace blink
