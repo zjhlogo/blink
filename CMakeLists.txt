@@ -26,6 +26,7 @@ add_subdirectory(external/glm)
 add_subdirectory(external/gtest)
 add_subdirectory(external/imgui)
 add_subdirectory(external/noise)
+add_subdirectory(external/spirv-cross)
 
 add_subdirectory(test/foundation_test)
 add_subdirectory(test/noise_test)

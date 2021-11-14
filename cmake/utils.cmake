@@ -64,6 +64,7 @@ macro(configure_test PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	set(ALL_LIBRARIES
 	libgtest
 	libfoundation
+	libspirv-cross
 	)
 	target_link_libraries(${PROJ_NAME} ${ALL_LIBRARIES})
 
