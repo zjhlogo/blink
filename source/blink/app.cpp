@@ -32,16 +32,30 @@ namespace blink
 
     void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
     {
+        // collect light data
+        RenderDataLight rdLight{};
+        m_world.each(
+            [&rdLight](flecs::entity e, const Position& pos, const LightData& light)
+            {
+                rdLight.pos = pos.value;
+                rdLight.color = light.color;
+                rdLight.intensity = light.intensity;
+            });
+
         // collect camera data into pfus
         std::vector<PerFrameUniforms> pfus;
         m_world.each(
-            [&pfus](flecs::entity e, const Position& pos, const Rotation& rot, const CameraData& camera)
+            [&pfus, &rdLight](flecs::entity e, const Position& pos, const Rotation& rot, const CameraData& camera)
             {
                 // setup perframe uniforms
                 PerFrameUniforms pfu;
+
+                pfu.lightPos = rdLight.pos;
+                pfu.lightColorAndIntensity = glm::vec4(rdLight.color, rdLight.intensity);
+
                 pfu.cameraPos = pos.value;
 
-                pfu.cameraDir = glm::rotate(rot.value, glm::vec3(0.0f, 0.0f, 1.0f));
+                pfu.cameraDir = glm::rotate(rot.value, glm::vec3(0.0f, 0.0f, -1.0f));
                 auto up = glm::rotate(rot.value, glm::vec3(0.0f, 1.0f, 0.0f));
                 pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, pfu.cameraPos + pfu.cameraDir, up);
 
@@ -52,7 +66,7 @@ namespace blink
             });
 
         // group render object by materials
-        std::unordered_map<Material*, std::vector<RenderData>> renderDatas;
+        std::unordered_map<Material*, std::vector<RenderDataGeo>> renderDatas;
         m_world.each(
             [&](flecs::entity e, const Position& pos, const Rotation& rot, const StaticModel& model)
             {
@@ -69,7 +83,7 @@ namespace blink
                 }
                 else
                 {
-                    std::vector<RenderData> dataLists;
+                    std::vector<RenderDataGeo> dataLists;
                     dataLists.push_back({pos.value, rot.value, geometry});
                     renderDatas.emplace(material, dataLists);
                 }
@@ -98,8 +112,9 @@ namespace blink
         // start rendering
         for (const auto& pfu : pfus)
         {
-            if (!uniformBuffer.alignBufferOffset()) return;
-            uniformBuffer.appendPerFrameBufferData(&pfu, sizeof(pfu));
+            // bind per camera uniforms
+            VkDescriptorBufferInfo pcuBufferInfo{};
+            uniformBuffer.appendData(&pfu, sizeof(pfu), &pcuBufferInfo);
 
             // render mesh group by material
             for (const auto& kvp : renderDatas)
@@ -108,10 +123,18 @@ namespace blink
 
                 material->bindPipeline(commandBuffer);
 
+                // TODO: bind per material uniform
+                uniformBuffer.appendData(&pmu, sizeof(pmu), &pmuBufferInfo);
+
                 for (const auto& renderData : kvp.second)
                 {
+                    // TODO: bind per instance uniform
+                    uniformBuffer.appendData(&piu, sizeof(piu), &piuBufferInfo);
+
+                    //material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
+
+                    // bind vertex input
                     renderData.geometry->bindBuffer(commandBuffer);
-                    material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
                     vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
                 }
             }

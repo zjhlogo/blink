@@ -17,11 +17,18 @@ namespace blink
     class Geometry;
     class Material;
 
-    struct RenderData
+    struct RenderDataGeo
     {
         glm::vec3 pos;
         glm::quat rot;
         Geometry* geometry;
+    };
+
+    struct RenderDataLight
+    {
+        glm::vec3 pos;
+        glm::vec3 color;
+        float intensity;
     };
 
     struct RenderFeatureData
@@ -38,6 +45,8 @@ namespace blink
         alignas(16) glm::mat3x4 matWorldToCameraInvT;
         alignas(16) glm::vec3 cameraPos;
         alignas(16) glm::vec3 cameraDir;
+        alignas(16) glm::vec3 lightPos;
+        alignas(16) glm::vec4 lightColorAndIntensity;
     };
 
     struct PerInstanceUniforms

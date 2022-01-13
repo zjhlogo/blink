@@ -13,7 +13,7 @@ layout(location = 2) out vec3 fragWorldPos;
 
 void main()
 {
-    vec4 worldPos = piu.matLocalToWorld * vec4(inPosition, 1.0);
+    worldPos = piu.matLocalToWorld * vec4(inPosition, 1.0);
     
     fragWorldPos = worldPos.xyz;
     fragNormal = piu.matLocalToWorldInvT * inNormal;

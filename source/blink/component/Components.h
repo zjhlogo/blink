@@ -51,6 +51,12 @@ namespace blink
         float far;
     };
 
+    struct LightData
+    {
+        glm::vec3 color;
+        float intensity;
+    };
+
     struct RenderFeature
     {
         int order;

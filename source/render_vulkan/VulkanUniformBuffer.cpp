@@ -54,6 +54,24 @@ namespace blink
         bufferMemory->uploadData(m_memBuffer.data(), m_currentPos, 0);
     }
 
+    bool VulkanUniformBuffer::appendData(const void* data, VkDeviceSize size, VkDescriptorBufferInfo* bufferInfoOut)
+    {
+        if (size + m_currentPos > m_memBuffer.size()) return false;
+
+        std::memcpy(&m_memBuffer[m_currentPos], data, size);
+
+        if (bufferInfoOut != nullptr)
+        {
+            bufferInfoOut->buffer = *m_gpuBuffer;
+            bufferInfoOut->offset = m_currentPos;
+            bufferInfoOut->range = size;
+        }
+
+        m_currentPos += size;
+        alignBufferOffset();
+        return true;
+    }
+
     bool VulkanUniformBuffer::alignBufferOffset()
     {
         auto align = m_logicalDevice.getMinUniformBufferOffsetAlignment();
@@ -61,28 +79,6 @@ namespace blink
         if (newPos >= m_memBuffer.size()) return false;
 
         m_currentPos = newPos;
-        return true;
-    }
-
-    bool VulkanUniformBuffer::appendData(const void* data, VkDeviceSize size)
-    {
-        if (size + m_currentPos > m_memBuffer.size()) return false;
-
-        std::memcpy(&m_memBuffer[m_currentPos], data, size);
-        m_currentPos += size;
-
-        return true;
-    }
-
-    bool VulkanUniformBuffer::appendPerFrameBufferData(const void* data, VkDeviceSize size)
-    {
-        auto beginPos = m_currentPos;
-        if (!appendData(data, size)) return false;
-
-        m_perFrameBufferInfo.buffer = *m_gpuBuffer;
-        m_perFrameBufferInfo.offset = beginPos;
-        m_perFrameBufferInfo.range = size;
-
         return true;
     }
 

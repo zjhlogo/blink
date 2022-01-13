@@ -33,11 +33,10 @@ namespace blink
         void flushBuffer();
 
         size_t getCurrentPos() const { return m_currentPos; };
-        bool alignBufferOffset();
-        bool appendData(const void* data, VkDeviceSize size);
+        bool appendData(const void* data, VkDeviceSize size, VkDescriptorBufferInfo* bufferInfoOut = nullptr);
 
-        const VkDescriptorBufferInfo& getPerFrameBufferInfo() const { return m_perFrameBufferInfo; };
-        bool appendPerFrameBufferData(const void* data, VkDeviceSize size);
+    private:
+        bool alignBufferOffset();
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
@@ -46,8 +45,6 @@ namespace blink
 
         std::vector<uint8_t> m_memBuffer;
         size_t m_currentPos{};
-
-        VkDescriptorBufferInfo m_perFrameBufferInfo{};
     };
 
 } // namespace blink
