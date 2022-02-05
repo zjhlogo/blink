@@ -16,9 +16,14 @@ namespace blink
     VulkanSemaphore::VulkanSemaphore(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
-    VulkanSemaphore::~VulkanSemaphore() { destroy(); }
+    VulkanSemaphore::~VulkanSemaphore()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanSemaphore::create()
     {

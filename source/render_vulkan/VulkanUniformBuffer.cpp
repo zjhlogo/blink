@@ -18,11 +18,20 @@ namespace blink
     VulkanUniformBuffer::VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
-    VulkanUniformBuffer::~VulkanUniformBuffer() { destroy(); }
+    VulkanUniformBuffer::~VulkanUniformBuffer()
+    {
+        //
+        destroy();
+    }
 
-    VulkanUniformBuffer::operator VkBuffer() const { return *m_gpuBuffer; }
+    VulkanUniformBuffer::operator VkBuffer() const
+    {
+        //
+        return *m_gpuBuffer;
+    }
 
     bool VulkanUniformBuffer::create(VkDeviceSize size)
     {
@@ -46,7 +55,11 @@ namespace blink
         SAFE_DELETE(m_gpuBuffer);
     }
 
-    void VulkanUniformBuffer::reset() { m_currentPos = 0; }
+    void VulkanUniformBuffer::reset()
+    {
+        //
+        m_currentPos = 0;
+    }
 
     void VulkanUniformBuffer::flushBuffer()
     {

@@ -18,9 +18,14 @@ namespace blink
     VulkanDescriptorPool::VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
-    VulkanDescriptorPool::~VulkanDescriptorPool() { destroy(); }
+    VulkanDescriptorPool::~VulkanDescriptorPool()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanDescriptorPool::create(uint32_t count)
     {

@@ -13,9 +13,15 @@
 
 namespace blink
 {
-    PathParser::PathParser() {}
+    PathParser::PathParser()
+    {
+        //
+    }
 
-    PathParser::~PathParser() {}
+    PathParser::~PathParser()
+    {
+        // 
+    }
 
     void PathParser::parse(const tstring& path)
     {

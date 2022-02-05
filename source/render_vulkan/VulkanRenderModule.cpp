@@ -25,9 +25,15 @@
 
 namespace blink
 {
-    VulkanRenderModule::VulkanRenderModule() {}
+    VulkanRenderModule::VulkanRenderModule()
+    {
+        //
+    }
 
-    VulkanRenderModule::~VulkanRenderModule() {}
+    VulkanRenderModule::~VulkanRenderModule()
+    {
+        //
+    }
 
     bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     {
@@ -190,6 +196,10 @@ namespace blink
         return true;
     }
 
-    void VulkanRenderModule::destroySyncObjects() { SAFE_DELETE(m_acquireImageFence); }
+    void VulkanRenderModule::destroySyncObjects()
+    {
+        //
+        SAFE_DELETE(m_acquireImageFence);
+    }
 
 } // namespace blink

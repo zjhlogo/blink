@@ -16,21 +16,41 @@ namespace blink
 {
     static void frameBufferResizeCallback(GLFWwindow* window, int width, int height)
     {
+        //
         VulkanRenderModule* renderModule = reinterpret_cast<VulkanRenderModule*>(glfwGetWindowUserPointer(window));
         // renderModule->setFrameBufferResized(true);
     }
 
-    static void mousePositionCallback(GLFWwindow* window, double xpos, double ypos) {}
+    static void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
+    {
+        //
+    }
 
-    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {}
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+    {
+        //
+    }
 
-    static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {}
+    static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+    {
+        //
+    }
 
-    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {}
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        //
+    }
 
-    VulkanWindow::VulkanWindow() {}
+    VulkanWindow::VulkanWindow()
+    {
+        //
+    }
 
-    VulkanWindow::~VulkanWindow() { destroy(); }
+    VulkanWindow::~VulkanWindow()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanWindow::create(const glm::ivec2& windowSize)
     {
@@ -39,7 +59,11 @@ namespace blink
         return true;
     }
 
-    void VulkanWindow::destroy() { destroyWindow(); }
+    void VulkanWindow::destroy()
+    {
+        //
+        destroyWindow();
+    }
 
     bool VulkanWindow::createWindow(const glm::ivec2& windowSize)
     {

@@ -19,15 +19,21 @@ namespace blink
     VulkanImage::VulkanImage(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
     VulkanImage::VulkanImage(VulkanLogicalDevice& logicalDevice, VkImage image)
         : m_logicalDevice(logicalDevice)
         , m_image(image)
     {
+        //
     }
 
-    VulkanImage::~VulkanImage() { destroyImage(); }
+    VulkanImage::~VulkanImage()
+    {
+        //
+        destroyImage();
+    }
 
     VkImage VulkanImage::createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
     {
@@ -135,7 +141,11 @@ namespace blink
         return m_imageMemory;
     }
 
-    void VulkanImage::freeImageMemory() { SAFE_DELETE(m_imageMemory); }
+    void VulkanImage::freeImageMemory()
+    {
+        //
+        SAFE_DELETE(m_imageMemory);
+    }
 
     void VulkanImage::transitionImageLayout(VulkanCommandPool& pool, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
     {

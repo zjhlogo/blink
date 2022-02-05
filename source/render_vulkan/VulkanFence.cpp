@@ -16,9 +16,14 @@ namespace blink
     VulkanFence::VulkanFence(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
-    VulkanFence::~VulkanFence() { destroy(); }
+    VulkanFence::~VulkanFence()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanFence::create(bool signaled)
     {
@@ -44,8 +49,16 @@ namespace blink
         }
     }
 
-    void VulkanFence::wait() { vkWaitForFences(m_logicalDevice, 1, &m_fence, VK_TRUE, UINT64_MAX); }
+    void VulkanFence::wait()
+    {
+        //
+        vkWaitForFences(m_logicalDevice, 1, &m_fence, VK_TRUE, UINT64_MAX);
+    }
 
-    void VulkanFence::reset() { vkResetFences(m_logicalDevice, 1, &m_fence); }
+    void VulkanFence::reset()
+    {
+        //
+        vkResetFences(m_logicalDevice, 1, &m_fence);
+    }
 
 } // namespace blink

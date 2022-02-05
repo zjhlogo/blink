@@ -15,5 +15,4 @@
 namespace blink
 {
     int run(IApp& app);
-
 }

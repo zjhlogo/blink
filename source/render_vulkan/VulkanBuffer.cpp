@@ -19,9 +19,14 @@ namespace blink
     VulkanBuffer::VulkanBuffer(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
-    VulkanBuffer::~VulkanBuffer() { destroyBuffer(); }
+    VulkanBuffer::~VulkanBuffer()
+    {
+        //
+        destroyBuffer();
+    }
 
     VkBuffer VulkanBuffer::createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode)
     {
@@ -120,7 +125,11 @@ namespace blink
         return m_bufferMemory;
     }
 
-    void VulkanBuffer::destroyBufferMemory() { SAFE_DELETE(m_bufferMemory); }
+    void VulkanBuffer::destroyBufferMemory()
+    {
+        //
+        SAFE_DELETE(m_bufferMemory);
+    }
 
     void VulkanBuffer::destroyBuffer()
     {

@@ -19,9 +19,14 @@ namespace blink
     VulkanLogicalDevice::VulkanLogicalDevice(VulkanContext* context)
         : m_context(context)
     {
+        //
     }
 
-    VulkanLogicalDevice::~VulkanLogicalDevice() { destroyLogicalDevice(); }
+    VulkanLogicalDevice::~VulkanLogicalDevice()
+    {
+        //
+        destroyLogicalDevice();
+    }
 
     bool VulkanLogicalDevice::create()
     {
@@ -29,7 +34,11 @@ namespace blink
         return true;
     }
 
-    void VulkanLogicalDevice::destroy() { destroyLogicalDevice(); }
+    void VulkanLogicalDevice::destroy()
+    {
+        //
+        destroyLogicalDevice();
+    }
 
     void VulkanLogicalDevice::waitDeviceIdle()
     {

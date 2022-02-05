@@ -26,9 +26,14 @@ namespace blink
         , m_logicalDevice(logicalDevice)
         , m_commandPool(commandPool)
     {
+        // 
     }
 
-    VulkanSwapchain::~VulkanSwapchain() { destroy(); }
+    VulkanSwapchain::~VulkanSwapchain()
+    {
+        // 
+        destroy();
+    }
 
     bool VulkanSwapchain::create()
     {

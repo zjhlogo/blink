@@ -25,9 +25,14 @@ namespace blink
         : m_logicalDevice(logicalDevice)
         , m_commandPool(pool)
     {
+        //
     }
 
-    VulkanTexture::~VulkanTexture() { destroy(); }
+    VulkanTexture::~VulkanTexture()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanTexture::createTexture2D(const tstring& texFile)
     {
@@ -140,7 +145,11 @@ namespace blink
         return m_textureImage;
     }
 
-    void VulkanTexture::destroyTextureImage() { SAFE_DELETE(m_textureImage); }
+    void VulkanTexture::destroyTextureImage()
+    {
+        //
+        SAFE_DELETE(m_textureImage);
+    }
 
     VkSampler VulkanTexture::createTextureSampler()
     {

@@ -27,9 +27,14 @@ namespace blink
         , m_swapchain(swapchain)
         , m_descriptorPool(descriptorPool)
     {
+        // 
     }
 
-    VulkanPipeline::~VulkanPipeline() { destroy(); }
+    VulkanPipeline::~VulkanPipeline()
+    {
+        // 
+        destroy();
+    }
 
     bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe)
     {

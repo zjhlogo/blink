@@ -56,7 +56,6 @@ TEST(SpirvCrossTestCase, parseUniforms)
 
         auto location = glsl.get_decoration(input.id, spv::DecorationLocation);
         auto binding = glsl.get_decoration(input.id, spv::DecorationBinding);
-
     }
 
     // output

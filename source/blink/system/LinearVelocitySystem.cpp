@@ -16,8 +16,13 @@ namespace blink
 {
     bool LinearVelocitySystem::initialize(flecs::world& world)
     {
-        world.system<Position&, const LinearVelocity&>().each([](flecs::entity e, Position& pos, const LinearVelocity& vel)
-                                                              { pos.value += vel.value * e.delta_time(); });
+        world.system<Position&, const LinearVelocity&>().each(
+            [](flecs::entity e, Position& pos, const LinearVelocity& vel)
+            {
+                //
+                pos.value += vel.value * e.delta_time();
+            });
+
         return true;
     }
 } // namespace blink

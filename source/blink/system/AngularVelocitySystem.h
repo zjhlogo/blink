@@ -1,7 +1,7 @@
 /**
 
     @file      AngularVelocitySystem.h
-    @brief     
+    @brief
     @details   ~
     @author    zjhlogo
     @date      8.11.2021
@@ -17,6 +17,5 @@ namespace blink
     {
     public:
         virtual bool initialize(flecs::world& world) override;
-
     };
-}
+} // namespace blink

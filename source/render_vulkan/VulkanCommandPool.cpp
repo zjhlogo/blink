@@ -18,9 +18,14 @@ namespace blink
     VulkanCommandPool::VulkanCommandPool(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
-    VulkanCommandPool::~VulkanCommandPool() { destroy(); }
+    VulkanCommandPool::~VulkanCommandPool()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanCommandPool::create()
     {

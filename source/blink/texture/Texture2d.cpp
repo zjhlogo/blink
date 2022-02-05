@@ -15,9 +15,17 @@
 
 namespace blink
 {
-    Texture2d::Texture2d() {}
+    Texture2d::Texture2d()
+    {
+        //
+        // constractor
+    }
 
-    Texture2d::~Texture2d() { SAFE_DELETE(m_texture); }
+    Texture2d::~Texture2d()
+    {
+        //
+        SAFE_DELETE(m_texture);
+    }
 
     bool Texture2d::create(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool, const tstring& filePath)
     {

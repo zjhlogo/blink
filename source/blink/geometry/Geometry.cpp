@@ -23,7 +23,11 @@ namespace blink
     {
     }
 
-    Geometry::~Geometry() { destroy(); }
+    Geometry::~Geometry()
+    {
+        //
+        destroy();
+    }
 
     bool Geometry::uploadData(const std::vector<uint16>& indices,
                               const std::vector<glm::vec3>& positions,
@@ -115,8 +119,7 @@ namespace blink
             uint32 currInputMask = (1 << i);
             if ((currInputMask & allInputMask) == currInputMask)
             {
-                if (currInputMask != VulkanPipeline::InputLocation_Position
-                    && currInputMask != VulkanPipeline::InputLocation_Normal
+                if (currInputMask != VulkanPipeline::InputLocation_Position && currInputMask != VulkanPipeline::InputLocation_Normal
                     && currInputMask != VulkanPipeline::InputLocation_Uv0)
                 {
                     return false;

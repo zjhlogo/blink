@@ -22,9 +22,14 @@ namespace blink
         : m_logicalDevice(logicalDevice)
         , m_commandPool(commandPool)
     {
+        //
     }
 
-    VulkanCommandBuffer::~VulkanCommandBuffer() { destroy(); }
+    VulkanCommandBuffer::~VulkanCommandBuffer()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanCommandBuffer::create()
     {
@@ -95,6 +100,10 @@ namespace blink
         vkCmdBeginRenderPass(m_commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-    void VulkanCommandBuffer::endRenderPass() { vkCmdEndRenderPass(m_commandBuffer); }
+    void VulkanCommandBuffer::endRenderPass()
+    {
+        //
+        vkCmdEndRenderPass(m_commandBuffer);
+    }
 
 } // namespace blink

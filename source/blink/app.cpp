@@ -26,9 +26,17 @@
 
 namespace blink
 {
-    IApp::~IApp() { destroyAllSystems(); }
+    IApp::~IApp()
+    {
+        //
+        destroyAllSystems();
+    }
 
-    void IApp::update(float dt) { m_world.progress(dt); }
+    void IApp::update(float dt)
+    {
+        //
+        m_world.progress(dt);
+    }
 
     void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
     {
@@ -176,7 +184,7 @@ namespace blink
     {
         m_systems.push_back(sys);
 
-        return false;
+        return true;
     }
 
     bool IApp::initializeSystems()

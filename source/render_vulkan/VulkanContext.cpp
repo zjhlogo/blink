@@ -43,11 +43,15 @@ namespace blink
 
     VulkanContext::VulkanContext(VulkanWindow* window)
         : m_window(window)
-
     {
+        //
     }
 
-    VulkanContext::~VulkanContext() { destroy(); }
+    VulkanContext::~VulkanContext()
+    {
+        //
+        destroy();
+    }
 
     bool VulkanContext::create()
     {
@@ -68,6 +72,7 @@ namespace blink
 
     uint32_t VulkanContext::findMemoryType(VkMemoryPropertyFlags typeFilter, VkMemoryPropertyFlags properties)
     {
+        //
         return VulkanUtils::findMemoryType(m_memoryProperties, typeFilter, properties);
     }
 
@@ -144,7 +149,11 @@ namespace blink
         return true;
     }
 
-    void VulkanContext::destroyDebugMessenger() { VulkanUtils::destroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr); }
+    void VulkanContext::destroyDebugMessenger()
+    {
+        //
+        VulkanUtils::destroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
+    }
 
     bool VulkanContext::createSurface()
     {

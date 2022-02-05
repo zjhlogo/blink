@@ -19,10 +19,12 @@
 
 HelloWorldApp::HelloWorldApp()
 {
+    //
 }
 
 HelloWorldApp::~HelloWorldApp()
 {
+    //
 }
 
 bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
@@ -32,9 +34,12 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& commandPool = renderModule.getCommandPool();
     auto& descriptorPool = renderModule.getDescriptorPool();
 
-    const auto& extent = swapchain.getImageExtent();
+    m_world.set_threads(4);
+
     addSystem(new blink::LinearVelocitySystem());
     addSystem(new blink::AngularVelocitySystem());
+
+    const auto& extent = swapchain.getImageExtent();
     addSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
 
     if (!initializeSystems()) return false;

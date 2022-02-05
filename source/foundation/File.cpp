@@ -10,11 +10,23 @@
 
 namespace blink
 {
-    File::File() {}
+    File::File()
+    {
+        //
+        //
+    }
 
-    File::File(const tstring& filePath, int flag /*= AM_READ*/) { open(filePath, flag); }
+    File::File(const tstring& filePath, int flag /*= AM_READ*/)
+    {
+        //
+        open(filePath, flag);
+    }
 
-    File::~File() { close(); }
+    File::~File()
+    {
+        //
+        close();
+    }
 
     bool File::readFileIntoString(tstring& strOut, const tstring& filePath)
     {

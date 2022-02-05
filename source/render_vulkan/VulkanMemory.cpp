@@ -17,9 +17,14 @@ namespace blink
     VulkanMemory::VulkanMemory(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
     {
+        //
     }
 
-    VulkanMemory::~VulkanMemory() { freeMemory(); }
+    VulkanMemory::~VulkanMemory()
+    {
+        //
+        freeMemory();
+    }
 
     bool VulkanMemory::allocateMemory(VkMemoryPropertyFlags memoryProperties, const VkMemoryRequirements& requirement)
     {
