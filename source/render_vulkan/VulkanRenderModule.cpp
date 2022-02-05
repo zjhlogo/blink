@@ -55,8 +55,14 @@ namespace blink
         m_commandBuffer = new VulkanCommandBuffer(*m_logicalDevice, *m_commandPool);
         if (!m_commandBuffer->create()) return false;
 
-        m_uniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
-        if (!m_uniformBuffer->create()) return false;
+        m_perFrameUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
+        if (!m_perFrameUniformBuffer->create()) return false;
+
+        m_perMaterialUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
+        if (!m_perMaterialUniformBuffer->create()) return false;
+
+        m_perInstanceUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
+        if (!m_perInstanceUniformBuffer->create()) return false;
 
         if (!createSyncObjects()) return false;
 
@@ -69,7 +75,9 @@ namespace blink
 
         destroySyncObjects();
 
-        SAFE_DELETE(m_uniformBuffer);
+        SAFE_DELETE(m_perInstanceUniformBuffer);
+        SAFE_DELETE(m_perMaterialUniformBuffer);
+        SAFE_DELETE(m_perFrameUniformBuffer);
         SAFE_DELETE(m_commandBuffer);
         SAFE_DELETE(m_descriptorPool);
         SAFE_DELETE(m_swapchain);
@@ -109,7 +117,9 @@ namespace blink
         m_logicalDevice->waitGraphicsQueueIdle();
 
         m_descriptorPool->reset();
-        m_uniformBuffer->reset();
+        m_perFrameUniformBuffer->reset();
+        m_perMaterialUniformBuffer->reset();
+        m_perInstanceUniformBuffer->reset();
 
         // record command buffer
         {
@@ -125,7 +135,7 @@ namespace blink
                 m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(imageIndex), rect);
 
                 // record commands
-                cb(*m_commandBuffer, *m_uniformBuffer);
+                cb(*m_commandBuffer, *m_perFrameUniformBuffer, *m_perMaterialUniformBuffer, *m_perInstanceUniformBuffer);
 
                 m_commandBuffer->endRenderPass();
             }
@@ -133,7 +143,9 @@ namespace blink
             m_commandBuffer->endCommand();
         }
 
-        m_uniformBuffer->flushBuffer();
+        m_perFrameUniformBuffer->flushBuffer();
+        m_perMaterialUniformBuffer->flushBuffer();
+        m_perInstanceUniformBuffer->flushBuffer();
 
         // submit command
         VkSubmitInfo submitInfo{};

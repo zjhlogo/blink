@@ -10,6 +10,7 @@
 **/
 
 #include "Material.h"
+#include "../geometry/Geometry.h"
 #include "../resource/ResourceMgr.h"
 #include "../texture/Texture2d.h"
 #include "../type/RenderTypes.h"
@@ -38,18 +39,6 @@ namespace blink
 
     bool Material::create(const tstring& filePath)
     {
-        static const std::vector<VkVertexInputBindingDescription> s_bindingDescription = {
-            {0, sizeof(glm::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // position
-            {1, sizeof(glm::vec3), VK_VERTEX_INPUT_RATE_VERTEX}, // normal
-            {2, sizeof(glm::vec2), VK_VERTEX_INPUT_RATE_VERTEX}, // uv0
-        };
-
-        static const std::vector<VkVertexInputAttributeDescription> s_attributeDescriptions = {
-            {0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0},
-            {1, 1, VK_FORMAT_R32G32B32_SFLOAT, 0},
-            {2, 2, VK_FORMAT_R32G32_SFLOAT, 0},
-        };
-
         destroy();
 
         if (!loadConfigFromFile(filePath)) return false;
@@ -58,8 +47,7 @@ namespace blink
         loadTextures();
 
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain, m_descriptorPool);
-        if (!m_pipeline
-                 ->create(s_bindingDescription, s_attributeDescriptions, m_vertexShader, m_fragmentShader, static_cast<int>(m_imageInfos.size()), m_wireframe))
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, static_cast<int>(m_imageInfos.size()), m_wireframe))
         {
             return false;
         }
@@ -84,28 +72,45 @@ namespace blink
         m_texturePaths.clear();
     }
 
-    void Material::bindPipeline(VulkanCommandBuffer& commandBuffer) { vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline); }
-
-    bool Material::bindUniformBuffer(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, const glm::vec3& pos, const glm::quat& rot)
+    void Material::bindPipeline(VulkanCommandBuffer& commandBuffer)
     {
-        PerInstanceUniforms piu;
-        piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos) * glm::mat4_cast(rot);
-        piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
+        //
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
+    }
 
-        if (!uniformBuffer.alignBufferOffset()) return false;
+    bool Material::bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pmub, VkDescriptorBufferInfo& pmubi)
+    {
+        // TODO: use config file
+        PerMaterialUniforms pmu{VEC4_ONE};
+        pmub.appendData(&pmu, sizeof(pmu), &pmubi);
 
-        auto beginOfData = uniformBuffer.getCurrentPos();
-        auto dataSize = sizeof(piu);
-        if (!uniformBuffer.appendData(&piu, dataSize)) return false;
+        return true;
+    }
 
-        const auto& pfuBufferInfo = uniformBuffer.getPerFrameBufferInfo();
+    bool Material::updateBufferInfos(VulkanCommandBuffer& commandBuffer,
+                                     Geometry* geometry,
+                                     const VkDescriptorBufferInfo& pfubi,
+                                     const VkDescriptorBufferInfo& pmubi,
+                                     const VkDescriptorBufferInfo& piubi)
+    {
+        auto inputMask = m_pipeline->getVertexInputMask();
+        if (!geometry->hasAllVertexInputs(inputMask)) return false;
 
-        VkDescriptorBufferInfo piuBufferInfo{};
-        piuBufferInfo.buffer = uniformBuffer;
-        piuBufferInfo.offset = beginOfData;
-        piuBufferInfo.range = dataSize;
+        VkBuffer buffer = *geometry->getVulkanBuffer();
 
-        auto descriptorSet = m_pipeline->updateDescriptorSet(pfuBufferInfo, piuBufferInfo, m_imageInfos);
+        for (int i = 0; i < VulkanPipeline::MaxInputLocationMaskBit; ++i)
+        {
+            uint32 currInputMask = (1 << i);
+            if ((currInputMask & inputMask) == currInputMask)
+            {
+                auto offset = geometry->getVertexInputOffset(currInputMask);
+                vkCmdBindVertexBuffers(commandBuffer, i, 1, &buffer, &offset);
+            }
+        }
+
+        vkCmdBindIndexBuffer(commandBuffer, buffer, geometry->getIndicesOffset(), VK_INDEX_TYPE_UINT16);
+
+        auto descriptorSet = m_pipeline->updateDescriptorSet(pfubi, pmubi, piubi, m_imageInfos);
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
         return true;

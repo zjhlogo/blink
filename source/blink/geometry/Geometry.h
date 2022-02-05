@@ -30,8 +30,6 @@ namespace blink
         friend ResourceMgr;
 
     public:
-        void bindBuffer(VulkanCommandBuffer& commandBuffer);
-
         uint32 getNumVertices() const { return m_numVertices; };
         uint32 getNumIndices() const { return m_numIndices; };
 
@@ -48,6 +46,12 @@ namespace blink
                         VkDeviceSize offsetNormal,
                         VkDeviceSize offsetUv0,
                         VkDeviceSize offsetIndices);
+
+        VkDeviceSize getVertexInputOffset(uint32 inputMask) const;
+        bool hasAllVertexInputs(uint32 allInputMask) const;
+
+        VulkanBuffer* getVulkanBuffer() const { return m_buffer; }
+        VkDeviceSize getIndicesOffset() const { return m_offsetIndices; }
 
     protected:
         Geometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);

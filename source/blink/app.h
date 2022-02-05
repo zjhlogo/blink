@@ -32,7 +32,7 @@ namespace blink
         virtual void terminate() = 0;
 
         virtual void update(float dt);
-        virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer);
+        virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub);
 
     protected:
         bool addSystem(ISystemBase* sys);

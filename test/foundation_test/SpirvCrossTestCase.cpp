@@ -16,7 +16,7 @@
 TEST(SpirvCrossTestCase, parseUniforms)
 {
     std::vector<blink::uint8> buffer;
-    blink::File::readFileIntoBuffer(buffer, "resource/shaders/simple_lit.vert.spv");
+    blink::File::readFileIntoBuffer(buffer, "resource/shaders/simple_lit.frag.spv");
 
     spirv_cross::CompilerGLSL glsl((uint32_t*)buffer.data(), buffer.size() / sizeof(uint32_t));
     auto resources = glsl.get_shader_resources();
@@ -25,10 +25,12 @@ TEST(SpirvCrossTestCase, parseUniforms)
     for (const auto& uniform : resources.uniform_buffers)
     {
         auto name = uniform.name;
-        auto set = glsl.get_decoration(uniform.id, spv::DecorationDescriptorSet);
-        auto binding = glsl.get_decoration(uniform.id, spv::DecorationBinding);
+
         auto type = glsl.get_type(uniform.type_id);
         auto baseType = glsl.get_type(uniform.base_type_id);
+
+        auto set = glsl.get_decoration(uniform.id, spv::DecorationDescriptorSet);
+        auto binding = glsl.get_decoration(uniform.id, spv::DecorationBinding);
 
         auto structSize = glsl.get_declared_struct_size(baseType);
         for (int i = 0; i < baseType.member_types.size(); ++i)
@@ -48,9 +50,13 @@ TEST(SpirvCrossTestCase, parseUniforms)
     for (const auto& input : resources.stage_inputs)
     {
         auto name = input.name;
-        auto location = glsl.get_decoration(input.id, spv::DecorationLocation);
+
         auto type = glsl.get_type(input.type_id);
         auto baseType = glsl.get_type(input.base_type_id);
+
+        auto location = glsl.get_decoration(input.id, spv::DecorationLocation);
+        auto binding = glsl.get_decoration(input.id, spv::DecorationBinding);
+
     }
 
     // output

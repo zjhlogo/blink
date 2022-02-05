@@ -17,10 +17,34 @@ namespace blink
     class Geometry;
     class Material;
 
+    struct PerFrameUniforms
+    {
+        alignas(16) glm::mat4 matWorldToCamera;
+        alignas(16) glm::mat4 matCameraToProjection;
+        alignas(16) glm::mat4 matWorldToProjection;
+        alignas(16) glm::mat3x4 matWorldToCameraInvT;
+        alignas(16) glm::vec3 cameraPos;
+        alignas(16) glm::vec3 cameraDir;
+        alignas(16) glm::vec3 lightPos;
+        alignas(16) glm::vec4 lightColorAndIntensity;
+    };
+
+    struct PerMaterialUniforms
+    {
+        alignas(16) glm::vec4 color;
+    };
+
+    struct PerInstanceUniforms
+    {
+        alignas(16) glm::mat4 matLocalToWorld;
+        alignas(16) glm::mat3x4 matLocalToWorldInvT;
+    };
+
     struct RenderDataGeo
     {
         glm::vec3 pos;
         glm::quat rot;
+        PerInstanceUniforms piu;
         Geometry* geometry;
     };
 
@@ -35,24 +59,6 @@ namespace blink
     {
         int order;
         Material* material;
-    };
-
-    struct PerFrameUniforms
-    {
-        alignas(16) glm::mat4 matWorldToCamera;
-        alignas(16) glm::mat4 matCameraToProjection;
-        alignas(16) glm::mat4 matWorldToProjection;
-        alignas(16) glm::mat3x4 matWorldToCameraInvT;
-        alignas(16) glm::vec3 cameraPos;
-        alignas(16) glm::vec3 cameraDir;
-        alignas(16) glm::vec3 lightPos;
-        alignas(16) glm::vec4 lightColorAndIntensity;
-    };
-
-    struct PerInstanceUniforms
-    {
-        alignas(16) glm::mat4 matLocalToWorld;
-        alignas(16) glm::mat3x4 matLocalToWorldInvT;
     };
 
 } // namespace blink

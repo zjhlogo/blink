@@ -33,8 +33,12 @@ namespace blink
                     {
                         app.update(0.0f);
 
-                        renderModule.render([&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
-                                            { app.render(commandBuffer, uniformBuffer); });
+                        renderModule.render(
+                            [&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
+                            {
+                                //
+                                app.render(commandBuffer, pfub, pmub, piub);
+                            });
                     }
 
                     renderModule.waitIdle();

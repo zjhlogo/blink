@@ -13,6 +13,7 @@
 
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanCommandBuffer.h>
+#include <render_vulkan/VulkanPipeline.h>
 
 namespace blink
 {
@@ -23,17 +24,6 @@ namespace blink
     }
 
     Geometry::~Geometry() { destroy(); }
-
-    void Geometry::bindBuffer(VulkanCommandBuffer& commandBuffer)
-    {
-        VkBuffer buffer = *m_buffer;
-
-        vkCmdBindIndexBuffer(commandBuffer, buffer, m_offsetIndices, VK_INDEX_TYPE_UINT16);
-
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, &buffer, &m_offsetPositions);
-        vkCmdBindVertexBuffers(commandBuffer, 1, 1, &buffer, &m_offsetNormals);
-        vkCmdBindVertexBuffers(commandBuffer, 2, 1, &buffer, &m_offsetUv0s);
-    }
 
     bool Geometry::uploadData(const std::vector<uint16>& indices,
                               const std::vector<glm::vec3>& positions,
@@ -96,6 +86,43 @@ namespace blink
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(data, dataSize, m_commandPool);
+
+        return true;
+    }
+
+    VkDeviceSize Geometry::getVertexInputOffset(uint32 inputMask) const
+    {
+        if (inputMask == VulkanPipeline::InputLocation_Position)
+        {
+            return m_offsetPositions;
+        }
+        else if (inputMask == VulkanPipeline::InputLocation_Normal)
+        {
+            return m_offsetNormals;
+        }
+        else if (inputMask == VulkanPipeline::InputLocation_Uv0)
+        {
+            return m_offsetUv0s;
+        }
+
+        return 0;
+    }
+
+    bool Geometry::hasAllVertexInputs(uint32 allInputMask) const
+    {
+        for (int i = 0; i < VulkanPipeline::MaxInputLocationMaskBit; ++i)
+        {
+            uint32 currInputMask = (1 << i);
+            if ((currInputMask & allInputMask) == currInputMask)
+            {
+                if (currInputMask != VulkanPipeline::InputLocation_Position
+                    && currInputMask != VulkanPipeline::InputLocation_Normal
+                    && currInputMask != VulkanPipeline::InputLocation_Uv0)
+                {
+                    return false;
+                }
+            }
+        }
 
         return true;
     }

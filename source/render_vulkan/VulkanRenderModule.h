@@ -35,7 +35,7 @@ namespace blink
     class VulkanRenderModule
     {
     public:
-        typedef std::function<void(VulkanCommandBuffer&, VulkanUniformBuffer&)> RenderCb;
+        typedef std::function<void(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)> RenderCb;
 
     public:
         VulkanRenderModule();
@@ -68,7 +68,10 @@ namespace blink
         VulkanCommandPool* m_commandPool{};
         VulkanDescriptorPool* m_descriptorPool{};
         VulkanCommandBuffer* m_commandBuffer{};
-        VulkanUniformBuffer* m_uniformBuffer{};
+
+        VulkanUniformBuffer* m_perFrameUniformBuffer{};
+        VulkanUniformBuffer* m_perMaterialUniformBuffer{};
+        VulkanUniformBuffer* m_perInstanceUniformBuffer{};
     };
 
 } // namespace blink

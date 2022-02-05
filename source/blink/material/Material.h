@@ -27,6 +27,7 @@ namespace blink
     class VulkanDescriptorPool;
     class Texture2d;
     class ResourceMgr;
+    class Geometry;
 
     class Material : public IResource
     {
@@ -34,7 +35,12 @@ namespace blink
 
     public:
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
-        bool bindUniformBuffer(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer, const glm::vec3& pos, const glm::quat& rot);
+        bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pmub, VkDescriptorBufferInfo& pmubi);
+        bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
+                               Geometry* geometry,
+                               const VkDescriptorBufferInfo& pfubi,
+                               const VkDescriptorBufferInfo& pmubi,
+                               const VkDescriptorBufferInfo& piubi);
 
         VulkanPipeline& getPipeline() { return *m_pipeline; };
 

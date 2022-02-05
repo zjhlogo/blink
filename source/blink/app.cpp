@@ -30,7 +30,7 @@ namespace blink
 
     void IApp::update(float dt) { m_world.progress(dt); }
 
-    void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& uniformBuffer)
+    void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
     {
         // collect light data
         RenderDataLight rdLight{};
@@ -76,15 +76,19 @@ namespace blink
                 auto geometry = model.geometry;
                 if (!geometry) return;
 
+                PerInstanceUniforms piu;
+                piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos.value) * glm::mat4_cast(rot.value);
+                piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
+
                 auto findIt = renderDatas.find(material);
                 if (findIt != renderDatas.end())
                 {
-                    findIt->second.push_back({pos.value, rot.value, geometry});
+                    findIt->second.push_back({pos.value, rot.value, piu, geometry});
                 }
                 else
                 {
                     std::vector<RenderDataGeo> dataLists;
-                    dataLists.push_back({pos.value, rot.value, geometry});
+                    dataLists.push_back({pos.value, rot.value, piu, geometry});
                     renderDatas.emplace(material, dataLists);
                 }
             });
@@ -113,8 +117,8 @@ namespace blink
         for (const auto& pfu : pfus)
         {
             // bind per camera uniforms
-            VkDescriptorBufferInfo pcuBufferInfo{};
-            uniformBuffer.appendData(&pfu, sizeof(pfu), &pcuBufferInfo);
+            VkDescriptorBufferInfo pfubi{};
+            pfub.appendData(&pfu, sizeof(pfu), &pfubi);
 
             // render mesh group by material
             for (const auto& kvp : renderDatas)
@@ -123,18 +127,19 @@ namespace blink
 
                 material->bindPipeline(commandBuffer);
 
-                // TODO: bind per material uniform
-                uniformBuffer.appendData(&pmu, sizeof(pmu), &pmuBufferInfo);
+                // bind per material uniform
+                VkDescriptorBufferInfo pmubi{};
+                material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
 
                 for (const auto& renderData : kvp.second)
                 {
-                    // TODO: bind per instance uniform
-                    uniformBuffer.appendData(&piu, sizeof(piu), &piuBufferInfo);
+                    // bind per instance uniform
+                    VkDescriptorBufferInfo piubi{};
+                    piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
 
-                    //material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
+                    // update vertex input and uniform buffers
+                    material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
 
-                    // bind vertex input
-                    renderData.geometry->bindBuffer(commandBuffer);
                     vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
                 }
             }
@@ -145,12 +150,21 @@ namespace blink
                 Material* material = kvpFeature.second.material;
                 material->bindPipeline(commandBuffer);
 
+                // bind per material uniform
+                VkDescriptorBufferInfo pmubi{};
+                material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
+
                 for (const auto& kvp : renderDatas)
                 {
                     for (const auto& renderData : kvp.second)
                     {
-                        renderData.geometry->bindBuffer(commandBuffer);
-                        material->bindUniformBuffer(commandBuffer, uniformBuffer, renderData.pos, renderData.rot);
+                        // bind per instance uniform
+                        VkDescriptorBufferInfo piubi{};
+                        piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
+
+                        // update vertex input and uniform buffers
+                        material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
+
                         vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
                 }
