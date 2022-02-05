@@ -27,7 +27,7 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 {
     // create camera
     world.entity()
-        .set<blink::Position>({glm::vec3(0.0f, 0.0f, 2.0f)})
+        .set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)})
         .set<blink::Rotation>({glm::identity<glm::quat>()})
         .set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 10.0f});
 
@@ -57,17 +57,17 @@ bool EntityCreationSystem::initialize(flecs::world& world)
     //    .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry("resource/monkey.gltf"),
     //                              blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl")});
 
-    //// load box
-    //{
-    //    blink::BoxBuilder builder;
+    // load box
+    {
+        blink::BoxBuilder builder;
 
-    //    world.entity()
-    //        .set<blink::Position>({glm::vec3(-2.0f, 1.0f, 0.0f)})
-    //        .set<blink::Rotation>({glm::identity<glm::quat>()})
-    //        .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(80.0f), 0.0f)})
-    //        .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
-    //                                  blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl")});
-    //}
+        world.entity()
+            .set<blink::Position>({glm::vec3(-1.0f, 0.0f, 0.0f)})
+            .set<blink::Rotation>({glm::identity<glm::quat>()})
+            .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(80.0f), 0.0f)})
+            .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
+                                      blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mtl")});
+    }
 
     // load sphere
     {
@@ -81,17 +81,17 @@ bool EntityCreationSystem::initialize(flecs::world& world)
                                       blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl")});
     }
 
-    //// load tetrahedron
-    //{
-    //    blink::TetrahedronBuilder builder;
+    // load tetrahedron
+    {
+        blink::TetrahedronBuilder builder;
 
-    //    world.entity()
-    //        .set<blink::Position>({glm::vec3(-4.0f, 1.0f, 0.0f)})
-    //        .set<blink::Rotation>({glm::identity<glm::quat>()})
-    //        .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(60.0f), 0.0f)})
-    //        .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
-    //                                  blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl")});
-    //}
+        world.entity()
+            .set<blink::Position>({glm::vec3(1.0f, 0.0f, 0.0f)})
+            .set<blink::Rotation>({glm::identity<glm::quat>()})
+            .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(60.0f), 0.0f)})
+            .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
+                                      blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl")});
+    }
 
     // auto e2 = world.entity();
     // e2.set<blink::Position>({glm::vec3(0.5f, 0.0f, 0.0f)});

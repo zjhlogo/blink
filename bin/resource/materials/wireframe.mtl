@@ -2,10 +2,5 @@
     "vertex_shader" : "resource/shaders/wireframe.vert.spv",
     "fragment_shader" : "resource/shaders/wireframe.frag.spv",
     
-    "vertex_attributes" : [
-        "position",
-        "normal"
-    ],
-
     "wireframe" : true
 }

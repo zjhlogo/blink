@@ -62,7 +62,7 @@ namespace blink
         tstring m_filePath;
         tstring m_vertexShader;
         tstring m_fragmentShader;
-        bool m_wireframe{false};
+        bool m_wireframe{};
         std::vector<tstring> m_texturePaths;
 
         VulkanPipeline* m_pipeline{};

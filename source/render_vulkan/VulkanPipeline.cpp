@@ -7,6 +7,7 @@
  *
  */
 #include "VulkanPipeline.h"
+#include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
 #include "VulkanDescriptorPool.h"
 #include "VulkanImage.h"
@@ -17,6 +18,7 @@
 
 #include <foundation/File.h>
 #include <foundation/Log.h>
+#include <spirv-cross/spirv_glsl.hpp>
 
 namespace blink
 {
@@ -29,10 +31,25 @@ namespace blink
 
     VulkanPipeline::~VulkanPipeline() { destroy(); }
 
-    bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, int numTextures, bool wireframe)
+    bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe)
     {
-        if (!createDescriptorSetLayout(numTextures)) return false;
-        if (!createGraphicsPipeline(vertexShader, fragmentShader, wireframe)) return false;
+        std::vector<uint8> vertexShaderCode;
+        if (!File::readFileIntoBuffer(vertexShaderCode, vertexShader)) return false;
+
+        std::vector<uint8> fragmentShaderCode;
+        if (!File::readFileIntoBuffer(fragmentShaderCode, fragmentShader)) return false;
+
+        // generate vertex input desc
+        std::vector<VkVertexInputBindingDescription> vertexInputBindings;
+        std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
+        m_vertexInputMasks = generateVertexInputDesc(vertexInputBindings, vertexInputAttributes, vertexShaderCode);
+
+        // generate layout bindings
+        std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+        m_numTextures = (int)generateDescriptorSetLayout(layoutBindings, m_writeSets, fragmentShaderCode);
+
+        if (createDescriptorSetLayout(layoutBindings) == VK_NULL_HANDLE) return false;
+        if (createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, wireframe) == VK_NULL_HANDLE) return false;
 
         return true;
     }
@@ -43,10 +60,11 @@ namespace blink
         destroyDescriptorSetLayout();
     }
 
-    VkDescriptorSet VulkanPipeline::updateDescriptorSet(const VkDescriptorBufferInfo& pfuBufferInfo,
-                                                        const VkDescriptorBufferInfo& pmuBufferInfo,
-                                                        const VkDescriptorBufferInfo& piuBufferInfo,
-                                                        const std::vector<VkDescriptorImageInfo>& imageInfos)
+    bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer,
+                                            const VkDescriptorBufferInfo& pfuBufferInfo,
+                                            const VkDescriptorBufferInfo& pmuBufferInfo,
+                                            const VkDescriptorBufferInfo& piuBufferInfo,
+                                            const std::vector<VkDescriptorImageInfo>& imageInfos)
     {
         // uniforms, textures binding
         auto descriptorSet = m_descriptorPool.allocateDescriptorSet(m_descriptorSetLayout);
@@ -68,87 +86,19 @@ namespace blink
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
 
-        return descriptorSet;
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+
+        return true;
     }
 
-    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(int numTextures)
+    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
     {
         destroyDescriptorSetLayout();
-        m_numTextures = numTextures;
-
-        // pfu
-        {
-            VkDescriptorSetLayoutBinding pfuLayoutBinding{};
-            pfuLayoutBinding.binding = PerFrameUniformIndex;
-            pfuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pfuLayoutBinding.descriptorCount = 1;
-            pfuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-            m_layoutBindings.push_back(pfuLayoutBinding);
-
-            VkWriteDescriptorSet pfuDescriptorWrites{};
-            pfuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            pfuDescriptorWrites.dstBinding = PerFrameUniformIndex;
-            pfuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pfuDescriptorWrites.descriptorCount = 1;
-            m_writeSets.push_back(pfuDescriptorWrites);
-        }
-
-        // pmu
-        {
-            VkDescriptorSetLayoutBinding pmuLayoutBinding{};
-            pmuLayoutBinding.binding = PerMaterialUniformIndex;
-            pmuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pmuLayoutBinding.descriptorCount = 1;
-            pmuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-            m_layoutBindings.push_back(pmuLayoutBinding);
-
-            VkWriteDescriptorSet pmuDescriptorWrites{};
-            pmuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            pmuDescriptorWrites.dstBinding = PerMaterialUniformIndex;
-            pmuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pmuDescriptorWrites.descriptorCount = 1;
-            m_writeSets.push_back(pmuDescriptorWrites);
-        }
-
-        // piu
-        {
-            VkDescriptorSetLayoutBinding piuLayoutBinding{};
-            piuLayoutBinding.binding = PerInstanceUniformIndex;
-            piuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            piuLayoutBinding.descriptorCount = 1;
-            piuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-            m_layoutBindings.push_back(piuLayoutBinding);
-
-            VkWriteDescriptorSet piuDescriptorWrites{};
-            piuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            piuDescriptorWrites.dstBinding = PerInstanceUniformIndex;
-            piuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            piuDescriptorWrites.descriptorCount = 1;
-            m_writeSets.push_back(piuDescriptorWrites);
-        }
-
-        // samplers
-        for (int i = 0; i < m_numTextures; ++i)
-        {
-            VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-            samplerLayoutBinding.binding = SamplerUniformIndexBegin + i;
-            samplerLayoutBinding.descriptorCount = 1;
-            samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-            m_layoutBindings.push_back(samplerLayoutBinding);
-
-            VkWriteDescriptorSet imageDescriptorWrites{};
-            imageDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            imageDescriptorWrites.dstBinding = SamplerUniformIndexBegin + i;
-            imageDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            imageDescriptorWrites.descriptorCount = 1;
-            m_writeSets.push_back(imageDescriptorWrites);
-        }
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = static_cast<uint32_t>(m_layoutBindings.size());
-        layoutInfo.pBindings = m_layoutBindings.data();
+        layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
+        layoutInfo.pBindings = layoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
         {
@@ -161,10 +111,6 @@ namespace blink
 
     void VulkanPipeline::destroyDescriptorSetLayout()
     {
-        m_numTextures = 0;
-        m_layoutBindings.clear();
-        m_writeSets.clear();
-
         if (m_descriptorSetLayout != nullptr)
         {
             vkDestroyDescriptorSetLayout(m_logicalDevice, m_descriptorSetLayout, nullptr);
@@ -172,7 +118,11 @@ namespace blink
         }
     }
 
-    VkPipeline VulkanPipeline::createGraphicsPipeline(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe)
+    VkPipeline VulkanPipeline::createGraphicsPipeline(const std::vector<uint8>& vertexShaderCode,
+                                                      const std::vector<uint8>& fragmentShaderCode,
+                                                      const std::vector<VkVertexInputBindingDescription>& bindings,
+                                                      const std::vector<VkVertexInputAttributeDescription>& attributes,
+                                                      bool wireframe)
     {
         destroyGraphicsPipeline();
 
@@ -188,8 +138,8 @@ namespace blink
             return nullptr;
         }
 
-        VkShaderModule vertShaderModule = createShaderModule(vertexShader);
-        VkShaderModule fragShaderModule = createShaderModule(fragmentShader);
+        VkShaderModule vertShaderModule = createShaderModule(vertexShaderCode);
+        VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -207,14 +157,6 @@ namespace blink
         VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
         // vertex input state
-        std::vector<blink::uint8> buffer;
-        blink::File::readFileIntoBuffer(buffer, vertexShader);
-        spirv_cross::CompilerGLSL glsl((uint32_t*)buffer.data(), buffer.size() / sizeof(uint32_t));
-
-        std::vector<VkVertexInputBindingDescription> bindings;
-        std::vector<VkVertexInputAttributeDescription> attributes;
-        m_vertexInputMasks = generateVertexInputDesc(bindings, attributes, glsl);
-
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindings.size());
@@ -328,14 +270,8 @@ namespace blink
         }
     }
 
-    VkShaderModule VulkanPipeline::createShaderModule(const tstring& shaderFile)
+    VkShaderModule VulkanPipeline::createShaderModule(const std::vector<uint8>& shaderCode)
     {
-        std::vector<uint8> shaderCode;
-        if (!File::readFileIntoBuffer(shaderCode, shaderFile))
-        {
-            return nullptr;
-        }
-
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = shaderCode.size();
@@ -351,45 +287,7 @@ namespace blink
         return shaderModule;
     }
 
-    uint32 VulkanPipeline::generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
-                                                 std::vector<VkVertexInputAttributeDescription>& attributeDesc,
-                                                 const spirv_cross::CompilerGLSL& glsl)
-    {
-        auto resources = glsl.get_shader_resources();
-
-        bindingDesc.resize(resources.stage_inputs.size());
-        attributeDesc.resize(resources.stage_inputs.size());
-        uint32 vertexInputMasks = 0;
-
-        // input
-        for (int i = 0; i < resources.stage_inputs.size(); ++i)
-        {
-            const auto& input = resources.stage_inputs[i];
-
-            auto name = input.name;
-            auto type = glsl.get_type(input.type_id);
-            //auto baseType = glsl.get_type(input.base_type_id);
-
-            auto location = glsl.get_decoration(input.id, spv::DecorationLocation);
-            //auto binding = glsl.get_decoration(input.id, spv::DecorationBinding);
-
-            bindingDesc[i].binding = location;
-            bindingDesc[i].stride = (type.vecsize * type.width) >> 3;
-            bindingDesc[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-            attributeDesc[i].location = location;
-            attributeDesc[i].binding = location;
-            attributeDesc[i].format = getVertexInputFormat(type);
-            attributeDesc[i].offset = 0;
-
-            // TODO: validate location
-            vertexInputMasks |= (1 << location);
-        }
-
-        return vertexInputMasks;
-    }
-
-    VkFormat VulkanPipeline::getVertexInputFormat(const spirv_cross::SPIRType& type)
+    static VkFormat getVertexInputFormat(const spirv_cross::SPIRType& type)
     {
         if (type.basetype == spirv_cross::SPIRType::BaseType::Float && type.width == 32)
         {
@@ -414,4 +312,132 @@ namespace blink
         return VK_FORMAT_UNDEFINED;
     }
 
+    uint32 VulkanPipeline::generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
+                                                   std::vector<VkVertexInputAttributeDescription>& attributeDesc,
+                                                   const std::vector<uint8>& vertexShaderCode)
+    {
+        spirv_cross::CompilerGLSL glsl((uint32_t*)vertexShaderCode.data(), vertexShaderCode.size() / sizeof(uint32_t));
+        auto resources = glsl.get_shader_resources();
+
+        bindingDesc.resize(resources.stage_inputs.size());
+        attributeDesc.resize(resources.stage_inputs.size());
+        uint32 vertexInputMasks = 0;
+
+        // vertex inputs
+        for (int i = 0; i < resources.stage_inputs.size(); ++i)
+        {
+            const auto& input = resources.stage_inputs[i];
+
+            //auto name = input.name;
+            auto type = glsl.get_type(input.type_id);
+            // auto baseType = glsl.get_type(input.base_type_id);
+
+            auto location = glsl.get_decoration(input.id, spv::DecorationLocation);
+            // auto binding = glsl.get_decoration(input.id, spv::DecorationBinding);
+
+            bindingDesc[i].binding = location;
+            bindingDesc[i].stride = (type.vecsize * type.width) >> 3;
+            bindingDesc[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+            attributeDesc[i].location = location;
+            attributeDesc[i].binding = location;
+            attributeDesc[i].format = getVertexInputFormat(type);
+            attributeDesc[i].offset = 0;
+
+            // TODO: validate location
+            vertexInputMasks |= (1 << location);
+        }
+
+        return vertexInputMasks;
+    }
+
+    size_t VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
+                                                    std::vector<VkWriteDescriptorSet>& writeSets,
+                                                    const std::vector<uint8>& fragmentShaderCode)
+    {
+        layoutBindings.clear();
+        writeSets.clear();
+
+        spirv_cross::CompilerGLSL glsl((uint32_t*)fragmentShaderCode.data(), fragmentShaderCode.size() / sizeof(uint32_t));
+        auto resources = glsl.get_shader_resources();
+
+        // pfu
+        {
+            VkDescriptorSetLayoutBinding pfuLayoutBinding{};
+            pfuLayoutBinding.binding = PerFrameUniformIndex;
+            pfuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            pfuLayoutBinding.descriptorCount = 1;
+            pfuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBindings.push_back(pfuLayoutBinding);
+
+            VkWriteDescriptorSet pfuDescriptorWrites{};
+            pfuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            pfuDescriptorWrites.dstBinding = PerFrameUniformIndex;
+            pfuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            pfuDescriptorWrites.descriptorCount = 1;
+            writeSets.push_back(pfuDescriptorWrites);
+        }
+
+        // pmu
+        {
+            VkDescriptorSetLayoutBinding pmuLayoutBinding{};
+            pmuLayoutBinding.binding = PerMaterialUniformIndex;
+            pmuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            pmuLayoutBinding.descriptorCount = 1;
+            pmuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBindings.push_back(pmuLayoutBinding);
+
+            VkWriteDescriptorSet pmuDescriptorWrites{};
+            pmuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            pmuDescriptorWrites.dstBinding = PerMaterialUniformIndex;
+            pmuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            pmuDescriptorWrites.descriptorCount = 1;
+            writeSets.push_back(pmuDescriptorWrites);
+        }
+
+        // piu
+        {
+            VkDescriptorSetLayoutBinding piuLayoutBinding{};
+            piuLayoutBinding.binding = PerInstanceUniformIndex;
+            piuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            piuLayoutBinding.descriptorCount = 1;
+            piuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBindings.push_back(piuLayoutBinding);
+
+            VkWriteDescriptorSet piuDescriptorWrites{};
+            piuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            piuDescriptorWrites.dstBinding = PerInstanceUniformIndex;
+            piuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            piuDescriptorWrites.descriptorCount = 1;
+            writeSets.push_back(piuDescriptorWrites);
+        }
+
+        // samples
+        for (int i = 0; i < resources.sampled_images.size(); ++i)
+        {
+            const auto& sample = resources.sampled_images[i];
+
+            //auto name = sample.name;
+            auto type = glsl.get_type(sample.type_id);
+            // auto baseType = glsl.get_type(sample.base_type_id);
+
+            auto binding = glsl.get_decoration(sample.id, spv::DecorationBinding);
+
+            VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+            samplerLayoutBinding.binding = binding;
+            samplerLayoutBinding.descriptorCount = 1;
+            samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBindings.push_back(samplerLayoutBinding);
+
+            VkWriteDescriptorSet imageDescriptorWrites{};
+            imageDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            imageDescriptorWrites.dstBinding = binding;
+            imageDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            imageDescriptorWrites.descriptorCount = 1;
+            writeSets.push_back(imageDescriptorWrites);
+        }
+
+        return resources.sampled_images.size();
+    }
 } // namespace blink

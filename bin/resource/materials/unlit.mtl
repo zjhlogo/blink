@@ -2,11 +2,6 @@
     "vertex_shader" : "resource/shaders/unlit.vert.spv",
     "fragment_shader" : "resource/shaders/unlit.frag.spv",
     
-    "vertex_attributes" : [
-        "position",
-        "uv0"
-    ],
-
     "textures" : [
         "resource/grid.png"
     ],

@@ -23,6 +23,8 @@
 
 namespace blink
 {
+    const tstring ResourceMgr::DEFAULT_TEXTURE = "resource/pink.png";
+
     ResourceMgr& ResourceMgr::getInstance()
     {
         static ResourceMgr s_resourceMgr;

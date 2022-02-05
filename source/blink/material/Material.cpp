@@ -35,7 +35,11 @@ namespace blink
     {
     }
 
-    Material::~Material() { destroy(); }
+    Material::~Material()
+    {
+        //
+        destroy();
+    }
 
     bool Material::create(const tstring& filePath)
     {
@@ -47,7 +51,7 @@ namespace blink
         loadTextures();
 
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain, m_descriptorPool);
-        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, static_cast<int>(m_imageInfos.size()), m_wireframe))
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_wireframe))
         {
             return false;
         }
@@ -110,10 +114,7 @@ namespace blink
 
         vkCmdBindIndexBuffer(commandBuffer, buffer, geometry->getIndicesOffset(), VK_INDEX_TYPE_UINT16);
 
-        auto descriptorSet = m_pipeline->updateDescriptorSet(pfubi, pmubi, piubi, m_imageInfos);
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
-
-        return true;
+        return m_pipeline->bindDescriptorSets(commandBuffer, pfubi, pmubi, piubi, m_imageInfos);
     }
 
     bool Material::loadConfigFromFile(const tstring& filePath)
@@ -148,6 +149,7 @@ namespace blink
         for (const auto& filePath : m_texturePaths)
         {
             auto texture = ResourceMgr::getInstance().createTexture2d(filePath);
+            if (!texture) texture = ResourceMgr::getInstance().createTexture2d(ResourceMgr::DEFAULT_TEXTURE);
             if (!texture) return false;
 
             m_textures.push_back(texture);

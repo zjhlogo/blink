@@ -29,6 +29,9 @@ namespace blink
     class ResourceMgr
     {
     public:
+        static const tstring DEFAULT_TEXTURE;
+
+    public:
         static ResourceMgr& getInstance();
 
         bool initialize(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool, VulkanCommandPool& commandPool);
