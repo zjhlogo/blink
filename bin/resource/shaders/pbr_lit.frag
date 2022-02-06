@@ -3,14 +3,6 @@
 
 #include "uniforms.inc"
 
-layout(set = 0, binding = 2) uniform Material
-{
-    float roughness;
-    float metallic;
-    float r;
-    float g;
-    float b;
-} material;
 const float PI = 3.14159265359;
 
 layout(location = 0) in vec3 fragNormal;
@@ -21,7 +13,7 @@ layout(location = 0) out vec4 outColor;
 
 vec3 materialColor()
 {
-    return vec3(material.r, material.g, material.b);
+    return pmu.color;
 }
 
 float D_GGX(float dotNH, float roughness)
@@ -41,7 +33,7 @@ float G_SchlicksmithGGX(float dotNL, float dotNV, float roughness)
     return GL * GV;
 }
 
-float F_Schlick(float cosTheta, float metallic)
+vec3 F_Schlick(float cosTheta, float metallic)
 {
     vec3 F0 = mix(vec3(0.04), materialColor(), metallic);
     vec3 F = F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
@@ -76,12 +68,12 @@ void main()
 {
     vec3 N = normalize(fragNormal);
     vec3 V = normalize(pfu.cameraPos - fragWorldPos);
-    float roughness = material.roughness;
+    float roughness = pmu.roughness;
 
     vec3 L = normalize(pfu.lightPos - fragWorldPos);
 
     vec3 Lo = vec3(0.0);
-    Lo += BRDF(L, V, N, material.metallic, roughness);
+    Lo += BRDF(L, V, N, pmu.metallic, roughness);
 
     vec3 color = materialColor() * 0.02;
     color += Lo;

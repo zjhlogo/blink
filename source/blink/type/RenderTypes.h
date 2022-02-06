@@ -31,7 +31,9 @@ namespace blink
 
     struct PerMaterialUniforms
     {
-        alignas(16) glm::vec4 color;
+        alignas(4) float roughness;
+        alignas(4) float metallic;
+        alignas(16) glm::vec3 color;
     };
 
     struct PerInstanceUniforms

@@ -1,0 +1,7 @@
+{
+    "vertex_shader" : "resource/shaders/pbr_lit.vert.spv",
+    "fragment_shader" : "resource/shaders/pbr_lit.frag.spv",
+    "roughness" : 0.1,
+    "metallic" : 1.0,
+    "color" : [1.0, 1.0, 1.0]
+}

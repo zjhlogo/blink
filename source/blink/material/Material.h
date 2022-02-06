@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../resource/IResource.h"
+#include "../type/RenderTypes.h"
 
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
@@ -68,6 +69,8 @@ namespace blink
         VulkanPipeline* m_pipeline{};
         std::vector<Texture2d*> m_textures;
         std::vector<VkDescriptorImageInfo> m_imageInfos;
+
+        PerMaterialUniforms m_pmu{0.5f, 0.5f, glm::vec3(1.0f, 0.0f, 1.0f)};
     };
 
 } // namespace blink

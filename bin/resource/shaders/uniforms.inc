@@ -12,7 +12,9 @@ layout(set = 0, binding = 0) uniform PerFrameUniforms
 
 layout(set = 0, binding = 1) uniform PerMaterialUniforms
 {
-    vec4 color;
+    float roughness;
+    float metallic;
+    vec3 color;
 } pmu;
 
 layout(set = 0, binding = 2) uniform PerInstanceUniforms

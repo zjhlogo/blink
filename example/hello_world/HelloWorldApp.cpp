@@ -34,7 +34,7 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& commandPool = renderModule.getCommandPool();
     auto& descriptorPool = renderModule.getDescriptorPool();
 
-    m_world.set_threads(4);
+    //m_world.set_threads(4);
 
     addSystem(new blink::LinearVelocitySystem());
     addSystem(new blink::AngularVelocitySystem());

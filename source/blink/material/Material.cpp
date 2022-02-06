@@ -13,7 +13,6 @@
 #include "../geometry/Geometry.h"
 #include "../resource/ResourceMgr.h"
 #include "../texture/Texture2d.h"
-#include "../type/RenderTypes.h"
 
 #include <foundation/File.h>
 #include <foundation/Log.h>
@@ -84,9 +83,7 @@ namespace blink
 
     bool Material::bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pmub, VkDescriptorBufferInfo& pmubi)
     {
-        // TODO: use config file
-        PerMaterialUniforms pmu{VEC4_ONE};
-        pmub.appendData(&pmu, sizeof(pmu), &pmubi);
+        pmub.appendData(&m_pmu, sizeof(m_pmu), &pmubi);
 
         return true;
     }
@@ -130,14 +127,52 @@ namespace blink
 
         m_vertexShader = j["vertex_shader"].get<tstring>();
         m_fragmentShader = j["fragment_shader"].get<tstring>();
-        m_wireframe = j["wireframe"].get<bool>();
 
-        auto jtextures = j["textures"];
-        if (jtextures.is_array())
+        // roughness
         {
-            for (int i = 0; i < jtextures.size(); ++i)
+            auto jroughness = j["roughness"];
+            if (!jroughness.is_null())
             {
-                m_texturePaths.push_back(jtextures[i].get<tstring>());
+                m_pmu.roughness = jroughness.get<float>();
+            }
+        }
+
+        // metallic
+        {
+            auto jmetallic = j["metallic"];
+            if (!jmetallic.is_null())
+            {
+                m_pmu.metallic = jmetallic.get<float>();
+            }
+        }
+
+        // color
+        {
+            auto jcolor = j["color"];
+            if (jcolor.is_array() && jcolor.size() == 3)
+            {
+                m_pmu.color = glm::vec3(jcolor[0].get<float>(), jcolor[1].get<float>(), jcolor[2].get<float>());
+            }
+        }
+
+        // wireframe
+        {
+            auto jwireframe = j["wireframe"];
+            if (!jwireframe.is_null())
+            {
+                m_wireframe = jwireframe.get<bool>();
+            }
+        }
+
+        // textures
+        {
+            auto jtextures = j["textures"];
+            if (jtextures.is_array())
+            {
+                for (int i = 0; i < jtextures.size(); ++i)
+                {
+                    m_texturePaths.push_back(jtextures[i].get<tstring>());
+                }
             }
         }
 

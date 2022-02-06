@@ -78,7 +78,7 @@ bool EntityCreationSystem::initialize(flecs::world& world)
             .set<blink::Rotation>({glm::identity<glm::quat>()})
             .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(20.0f), 0.0f)})
             .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
-                                      blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl")});
+                                      blink::ResourceMgr::getInstance().createMaterial("resource/materials/pbr_lit.mtl")});
     }
 
     // load tetrahedron
