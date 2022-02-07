@@ -27,10 +27,9 @@
 
 namespace blink
 {
-    Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool)
+    Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
         : m_logicalDevice(logicalDevice)
         , m_swapchain(swapchain)
-        , m_descriptorPool(descriptorPool)
     {
     }
 
@@ -49,7 +48,7 @@ namespace blink
 
         loadTextures();
 
-        m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain, m_descriptorPool);
+        m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
         if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_wireframe))
         {
             return false;

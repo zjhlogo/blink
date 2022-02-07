@@ -15,14 +15,13 @@ namespace blink
 {
     class VulkanWindow;
     class VulkanLogicalDevice;
-    class VulkanCommandPool;
     class VulkanImage;
     class VulkanTexture;
 
     class VulkanSwapchain
     {
     public:
-        VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+        VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice);
         ~VulkanSwapchain();
 
         bool create();
@@ -55,7 +54,6 @@ namespace blink
     private:
         VulkanWindow& m_window;
         VulkanLogicalDevice& m_logicalDevice;
-        VulkanCommandPool& m_commandPool;
 
         VkSwapchainKHR m_swapChain{};
         VkFormat m_swapChainImageFormat;

@@ -9,12 +9,9 @@
 #include "VulkanRenderModule.h"
 #include "VulkanBuffer.h"
 #include "VulkanCommandBuffer.h"
-#include "VulkanCommandPool.h"
 #include "VulkanContext.h"
-#include "VulkanDescriptorPool.h"
 #include "VulkanFence.h"
 #include "VulkanLogicalDevice.h"
-#include "VulkanPipeline.h"
 #include "VulkanSemaphore.h"
 #include "VulkanSwapchain.h"
 #include "VulkanUniformBuffer.h"
@@ -49,16 +46,10 @@ namespace blink
         m_logicalDevice = new VulkanLogicalDevice(m_context);
         if (!m_logicalDevice->create()) return false;
 
-        m_commandPool = new VulkanCommandPool(*m_logicalDevice);
-        if (!m_commandPool->create()) return false;
-
-        m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice, *m_commandPool);
+        m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice);
         if (!m_swapchain->create()) return false;
 
-        m_descriptorPool = new VulkanDescriptorPool(*m_logicalDevice);
-        if (!m_descriptorPool->create()) return false;
-
-        m_commandBuffer = new VulkanCommandBuffer(*m_logicalDevice, *m_commandPool);
+        m_commandBuffer = new VulkanCommandBuffer(*m_logicalDevice, m_logicalDevice->getCommandPool());
         if (!m_commandBuffer->create()) return false;
 
         m_perFrameUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
@@ -85,9 +76,7 @@ namespace blink
         SAFE_DELETE(m_perMaterialUniformBuffer);
         SAFE_DELETE(m_perFrameUniformBuffer);
         SAFE_DELETE(m_commandBuffer);
-        SAFE_DELETE(m_descriptorPool);
         SAFE_DELETE(m_swapchain);
-        SAFE_DELETE(m_commandPool);
         SAFE_DELETE(m_logicalDevice);
         SAFE_DELETE(m_context);
         SAFE_DELETE(m_window);
@@ -127,7 +116,7 @@ namespace blink
         // wait graphics queue idle
         m_logicalDevice->waitGraphicsQueueIdle();
 
-        m_descriptorPool->reset();
+        m_logicalDevice->resetDescriptorPool();
         m_perFrameUniformBuffer->reset();
         m_perMaterialUniformBuffer->reset();
         m_perInstanceUniformBuffer->reset();

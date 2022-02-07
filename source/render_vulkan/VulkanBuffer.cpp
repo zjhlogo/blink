@@ -8,7 +8,6 @@
  */
 #include "VulkanBuffer.h"
 #include "VulkanCommandBuffer.h"
-#include "VulkanCommandPool.h"
 #include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
 
@@ -49,19 +48,15 @@ namespace blink
         return m_buffer;
     }
 
-    VkBuffer VulkanBuffer::createBufferAndUpload(const void* data,
-                                                 VkDeviceSize bufferSize,
-                                                 VkBufferUsageFlags usage,
-                                                 VkSharingMode mode,
-                                                 VulkanCommandPool& pool)
+    VkBuffer VulkanBuffer::createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode)
     {
         createBuffer(bufferSize, usage, mode);
-        uploadBuffer(data, bufferSize, pool);
+        uploadBuffer(data, bufferSize);
 
         return m_buffer;
     }
 
-    void VulkanBuffer::uploadBuffer(const void* data, VkDeviceSize bufferSize, VulkanCommandPool& pool)
+    void VulkanBuffer::uploadBuffer(const void* data, VkDeviceSize bufferSize)
     {
         VulkanBuffer stagingBuffer(m_logicalDevice);
         stagingBuffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
@@ -70,10 +65,10 @@ namespace blink
         stagingMem->uploadData(data, bufferSize, 0);
 
         allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        copyBuffer(&stagingBuffer, pool);
+        copyBuffer(&stagingBuffer);
     }
 
-    void VulkanBuffer::uploadBuffer(VulkanCommandPool& pool, VulkanMemory::CustomCopyCb cb)
+    void VulkanBuffer::uploadBuffer(VulkanMemory::CustomCopyCb cb)
     {
         VulkanBuffer stagingBuffer(m_logicalDevice);
         stagingBuffer.createBuffer(m_bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
@@ -82,25 +77,20 @@ namespace blink
         stagingMem->uploadData(0, m_bufferSize, cb);
 
         allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        copyBuffer(&stagingBuffer, pool);
+        copyBuffer(&stagingBuffer);
     }
 
-    void VulkanBuffer::copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool)
+    void VulkanBuffer::copyBuffer(VulkanBuffer* src)
     {
-        VulkanCommandBuffer commandBuffer(m_logicalDevice, pool);
-        commandBuffer.create();
-        commandBuffer.beginCommand();
-
-        VkBufferCopy copyRegion{};
-        copyRegion.srcOffset = 0;
-        copyRegion.dstOffset = 0;
-        copyRegion.size = src->m_bufferSize;
-        vkCmdCopyBuffer(commandBuffer, *src, m_buffer, 1, &copyRegion);
-
-        commandBuffer.endCommand();
-        commandBuffer.submitCommand();
-
-        commandBuffer.destroy();
+        m_logicalDevice.executeCommand(
+            [&](VulkanCommandBuffer& commandBuffer)
+            {
+                VkBufferCopy copyRegion{};
+                copyRegion.srcOffset = 0;
+                copyRegion.dstOffset = 0;
+                copyRegion.size = src->m_bufferSize;
+                vkCmdCopyBuffer(commandBuffer, *src, m_buffer, 1, &copyRegion);
+            });
     }
 
     VulkanMemory* VulkanBuffer::allocateBufferMemory(VkMemoryPropertyFlags memProperties)

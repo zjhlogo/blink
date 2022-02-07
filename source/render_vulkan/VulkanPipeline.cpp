@@ -22,17 +22,16 @@
 
 namespace blink
 {
-    VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool)
+    VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
         : m_logicalDevice(logicalDevice)
         , m_swapchain(swapchain)
-        , m_descriptorPool(descriptorPool)
     {
-        // 
+        //
     }
 
     VulkanPipeline::~VulkanPipeline()
     {
-        // 
+        //
         destroy();
     }
 
@@ -65,7 +64,8 @@ namespace blink
         m_numTextures = (int)generateDescriptorSetLayout(layoutBindings, m_writeSets, fragmentShaderCode);
 
         if (createDescriptorSetLayout(layoutBindings) == VK_NULL_HANDLE) return false;
-        if (createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_wireframe) == VK_NULL_HANDLE) return false;
+        if (createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_wireframe) == VK_NULL_HANDLE)
+            return false;
 
         return true;
     }
@@ -87,7 +87,7 @@ namespace blink
                                             const std::vector<VkDescriptorImageInfo>& imageInfos)
     {
         // uniforms binding
-        auto descriptorSet = m_descriptorPool.allocateDescriptorSet(m_descriptorSetLayout);
+        auto descriptorSet = m_logicalDevice.getDescriptorPool().allocateDescriptorSet(m_descriptorSetLayout);
 
         m_writeSets[PerFrameUniformIndex].dstSet = descriptorSet;
         m_writeSets[PerFrameUniformIndex].pBufferInfo = &pfuBufferInfo;
@@ -349,7 +349,7 @@ namespace blink
         {
             const auto& input = resources.stage_inputs[i];
 
-            //auto name = input.name;
+            // auto name = input.name;
             auto type = glsl.get_type(input.type_id);
             // auto baseType = glsl.get_type(input.base_type_id);
 
@@ -373,8 +373,8 @@ namespace blink
     }
 
     size_t VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
-                                                    std::vector<VkWriteDescriptorSet>& writeSets,
-                                                    const std::vector<uint8>& fragmentShaderCode)
+                                                       std::vector<VkWriteDescriptorSet>& writeSets,
+                                                       const std::vector<uint8>& fragmentShaderCode)
     {
         layoutBindings.clear();
         writeSets.clear();
@@ -438,7 +438,7 @@ namespace blink
         {
             const auto& sample = resources.sampled_images[i];
 
-            //auto name = sample.name;
+            // auto name = sample.name;
             auto type = glsl.get_type(sample.type_id);
             // auto baseType = glsl.get_type(sample.base_type_id);
 

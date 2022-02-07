@@ -22,7 +22,7 @@ namespace blink
     class VulkanTexture
     {
     public:
-        VulkanTexture(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& pool);
+        VulkanTexture(VulkanLogicalDevice& logicalDevice);
         virtual ~VulkanTexture();
 
         bool createTexture2D(const tstring& texFile);
@@ -43,7 +43,6 @@ namespace blink
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
-        VulkanCommandPool& m_commandPool;
 
         VulkanImage* m_textureImage{};
         VkSampler m_textureSampler{};

@@ -66,7 +66,6 @@ namespace blink
 
         auto graphicsQueue = m_logicalDevice.getGraphicsQueue();
         vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-        m_logicalDevice.waitGraphicsQueueIdle();
     }
 
     void VulkanCommandBuffer::beginCommand()

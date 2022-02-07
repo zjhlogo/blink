@@ -7,7 +7,10 @@
  *
  */
 #include "VulkanLogicalDevice.h"
+#include "VulkanCommandBuffer.h"
+#include "VulkanCommandPool.h"
 #include "VulkanContext.h"
+#include "VulkanDescriptorPool.h"
 #include "utils/VulkanUtils.h"
 
 #include <foundation/Log.h>
@@ -25,18 +28,27 @@ namespace blink
     VulkanLogicalDevice::~VulkanLogicalDevice()
     {
         //
-        destroyLogicalDevice();
+        destroy();
     }
 
     bool VulkanLogicalDevice::create()
     {
         if (!createLogicalDevice()) return false;
+
+        m_commandPool = new VulkanCommandPool(*this);
+        if (!m_commandPool->create()) return false;
+
+        m_descriptorPool = new VulkanDescriptorPool(*this);
+        if (!m_descriptorPool->create()) return false;
+
         return true;
     }
 
     void VulkanLogicalDevice::destroy()
     {
-        //
+        SAFE_DELETE(m_descriptorPool);
+        SAFE_DELETE(m_commandPool);
+
         destroyLogicalDevice();
     }
 
@@ -54,6 +66,26 @@ namespace blink
         {
             vkQueueWaitIdle(m_graphicsQueue);
         }
+    }
+
+    void VulkanLogicalDevice::resetDescriptorPool()
+    {
+        m_descriptorPool->reset();
+    }
+
+    void VulkanLogicalDevice::executeCommand(std::function<void(VulkanCommandBuffer& commandBuffer)>&& cb)
+    {
+        VulkanCommandBuffer commandBuffer(*this, *m_commandPool);
+        commandBuffer.create();
+        commandBuffer.beginCommand();
+
+        cb(commandBuffer);
+
+        commandBuffer.endCommand();
+        commandBuffer.submitCommand();
+
+        waitGraphicsQueueIdle();
+        commandBuffer.destroy();
     }
 
     bool VulkanLogicalDevice::createLogicalDevice()

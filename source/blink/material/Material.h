@@ -25,7 +25,6 @@ namespace blink
     class VulkanPipeline;
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
-    class VulkanDescriptorPool;
     class Texture2d;
     class ResourceMgr;
     class Geometry;
@@ -46,7 +45,7 @@ namespace blink
         VulkanPipeline& getPipeline() { return *m_pipeline; };
 
     private:
-        Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool);
+        Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~Material();
 
         bool create(const tstring& filePath);
@@ -59,7 +58,6 @@ namespace blink
     private:
         VulkanLogicalDevice& m_logicalDevice;
         VulkanSwapchain& m_swapchain;
-        VulkanDescriptorPool& m_descriptorPool;
 
         tstring m_filePath;
         tstring m_vertexShader;

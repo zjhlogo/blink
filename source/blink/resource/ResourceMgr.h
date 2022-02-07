@@ -18,8 +18,6 @@ namespace blink
 {
     class VulkanLogicalDevice;
     class VulkanSwapchain;
-    class VulkanDescriptorPool;
-    class VulkanCommandPool;
 
     class Texture2d;
     class Geometry;
@@ -34,7 +32,7 @@ namespace blink
     public:
         static ResourceMgr& getInstance();
 
-        bool initialize(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool, VulkanCommandPool& commandPool);
+        bool initialize(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         void terminate();
         void recreate();
 
@@ -55,8 +53,6 @@ namespace blink
     private:
         VulkanLogicalDevice* m_logicalDevice{};
         VulkanSwapchain* m_swapchain{};
-        VulkanDescriptorPool* m_descriptorPool{};
-        VulkanCommandPool* m_commandPool{};
 
         std::unordered_map<tstring, Texture2d*> m_texture2dMap;
         std::unordered_map<tstring, Geometry*> m_geometryMap;

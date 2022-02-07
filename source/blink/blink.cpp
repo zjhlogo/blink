@@ -17,7 +17,6 @@
 #include <imgui/backends/imgui_impl_vulkan.h>
 #include <imgui/imgui.h>
 #include <render_vulkan/VulkanCommandBuffer.h>
-#include <render_vulkan/VulkanCommandPool.h>
 #include <render_vulkan/VulkanContext.h>
 #include <render_vulkan/VulkanDescriptorPool.h>
 #include <render_vulkan/VulkanLogicalDevice.h>
@@ -93,30 +92,12 @@ namespace blink
         // Upload Fonts
         {
             // Use any command queue
-            auto& commandPool = renderModule.getCommandPool();
-            VkCommandBuffer commandBuffer = renderModule.getCommandBuffer();
-
-            auto err = vkResetCommandPool(logicalDevice, commandPool, 0);
-            imguiCheckVkResult(err);
-            VkCommandBufferBeginInfo begin_info = {};
-            begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-            err = vkBeginCommandBuffer(commandBuffer, &begin_info);
-            imguiCheckVkResult(err);
-
-            ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
-
-            VkSubmitInfo end_info = {};
-            end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-            end_info.commandBufferCount = 1;
-            end_info.pCommandBuffers = &commandBuffer;
-            err = vkEndCommandBuffer(commandBuffer);
-            imguiCheckVkResult(err);
-            err = vkQueueSubmit(logicalDevice.getGraphicsQueue(), 1, &end_info, VK_NULL_HANDLE);
-            imguiCheckVkResult(err);
-
-            err = vkDeviceWaitIdle(logicalDevice);
-            imguiCheckVkResult(err);
+            logicalDevice.executeCommand(
+                [&](VulkanCommandBuffer& commandBuffer)
+                {
+                    //
+                    ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
+                });
             ImGui_ImplVulkan_DestroyFontUploadObjects();
         }
     }
@@ -158,10 +139,7 @@ namespace blink
 
         if (renderModule.createDevice({1280, 720}))
         {
-            if (ResourceMgr::getInstance().initialize(renderModule.getLogicalDevice(),
-                                                      renderModule.getSwapchain(),
-                                                      renderModule.getDescriptorPool(),
-                                                      renderModule.getCommandPool()))
+            if (ResourceMgr::getInstance().initialize(renderModule.getLogicalDevice(), renderModule.getSwapchain()))
             {
                 initImgui(renderModule);
 

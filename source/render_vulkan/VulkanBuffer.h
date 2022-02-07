@@ -15,7 +15,6 @@
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanCommandPool;
     class VulkanMemory;
 
     class VulkanBuffer
@@ -29,10 +28,10 @@ namespace blink
         VkBuffer createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
         void destroyBuffer();
 
-        VkBuffer createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode, VulkanCommandPool& pool);
-        void uploadBuffer(const void* data, VkDeviceSize bufferSize, VulkanCommandPool& pool);
-        void uploadBuffer(VulkanCommandPool& pool, VulkanMemory::CustomCopyCb cb);
-        void copyBuffer(VulkanBuffer* src, VulkanCommandPool& pool);
+        VkBuffer createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
+        void uploadBuffer(const void* data, VkDeviceSize bufferSize);
+        void uploadBuffer(VulkanMemory::CustomCopyCb cb);
+        void copyBuffer(VulkanBuffer* src);
 
         VulkanMemory* allocateBufferMemory(VkMemoryPropertyFlags memProperties);
         void destroyBufferMemory();

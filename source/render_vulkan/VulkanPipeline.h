@@ -16,7 +16,6 @@ namespace blink
 {
     class VulkanLogicalDevice;
     class VulkanSwapchain;
-    class VulkanDescriptorPool;
     class VulkanTexture;
     class VulkanCommandBuffer;
 
@@ -44,7 +43,7 @@ namespace blink
         static const uint32 MaxInputLocationMaskBit = 10;
 
     public:
-        VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool);
+        VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~VulkanPipeline();
 
         operator VkPipeline() const { return m_pipeline; };
@@ -86,7 +85,6 @@ namespace blink
     private:
         VulkanLogicalDevice& m_logicalDevice;
         VulkanSwapchain& m_swapchain;
-        VulkanDescriptorPool& m_descriptorPool;
 
         VkDescriptorSetLayout m_descriptorSetLayout{};
         VkPipelineLayout m_pipelineLayout{};

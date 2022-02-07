@@ -12,15 +12,14 @@
 #include "Geometry.h"
 
 #include <render_vulkan/VulkanBuffer.h>
-#include <render_vulkan/VulkanCommandBuffer.h>
 #include <render_vulkan/VulkanPipeline.h>
 
 namespace blink
 {
-    Geometry::Geometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
+    Geometry::Geometry(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
-        , m_commandPool(commandPool)
     {
+        //
     }
 
     Geometry::~Geometry()
@@ -54,14 +53,14 @@ namespace blink
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
-        m_buffer->uploadBuffer(m_commandPool,
-                               [&](void* destBuffer, VkDeviceSize destBufferSize)
-                               {
-                                   memcpy(((uint8*)destBuffer + m_offsetIndices), indices.data(), sizeIndices);
-                                   memcpy(((uint8*)destBuffer + m_offsetPositions), positions.data(), sizePositions);
-                                   memcpy(((uint8*)destBuffer + m_offsetNormals), normals.data(), sizeNormals);
-                                   memcpy(((uint8*)destBuffer + m_offsetUv0s), uv0s.data(), sizeUv0s);
-                               });
+        m_buffer->uploadBuffer(
+            [&](void* destBuffer, VkDeviceSize destBufferSize)
+            {
+                memcpy(((uint8*)destBuffer + m_offsetIndices), indices.data(), sizeIndices);
+                memcpy(((uint8*)destBuffer + m_offsetPositions), positions.data(), sizePositions);
+                memcpy(((uint8*)destBuffer + m_offsetNormals), normals.data(), sizeNormals);
+                memcpy(((uint8*)destBuffer + m_offsetUv0s), uv0s.data(), sizeUv0s);
+            });
         return true;
     }
 
@@ -89,7 +88,7 @@ namespace blink
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
-        m_buffer->uploadBuffer(data, dataSize, m_commandPool);
+        m_buffer->uploadBuffer(data, dataSize);
 
         return true;
     }

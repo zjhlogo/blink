@@ -21,9 +21,8 @@
 
 namespace blink
 {
-    VulkanTexture::VulkanTexture(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& pool)
+    VulkanTexture::VulkanTexture(VulkanLogicalDevice& logicalDevice)
         : m_logicalDevice(logicalDevice)
-        , m_commandPool(pool)
     {
         //
     }
@@ -77,7 +76,7 @@ namespace blink
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         m_textureImage->allocateImageMemory();
         m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-        m_textureImage->transitionImageLayout(m_commandPool, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        m_textureImage->transitionImageLayout(depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
         return true;
     }
@@ -106,38 +105,31 @@ namespace blink
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
         m_textureImage->allocateImageMemory();
 
-        m_textureImage->transitionImageLayout(m_commandPool, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         // copy buffer to image
         {
-            VulkanCommandBuffer commandBuffer(m_logicalDevice, m_commandPool);
-            commandBuffer.create();
-            commandBuffer.beginCommand();
+            m_logicalDevice.executeCommand(
+                [&](VulkanCommandBuffer& commandBuffer)
+                {
+                    VkBufferImageCopy region;
+                    region.bufferOffset = 0;
+                    region.bufferRowLength = 0;
+                    region.bufferImageHeight = 0;
 
-            VkBufferImageCopy region;
-            region.bufferOffset = 0;
-            region.bufferRowLength = 0;
-            region.bufferImageHeight = 0;
+                    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    region.imageSubresource.mipLevel = 0;
+                    region.imageSubresource.baseArrayLayer = 0;
+                    region.imageSubresource.layerCount = 1;
 
-            region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            region.imageSubresource.mipLevel = 0;
-            region.imageSubresource.baseArrayLayer = 0;
-            region.imageSubresource.layerCount = 1;
+                    region.imageOffset = {0, 0, 0};
+                    region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
 
-            region.imageOffset = {0, 0, 0};
-            region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
-
-            vkCmdCopyBufferToImage(commandBuffer, *stagingBuffer, *m_textureImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-
-            commandBuffer.endCommand();
-            commandBuffer.submitCommand();
-            commandBuffer.destroy();
+                    vkCmdCopyBufferToImage(commandBuffer, *stagingBuffer, *m_textureImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                });
         }
 
-        m_textureImage->transitionImageLayout(m_commandPool,
-                                              VK_FORMAT_R8G8B8A8_UNORM,
-                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         // destroy staging buffer
         SAFE_DELETE(stagingBuffer);

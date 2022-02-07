@@ -41,15 +41,10 @@ namespace blink
         return s_resourceMgr;
     }
 
-    bool ResourceMgr::initialize(VulkanLogicalDevice& logicalDevice,
-                                 VulkanSwapchain& swapchain,
-                                 VulkanDescriptorPool& descriptorPool,
-                                 VulkanCommandPool& commandPool)
+    bool ResourceMgr::initialize(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
     {
         m_logicalDevice = &logicalDevice;
         m_swapchain = &swapchain;
-        m_descriptorPool = &descriptorPool;
-        m_commandPool = &commandPool;
 
         return true;
     }
@@ -76,8 +71,6 @@ namespace blink
 
         m_logicalDevice = nullptr;
         m_swapchain = nullptr;
-        m_descriptorPool = nullptr;
-        m_commandPool = nullptr;
     }
 
     void ResourceMgr::recreate()
@@ -100,7 +93,7 @@ namespace blink
 
         // create new
         auto texture = new Texture2d();
-        if (!texture->create(*m_logicalDevice, *m_commandPool, filePath))
+        if (!texture->create(*m_logicalDevice, filePath))
         {
             SAFE_DELETE(texture);
             return nullptr;
@@ -143,7 +136,7 @@ namespace blink
             return nullptr;
         }
 
-        auto geometry = new Geometry(*m_logicalDevice, *m_commandPool);
+        auto geometry = new Geometry(*m_logicalDevice);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_DELETE(geometry);
@@ -172,7 +165,7 @@ namespace blink
         }
 
         // create new
-        auto geometry = new Geometry(*m_logicalDevice, *m_commandPool);
+        auto geometry = new Geometry(*m_logicalDevice);
         if (!builder.build(geometry))
         {
             SAFE_DELETE(geometry);
@@ -206,7 +199,7 @@ namespace blink
         }
 
         // create new
-        auto material = new Material(*m_logicalDevice, *m_swapchain, *m_descriptorPool);
+        auto material = new Material(*m_logicalDevice, *m_swapchain);
         if (!material->create(filePath))
         {
             SAFE_DELETE(material);

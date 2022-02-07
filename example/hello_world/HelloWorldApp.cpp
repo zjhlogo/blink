@@ -31,8 +31,6 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 {
     auto& logicalDevice = renderModule.getLogicalDevice();
     auto& swapchain = renderModule.getSwapchain();
-    auto& commandPool = renderModule.getCommandPool();
-    auto& descriptorPool = renderModule.getDescriptorPool();
 
     //m_world.set_threads(4);
 

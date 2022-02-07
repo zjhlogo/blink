@@ -21,17 +21,16 @@
 
 namespace blink
 {
-    VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool)
+    VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice)
         : m_window(window)
         , m_logicalDevice(logicalDevice)
-        , m_commandPool(commandPool)
     {
-        // 
+        //
     }
 
     VulkanSwapchain::~VulkanSwapchain()
     {
-        // 
+        //
         destroy();
     }
 
@@ -312,7 +311,7 @@ namespace blink
     {
         SAFE_DELETE(m_depthTexture);
 
-        m_depthTexture = new VulkanTexture(m_logicalDevice, m_commandPool);
+        m_depthTexture = new VulkanTexture(m_logicalDevice);
         if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
 
         auto count = m_images.size();

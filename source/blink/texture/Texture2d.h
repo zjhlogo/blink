@@ -14,7 +14,6 @@
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanCommandPool;
     class VulkanTexture;
 
     class ResourceMgr;
@@ -30,7 +29,7 @@ namespace blink
         Texture2d();
         ~Texture2d();
 
-        bool create(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool, const tstring& filePath);
+        bool create(VulkanLogicalDevice& logicalDevice, const tstring& filePath);
 
     private:
         VulkanTexture* m_texture{};

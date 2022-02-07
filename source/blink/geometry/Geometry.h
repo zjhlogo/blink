@@ -20,7 +20,6 @@
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanCommandPool;
     class VulkanCommandBuffer;
     class VulkanBuffer;
     class ResourceMgr;
@@ -54,14 +53,13 @@ namespace blink
         VkDeviceSize getIndicesOffset() const { return m_offsetIndices; }
 
     protected:
-        Geometry(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
+        Geometry(VulkanLogicalDevice& logicalDevice);
         virtual ~Geometry();
 
         void destroy();
 
     protected:
         VulkanLogicalDevice& m_logicalDevice;
-        VulkanCommandPool& m_commandPool;
 
         VulkanBuffer* m_buffer{};
 
