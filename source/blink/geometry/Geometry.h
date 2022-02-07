@@ -29,6 +29,8 @@ namespace blink
         friend ResourceMgr;
 
     public:
+        virtual void release() override;
+
         uint32 getNumVertices() const { return m_numVertices; };
         uint32 getNumIndices() const { return m_numIndices; };
 

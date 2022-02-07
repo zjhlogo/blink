@@ -11,6 +11,7 @@
 
 #include "Geometry.h"
 
+#include <blink/resource/ResourceMgr.h>
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanPipeline.h>
 
@@ -26,6 +27,12 @@ namespace blink
     {
         //
         destroy();
+    }
+
+    void Geometry::release()
+    {
+        //
+        ResourceMgr::getInstance().releaseGeometry(this);
     }
 
     bool Geometry::uploadData(const std::vector<uint16>& indices,

@@ -34,6 +34,8 @@ namespace blink
         friend ResourceMgr;
 
     public:
+        virtual void release() override;
+
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
         bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pmub, VkDescriptorBufferInfo& pmubi);
         bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
@@ -42,7 +44,11 @@ namespace blink
                                const VkDescriptorBufferInfo& pmubi,
                                const VkDescriptorBufferInfo& piubi);
 
-        VulkanPipeline& getPipeline() { return *m_pipeline; };
+        void setRoughness(float roughness) { m_pmu.roughness = roughness; };
+        void setMetallic(float metallic) { m_pmu.metallic = metallic; };
+        void setColor(const glm::vec3& color) { m_pmu.color = color; };
+
+        VulkanPipeline& getPipeline() const { return *m_pipeline; };
 
     private:
         Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);

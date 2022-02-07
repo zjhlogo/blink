@@ -11,6 +11,7 @@
 
 #include "Texture2d.h"
 
+#include <blink/resource/ResourceMgr.h>
 #include <render_vulkan/VulkanTexture.h>
 
 namespace blink
@@ -24,6 +25,12 @@ namespace blink
     {
         //
         SAFE_DELETE(m_texture);
+    }
+
+    void Texture2d::release()
+    {
+        //
+        ResourceMgr::getInstance().releaseTexture2d(this);
     }
 
     bool Texture2d::create(VulkanLogicalDevice& logicalDevice, const tstring& filePath)

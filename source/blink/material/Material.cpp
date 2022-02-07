@@ -39,49 +39,10 @@ namespace blink
         destroy();
     }
 
-    bool Material::create(const tstring& filePath)
+    void Material::release()
     {
-        destroy();
-
-        if (!loadConfigFromFile(filePath)) return false;
-        m_filePath = filePath;
-
-        loadTextures();
-
-        m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
-        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_wireframe))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    bool Material::recreate()
-    {
-        if (m_pipeline)
-        {
-            return m_pipeline->recreate();
-        }
-
-        return true;
-    }
-
-    void Material::destroy()
-    {
-        for (auto texture : m_textures)
-        {
-            ResourceMgr::getInstance().releaseTexture2d(texture);
-        }
-        m_textures.clear();
-        m_imageInfos.clear();
-
-        SAFE_DELETE(m_pipeline);
-        m_filePath.clear();
-        m_vertexShader.clear();
-        m_fragmentShader.clear();
-        m_wireframe = false;
-        m_texturePaths.clear();
+        // 
+        ResourceMgr::getInstance().releaseMaterial(this);
     }
 
     void Material::bindPipeline(VulkanCommandBuffer& commandBuffer)
@@ -121,6 +82,51 @@ namespace blink
         vkCmdBindIndexBuffer(commandBuffer, buffer, geometry->getIndicesOffset(), VK_INDEX_TYPE_UINT16);
 
         return m_pipeline->bindDescriptorSets(commandBuffer, pfubi, pmubi, piubi, m_imageInfos);
+    }
+
+    bool Material::create(const tstring& filePath)
+    {
+        destroy();
+
+        if (!loadConfigFromFile(filePath)) return false;
+        m_filePath = filePath;
+
+        loadTextures();
+
+        m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_wireframe))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool Material::recreate()
+    {
+        if (m_pipeline)
+        {
+            return m_pipeline->recreate();
+        }
+
+        return true;
+    }
+
+    void Material::destroy()
+    {
+        for (auto texture : m_textures)
+        {
+            SAFE_RELEASE(texture);
+        }
+        m_textures.clear();
+        m_imageInfos.clear();
+
+        SAFE_DELETE(m_pipeline);
+        m_filePath.clear();
+        m_vertexShader.clear();
+        m_fragmentShader.clear();
+        m_wireframe = false;
+        m_texturePaths.clear();
     }
 
     bool Material::loadConfigFromFile(const tstring& filePath)

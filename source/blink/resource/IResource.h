@@ -24,6 +24,8 @@ namespace blink
         const tstring& getId() const { return m_id; };
         int getRef() { return m_ref; };
 
+        virtual void release() = 0;
+
     private:
         void setId(const tstring& id) { m_id = id; };
         int incRef() { return ++m_ref; };

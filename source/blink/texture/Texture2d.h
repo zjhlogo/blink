@@ -23,7 +23,9 @@ namespace blink
         friend ResourceMgr;
 
     public:
-        VulkanTexture* getVulkanTexture() { return m_texture; };
+        virtual void release() override;
+
+        VulkanTexture* getVulkanTexture() const { return m_texture; };
 
     private:
         Texture2d();

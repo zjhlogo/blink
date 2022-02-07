@@ -30,6 +30,12 @@
         delete x;                                                                                                                                              \
         x = nullptr;                                                                                                                                           \
     }
+#define SAFE_RELEASE(x)                                                                                                                                        \
+    if (x)                                                                                                                                                     \
+    {                                                                                                                                                          \
+        x->release();                                                                                                                                          \
+        x = nullptr;                                                                                                                                           \
+    }
 
 #define ALIGN_BYTES_4(x) ((((x) + 3) >> 2) << 2)
 
