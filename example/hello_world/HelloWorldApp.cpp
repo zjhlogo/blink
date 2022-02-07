@@ -62,16 +62,9 @@ void HelloWorldApp::terminate()
 
 void HelloWorldApp::renderUi()
 {
-    // 3. Show another simple window.
-    bool show_another_window = true;
-    if (show_another_window)
-    {
-        // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Begin("Another Window", &show_another_window);
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me")) show_another_window = false;
-        ImGui::End();
-    }
+    ImGui::Begin("Another Window");
+    ImGui::SliderFloat("slider float", &f1, 0.0f, 1.0f, "ratio = %.3f");
+    ImGui::End();
 }
 
 int main(int argc, char** argv)

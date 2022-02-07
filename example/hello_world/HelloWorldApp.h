@@ -24,4 +24,6 @@ public:
 
     virtual void renderUi() override;
 
+private:
+
 };
