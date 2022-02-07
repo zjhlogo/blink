@@ -48,7 +48,7 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness)
     float dotLH = clamp(dot(L, H), 0.0, 1.0);
     float dotNH = clamp(dot(N, H), 0.0, 1.0);
 
-    vec3 lightColor = vec3(1.0);
+    vec3 lightColor = pfu.lightColorAndIntensity.xyz;
     vec3 color = vec3(0.0);
 
     if (dotNL > 0.0)
@@ -68,12 +68,11 @@ void main()
 {
     vec3 N = normalize(fragNormal);
     vec3 V = normalize(pfu.cameraPos - fragWorldPos);
-    float roughness = pmu.roughness;
 
     vec3 L = normalize(pfu.lightPos - fragWorldPos);
 
     vec3 Lo = vec3(0.0);
-    Lo += BRDF(L, V, N, pmu.metallic, roughness);
+    Lo += BRDF(L, V, N, pmu.metallic, pmu.roughness);
 
     vec3 color = materialColor() * 0.02;
     color += Lo;

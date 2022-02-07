@@ -26,15 +26,15 @@ EntityCreationSystem::EntityCreationSystem(const glm::vec2& surfaceSize)
 bool EntityCreationSystem::initialize(flecs::world& world)
 {
     // create camera
-    world.entity()
-        .set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)})
-        .set<blink::Rotation>({glm::identity<glm::quat>()})
-        .set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 10.0f});
+    m_camera = world.entity();
+    m_camera.set(blink::Position{glm::vec3(0.0f, 0.0f, 4.0f)});
+    m_camera.set(blink::Rotation{glm::identity<glm::quat>()});
+    m_camera.set(blink::CameraData{glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 10.0f});
 
     // light
-    world.entity()
-        .set<blink::Position>({glm::vec3(-3.0f, 4.0f, 8.0f)})
-        .set<blink::LightData>({glm::one<glm::vec3>(), 100.0f});
+    m_light = world.entity();
+    m_light.set(blink::Position{glm::vec3(-3.0f, 4.0f, 8.0f)});
+    m_light.set(blink::LightData{glm::one<glm::vec3>(), 100.0f});
 
     //// load plane
     //{
@@ -59,38 +59,42 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 
     // load box
     {
-        blink::BoxBuilder builder;
+        m_box = world.entity();
+        m_box.set(blink::Position{glm::vec3(-1.0f, 0.0f, 0.0f)});
+        m_box.set(blink::Rotation{glm::identity<glm::quat>()});
+        m_box.set(blink::AngularVelocity{glm::vec3(0.0f, glm::radians(80.0f), 0.0f)});
 
-        world.entity()
-            .set<blink::Position>({glm::vec3(-1.0f, 0.0f, 0.0f)})
-            .set<blink::Rotation>({glm::identity<glm::quat>()})
-            .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(80.0f), 0.0f)})
-            .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
-                                      blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mtl")});
+        blink::BoxBuilder builder;
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mtl");
+        m_box.set(blink::StaticModel{geometry, material});
     }
 
     // load sphere
     {
+        m_sphere = world.entity();
+        m_sphere.set(blink::Position{glm::vec3(0.0f, 0.0f, 0.0f)});
+        m_sphere.set(blink::Rotation{glm::identity<glm::quat>()});
+        m_sphere.set(blink::AngularVelocity{glm::vec3(0.0f, glm::radians(20.0f), 0.0f)});
+
         blink::SphereUvBuilder builder;
         builder.ringAndSection(20, 20);
-        world.entity()
-            .set<blink::Position>({glm::vec3(0.0f, 0.0f, 0.0f)})
-            .set<blink::Rotation>({glm::identity<glm::quat>()})
-            .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(20.0f), 0.0f)})
-            .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
-                                      blink::ResourceMgr::getInstance().createMaterial("resource/materials/pbr_lit.mtl")});
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/pbr_lit.mtl");
+        m_sphere.set(blink::StaticModel{geometry, material});
     }
 
     // load tetrahedron
     {
-        blink::TetrahedronBuilder builder;
+        m_tetrahedron = world.entity();
+        m_tetrahedron.set(blink::Position{glm::vec3(1.0f, 0.0f, 0.0f)});
+        m_tetrahedron.set(blink::Rotation{glm::identity<glm::quat>()});
+        m_tetrahedron.set(blink::AngularVelocity{glm::vec3(0.0f, glm::radians(60.0f), 0.0f)});
 
-        world.entity()
-            .set<blink::Position>({glm::vec3(1.0f, 0.0f, 0.0f)})
-            .set<blink::Rotation>({glm::identity<glm::quat>()})
-            .set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(60.0f), 0.0f)})
-            .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry(builder),
-                                      blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl")});
+        blink::TetrahedronBuilder builder;
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
+        m_tetrahedron.set(blink::StaticModel{geometry, material});
     }
 
     // auto e2 = world.entity();
@@ -105,5 +109,5 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 
 void EntityCreationSystem::terminate(flecs::world& world)
 {
-    // 
+    //
 }

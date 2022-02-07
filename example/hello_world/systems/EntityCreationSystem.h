@@ -20,6 +20,13 @@ public:
     virtual bool initialize(flecs::world& world) override;
     virtual void terminate(flecs::world& world) override;
 
+public:
+    flecs::entity m_camera;
+    flecs::entity m_light;
+    flecs::entity m_box;
+    flecs::entity m_sphere;
+    flecs::entity m_tetrahedron;
+
 private:
     glm::vec2 m_surfaceSize;
 

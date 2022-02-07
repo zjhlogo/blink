@@ -11,8 +11,9 @@
 #pragma once
 
 #include <blink/app.h>
-#include <blink/material/Material.h>
 #include <guis/IGuiWindow.h>
+
+class EntityCreationSystem;
 
 class HelloWorldApp : public blink::IApp, public IGuiWindow
 {
@@ -26,6 +27,6 @@ public:
     virtual void renderUi() override;
 
 private:
-    blink::Material* m_pbrMaterial{};
+    EntityCreationSystem* m_sys{};
 
 };

@@ -12,6 +12,8 @@
 #include "systems/EntityCreationSystem.h"
 
 #include <blink/blink.h>
+#include <blink/component/Components.h>
+#include <blink/material/Material.h>
 #include <blink/resource/ResourceMgr.h>
 #include <blink/system/AngularVelocitySystem.h>
 #include <blink/system/LinearVelocitySystem.h>
@@ -42,7 +44,8 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     addLogicalSystem(new blink::AngularVelocitySystem());
 
     const auto& extent = swapchain.getImageExtent();
-    addLogicalSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
+    m_sys = new EntityCreationSystem(glm::vec2(extent.width, extent.height));
+    addLogicalSystem(m_sys);
     if (!initializeLogicalSystems()) return false;
 
     // add render systems
@@ -52,14 +55,12 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     if (!initializeRenderSystems()) return false;
 
     guiRenderSystem->addWindow(this);
-    m_pbrMaterial = blink::ResourceMgr::getInstance().createMaterial("resource/materials/pbr_lit.mtl");
 
     return true;
 }
 
 void HelloWorldApp::terminate()
 {
-    SAFE_RELEASE(m_pbrMaterial);
     terminateRenderSystems();
     terminateLogicalSystems();
 }
@@ -68,21 +69,38 @@ void HelloWorldApp::renderUi()
 {
     static float s_roughness = 0.1f;
     static float s_metallic = 1.0f;
-    static glm::vec3 s_color = {1.0f, 1.0f, 1.0f};
+    static glm::vec3 s_surfaceColor = {1.0f, 1.0f, 1.0f};
+
+    static glm::vec3 s_lightColor = {1.0f, 1.0f, 1.0f};
+    static float s_intensity = 100.0f;
 
     ImGui::Begin("Pbr Properties Window");
 
     if (ImGui::SliderFloat("roughness", &s_roughness, 0.0f, 1.0f, "roughness = %.3f"))
     {
-        m_pbrMaterial->setRoughness(s_roughness);
+        auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
+        material->setRoughness(s_roughness);
     }
     if (ImGui::SliderFloat("metallic", &s_metallic, 0.0f, 1.0f, "metallic = %.3f"))
     {
-        m_pbrMaterial->setMetallic(s_metallic);
+        auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
+        material->setMetallic(s_metallic);
     }
-    if (ImGui::ColorPicker3("color", (float*)&s_color))
+    if (ImGui::ColorEdit3("surface color", (float*)&s_surfaceColor))
     {
-        m_pbrMaterial->setColor(s_color);
+        auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
+        material->setColor(s_surfaceColor);
+    }
+
+    if (ImGui::ColorEdit3("light color", (float*)&s_lightColor))
+    {
+        const auto lightData = m_sys->m_light.get<blink::LightData>();
+        m_sys->m_light.set(blink::LightData{s_lightColor, lightData->intensity});
+    }
+    if (ImGui::SliderFloat("light intensity", &s_intensity, 0.0f, 1000.0f, "intensity = %.3f"))
+    {
+        const auto lightData = m_sys->m_light.get<blink::LightData>();
+        m_sys->m_light.set(blink::LightData{lightData->color, s_intensity});
     }
 
     ImGui::End();
