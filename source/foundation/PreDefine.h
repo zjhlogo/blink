@@ -32,3 +32,5 @@
     }
 
 #define ALIGN_BYTES_4(x) ((((x) + 3) >> 2) << 2)
+
+#define ARRAY_SIZE(x) ((int)(sizeof(x) / sizeof(*(x))))     // Size of a static C-style array. Don't use on pointers!

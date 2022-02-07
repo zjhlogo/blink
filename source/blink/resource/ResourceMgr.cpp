@@ -25,6 +25,16 @@ namespace blink
 {
     const tstring ResourceMgr::DEFAULT_TEXTURE = "resource/pink.png";
 
+    ResourceMgr::ResourceMgr()
+    {
+        //
+    }
+
+    ResourceMgr::~ResourceMgr()
+    {
+        //
+    }
+
     ResourceMgr& ResourceMgr::getInstance()
     {
         static ResourceMgr s_resourceMgr;
@@ -68,6 +78,15 @@ namespace blink
         m_swapchain = nullptr;
         m_descriptorPool = nullptr;
         m_commandPool = nullptr;
+    }
+
+    void ResourceMgr::recreate()
+    {
+        for (auto kvp : m_materialMap)
+        {
+            auto material = kvp.second;
+            material->recreate();
+        }
     }
 
     Texture2d* ResourceMgr::createTexture2d(const tstring& filePath)

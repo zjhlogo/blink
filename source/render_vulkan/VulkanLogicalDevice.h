@@ -23,13 +23,16 @@ namespace blink
         bool create();
         void destroy();
 
-        operator VkDevice() { return m_logicalDevice; };
+        operator VkDevice() const { return m_logicalDevice; };
         void waitDeviceIdle();
         void waitGraphicsQueueIdle();
 
-        VulkanContext* getContext() { return m_context; };
-        VkQueue getGraphicsQueue() { return m_graphicsQueue; };
-        VkQueue getPresentQueue() { return m_presentQueue; };
+        int getGraphicsFamilyIndex() const { return m_graphicsFamilyIndex; };
+        int getPresentFamilyIndex() const { return m_presentFamilyIndex; };
+
+        VulkanContext* getContext() const { return m_context; };
+        VkQueue getGraphicsQueue() const { return m_graphicsQueue; };
+        VkQueue getPresentQueue() const { return m_presentQueue; };
         VkDeviceSize getMinUniformBufferOffsetAlignment() const { return m_minUniformBufferOffsetAlignment; };
 
     private:
@@ -38,6 +41,9 @@ namespace blink
 
     private:
         VulkanContext* m_context{};
+
+        int m_graphicsFamilyIndex{-1};
+        int m_presentFamilyIndex{-1};
 
         VkDevice m_logicalDevice{};
         VkQueue m_graphicsQueue{};

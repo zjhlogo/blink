@@ -78,7 +78,11 @@ namespace blink
         vkBeginCommandBuffer(m_commandBuffer, &beginInfo);
     }
 
-    void VulkanCommandBuffer::endCommand() { vkEndCommandBuffer(m_commandBuffer); }
+    void VulkanCommandBuffer::endCommand()
+    {
+        // 
+        vkEndCommandBuffer(m_commandBuffer);
+    }
 
     void VulkanCommandBuffer::beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, const VkRect2D& renderArea)
     {

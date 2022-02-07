@@ -45,15 +45,7 @@ namespace blink
         return true;
     }
 
-    void VulkanSwapchain::destroy()
-    {
-        destroyFramebuffers();
-        destroyRenderPass();
-        destroySwapchainImageViews();
-        destroySwapChain();
-    }
-
-    bool VulkanSwapchain::recreateSwapChain()
+    bool VulkanSwapchain::recreate()
     {
         int width = 0;
         int height = 0;
@@ -67,8 +59,7 @@ namespace blink
 
         m_logicalDevice.waitDeviceIdle();
 
-        destroySwapchainImageViews();
-        destroySwapChain();
+        destroy();
 
         if (!createSwapChain()) return false;
         if (!createSwapchainImageViews()) return false;
@@ -76,6 +67,14 @@ namespace blink
         if (!createFramebuffers(m_renderPass)) return false;
 
         return true;
+    }
+
+    void VulkanSwapchain::destroy()
+    {
+        destroyFramebuffers();
+        destroyRenderPass();
+        destroySwapchainImageViews();
+        destroySwapChain();
     }
 
     bool VulkanSwapchain::createSwapChain()

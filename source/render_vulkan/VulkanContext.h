@@ -28,7 +28,8 @@ namespace blink
 
         uint32_t findMemoryType(VkMemoryPropertyFlags typeFilter, VkMemoryPropertyFlags properties);
 
-        VulkanWindow* getWindow() { return m_window; };
+        VkInstance getInstance() const { return m_instance; };
+        VulkanWindow* getWindow() const { return m_window; };
         const std::vector<VkPhysicalDevice>& getPhysicalDevices() const { return m_physicalDevices; };
 
         VkPhysicalDevice getPickedPhysicalDevice() const { return m_pickedPhysicalDevice; };

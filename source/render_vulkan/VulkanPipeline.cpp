@@ -38,11 +38,22 @@ namespace blink
 
     bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe)
     {
+        m_vertexShader = vertexShader;
+        m_fragmentShader = fragmentShader;
+        m_wireframe = wireframe;
+
+        return recreate();
+    }
+
+    bool VulkanPipeline::recreate()
+    {
+        destroy();
+
         std::vector<uint8> vertexShaderCode;
-        if (!File::readFileIntoBuffer(vertexShaderCode, vertexShader)) return false;
+        if (!File::readFileIntoBuffer(vertexShaderCode, m_vertexShader)) return false;
 
         std::vector<uint8> fragmentShaderCode;
-        if (!File::readFileIntoBuffer(fragmentShaderCode, fragmentShader)) return false;
+        if (!File::readFileIntoBuffer(fragmentShaderCode, m_fragmentShader)) return false;
 
         // generate vertex input desc
         std::vector<VkVertexInputBindingDescription> vertexInputBindings;
@@ -54,7 +65,7 @@ namespace blink
         m_numTextures = (int)generateDescriptorSetLayout(layoutBindings, m_writeSets, fragmentShaderCode);
 
         if (createDescriptorSetLayout(layoutBindings) == VK_NULL_HANDLE) return false;
-        if (createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, wireframe) == VK_NULL_HANDLE) return false;
+        if (createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_wireframe) == VK_NULL_HANDLE) return false;
 
         return true;
     }
@@ -63,6 +74,10 @@ namespace blink
     {
         destroyGraphicsPipeline();
         destroyDescriptorSetLayout();
+
+        m_numTextures = 0;
+        m_writeSets.clear();
+        m_vertexInputMasks = 0;
     }
 
     bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer,

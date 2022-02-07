@@ -29,20 +29,10 @@ namespace blink
 
     bool VulkanCommandPool::create()
     {
-        int graphicsFamilyIndex{};
-        int presentFamilyIndex{};
-
-        auto context = m_logicalDevice.getContext();
-        VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex,
-                                                        presentFamilyIndex,
-                                                        context->getPickedPhysicalDevice(),
-                                                        context->getVkSurface(),
-                                                        context->getQueueFamilyProperties());
-
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = static_cast<uint32_t>(graphicsFamilyIndex);
+        poolInfo.queueFamilyIndex = static_cast<uint32_t>(m_logicalDevice.getGraphicsFamilyIndex());
 
         if (vkCreateCommandPool(m_logicalDevice, &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS)
         {

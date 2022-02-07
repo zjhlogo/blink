@@ -41,7 +41,7 @@ blink.h
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} libfoundation libflecs librender_vulkan)
+target_link_libraries(${PROJECT_NAME} libfoundation libflecs librender_vulkan libimgui)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>

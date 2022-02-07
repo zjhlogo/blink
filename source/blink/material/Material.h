@@ -50,6 +50,7 @@ namespace blink
         ~Material();
 
         bool create(const tstring& filePath);
+        bool recreate();
         void destroy();
 
         bool loadConfigFromFile(const tstring& filePath);

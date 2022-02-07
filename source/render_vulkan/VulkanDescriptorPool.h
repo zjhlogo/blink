@@ -23,7 +23,7 @@ namespace blink
         VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice);
         ~VulkanDescriptorPool();
 
-        operator VkDescriptorPool() { return m_descriptorPool; };
+        operator VkDescriptorPool() const { return m_descriptorPool; };
 
         bool create(uint32_t count = DEFAULT_DESCRIPTOR_COUNT);
         void destroy();

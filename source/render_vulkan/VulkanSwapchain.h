@@ -26,6 +26,7 @@ namespace blink
         ~VulkanSwapchain();
 
         bool create();
+        bool recreate();
         void destroy();
 
         operator VkSwapchainKHR() const { return m_swapChain; };
@@ -37,8 +38,6 @@ namespace blink
 
         void setCurrentActivedImageIndex(uint32_t imageIndex) { m_activedImageIndex = imageIndex; };
         uint32_t getCurrentActivedImageIndex() { return m_activedImageIndex; };
-
-        bool recreateSwapChain();
 
     private:
         bool createSwapChain();

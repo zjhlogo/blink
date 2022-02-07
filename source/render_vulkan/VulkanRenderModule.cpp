@@ -109,11 +109,16 @@ namespace blink
         return true;
     }
 
-    void VulkanRenderModule::render(const RenderCb& cb)
+    VulkanRenderModule::RenderResult VulkanRenderModule::render(const RenderCb& cb)
     {
         // acquire an image and wait for it became ready to use
         uint32_t imageIndex{};
         auto result = vkAcquireNextImageKHR(*m_logicalDevice, *m_swapchain, UINT64_MAX, VK_NULL_HANDLE, *m_acquireImageFence, &imageIndex);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+        {
+            // rebuild swap chain
+            return RenderResult::Recreate;
+        }
         m_acquireImageFence->wait();
         m_acquireImageFence->reset();
 
@@ -177,6 +182,13 @@ namespace blink
         presentInfo.pImageIndices = &imageIndex;
 
         result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+        {
+            // rebuild swap chain
+            return RenderResult::Recreate;
+        }
+
+        return RenderResult::Success;
     }
 
     void VulkanRenderModule::waitIdle()

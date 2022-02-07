@@ -58,6 +58,16 @@ namespace blink
         return true;
     }
 
+    bool Material::recreate()
+    {
+        if (m_pipeline)
+        {
+            return m_pipeline->recreate();
+        }
+
+        return true;
+    }
+
     void Material::destroy()
     {
         for (auto texture : m_textures)

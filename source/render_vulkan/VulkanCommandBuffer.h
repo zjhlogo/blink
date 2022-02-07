@@ -24,7 +24,7 @@ namespace blink
         bool create();
         void destroy();
 
-        operator VkCommandBuffer() { return m_commandBuffer; };
+        operator VkCommandBuffer() const { return m_commandBuffer; };
 
         void submitCommand();
 

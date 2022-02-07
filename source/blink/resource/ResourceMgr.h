@@ -36,6 +36,7 @@ namespace blink
 
         bool initialize(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain, VulkanDescriptorPool& descriptorPool, VulkanCommandPool& commandPool);
         void terminate();
+        void recreate();
 
         Texture2d* createTexture2d(const tstring& filePath);
         void releaseTexture2d(Texture2d* texture);
@@ -48,8 +49,8 @@ namespace blink
         void releaseMaterial(Material* material);
 
     private:
-        ResourceMgr(){};
-        ~ResourceMgr(){};
+        ResourceMgr();
+        ~ResourceMgr();
 
     private:
         VulkanLogicalDevice* m_logicalDevice{};

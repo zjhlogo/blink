@@ -59,10 +59,8 @@ namespace blink
     bool VulkanLogicalDevice::createLogicalDevice()
     {
         // get best fit queue index from queue families
-        int graphicsFamilyIndex{};
-        int presentFamilyIndex{};
-        if (!VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex,
-                                                             presentFamilyIndex,
+        if (!VulkanUtils::getBestFitQueueFamilyPropertyIndex(m_graphicsFamilyIndex,
+                                                             m_presentFamilyIndex,
                                                              m_context->getPickedPhysicalDevice(),
                                                              m_context->getVkSurface(),
                                                              m_context->getQueueFamilyProperties()))
@@ -71,7 +69,7 @@ namespace blink
         }
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        std::set<int> uniqueQueueFamilies = {graphicsFamilyIndex, presentFamilyIndex};
+        std::set<int> uniqueQueueFamilies = {m_graphicsFamilyIndex, m_presentFamilyIndex};
 
         float priority = 1.0f;
         for (uint32_t queueFamilyIndex : uniqueQueueFamilies)
@@ -116,8 +114,8 @@ namespace blink
         }
 
         // retriveing queue handles
-        vkGetDeviceQueue(m_logicalDevice, graphicsFamilyIndex, 0, &m_graphicsQueue);
-        vkGetDeviceQueue(m_logicalDevice, presentFamilyIndex, 0, &m_presentQueue);
+        vkGetDeviceQueue(m_logicalDevice, m_graphicsFamilyIndex, 0, &m_graphicsQueue);
+        vkGetDeviceQueue(m_logicalDevice, m_presentFamilyIndex, 0, &m_presentQueue);
 
         const auto& properties = m_context->getProperties();
         m_minUniformBufferOffsetAlignment = properties.limits.minUniformBufferOffsetAlignment;

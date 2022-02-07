@@ -50,6 +50,7 @@ namespace blink
         operator VkPipeline() const { return m_pipeline; };
 
         bool create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe = false);
+        bool recreate();
         void destroy();
 
         bool bindDescriptorSets(VulkanCommandBuffer& commandBuffer,
@@ -93,8 +94,11 @@ namespace blink
 
         int m_numTextures{};
         std::vector<VkWriteDescriptorSet> m_writeSets;
-
         uint32 m_vertexInputMasks{};
+        tstring m_vertexShader;
+        tstring m_fragmentShader;
+        bool m_wireframe{};
+
     };
 
 } // namespace blink
