@@ -86,7 +86,7 @@ namespace blink
                                             const VkDescriptorBufferInfo& piuBufferInfo,
                                             const std::vector<VkDescriptorImageInfo>& imageInfos)
     {
-        // uniforms, textures binding
+        // uniforms binding
         auto descriptorSet = m_descriptorPool.allocateDescriptorSet(m_descriptorSetLayout);
 
         m_writeSets[PerFrameUniformIndex].dstSet = descriptorSet;
@@ -98,6 +98,7 @@ namespace blink
         m_writeSets[PerInstanceUniformIndex].dstSet = descriptorSet;
         m_writeSets[PerInstanceUniformIndex].pBufferInfo = &piuBufferInfo;
 
+        // sampler binding
         for (int i = 0; i < m_numTextures; ++i)
         {
             m_writeSets[SamplerUniformIndexBegin + i].dstSet = descriptorSet;
