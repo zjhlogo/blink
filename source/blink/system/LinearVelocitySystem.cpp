@@ -25,4 +25,9 @@ namespace blink
 
         return true;
     }
+
+    void LinearVelocitySystem::terminate(flecs::world& world)
+    {
+        //
+    }
 } // namespace blink

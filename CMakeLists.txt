@@ -16,6 +16,7 @@ add_subdirectory(source/foundation)
 add_subdirectory(source/blink)
 add_subdirectory(source/render_vulkan)
 
+add_subdirectory(example/common)
 add_subdirectory(example/hello_world)
 
 add_subdirectory(external/flecs)

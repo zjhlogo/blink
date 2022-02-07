@@ -1,6 +1,6 @@
 /**
 
-    @file      ISystemBase.h
+    @file      ILogicalSystem.h
     @brief
     @details   ~
     @author    zjhlogo
@@ -15,11 +15,11 @@
 
 namespace blink
 {
-    class ISystemBase
+    class ILogicalSystem
     {
     public:
         virtual bool initialize(flecs::world& world) = 0;
-        virtual void terminate(flecs::world& world){};
+        virtual void terminate(flecs::world& world) = 0;
     };
 
 } // namespace blink

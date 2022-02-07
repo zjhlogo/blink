@@ -25,4 +25,10 @@ namespace blink
 
         return true;
     }
+
+    void AngularVelocitySystem::terminate(flecs::world& world)
+    {
+        // 
+    }
+
 } // namespace blink

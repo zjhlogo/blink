@@ -9,13 +9,15 @@
 
 **/
 #pragma once
-#include "ISystemBase.h"
+#include "../base/ILogicalSystem.h"
 
 namespace blink
 {
-    class LinearVelocitySystem : public ISystemBase
+    class LinearVelocitySystem : public ILogicalSystem
     {
     public:
         virtual bool initialize(flecs::world& world) override;
+        virtual void terminate(flecs::world& world) override;
+
     };
 } // namespace blink

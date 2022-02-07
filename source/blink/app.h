@@ -16,10 +16,11 @@
 
 namespace blink
 {
-    class VulkanRenderModule;
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
-    class ISystemBase;
+    class VulkanRenderModule;
+    class ILogicalSystem;
+    class IRenderSystem;
 
     class IApp
     {
@@ -30,20 +31,26 @@ namespace blink
         virtual bool initialize(VulkanRenderModule& renderModule) = 0;
         virtual void terminate() = 0;
 
-        virtual void update(float dt);
-        virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub);
+        void executeLogicalSystems();
+        void executeRenderSystems(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub);
+
+        const flecs::world& getWorld() const { return m_world; };
 
     protected:
-        bool addSystem(ISystemBase* sys);
-        bool initializeSystems();
-        void terminateSystems();
-        void destroyAllSystems();
+        bool addLogicalSystem(ILogicalSystem* sys);
+        bool initializeLogicalSystems();
+        void terminateLogicalSystems();
+        void destroyLogicalSystems();
+
+        bool addRenderSystem(IRenderSystem* sys);
+        bool initializeRenderSystems();
+        void terminateRenderSystems();
+        void destroyRenderSystems();
 
     protected:
         flecs::world m_world;
-
-    private:
-        std::vector<ISystemBase*> m_systems;
+        std::vector<ILogicalSystem*> m_logicalSystems;
+        std::vector<IRenderSystem*> m_renderSystems;
     };
 
 } // namespace blink

@@ -10,17 +10,9 @@
 **/
 
 #include "app.h"
-#include "geometry/Geometry.h"
-#include "material/Material.h"
-#include "resource/ResourceMgr.h"
-#include "type/RenderTypes.h"
 
-#include <blink/component/Components.h>
-#include <blink/system/ISystemBase.h>
-#include <foundation/Log.h>
-#include <glm/gtx/quaternion.hpp>
-#include <render_vulkan/VulkanCommandBuffer.h>
-#include <render_vulkan/VulkanUniformBuffer.h>
+#include <blink/base/ILogicalSystem.h>
+#include <blink/base/IRenderSystem.h>
 
 #include <map>
 
@@ -29,167 +21,34 @@ namespace blink
     IApp::~IApp()
     {
         //
-        destroyAllSystems();
+        destroyRenderSystems();
+        destroyLogicalSystems();
     }
 
-    void IApp::update(float dt)
+    void IApp::executeLogicalSystems()
     {
         //
-        m_world.progress(dt);
+        m_world.progress(0.0f);
     }
 
-    void IApp::render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
+    void IApp::executeRenderSystems(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
     {
-        // collect light data
-        RenderDataLight rdLight{};
-        m_world.each(
-            [&rdLight](flecs::entity e, const Position& pos, const LightData& light)
-            {
-                rdLight.pos = pos.value;
-                rdLight.color = light.color;
-                rdLight.intensity = light.intensity;
-            });
-
-        // collect camera data into pfus
-        std::vector<PerFrameUniforms> pfus;
-        m_world.each(
-            [&pfus, &rdLight](flecs::entity e, const Position& pos, const Rotation& rot, const CameraData& camera)
-            {
-                // setup perframe uniforms
-                PerFrameUniforms pfu;
-
-                pfu.lightPos = rdLight.pos;
-                pfu.lightColorAndIntensity = glm::vec4(rdLight.color, rdLight.intensity);
-
-                pfu.cameraPos = pos.value;
-
-                pfu.cameraDir = glm::rotate(rot.value, glm::vec3(0.0f, 0.0f, -1.0f));
-                auto up = glm::rotate(rot.value, glm::vec3(0.0f, 1.0f, 0.0f));
-                pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, pfu.cameraPos + pfu.cameraDir, up);
-
-                pfu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pfu.matWorldToCamera)));
-                pfu.matCameraToProjection = glm::perspective(camera.fov, camera.aspect, camera.near, camera.far);
-                pfu.matWorldToProjection = pfu.matCameraToProjection * pfu.matWorldToCamera;
-                pfus.push_back(pfu);
-            });
-
-        // group render object by materials
-        std::unordered_map<Material*, std::vector<RenderDataGeo>> renderDatas;
-        m_world.each(
-            [&](flecs::entity e, const Position& pos, const Rotation& rot, const StaticModel& model)
-            {
-                auto material = model.material;
-                if (!material) return;
-
-                auto geometry = model.geometry;
-                if (!geometry) return;
-
-                PerInstanceUniforms piu;
-                piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos.value) * glm::mat4_cast(rot.value);
-                piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
-
-                auto findIt = renderDatas.find(material);
-                if (findIt != renderDatas.end())
-                {
-                    findIt->second.push_back({pos.value, rot.value, piu, geometry});
-                }
-                else
-                {
-                    std::vector<RenderDataGeo> dataLists;
-                    dataLists.push_back({pos.value, rot.value, piu, geometry});
-                    renderDatas.emplace(material, dataLists);
-                }
-            });
-
-        // group render features
-        std::map<int, RenderFeatureData> renderFeatureDatas;
-        m_world.each(
-            [&](flecs::entity e, const RenderFeature& feature)
-            {
-                auto findIt = renderFeatureDatas.find(feature.order);
-                if (findIt != renderFeatureDatas.end())
-                {
-                    LOGE("duplicate render feature order {0} <-> {1}", findIt->second.material->getId(), feature.material->getId());
-                }
-                else
-                {
-                    auto material = feature.material;
-                    if (!material) return;
-
-                    RenderFeatureData renderFeatureData{feature.order, material};
-                    renderFeatureDatas.emplace(feature.order, renderFeatureData);
-                }
-            });
-
-        // start rendering
-        for (const auto& pfu : pfus)
+        for (auto sys : m_renderSystems)
         {
-            // bind per camera uniforms
-            VkDescriptorBufferInfo pfubi{};
-            pfub.appendData(&pfu, sizeof(pfu), &pfubi);
-
-            // render mesh group by material
-            for (const auto& kvp : renderDatas)
-            {
-                Material* material = kvp.first;
-
-                material->bindPipeline(commandBuffer);
-
-                // bind per material uniform
-                VkDescriptorBufferInfo pmubi{};
-                material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
-
-                for (const auto& renderData : kvp.second)
-                {
-                    // bind per instance uniform
-                    VkDescriptorBufferInfo piubi{};
-                    piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
-
-                    // update vertex input and uniform buffers
-                    material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
-
-                    vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
-                }
-            }
-
-            // render features
-            for (const auto& kvpFeature : renderFeatureDatas)
-            {
-                Material* material = kvpFeature.second.material;
-                material->bindPipeline(commandBuffer);
-
-                // bind per material uniform
-                VkDescriptorBufferInfo pmubi{};
-                material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
-
-                for (const auto& kvp : renderDatas)
-                {
-                    for (const auto& renderData : kvp.second)
-                    {
-                        // bind per instance uniform
-                        VkDescriptorBufferInfo piubi{};
-                        piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
-
-                        // update vertex input and uniform buffers
-                        material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
-
-                        vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
-                    }
-                }
-            }
+            sys->render(commandBuffer, pfub, pmub, piub);
         }
     }
 
-    bool IApp::addSystem(ISystemBase* sys)
+    bool IApp::addLogicalSystem(ILogicalSystem* sys)
     {
-        m_systems.push_back(sys);
+        m_logicalSystems.push_back(sys);
 
         return true;
     }
 
-    bool IApp::initializeSystems()
+    bool IApp::initializeLogicalSystems()
     {
-        for (auto sys : m_systems)
+        for (auto sys : m_logicalSystems)
         {
             if (!sys->initialize(m_world)) return false;
         }
@@ -197,22 +56,57 @@ namespace blink
         return true;
     }
 
-    void IApp::terminateSystems()
+    void IApp::terminateLogicalSystems()
     {
-        for (int i = (int)m_systems.size() - 1; i >= 0; --i)
+        for (int i = (int)m_logicalSystems.size() - 1; i >= 0; --i)
         {
-            m_systems[i]->terminate(m_world);
+            m_logicalSystems[i]->terminate(m_world);
         }
     }
 
-    void IApp::destroyAllSystems()
+    void IApp::destroyLogicalSystems()
     {
-        for (int i = (int)m_systems.size() - 1; i >= 0; --i)
+        for (int i = (int)m_logicalSystems.size() - 1; i >= 0; --i)
         {
-            SAFE_DELETE(m_systems[i]);
+            SAFE_DELETE(m_logicalSystems[i]);
         }
 
-        m_systems.clear();
+        m_logicalSystems.clear();
+    }
+
+    bool IApp::addRenderSystem(IRenderSystem* sys)
+    {
+        m_renderSystems.push_back(sys);
+
+        return true;
+    }
+
+    bool IApp::initializeRenderSystems()
+    {
+        for (auto sys : m_renderSystems)
+        {
+            if (!sys->initialize()) return false;
+        }
+
+        return true;
+    }
+
+    void IApp::terminateRenderSystems()
+    {
+        for (int i = (int)m_renderSystems.size() - 1; i >= 0; --i)
+        {
+            m_renderSystems[i]->terminate();
+        }
+    }
+
+    void IApp::destroyRenderSystems()
+    {
+        for (int i = (int)m_renderSystems.size() - 1; i >= 0; --i)
+        {
+            SAFE_DELETE(m_renderSystems[i]);
+        }
+
+        m_renderSystems.clear();
     }
 
 } // namespace blink

@@ -102,3 +102,8 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 
     return true;
 }
+
+void EntityCreationSystem::terminate(flecs::world& world)
+{
+    // 
+}

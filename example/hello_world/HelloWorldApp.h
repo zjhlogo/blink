@@ -11,8 +11,9 @@
 #pragma once
 
 #include <blink/app.h>
+#include <guis/IGuiWindow.h>
 
-class HelloWorldApp : public blink::IApp
+class HelloWorldApp : public blink::IApp, public IGuiWindow
 {
 public:
     HelloWorldApp();
@@ -20,4 +21,7 @@ public:
 
     virtual bool initialize(blink::VulkanRenderModule& renderModule) override;
     virtual void terminate() override;
+
+    virtual void renderUi() override;
+
 };

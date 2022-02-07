@@ -14,8 +14,11 @@
 #include <blink/blink.h>
 #include <blink/system/AngularVelocitySystem.h>
 #include <blink/system/LinearVelocitySystem.h>
+#include <imgui/imgui.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
+#include <systems/ImguiRenderSystem.h>
+#include <systems/SceneRenderSystem.h>
 
 HelloWorldApp::HelloWorldApp()
 {
@@ -32,22 +35,43 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& logicalDevice = renderModule.getLogicalDevice();
     auto& swapchain = renderModule.getSwapchain();
 
-    //m_world.set_threads(4);
-
-    addSystem(new blink::LinearVelocitySystem());
-    addSystem(new blink::AngularVelocitySystem());
+    // add logical systems
+    // m_world.set_threads(4);
+    addLogicalSystem(new blink::LinearVelocitySystem());
+    addLogicalSystem(new blink::AngularVelocitySystem());
 
     const auto& extent = swapchain.getImageExtent();
-    addSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
+    addLogicalSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
+    if (!initializeLogicalSystems()) return false;
 
-    if (!initializeSystems()) return false;
+    // add render systems
+    addRenderSystem(new SceneRenderSystem(this));
+    auto guiRenderSystem = new ImguiRenderSystem(renderModule);
+    addRenderSystem(guiRenderSystem);
+    if (!initializeRenderSystems()) return false;
 
+    guiRenderSystem->addWindow(this);
     return true;
 }
 
 void HelloWorldApp::terminate()
 {
-    terminateSystems();
+    terminateRenderSystems();
+    terminateLogicalSystems();
+}
+
+void HelloWorldApp::renderUi()
+{
+    // 3. Show another simple window.
+    bool show_another_window = true;
+    if (show_another_window)
+    {
+        // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::Begin("Another Window", &show_another_window);
+        ImGui::Text("Hello from another window!");
+        if (ImGui::Button("Close Me")) show_another_window = false;
+        ImGui::End();
+    }
 }
 
 int main(int argc, char** argv)
