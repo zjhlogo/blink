@@ -18,8 +18,8 @@ vec3 materialColor()
 
 float D_GGX(float dotNH, float roughness)
 {
-    float alpha = roughness * roughness;
-    float alpha2 = alpha * alpha;
+    //float alpha = roughness * roughness;
+    float alpha2 = roughness * roughness;
     float denom = dotNH * dotNH * (alpha2 - 1.0) + 1.0;
     return (alpha2) / (PI * denom * denom);
 }
@@ -43,23 +43,19 @@ vec3 F_Schlick(float cosTheta, float metallic)
 vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness)
 {
     vec3 H = normalize(V + L);
-    float dotNV = clamp(dot(N, V), 0.0, 1.0);
-    float dotNL = clamp(dot(N, L), 0.0, 1.0);
-    float dotLH = clamp(dot(L, H), 0.0, 1.0);
-    float dotNH = clamp(dot(N, H), 0.0, 1.0);
+    float dotNV = clamp(dot(N, V), 0.001, 1.0);
+    float dotNL = clamp(dot(N, L), 0.001, 1.0);
+    float dotLH = clamp(dot(L, H), 0.001, 1.0);
+    float dotNH = clamp(dot(N, H), 0.001, 1.0);
 
     vec3 lightColor = pfu.lightColorAndIntensity.xyz;
     vec3 color = vec3(0.0);
 
-    if (dotNL > 0.0)
-    {
-        float rroughness = max(0.05, roughness);
-        float D = D_GGX(dotNH, roughness);
-        float G = G_SchlicksmithGGX(dotNL, dotNV, roughness);
-        vec3 F = F_Schlick(dotNV, metallic);
-        vec3 spec = D * F * G / (4.0 * dotNL * dotNV);
-        color += spec * dotNL * lightColor;
-    }
+    float D = D_GGX(dotNH, roughness);
+    float G = G_SchlicksmithGGX(dotNL, dotNV, roughness);
+    vec3 F = F_Schlick(dotNV, metallic);
+    vec3 spec = D * F * G / (4.0 * dotNL * dotNV);
+    color += spec * dotNL * lightColor;
 
     return color;
 }
@@ -68,7 +64,6 @@ void main()
 {
     vec3 N = normalize(fragNormal);
     vec3 V = normalize(pfu.cameraPos - fragWorldPos);
-
     vec3 L = normalize(pfu.lightPos - fragWorldPos);
 
     vec3 Lo = vec3(0.0);

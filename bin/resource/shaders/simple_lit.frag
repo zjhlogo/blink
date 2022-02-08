@@ -22,7 +22,7 @@ void main()
     float dotNH = clamp(dot(normalDir, halfDir), 0.0, 1.0);
 
     vec3 diffuse = texture(texSampler, fragTexCoord).xyz * dotNV;
-    vec3 specular = pfu.lightColorAndIntensity.xyz * pow(max(0.0, dotNH), pfu.lightColorAndIntensity.w);
+    vec3 specular = pfu.lightColorAndIntensity.xyz * pow(dotNH, pfu.lightColorAndIntensity.w);
 
     outColor = vec4(diffuse + specular, 1.0);
 }

@@ -44,8 +44,13 @@ namespace blink
                                const VkDescriptorBufferInfo& pmubi,
                                const VkDescriptorBufferInfo& piubi);
 
+        float getRoughness() const { return m_pmu.roughness; };
         void setRoughness(float roughness) { m_pmu.roughness = roughness; };
+
+        float getMetallic() const { return m_pmu.metallic; };
         void setMetallic(float metallic) { m_pmu.metallic = metallic; };
+
+        const glm::vec3& getColor() const { return m_pmu.color; };
         void setColor(const glm::vec3& color) { m_pmu.color = color; };
 
         VulkanPipeline& getPipeline() const { return *m_pipeline; };

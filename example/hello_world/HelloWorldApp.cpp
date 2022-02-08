@@ -67,40 +67,46 @@ void HelloWorldApp::terminate()
 
 void HelloWorldApp::renderUi()
 {
-    static float s_roughness = 0.1f;
-    static float s_metallic = 1.0f;
-    static glm::vec3 s_surfaceColor = {1.0f, 1.0f, 1.0f};
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
+    ImGui::Begin("Properties", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
 
-    static glm::vec3 s_lightColor = {1.0f, 1.0f, 1.0f};
-    static float s_intensity = 100.0f;
-
-    ImGui::Begin("Pbr Properties Window");
-
-    if (ImGui::SliderFloat("roughness", &s_roughness, 0.0f, 1.0f, "roughness = %.3f"))
+    // light property
     {
-        auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
-        material->setRoughness(s_roughness);
-    }
-    if (ImGui::SliderFloat("metallic", &s_metallic, 0.0f, 1.0f, "metallic = %.3f"))
-    {
-        auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
-        material->setMetallic(s_metallic);
-    }
-    if (ImGui::ColorEdit3("surface color", (float*)&s_surfaceColor))
-    {
-        auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
-        material->setColor(s_surfaceColor);
+        if (ImGui::CollapsingHeader("light property", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            blink::LightData lightData = *m_sys->m_light.get<blink::LightData>();
+            if (ImGui::ColorEdit3("color1", (float*)&lightData.color))
+            {
+                m_sys->m_light.set<blink::LightData>(lightData);
+            }
+            if (ImGui::SliderFloat("intensity", &lightData.intensity, 0.0f, 1000.0f, "intensity = %.3f"))
+            {
+                m_sys->m_light.set<blink::LightData>(lightData);
+            }
+        }
     }
 
-    if (ImGui::ColorEdit3("light color", (float*)&s_lightColor))
+    // material property
     {
-        const auto lightData = m_sys->m_light.get<blink::LightData>();
-        m_sys->m_light.set(blink::LightData{s_lightColor, lightData->intensity});
-    }
-    if (ImGui::SliderFloat("light intensity", &s_intensity, 0.0f, 1000.0f, "intensity = %.3f"))
-    {
-        const auto lightData = m_sys->m_light.get<blink::LightData>();
-        m_sys->m_light.set(blink::LightData{lightData->color, s_intensity});
+        if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
+            auto roughness = material->getRoughness();
+            if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
+            {
+                material->setRoughness(roughness);
+            }
+            auto metallic = material->getMetallic();
+            if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
+            {
+                material->setMetallic(metallic);
+            }
+            glm::vec3 color = material->getColor();
+            if (ImGui::ColorEdit3("color2", (float*)&color))
+            {
+                material->setColor(color);
+            }
+        }
     }
 
     ImGui::End();
