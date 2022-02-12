@@ -17,6 +17,7 @@
 #include <blink/resource/ResourceMgr.h>
 #include <blink/system/AngularVelocitySystem.h>
 #include <blink/system/LinearVelocitySystem.h>
+#include <flecs/flecs_os_api_stdcpp.h>
 #include <imgui/imgui.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
@@ -35,11 +36,14 @@ HelloWorldApp::~HelloWorldApp()
 
 bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 {
+    stdcpp_set_os_api();
+    m_world.set_threads(4);
+    m_world.set_target_fps(60.0f);
+
     auto& logicalDevice = renderModule.getLogicalDevice();
     auto& swapchain = renderModule.getSwapchain();
 
     // add logical systems
-    // m_world.set_threads(4);
     addLogicalSystem(new blink::LinearVelocitySystem());
     addLogicalSystem(new blink::AngularVelocitySystem());
 

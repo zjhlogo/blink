@@ -28,7 +28,7 @@ namespace blink
     void IApp::executeLogicalSystems()
     {
         //
-        m_world.progress(0.0f);
+        m_world.progress();
     }
 
     void IApp::executeRenderSystems(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)

@@ -47,86 +47,99 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
                                blink::VulkanUniformBuffer& piub)
 {
     const auto& world = m_app->getWorld();
+
     // collect light data
     blink::RenderDataLight rdLight{};
-    world.each(
-        [&rdLight](flecs::entity e, const blink::Position& pos, const blink::LightData& light)
-        {
-            rdLight.pos = pos.value;
-            rdLight.color = light.color;
-            rdLight.intensity = light.intensity;
-        });
+    {
+        static auto lightDataQuery = world.query_builder<const blink::Position, const blink::LightData>().build();
+        lightDataQuery.each(
+            [&rdLight](flecs::entity e, const blink::Position& pos, const blink::LightData& light)
+            {
+                rdLight.pos = pos.value;
+                rdLight.color = light.color;
+                rdLight.intensity = light.intensity;
+            });
+    }
 
     // collect camera data into pfus
     std::vector<blink::PerFrameUniforms> pfus;
-    world.each(
-        [&pfus, &rdLight](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera)
-        {
-            // setup perframe uniforms
-            blink::PerFrameUniforms pfu;
+    {
+        static auto cameraDataQuery = world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
+        cameraDataQuery.each(
+            [&pfus, &rdLight](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera)
+            {
+                // setup perframe uniforms
+                blink::PerFrameUniforms pfu;
 
-            pfu.lightPos = rdLight.pos;
-            pfu.lightColorAndIntensity = glm::vec4(rdLight.color, rdLight.intensity);
+                pfu.lightPos = rdLight.pos;
+                pfu.lightColorAndIntensity = glm::vec4(rdLight.color, rdLight.intensity);
 
-            pfu.cameraPos = pos.value;
+                pfu.cameraPos = pos.value;
 
-            pfu.cameraDir = glm::rotate(rot.value, glm::vec3(0.0f, 0.0f, -1.0f));
-            auto up = glm::rotate(rot.value, glm::vec3(0.0f, 1.0f, 0.0f));
-            pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, pfu.cameraPos + pfu.cameraDir, up);
+                pfu.cameraDir = glm::rotate(rot.value, glm::vec3(0.0f, 0.0f, -1.0f));
+                auto up = glm::rotate(rot.value, glm::vec3(0.0f, 1.0f, 0.0f));
+                pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, pfu.cameraPos + pfu.cameraDir, up);
 
-            pfu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pfu.matWorldToCamera)));
-            pfu.matCameraToProjection = glm::perspective(camera.fov, camera.aspect, camera.near, camera.far);
-            pfu.matWorldToProjection = pfu.matCameraToProjection * pfu.matWorldToCamera;
-            pfus.push_back(pfu);
-        });
+                pfu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pfu.matWorldToCamera)));
+                pfu.matCameraToProjection = glm::perspective(camera.fov, camera.aspect, camera.near, camera.far);
+                pfu.matWorldToProjection = pfu.matCameraToProjection * pfu.matWorldToCamera;
+                pfus.push_back(pfu);
+            });
+    }
 
     // group render object by materials
     std::unordered_map<blink::Material*, std::vector<blink::RenderDataGeo>> renderDatas;
-    world.each(
-        [&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::StaticModel& model)
-        {
-            auto material = model.material;
-            if (!material) return;
-
-            auto geometry = model.geometry;
-            if (!geometry) return;
-
-            blink::PerInstanceUniforms piu;
-            piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos.value) * glm::mat4_cast(rot.value);
-            piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
-
-            auto findIt = renderDatas.find(material);
-            if (findIt != renderDatas.end())
+    {
+        static auto staticModelQuery = world.query_builder<const blink::Position, const blink::Rotation, const blink::StaticModel>().build();
+        staticModelQuery.each(
+            [&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::StaticModel& model)
             {
-                findIt->second.push_back({pos.value, rot.value, piu, geometry});
-            }
-            else
-            {
-                std::vector<blink::RenderDataGeo> dataLists;
-                dataLists.push_back({pos.value, rot.value, piu, geometry});
-                renderDatas.emplace(material, dataLists);
-            }
-        });
+                auto material = model.material;
+                if (!material) return;
+
+                auto geometry = model.geometry;
+                if (!geometry) return;
+
+                blink::PerInstanceUniforms piu;
+                piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos.value) * glm::mat4_cast(rot.value);
+                piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
+
+                auto findIt = renderDatas.find(material);
+                if (findIt != renderDatas.end())
+                {
+                    findIt->second.push_back({pos.value, rot.value, piu, geometry});
+                }
+                else
+                {
+                    std::vector<blink::RenderDataGeo> dataLists;
+                    dataLists.push_back({pos.value, rot.value, piu, geometry});
+                    renderDatas.emplace(material, dataLists);
+                }
+            });
+    }
 
     // group render features
     std::map<int, blink::RenderFeatureData> renderFeatureDatas;
-    world.each(
-        [&](flecs::entity e, const blink::RenderFeature& feature)
-        {
-            auto findIt = renderFeatureDatas.find(feature.order);
-            if (findIt != renderFeatureDatas.end())
+    {
+        static auto renderFeatureQuery = world.query_builder<const blink::RenderFeature>().build();
+        renderFeatureQuery.each(
+            [&](flecs::entity e, const blink::RenderFeature& feature)
             {
-                LOGE("duplicate render feature order {0} <-> {1}", findIt->second.material->getId(), feature.material->getId());
-            }
-            else
-            {
-                auto material = feature.material;
-                if (!material) return;
+                auto findIt = renderFeatureDatas.find(feature.order);
+                if (findIt != renderFeatureDatas.end())
+                {
+                    LOGE("duplicate render feature order {0} <-> {1}", findIt->second.material->getId(), feature.material->getId());
+                }
+                else
+                {
+                    auto material = feature.material;
+                    if (!material) return;
 
-                blink::RenderFeatureData renderFeatureData{feature.order, material};
-                renderFeatureDatas.emplace(feature.order, renderFeatureData);
-            }
-        });
+                    blink::RenderFeatureData renderFeatureData{feature.order, material};
+                    renderFeatureDatas.emplace(feature.order, renderFeatureData);
+                }
+            });
+    }
 
     // start rendering
     for (const auto& pfu : pfus)

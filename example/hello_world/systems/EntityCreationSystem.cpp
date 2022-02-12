@@ -33,7 +33,7 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 
     // light
     m_light = world.entity();
-    m_light.set(blink::Position{glm::vec3(-3.0f, 4.0f, 8.0f)});
+    m_light.set(blink::Position{glm::vec3(0.0f, 0.0f, 4.0f)});
     m_light.set(blink::LightData{glm::one<glm::vec3>(), 100.0f});
 
     //// load plane

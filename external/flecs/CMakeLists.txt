@@ -6,6 +6,9 @@ project(libflecs)
 set(SOURCE_FILES
 flecs.c
 flecs.h
+flecs_os_api_stdcpp_bake_config.h
+flecs-os_api-stdcpp.cpp
+flecs_os_api_stdcpp.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

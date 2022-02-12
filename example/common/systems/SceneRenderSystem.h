@@ -7,8 +7,8 @@
  *********************************************************************/
 #pragma once
 
-#include <blink/base/IRenderSystem.h>
 #include <blink/app.h>
+#include <blink/base/IRenderSystem.h>
 
 class SceneRenderSystem : public blink::IRenderSystem
 {
@@ -25,4 +25,5 @@ public:
 
 private:
     blink::IApp* m_app{};
+
 };

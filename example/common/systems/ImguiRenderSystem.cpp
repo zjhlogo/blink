@@ -99,7 +99,7 @@ bool ImguiRenderSystem::initialize()
     {
         // Use any command queue
         logicalDevice.executeCommand(
-            [&](blink::VulkanCommandBuffer& commandBuffer)
+            [](blink::VulkanCommandBuffer& commandBuffer)
             {
                 //
                 ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);

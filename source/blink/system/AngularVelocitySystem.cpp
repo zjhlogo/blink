@@ -16,19 +16,20 @@ namespace blink
 {
     bool AngularVelocitySystem::initialize(flecs::world& world)
     {
-        world.system<Rotation&, const AngularVelocity&>().each(
-            [](flecs::entity e, Rotation& rot, const AngularVelocity& vel)
-            {
-                //
-                rot.value *= glm::quat(vel.value * e.delta_time());
-            });
+        world.system<Rotation, const AngularVelocity>("apply angular velocity")
+            .each(
+                [](flecs::entity e, Rotation& rot, const AngularVelocity& vel)
+                {
+                    //
+                    rot.value *= glm::quat(vel.value * e.delta_time());
+                });
 
         return true;
     }
 
     void AngularVelocitySystem::terminate(flecs::world& world)
     {
-        // 
+        //
     }
 
 } // namespace blink
