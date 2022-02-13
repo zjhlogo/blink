@@ -4,8 +4,6 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(libblink)
 
 set(SOURCE_FILES
-base/ILogicalSystem.h
-base/IRenderSystem.h
 component/Components.h
 geometry/builder/BoxBuilder.cpp
 geometry/builder/BoxBuilder.h
@@ -27,10 +25,6 @@ resource/IResource.cpp
 resource/IResource.h
 resource/ResourceMgr.cpp
 resource/ResourceMgr.h
-system/AngularVelocitySystem.cpp
-system/AngularVelocitySystem.h
-system/LinearVelocitySystem.cpp
-system/LinearVelocitySystem.h
 texture/Texture2d.cpp
 texture/Texture2d.h
 type/RenderTypes.h
@@ -42,7 +36,7 @@ blink.h
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} libfoundation libflecs librender_vulkan libimgui)
+target_link_libraries(${PROJECT_NAME} libcore librender_vulkan libimgui)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>

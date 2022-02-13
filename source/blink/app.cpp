@@ -11,8 +11,8 @@
 
 #include "app.h"
 
-#include <blink/base/ILogicalSystem.h>
-#include <blink/base/IRenderSystem.h>
+#include <core/base/ILogicalSystem.h>
+#include <render_vulkan/base/IRenderSystem.h>
 
 #include <map>
 

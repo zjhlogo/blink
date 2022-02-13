@@ -10,7 +10,6 @@
 **/
 #pragma once
 
-#include <flecs/flecs.h>
 #include <foundation/BaseTypesGlm.h>
 
 namespace blink

@@ -17,26 +17,6 @@ namespace blink
     class Geometry;
     class Material;
 
-    struct Position
-    {
-        glm::vec3 value;
-    };
-
-    struct Rotation
-    {
-        glm::quat value;
-    };
-
-    struct LinearVelocity
-    {
-        glm::vec3 value;
-    };
-
-    struct AngularVelocity
-    {
-        glm::vec3 value;
-    };
-
     struct StaticModel
     {
         Geometry* geometry;

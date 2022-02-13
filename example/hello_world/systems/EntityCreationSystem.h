@@ -10,7 +10,7 @@
 **/
 #pragma once
 
-#include <blink/base/ILogicalSystem.h>
+#include <core/base/ILogicalSystem.h>
 
 class EntityCreationSystem : public blink::ILogicalSystem
 {

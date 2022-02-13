@@ -9,7 +9,7 @@
 
 #include "../guis/IGuiWindow.h"
 
-#include <blink/base/IRenderSystem.h>
+#include <render_vulkan/base/IRenderSystem.h>
 #include <vulkan/vulkan.h>
 
 #include <vector>

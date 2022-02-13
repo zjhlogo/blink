@@ -13,8 +13,10 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "")
 set(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_subdirectory(source/foundation)
-add_subdirectory(source/blink)
+add_subdirectory(source/core)
+add_subdirectory(source/physics)
 add_subdirectory(source/render_vulkan)
+add_subdirectory(source/blink)
 
 add_subdirectory(example/common)
 add_subdirectory(example/hello_world)

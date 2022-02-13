@@ -8,7 +8,7 @@
 #pragma once
 
 #include <blink/app.h>
-#include <blink/base/IRenderSystem.h>
+#include <render_vulkan/base/IRenderSystem.h>
 
 class SceneRenderSystem : public blink::IRenderSystem
 {
@@ -25,5 +25,4 @@ public:
 
 private:
     blink::IApp* m_app{};
-
 };

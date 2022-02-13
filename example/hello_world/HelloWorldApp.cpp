@@ -15,8 +15,8 @@
 #include <blink/component/Components.h>
 #include <blink/material/Material.h>
 #include <blink/resource/ResourceMgr.h>
-#include <blink/system/AngularVelocitySystem.h>
-#include <blink/system/LinearVelocitySystem.h>
+#include <core/system/AngularVelocitySystem.h>
+#include <core/system/LinearVelocitySystem.h>
 #include <flecs/flecs_os_api_stdcpp.h>
 #include <imgui/imgui.h>
 #include <render_vulkan/VulkanRenderModule.h>

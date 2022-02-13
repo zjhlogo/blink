@@ -17,6 +17,7 @@
 #include <blink/geometry/builder/SphereUvBuilder.h>
 #include <blink/geometry/builder/TetrahedronBuilder.h>
 #include <blink/resource/ResourceMgr.h>
+#include <core/component/Components.h>
 
 EntityCreationSystem::EntityCreationSystem(const glm::vec2& surfaceSize)
     : m_surfaceSize(surfaceSize)

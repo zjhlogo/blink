@@ -12,6 +12,7 @@
 #include <blink/geometry/Geometry.h>
 #include <blink/material/Material.h>
 #include <blink/type/RenderTypes.h>
+#include <core/component/Components.h>
 #include <foundation/Log.h>
 #include <glm/gtx/quaternion.hpp>
 #include <render_vulkan/VulkanCommandBuffer.h>
