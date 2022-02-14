@@ -16,17 +16,9 @@ namespace blink
 {
     struct PhysicsMass
     {
-    public:
+        PhysicsMass(float m, const glm::mat3& inertiaTensor);
         bool setMass(float m);
-        float getMass() const { return m_mass; };
-        float getInverseMass() const { return m_inverseMass; };
-        const glm::mat3& getInverseInertiaTensor() const { return m_inverseInertiaTensor; };
-
-    private:
-        /**
-         * Holds the rigid body mass
-         */
-        float m_mass;
+        void setInertialTensor(const glm::mat3& inertiaTensor);
 
         /**
          * Holds the inverse of the mass of the rigid body. It is more useful to hold the inverse mass because integration is simpler,

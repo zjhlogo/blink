@@ -12,7 +12,7 @@
 
 namespace blink
 {
-	class DynamicIntegrateSystem : ILogicalSystem
+	class DynamicIntegrateSystem : public ILogicalSystem
 	{
 	public:
 		virtual bool initialize(flecs::world& world) override;

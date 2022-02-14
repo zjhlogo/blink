@@ -10,13 +10,17 @@
 
 namespace blink
 {
+    PhysicsMass::PhysicsMass(float m, const glm::mat3& inertiaTensor)
+    {
+        setMass(m);
+        setInertialTensor(inertiaTensor);
+    }
+
     bool PhysicsMass::setMass(float m)
     {
         if (m < 0.0f) return false;
 
-        m_mass = m;
-
-        if (m_mass == 0.0f)
+        if (m == 0.0f)
         {
             m_inverseMass = std::numeric_limits<float>().max();
         }
@@ -26,5 +30,11 @@ namespace blink
         }
 
         return true;
+    }
+
+    void PhysicsMass::setInertialTensor(const glm::mat3& inertiaTensor)
+    {
+        //
+        m_inverseInertiaTensor = glm::inverse(inertiaTensor);
     }
 } // namespace blink

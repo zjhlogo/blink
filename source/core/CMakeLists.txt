@@ -14,7 +14,7 @@ system/LinearVelocitySystem.h
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} libfoundation libflecs)
+target_link_libraries(${PROJECT_NAME} libfoundation libflecs libphysics)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
 	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
