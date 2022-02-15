@@ -25,7 +25,7 @@ namespace blink
          * and because in real time simulation it is more useful to have bodies with infinite mass (immovable) then zero mass (completely
          * unstable in numerical simulation).
          */
-        float m_inverseMass;
+        float inverseMass;
 
         /**
          * Holds the inverse of the body's inertia tensor. The inertia tensor provided must not be degenerate (that would mean the body had
@@ -34,7 +34,7 @@ namespace blink
          *
          * The inertia tensor, unlike the other variables that define a rigid body, is given in body space.
          */
-        glm::mat3 m_inverseInertiaTensor;
+        glm::mat3 inverseInertiaTensor;
     };
 
     struct PhysicsVelocity

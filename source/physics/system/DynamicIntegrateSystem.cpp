@@ -34,11 +34,11 @@ namespace blink
                     const PhysicsTorqueAccumulate& pta)
                 {
                     // calculate linear acceleration from force accumulate
-                    auto linearAcceleration = pfa.forceAccum * pm.getInverseMass();
+                    auto linearAcceleration = pfa.forceAccum * pm.inverseMass;
 
                     // calculate anguar acceleration from torque accumulate
                     auto matRot = glm::mat3_cast(rot.value);
-                    auto inverseInertiaTensorWorld = matRot * pm.getInverseInertiaTensor();
+                    auto inverseInertiaTensorWorld = matRot * pm.inverseInertiaTensor;
                     auto angularAcceleration = inverseInertiaTensorWorld * pta.torqueAccum;
 
                     auto deltaTime = e.delta_time();
