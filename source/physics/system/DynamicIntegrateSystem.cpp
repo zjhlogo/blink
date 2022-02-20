@@ -15,31 +15,23 @@ namespace blink
 {
     bool DynamicIntegrateSystem::initialize(flecs::world& world)
     {
-        world
-            .system<PhysicsVelocity,
-            Position,
-            Rotation,
-            const PhysicsMass,
-            const PhysicsDamping,
-            const PhysicsForceAccumulate,
-            const PhysicsTorqueAccumulate>("calculate physics velocity")
+        world.system<PhysicsVelocity, Position, Rotation, const PhysicsMass, const PhysicsDamping, const PhysicsAccumulate>("calculate physics velocity")
             .each(
                 [](flecs::entity e,
-                    PhysicsVelocity& pv,
-                    Position& pos,
-                    Rotation& rot,
-                    const PhysicsMass& pm,
-                    const PhysicsDamping& pd,
-                    const PhysicsForceAccumulate& pfa,
-                    const PhysicsTorqueAccumulate& pta)
+                   PhysicsVelocity& pv,
+                   Position& pos,
+                   Rotation& rot,
+                   const PhysicsMass& pm,
+                   const PhysicsDamping& pd,
+                   const PhysicsAccumulate& pa)
                 {
                     // calculate linear acceleration from force accumulate
-                    auto linearAcceleration = pfa.forceAccum * pm.inverseMass;
+                    auto linearAcceleration = pa.forceAccum * pm.inverseMass;
 
                     // calculate anguar acceleration from torque accumulate
                     auto matRot = glm::mat3_cast(rot.value);
                     auto inverseInertiaTensorWorld = matRot * pm.inverseInertiaTensor;
-                    auto angularAcceleration = inverseInertiaTensorWorld * pta.torqueAccum;
+                    auto angularAcceleration = inverseInertiaTensorWorld * pa.torqueAccum;
 
                     auto deltaTime = e.delta_time();
 

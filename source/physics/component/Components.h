@@ -65,19 +65,16 @@ namespace blink
         float angularDamping;
     };
 
-    /**
-     * Holds the accumulated force to be applied at the next integration step. this component value will be reset at the end of every frame
-     */
-    struct PhysicsForceAccumulate
+    struct PhysicsAccumulate
     {
+        /**
+         * Holds the accumulated force to be applied at the next integration step. this component value will be reset at the end of every frame
+         */
         glm::vec3 forceAccum;
-    };
 
-    /**
-     * Holds the accumulated torque to be applied at the next integration step. this component value will be reset at the end of every frame
-     */
-    struct PhysicsTorqueAccumulate
-    {
+        /**
+         * Holds the accumulated torque to be applied at the next integration step. this component value will be reset at the end of every frame
+         */
         glm::vec3 torqueAccum;
     };
 

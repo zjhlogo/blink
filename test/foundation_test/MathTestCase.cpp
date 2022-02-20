@@ -35,10 +35,10 @@ void assertMatrixEqual(const glm::mat4& mat1, const glm::mat4& mat2)
 
 TEST(MathTestCase, matrixTest)
 {
-    glm::mat4 matIdentity = blink::MAT4_IDENTITY;
-    glm::mat4 matScale = glm::scale(blink::MAT4_IDENTITY, glm::vec3(4.0f, 5.0f, 6.0f));
+    glm::mat4 matIdentity = glm::identity<glm::mat4>();
+    glm::mat4 matScale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(4.0f, 5.0f, 6.0f));
     glm::mat4 matRotation = glm::eulerAngleXYZ(1.0f, 2.0f, 3.0f);
-    glm::mat4 matTranslation = glm::translate(blink::MAT4_IDENTITY, glm::vec3(7.0f, 8.0f, 9.0f));
+    glm::mat4 matTranslation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(7.0f, 8.0f, 9.0f));
     glm::mat4 matSR = matRotation * matScale;
     glm::mat4 matRT = matTranslation * matRotation;
     glm::mat4 matSRT = matTranslation * matRotation * matScale;

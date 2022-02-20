@@ -10,6 +10,7 @@
 **/
 #include "HelloWorldApp.h"
 #include "systems/EntityCreationSystem.h"
+#include "systems/PrefabInitializeSystem.h"
 
 #include <blink/blink.h>
 #include <blink/component/Components.h>
@@ -19,7 +20,9 @@
 #include <core/system/LinearVelocitySystem.h>
 #include <flecs/flecs_os_api_stdcpp.h>
 #include <imgui/imgui.h>
+#include <physics/system/BeginPhysicsSimulationSystem.h>
 #include <physics/system/DynamicIntegrateSystem.h>
+#include <physics/system/EndPhysicsSimulationSystem.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
 #include <systems/ImguiRenderSystem.h>
@@ -45,12 +48,14 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& swapchain = renderModule.getSwapchain();
 
     // add logical systems
-    //addLogicalSystem(new blink::LinearVelocitySystem());
-    //addLogicalSystem(new blink::AngularVelocitySystem());
+    addLogicalSystem(new blink::BeginPhysicsSimulationSystem());
     addLogicalSystem(new blink::DynamicIntegrateSystem());
+    addLogicalSystem(new blink::EndPhysicsSimulationSystem());
 
+    auto prefabSystem = new PrefabInitializeSystem();
+    addLogicalSystem(prefabSystem);
     const auto& extent = swapchain.getImageExtent();
-    m_sys = new EntityCreationSystem(glm::vec2(extent.width, extent.height));
+    m_sys = new EntityCreationSystem(prefabSystem, glm::vec2(extent.width, extent.height));
     addLogicalSystem(m_sys);
     if (!initializeLogicalSystems()) return false;
 

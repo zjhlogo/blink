@@ -12,10 +12,12 @@
 
 #include <core/base/ILogicalSystem.h>
 
+class PrefabInitializeSystem;
+
 class EntityCreationSystem : public blink::ILogicalSystem
 {
 public:
-    EntityCreationSystem(const glm::vec2& surfaceSize);
+    EntityCreationSystem(PrefabInitializeSystem* prefabSystem, const glm::vec2& surfaceSize);
 
     virtual bool initialize(flecs::world& world) override;
     virtual void terminate(flecs::world& world) override;
@@ -28,6 +30,7 @@ public:
     flecs::entity m_tetrahedron;
 
 private:
+    PrefabInitializeSystem* m_prefabSystem;
     glm::vec2 m_surfaceSize;
 
 };

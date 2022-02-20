@@ -6,6 +6,8 @@ project(hello_world)
 set(SOURCE_FILES
 systems/EntityCreationSystem.cpp
 systems/EntityCreationSystem.h
+systems/PrefabInitializeSystem.cpp
+systems/PrefabInitializeSystem.h
 HelloWorldApp.cpp
 HelloWorldApp.h
 )

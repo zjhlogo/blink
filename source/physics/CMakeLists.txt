@@ -6,8 +6,12 @@ project(libphysics)
 set(SOURCE_FILES
 component/Components.cpp
 component/Components.h
+system/BeginPhysicsSimulationSystem.cpp
+system/BeginPhysicsSimulationSystem.h
 system/DynamicIntegrateSystem.cpp
 system/DynamicIntegrateSystem.h
+system/EndPhysicsSimulationSystem.cpp
+system/EndPhysicsSimulationSystem.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
