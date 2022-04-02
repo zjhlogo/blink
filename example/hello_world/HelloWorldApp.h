@@ -13,8 +13,6 @@
 #include <blink/app.h>
 #include <guis/IGuiWindow.h>
 
-class EntityCreationSystem;
-
 class HelloWorldApp : public blink::IApp, public IGuiWindow
 {
 public:
@@ -25,8 +23,5 @@ public:
     virtual void terminate() override;
 
     virtual void renderUi() override;
-
-private:
-    EntityCreationSystem* m_sys{};
 
 };

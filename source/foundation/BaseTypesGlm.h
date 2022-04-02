@@ -20,4 +20,7 @@ namespace blink
     extern const glm::vec3 VEC3_NY;
     extern const glm::vec3 VEC3_PZ;
     extern const glm::vec3 VEC3_NZ;
+
+    glm::vec3 randomVec3Normalized();
+
 } // namespace blink

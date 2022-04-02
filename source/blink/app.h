@@ -13,6 +13,8 @@
 #include <flecs/flecs.h>
 
 #include <vector>
+#include <unordered_map>
+#include <typeindex>
 
 namespace blink
 {
@@ -38,6 +40,8 @@ namespace blink
 
     protected:
         bool addLogicalSystem(ILogicalSystem* sys);
+        template <typename T> T* getLogicalSystem();
+
         bool initializeLogicalSystems();
         void terminateLogicalSystems();
         void destroyLogicalSystems();
@@ -50,7 +54,18 @@ namespace blink
     protected:
         flecs::world m_world;
         std::vector<ILogicalSystem*> m_logicalSystems;
+        std::unordered_map<std::type_index, ILogicalSystem*> m_logicalSytemsTypeMap;
+
         std::vector<IRenderSystem*> m_renderSystems;
     };
+
+    template<typename T>
+    inline T* IApp::getLogicalSystem()
+    {
+        auto it = m_logicalSytemsTypeMap.find(typeid(T));
+        if (it == m_logicalSytemsTypeMap.end()) return nullptr;
+
+        return dynamic_cast<T*>(it->second);
+    }
 
 } // namespace blink

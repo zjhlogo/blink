@@ -20,6 +20,10 @@ namespace blink
     public:
         virtual bool initialize(flecs::world& world) = 0;
         virtual void terminate(flecs::world& world) = 0;
+
+        virtual void framePreUpdate(flecs::world& world) {};
+        virtual void framePostUpdate(flecs::world& world) {};
+
     };
 
 } // namespace blink

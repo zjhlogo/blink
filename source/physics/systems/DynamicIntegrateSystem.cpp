@@ -15,7 +15,9 @@ namespace blink
 {
     bool DynamicIntegrateSystem::initialize(flecs::world& world)
     {
-        world.system<PhysicsVelocity, Position, Rotation, const PhysicsMass, const PhysicsDamping, const PhysicsAccumulate>("calculate physics velocity")
+        world
+            .system<PhysicsVelocity, Position, Rotation, const PhysicsMass, const PhysicsDamping, const PhysicsAccumulate>(
+                "calculate physics velocity")
             .each(
                 [](flecs::entity e,
                    PhysicsVelocity& pv,

@@ -10,6 +10,7 @@
 **/
 #pragma once
 
+#include <blink/components/Components.h>
 #include <core/base/ILogicalSystem.h>
 
 class PrefabInitializeSystem;
@@ -22,15 +23,21 @@ public:
     virtual bool initialize(flecs::world& world) override;
     virtual void terminate(flecs::world& world) override;
 
-public:
-    flecs::entity m_camera;
-    flecs::entity m_light;
-    flecs::entity m_box;
-    flecs::entity m_sphere;
-    flecs::entity m_tetrahedron;
+    virtual void framePreUpdate(flecs::world& world) override;
+
+    void renderLightPropertyUi();
+    void renderMaterialPropertyUi();
 
 private:
     PrefabInitializeSystem* m_prefabSystem;
     glm::vec2 m_surfaceSize;
 
+    blink::LightData m_lightData{glm::one<glm::vec3>(), 100.0f};
+    bool m_lightDataDirty{};
+
+    flecs::entity m_camera;
+    flecs::entity m_light;
+    flecs::entity m_box;
+    flecs::entity m_sphere;
+    flecs::entity m_tetrahedron;
 };

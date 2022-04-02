@@ -17,8 +17,10 @@
 #include <blink/geometries/builder/PlaneBuilder.h>
 #include <blink/geometries/builder/SphereUvBuilder.h>
 #include <blink/geometries/builder/TetrahedronBuilder.h>
+#include <blink/materials/Material.h>
 #include <blink/resources/ResourceMgr.h>
 #include <core/components/Components.h>
+#include <imgui/imgui.h>
 #include <physics/components/Components.h>
 
 EntityCreationSystem::EntityCreationSystem(PrefabInitializeSystem* prefabSystem, const glm::vec2& surfaceSize)
@@ -38,7 +40,7 @@ bool EntityCreationSystem::initialize(flecs::world& world)
     // light
     m_light = world.entity();
     m_light.set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)});
-    m_light.set<blink::LightData>({glm::one<glm::vec3>(), 100.0f});
+    m_light.set<blink::LightData>(m_lightData);
 
     //// load plane
     //{
@@ -61,42 +63,37 @@ bool EntityCreationSystem::initialize(flecs::world& world)
     //    .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry("resource/monkey.gltf"),
     //                              blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl")});
 
-    //// load box
-    //{
-    //    m_box = world.entity();
-    //    m_box.set<blink::Position{glm::vec3(-1.0f, 0.0f, 0.0f)});
-    //    m_box.set<blink::Rotation{glm::identity<glm::quat>()});
-    //    m_box.set<blink::AngularVelocity{glm::vec3(0.0f, glm::radians(80.0f), 0.0f)});
+    // load box
+    {
+        m_box = world.entity().is_a(m_prefabSystem->prefabRigidBody);
+        m_box.set<blink::Position>({glm::vec3(-1.5f, 0.0f, 0.0f)});
 
-    //    blink::BoxBuilder builder;
-    //    auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
-    //    auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mtl");
-    //    m_box.set<blink::StaticModel{geometry, material});
-    //}
+        blink::BoxBuilder builder;
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mtl");
+        m_box.set<blink::StaticModel>({geometry, material});
+    }
 
     // load sphere
     {
         m_sphere = world.entity().is_a(m_prefabSystem->prefabRigidBody);
-        //m_sphere.set<blink::PhysicsAccumulate>({glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.5f, 1.0f, 3.0f)});
-        blink::BoxBuilder builder;
-        builder.size(0.5f, 0.5f, 0.5f);
+
+        blink::SphereUvBuilder builder;
         auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
         auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/pbr_lit.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
     }
 
-    //// load tetrahedron
-    //{
-    //    m_tetrahedron = world.entity();
-    //    m_tetrahedron.set<blink::Position>({glm::vec3(1.0f, 0.0f, 0.0f)});
-    //    m_tetrahedron.set<blink::Rotation>({glm::identity<glm::quat>()});
-    //    m_tetrahedron.set<blink::AngularVelocity>({glm::vec3(0.0f, glm::radians(60.0f), 0.0f)});
+    // load tetrahedron
+    {
+        m_tetrahedron = world.entity().is_a(m_prefabSystem->prefabRigidBody);
+        m_tetrahedron.set<blink::Position>({glm::vec3(1.5f, 0.0f, 0.0f)});
 
-    //    blink::TetrahedronBuilder builder;
-    //    auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
-    //    auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
-    //    m_tetrahedron.set<blink::StaticModel>({geometry, material});
-    //}
+        blink::TetrahedronBuilder builder;
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
+        m_tetrahedron.set<blink::StaticModel>({geometry, material});
+    }
 
     // auto e2 = world.entity();
     // e2.set<blink::Position>({glm::vec3(0.5f, 0.0f, 0.0f)});
@@ -111,4 +108,51 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 void EntityCreationSystem::terminate(flecs::world& world)
 {
     //
+}
+
+void EntityCreationSystem::framePreUpdate(flecs::world& world)
+{
+    if (m_lightDataDirty)
+    {
+        m_lightDataDirty = false;
+        m_light.set<blink::LightData>(m_lightData);
+    }
+}
+
+void EntityCreationSystem::renderLightPropertyUi()
+{
+    if (ImGui::CollapsingHeader("light property", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        if (ImGui::ColorEdit3("color1", (float*)&m_lightData.color))
+        {
+            m_lightDataDirty = true;
+        }
+        if (ImGui::SliderFloat("intensity", &m_lightData.intensity, 0.0f, 1000.0f, "intensity = %.3f"))
+        {
+            m_lightDataDirty = true;
+        }
+    }
+}
+
+void EntityCreationSystem::renderMaterialPropertyUi()
+{
+    if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        blink::Material* material = m_sphere.get<blink::StaticModel>()->material;
+        auto roughness = material->getRoughness();
+        if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
+        {
+            material->setRoughness(roughness);
+        }
+        auto metallic = material->getMetallic();
+        if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
+        {
+            material->setMetallic(metallic);
+        }
+        glm::vec3 color = material->getColor();
+        if (ImGui::ColorEdit3("color2", (float*)&color))
+        {
+            material->setColor(color);
+        }
+    }
 }

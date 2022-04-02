@@ -27,8 +27,19 @@ namespace blink
 
     void IApp::executeLogicalSystems()
     {
+        for (auto sys : m_logicalSystems)
+        {
+            sys->framePreUpdate(m_world);
+        }
+
         //
         m_world.progress();
+
+
+        for (auto sys : m_logicalSystems)
+        {
+            sys->framePostUpdate(m_world);
+        }
     }
 
     void IApp::executeRenderSystems(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
@@ -41,8 +52,10 @@ namespace blink
 
     bool IApp::addLogicalSystem(ILogicalSystem* sys)
     {
-        m_logicalSystems.push_back(sys);
+        std::type_index typeIndex = typeid(*sys);
+        m_logicalSytemsTypeMap.emplace(typeIndex, sys);
 
+        m_logicalSystems.push_back(sys);
         return true;
     }
 

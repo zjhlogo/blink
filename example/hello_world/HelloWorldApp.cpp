@@ -11,6 +11,7 @@
 #include "HelloWorldApp.h"
 #include "systems/EntityCreationSystem.h"
 #include "systems/PrefabInitializeSystem.h"
+#include "systems/UserCommandSystem.h"
 
 #include <blink/blink.h>
 #include <blink/components/Components.h>
@@ -48,15 +49,23 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     auto& swapchain = renderModule.getSwapchain();
 
     // add logical systems
+
+    // physics systems
     addLogicalSystem(new blink::BeginPhysicsSimulationSystem());
     addLogicalSystem(new blink::DynamicIntegrateSystem());
     addLogicalSystem(new blink::EndPhysicsSimulationSystem());
 
+    // prefab system
     auto prefabSystem = new PrefabInitializeSystem();
     addLogicalSystem(prefabSystem);
+
+    // entity creation system
     const auto& extent = swapchain.getImageExtent();
-    m_sys = new EntityCreationSystem(prefabSystem, glm::vec2(extent.width, extent.height));
-    addLogicalSystem(m_sys);
+    addLogicalSystem(new EntityCreationSystem(prefabSystem, glm::vec2(extent.width, extent.height)));
+
+    // add user command system
+    addLogicalSystem(new UserCommandSystem());
+
     if (!initializeLogicalSystems()) return false;
 
     // add render systems
@@ -78,47 +87,22 @@ void HelloWorldApp::terminate()
 
 void HelloWorldApp::renderUi()
 {
+    auto* entityCreation = getLogicalSystem<EntityCreationSystem>();
+    auto* userCommand = getLogicalSystem<UserCommandSystem>();
+
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
-    ImGui::Begin("Properties", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Properties",
+                 nullptr,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
 
     // light property
-    {
-        if (ImGui::CollapsingHeader("light property", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            blink::LightData lightData = *m_sys->m_light.get<blink::LightData>();
-            if (ImGui::ColorEdit3("color1", (float*)&lightData.color))
-            {
-                m_sys->m_light.set<blink::LightData>(lightData);
-            }
-            if (ImGui::SliderFloat("intensity", &lightData.intensity, 0.0f, 1000.0f, "intensity = %.3f"))
-            {
-                m_sys->m_light.set<blink::LightData>(lightData);
-            }
-        }
-    }
+    entityCreation->renderLightPropertyUi();
 
     // material property
-    {
-        if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            auto material = m_sys->m_sphere.get<blink::StaticModel>()->material;
-            auto roughness = material->getRoughness();
-            if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
-            {
-                material->setRoughness(roughness);
-            }
-            auto metallic = material->getMetallic();
-            if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
-            {
-                material->setMetallic(metallic);
-            }
-            glm::vec3 color = material->getColor();
-            if (ImGui::ColorEdit3("color2", (float*)&color))
-            {
-                material->setColor(color);
-            }
-        }
-    }
+    entityCreation->renderMaterialPropertyUi();
+
+    // user input
+    userCommand->renderUi();
 
     ImGui::End();
 }
