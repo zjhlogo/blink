@@ -8,11 +8,11 @@
 
 #include "SceneRenderSystem.h"
 
-#include <blink/component/Components.h>
-#include <blink/geometry/Geometry.h>
-#include <blink/material/Material.h>
+#include <blink/components/Components.h>
+#include <blink/geometries/Geometry.h>
+#include <blink/materials/Material.h>
 #include <blink/type/RenderTypes.h>
-#include <core/component/Components.h>
+#include <core/components/Components.h>
 #include <foundation/Log.h>
 #include <glm/gtx/quaternion.hpp>
 #include <render_vulkan/VulkanCommandBuffer.h>

@@ -7,9 +7,9 @@
  * \date   2/13 2022
  *********************************************************************/
 #include "DynamicIntegrateSystem.h"
-#include "../component/Components.h"
+#include "../components/Components.h"
 
-#include <core/component/Components.h>
+#include <core/components/Components.h>
 
 namespace blink
 {

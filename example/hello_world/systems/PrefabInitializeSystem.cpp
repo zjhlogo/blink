@@ -8,8 +8,8 @@
  *********************************************************************/
 #include "PrefabInitializeSystem.h"
 
-#include <core/component/Components.h>
-#include <physics/component/Components.h>
+#include <core/components/Components.h>
+#include <physics/components/Components.h>
 
 PrefabInitializeSystem::PrefabInitializeSystem()
 {

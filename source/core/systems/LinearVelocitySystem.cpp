@@ -10,7 +10,7 @@
 **/
 
 #include "LinearVelocitySystem.h"
-#include "../component/Components.h"
+#include "../components/Components.h"
 
 namespace blink
 {

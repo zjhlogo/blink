@@ -4,14 +4,14 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(libphysics)
 
 set(SOURCE_FILES
-component/Components.cpp
-component/Components.h
-system/BeginPhysicsSimulationSystem.cpp
-system/BeginPhysicsSimulationSystem.h
-system/DynamicIntegrateSystem.cpp
-system/DynamicIntegrateSystem.h
-system/EndPhysicsSimulationSystem.cpp
-system/EndPhysicsSimulationSystem.h
+components/Components.cpp
+components/Components.h
+systems/BeginPhysicsSimulationSystem.cpp
+systems/BeginPhysicsSimulationSystem.h
+systems/DynamicIntegrateSystem.cpp
+systems/DynamicIntegrateSystem.h
+systems/EndPhysicsSimulationSystem.cpp
+systems/EndPhysicsSimulationSystem.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

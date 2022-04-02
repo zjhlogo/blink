@@ -10,9 +10,9 @@
 **/
 
 #include "Material.h"
-#include "../geometry/Geometry.h"
-#include "../resource/ResourceMgr.h"
-#include "../texture/Texture2d.h"
+#include "../geometries/Geometry.h"
+#include "../resources/ResourceMgr.h"
+#include "../textures/Texture2d.h"
 
 #include <foundation/File.h>
 #include <foundation/Log.h>

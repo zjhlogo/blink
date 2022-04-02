@@ -10,7 +10,7 @@
 **/
 
 #include "AngularVelocitySystem.h"
-#include "../component/Components.h"
+#include "../components/Components.h"
 
 namespace blink
 {

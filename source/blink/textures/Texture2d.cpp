@@ -11,7 +11,7 @@
 
 #include "Texture2d.h"
 
-#include <blink/resource/ResourceMgr.h>
+#include <blink/resources/ResourceMgr.h>
 #include <render_vulkan/VulkanTexture.h>
 
 namespace blink

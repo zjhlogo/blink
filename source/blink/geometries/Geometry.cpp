@@ -11,7 +11,7 @@
 
 #include "Geometry.h"
 
-#include <blink/resource/ResourceMgr.h>
+#include <blink/resources/ResourceMgr.h>
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanPipeline.h>
 

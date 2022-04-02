@@ -5,11 +5,11 @@ project(libcore)
 
 set(SOURCE_FILES
 base/ILogicalSystem.h
-component/Components.h
-system/AngularVelocitySystem.cpp
-system/AngularVelocitySystem.h
-system/LinearVelocitySystem.cpp
-system/LinearVelocitySystem.h
+components/Components.h
+systems/AngularVelocitySystem.cpp
+systems/AngularVelocitySystem.h
+systems/LinearVelocitySystem.cpp
+systems/LinearVelocitySystem.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

@@ -13,16 +13,16 @@
 #include "systems/PrefabInitializeSystem.h"
 
 #include <blink/blink.h>
-#include <blink/component/Components.h>
-#include <blink/material/Material.h>
-#include <blink/resource/ResourceMgr.h>
-#include <core/system/AngularVelocitySystem.h>
-#include <core/system/LinearVelocitySystem.h>
+#include <blink/components/Components.h>
+#include <blink/materials/Material.h>
+#include <blink/resources/ResourceMgr.h>
+#include <core/systems/AngularVelocitySystem.h>
+#include <core/systems/LinearVelocitySystem.h>
 #include <flecs/flecs_os_api_stdcpp.h>
 #include <imgui/imgui.h>
-#include <physics/system/BeginPhysicsSimulationSystem.h>
-#include <physics/system/DynamicIntegrateSystem.h>
-#include <physics/system/EndPhysicsSimulationSystem.h>
+#include <physics/systems/BeginPhysicsSimulationSystem.h>
+#include <physics/systems/DynamicIntegrateSystem.h>
+#include <physics/systems/EndPhysicsSimulationSystem.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
 #include <systems/ImguiRenderSystem.h>

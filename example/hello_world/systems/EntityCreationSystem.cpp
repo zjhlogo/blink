@@ -12,14 +12,14 @@
 #include "EntityCreationSystem.h"
 #include "PrefabInitializeSystem.h"
 
-#include <blink/component/Components.h>
-#include <blink/geometry/builder/BoxBuilder.h>
-#include <blink/geometry/builder/PlaneBuilder.h>
-#include <blink/geometry/builder/SphereUvBuilder.h>
-#include <blink/geometry/builder/TetrahedronBuilder.h>
-#include <blink/resource/ResourceMgr.h>
-#include <core/component/Components.h>
-#include <physics/component/Components.h>
+#include <blink/components/Components.h>
+#include <blink/geometries/builder/BoxBuilder.h>
+#include <blink/geometries/builder/PlaneBuilder.h>
+#include <blink/geometries/builder/SphereUvBuilder.h>
+#include <blink/geometries/builder/TetrahedronBuilder.h>
+#include <blink/resources/ResourceMgr.h>
+#include <core/components/Components.h>
+#include <physics/components/Components.h>
 
 EntityCreationSystem::EntityCreationSystem(PrefabInitializeSystem* prefabSystem, const glm::vec2& surfaceSize)
     : m_prefabSystem(prefabSystem)
@@ -77,7 +77,7 @@ bool EntityCreationSystem::initialize(flecs::world& world)
     // load sphere
     {
         m_sphere = world.entity().is_a(m_prefabSystem->prefabRigidBody);
-        m_sphere.set<blink::PhysicsAccumulate>({glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.5f, 1.0f, 3.0f)});
+        //m_sphere.set<blink::PhysicsAccumulate>({glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.5f, 1.0f, 3.0f)});
         blink::BoxBuilder builder;
         builder.size(0.5f, 0.5f, 0.5f);
         auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);

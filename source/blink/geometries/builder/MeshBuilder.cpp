@@ -10,7 +10,7 @@
 **/
 
 #include "MeshBuilder.h"
-#include "../../resource/ResourceMgr.h"
+#include "../../resources/ResourceMgr.h"
 
 #include <foundation/File.h>
 #include <foundation/Log.h>

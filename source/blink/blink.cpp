@@ -10,7 +10,7 @@
 **/
 
 #include "blink.h"
-#include "resource/ResourceMgr.h"
+#include "resources/ResourceMgr.h"
 
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>

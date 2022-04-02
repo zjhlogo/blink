@@ -10,7 +10,7 @@
 **/
 #pragma once
 
-#include "../resource/IResource.h"
+#include "../resources/IResource.h"
 
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>

@@ -9,7 +9,7 @@
 
 **/
 #pragma once
-#include "../resource/IResource.h"
+#include "../resources/IResource.h"
 
 namespace blink
 {
