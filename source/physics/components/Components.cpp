@@ -8,8 +8,16 @@
  *********************************************************************/
 #include "Components.h"
 
+#include <foundation/BaseTypesGlm.h>
+
 namespace blink
 {
+    PhysicsMass::PhysicsMass()
+    {
+        setMass(1.0f);
+        setInertialTensor(glm::identity<glm::mat3>());
+    }
+
     PhysicsMass::PhysicsMass(float m, const glm::mat3& inertiaTensor)
     {
         setMass(m);

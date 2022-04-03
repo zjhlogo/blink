@@ -16,6 +16,7 @@ namespace blink
 {
     struct PhysicsMass
     {
+        PhysicsMass();
         PhysicsMass(float m, const glm::mat3& inertiaTensor);
         bool setMass(float m);
         void setInertialTensor(const glm::mat3& inertiaTensor);

@@ -70,7 +70,7 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 
         blink::BoxBuilder builder;
         auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
-        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/unlit.mtl");
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
         m_box.set<blink::StaticModel>({geometry, material});
     }
 
@@ -80,7 +80,7 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 
         blink::SphereUvBuilder builder;
         auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
-        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/pbr_lit.mtl");
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
     }
 

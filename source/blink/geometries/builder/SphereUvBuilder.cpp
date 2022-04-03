@@ -31,27 +31,31 @@ namespace blink
 
     SphereUvBuilder& SphereUvBuilder::ringAndSection(uint16 rings, uint16 sections)
     {
-        m_segments.x = rings < 3 ? 3 : rings;
-        m_segments.y = sections < 3 ? 3 : sections;
+        m_rings = rings < 3 ? 3 : rings;
+        m_sections = sections < 3 ? 3 : sections;
         return *this;
     }
 
-    tstring SphereUvBuilder::getUniqueId() const { return fmt::format("sphereuv_{0}_{1}_{2}", m_center, m_radius, m_segments); }
+    tstring SphereUvBuilder::getUniqueId() const
+    {
+        //
+        return fmt::format("sphereuv_{0}_{1}_{2}_{3}", m_center, m_radius, m_rings, m_sections);
+    }
 
     bool SphereUvBuilder::build(std::vector<glm::vec3>& positionsOut,
                                 std::vector<uint16>& indicesOut,
                                 std::vector<glm::vec3>* normalsOut,
                                 std::vector<glm::vec2>* uvsOut) const
     {
-        float const R = 1.0f / (m_segments.x - 1);
-        float const S = 1.0f / m_segments.y;
+        float const R = 1.0f / (m_rings - 1);
+        float const S = 1.0f / m_sections;
 
         // calculate the vertex position
         uint16 startIndex = static_cast<uint16>(positionsOut.size());
-        for (uint16 r = 0; r < m_segments.x; ++r)
+        for (uint16 r = 0; r < m_rings; ++r)
         {
             float const y = sin(-glm::half_pi<float>() + glm::pi<float>() * r * R);
-            for (uint16 s = 0; s < m_segments.y + 1; ++s)
+            for (uint16 s = 0; s <= m_sections; ++s)
             {
                 float const x = sin(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
                 float const z = cos(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
@@ -63,12 +67,12 @@ namespace blink
         }
 
         // setup face index
-        for (uint16 r = 0; r < m_segments.x; ++r)
+        for (uint16 r = 0; r < m_rings; ++r)
         {
-            int prevRingIndex = r * (m_segments.y + 1);
-            int currRingIndex = prevRingIndex + m_segments.y + 1;
+            int prevRingIndex = r * (m_rings + 1);
+            int currRingIndex = prevRingIndex + m_sections + 1;
 
-            for (uint16 s = 0; s < m_segments.y; ++s)
+            for (uint16 s = 0; s < m_sections; ++s)
             {
                 indicesOut.push_back(currRingIndex + s);
                 indicesOut.push_back(prevRingIndex + s);

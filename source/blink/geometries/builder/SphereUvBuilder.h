@@ -30,6 +30,7 @@ namespace blink
     private:
         glm::vec3 m_center{};
         float m_radius{0.5f};
-        glm::u16vec2 m_segments{10, 10};
+        uint16 m_rings{15};
+        uint16 m_sections{15};
     };
 } // namespace blink

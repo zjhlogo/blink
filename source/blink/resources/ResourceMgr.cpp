@@ -10,11 +10,11 @@
 **/
 
 #include "ResourceMgr.h"
-#include "../geometry/Geometry.h"
-#include "../geometry/builder/IGeometryBuilder.h"
-#include "../geometry/builder/MeshBuilder.h"
-#include "../material/Material.h"
-#include "../texture/Texture2d.h"
+#include "../geometries/Geometry.h"
+#include "../geometries/builder/IGeometryBuilder.h"
+#include "../geometries/builder/MeshBuilder.h"
+#include "../materials/Material.h"
+#include "../textures/Texture2d.h"
 
 #include <render_vulkan/VulkanCommandPool.h>
 #include <render_vulkan/VulkanDescriptorPool.h>

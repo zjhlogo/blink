@@ -29,7 +29,11 @@ namespace blink
         return *this;
     }
 
-    tstring TetrahedronBuilder::getUniqueId() const { return fmt::format("tetrahedron_{0}_{1}", m_center, m_radius); }
+    tstring TetrahedronBuilder::getUniqueId() const
+    {
+        //
+        return fmt::format("tetrahedron_{0}_{1}", m_center, m_radius);
+    }
 
     bool TetrahedronBuilder::build(std::vector<glm::vec3>& positionsOut,
                                    std::vector<uint16>& indicesOut,
@@ -37,10 +41,10 @@ namespace blink
                                    std::vector<glm::vec2>* uvsOut) const
     {
         // build vertex
-        glm::vec3 p0(0.0f, m_radius, 0.0f);
-        glm::vec3 p2(0.0f, -0.33333f * m_radius, -sqrtf(0.88888f * m_radius * m_radius));
-        glm::vec3 p1 = glm::rotate(glm::angleAxis(glm::radians(120.0f), glm::vec3(0.0f, 1.0f, 0.0f)), p2);
-        glm::vec3 p3 = glm::rotate(glm::angleAxis(glm::radians(-120.0f), glm::vec3(0.0f, 1.0f, 0.0f)), p2);
+        glm::vec3 p0(m_radius, 0.0f, -m_radius / sqrtf(2.0f));
+        glm::vec3 p2(-m_radius, 0.0f, -m_radius / sqrtf(2.0f));
+        glm::vec3 p1(0.0f, -m_radius, m_radius / sqrtf(2.0f));
+        glm::vec3 p3(0.0f, m_radius, m_radius / sqrtf(2.0f));
 
         uint16 startIndex = static_cast<uint16>(positionsOut.size());
         positionsOut.push_back(p0 + m_center);
