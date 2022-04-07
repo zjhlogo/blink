@@ -115,7 +115,7 @@ namespace blink
         }
     }
 
-    Geometry* ResourceMgr::createGeometry(const IGeometryBuilder& builder)
+    Geometry* ResourceMgr::createGeometry(const IGeometryBuilder& builder, bool calcInertiaTensor)
     {
         auto uniqueId = builder.getUniqueId();
 
@@ -137,7 +137,7 @@ namespace blink
         }
 
         auto geometry = new Geometry(*m_logicalDevice);
-        if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
+        if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0, calcInertiaTensor))
         {
             SAFE_DELETE(geometry);
             return nullptr;
@@ -150,7 +150,7 @@ namespace blink
         return geometry;
     }
 
-    Geometry* ResourceMgr::createGeometry(const tstring& filePath)
+    Geometry* ResourceMgr::createGeometry(const tstring& filePath, bool calcInertiaTensor)
     {
         MeshBuilder builder;
         builder.filePath(filePath);
@@ -166,7 +166,7 @@ namespace blink
 
         // create new
         auto geometry = new Geometry(*m_logicalDevice);
-        if (!builder.build(geometry))
+        if (!builder.build(geometry, calcInertiaTensor))
         {
             SAFE_DELETE(geometry);
             return nullptr;

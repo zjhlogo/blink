@@ -47,7 +47,7 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
                                blink::VulkanUniformBuffer& pmub,
                                blink::VulkanUniformBuffer& piub)
 {
-    const auto& world = m_app->getWorld();
+    const auto& world = m_app->getEcsWorld().getWorld();
 
     // collect light data
     blink::RenderDataLight rdLight{};
@@ -65,9 +65,11 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
     // collect camera data into pfus
     std::vector<blink::PerFrameUniforms> pfus;
     {
-        static auto cameraDataQuery = world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
+        static auto cameraDataQuery =
+            world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
         cameraDataQuery.each(
-            [&pfus, &rdLight](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera)
+            [&pfus,
+             &rdLight](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera)
             {
                 // setup perframe uniforms
                 blink::PerFrameUniforms pfu;
@@ -91,7 +93,8 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
     // group render object by materials
     std::unordered_map<blink::Material*, std::vector<blink::RenderDataGeo>> renderDatas;
     {
-        static auto staticModelQuery = world.query_builder<const blink::Position, const blink::Rotation, const blink::StaticModel>().build();
+        static auto staticModelQuery =
+            world.query_builder<const blink::Position, const blink::Rotation, const blink::StaticModel>().build();
         staticModelQuery.each(
             [&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::StaticModel& model)
             {
@@ -129,7 +132,9 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
                 auto findIt = renderFeatureDatas.find(feature.order);
                 if (findIt != renderFeatureDatas.end())
                 {
-                    LOGE("duplicate render feature order {0} <-> {1}", findIt->second.material->getId(), feature.material->getId());
+                    LOGE("duplicate render feature order {0} <-> {1}",
+                         findIt->second.material->getId(),
+                         feature.material->getId());
                 }
                 else
                 {

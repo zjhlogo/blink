@@ -13,23 +13,20 @@
 #include <blink/components/Components.h>
 #include <core/base/ILogicalSystem.h>
 
-class PrefabInitializeSystem;
-
 class EntityCreationSystem : public blink::ILogicalSystem
 {
 public:
-    EntityCreationSystem(PrefabInitializeSystem* prefabSystem, const glm::vec2& surfaceSize);
+    EntityCreationSystem(const glm::vec2& surfaceSize);
 
-    virtual bool initialize(flecs::world& world) override;
-    virtual void terminate(flecs::world& world) override;
+    virtual bool initialize() override;
+    virtual void terminate() override;
 
-    virtual void framePreUpdate(flecs::world& world) override;
+    virtual void framePreUpdate() override;
 
     void renderLightPropertyUi();
     void renderMaterialPropertyUi();
 
 private:
-    PrefabInitializeSystem* m_prefabSystem;
     glm::vec2 m_surfaceSize;
 
     blink::LightData m_lightData{glm::one<glm::vec3>(), 100.0f};

@@ -9,13 +9,14 @@
 #include "DynamicIntegrateSystem.h"
 #include "../components/Components.h"
 
+#include <core/EcsWorld.h>
 #include <core/components/Components.h>
 
 namespace blink
 {
-    bool DynamicIntegrateSystem::initialize(flecs::world& world)
+    bool DynamicIntegrateSystem::initialize()
     {
-        world
+        m_ecsWorld->getWorld()
             .system<PhysicsVelocity, Position, Rotation, const PhysicsMass, const PhysicsDamping, const PhysicsAccumulate>(
                 "calculate physics velocity")
             .each(
@@ -58,7 +59,7 @@ namespace blink
         return true;
     }
 
-    void DynamicIntegrateSystem::terminate(flecs::world& world)
+    void DynamicIntegrateSystem::terminate()
     {
         //
     }

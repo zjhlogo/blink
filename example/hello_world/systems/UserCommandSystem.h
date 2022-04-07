@@ -15,11 +15,11 @@ class UserCommandSystem : public blink::ILogicalSystem
 public:
     UserCommandSystem();
 
-    virtual bool initialize(flecs::world& world) override;
-    virtual void terminate(flecs::world& world) override;
+    virtual bool initialize() override;
+    virtual void terminate() override;
 
-    virtual void framePreUpdate(flecs::world& world) override;
-    virtual void framePostUpdate(flecs::world& world) override;
+    virtual void framePreUpdate() override;
+    virtual void framePostUpdate() override;
 
     void renderUi();
 

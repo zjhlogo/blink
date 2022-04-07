@@ -10,13 +10,15 @@
 **/
 
 #include "LinearVelocitySystem.h"
+#include "../EcsWorld.h"
 #include "../components/Components.h"
 
 namespace blink
 {
-    bool LinearVelocitySystem::initialize(flecs::world& world)
+    bool LinearVelocitySystem::initialize()
     {
-        world.system<Position, const LinearVelocity>("apply linear velocity")
+        m_ecsWorld->getWorld()
+            .system<Position, const LinearVelocity>("apply linear velocity")
             .each(
                 [](flecs::entity e, Position& pos, const LinearVelocity& vel)
                 {
@@ -27,7 +29,7 @@ namespace blink
         return true;
     }
 
-    void LinearVelocitySystem::terminate(flecs::world& world)
+    void LinearVelocitySystem::terminate()
     {
         //
     }

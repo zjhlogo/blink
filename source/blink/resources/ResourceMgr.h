@@ -39,8 +39,8 @@ namespace blink
         Texture2d* createTexture2d(const tstring& filePath);
         void releaseTexture2d(Texture2d* texture);
 
-        Geometry* createGeometry(const IGeometryBuilder& builder);
-        Geometry* createGeometry(const tstring& filePath);
+        Geometry* createGeometry(const IGeometryBuilder& builder, bool calcInertiaTensor = false);
+        Geometry* createGeometry(const tstring& filePath, bool calcInertiaTensor = false);
         void releaseGeometry(Geometry* geometry);
 
         Material* createMaterial(const tstring& filePath);

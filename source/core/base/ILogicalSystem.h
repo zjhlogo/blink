@@ -15,14 +15,21 @@
 
 namespace blink
 {
+    class EcsWorld;
+
     class ILogicalSystem
     {
     public:
-        virtual bool initialize(flecs::world& world) = 0;
-        virtual void terminate(flecs::world& world) = 0;
+        virtual bool initialize() = 0;
+        virtual void terminate() = 0;
 
-        virtual void framePreUpdate(flecs::world& world) {};
-        virtual void framePostUpdate(flecs::world& world) {};
+        virtual void framePreUpdate(){};
+        virtual void framePostUpdate(){};
+
+        void setEcsWorld(EcsWorld* ecsWorld) { m_ecsWorld = ecsWorld; };
+
+    protected:
+        EcsWorld* m_ecsWorld{};
 
     };
 

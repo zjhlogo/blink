@@ -9,13 +9,15 @@
 #include "EndPhysicsSimulationSystem.h"
 #include "../components/Components.h"
 
+#include <core/EcsWorld.h>
 #include <core/components/Components.h>
 
 namespace blink
 {
-    bool EndPhysicsSimulationSystem::initialize(flecs::world& world)
+    bool EndPhysicsSimulationSystem::initialize()
     {
-        world.system<PhysicsAccumulate>("cleanup physics accumulate")
+        m_ecsWorld->getWorld()
+            .system<PhysicsAccumulate>("cleanup physics accumulate")
             .each(
                 [](flecs::entity e, PhysicsAccumulate& pa)
                 {
@@ -26,7 +28,7 @@ namespace blink
         return true;
     }
 
-    void EndPhysicsSimulationSystem::terminate(flecs::world& world)
+    void EndPhysicsSimulationSystem::terminate()
     {
         //
     }

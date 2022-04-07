@@ -14,8 +14,8 @@ class PrefabInitializeSystem : public blink::ILogicalSystem
 public:
     PrefabInitializeSystem();
 
-    virtual bool initialize(flecs::world& world) override;
-    virtual void terminate(flecs::world& world) override;
+    virtual bool initialize() override;
+    virtual void terminate() override;
 
 public:
     flecs::entity prefabRigidBody;

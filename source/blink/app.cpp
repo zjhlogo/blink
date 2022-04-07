@@ -11,10 +11,7 @@
 
 #include "app.h"
 
-#include <core/base/ILogicalSystem.h>
 #include <render_vulkan/base/IRenderSystem.h>
-
-#include <map>
 
 namespace blink
 {
@@ -22,69 +19,24 @@ namespace blink
     {
         //
         destroyRenderSystems();
-        destroyLogicalSystems();
+        m_ecsWorld.destroySystems();
     }
 
-    void IApp::executeLogicalSystems()
+    void IApp::stepEcsWorld()
     {
-        for (auto sys : m_logicalSystems)
-        {
-            sys->framePreUpdate(m_world);
-        }
-
         //
-        m_world.progress();
-
-
-        for (auto sys : m_logicalSystems)
-        {
-            sys->framePostUpdate(m_world);
-        }
+        m_ecsWorld.step();
     }
 
-    void IApp::executeRenderSystems(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
+    void IApp::render(VulkanCommandBuffer& commandBuffer,
+                      VulkanUniformBuffer& pfub,
+                      VulkanUniformBuffer& pmub,
+                      VulkanUniformBuffer& piub)
     {
         for (auto sys : m_renderSystems)
         {
             sys->render(commandBuffer, pfub, pmub, piub);
         }
-    }
-
-    bool IApp::addLogicalSystem(ILogicalSystem* sys)
-    {
-        std::type_index typeIndex = typeid(*sys);
-        m_logicalSytemsTypeMap.emplace(typeIndex, sys);
-
-        m_logicalSystems.push_back(sys);
-        return true;
-    }
-
-    bool IApp::initializeLogicalSystems()
-    {
-        for (auto sys : m_logicalSystems)
-        {
-            if (!sys->initialize(m_world)) return false;
-        }
-
-        return true;
-    }
-
-    void IApp::terminateLogicalSystems()
-    {
-        for (int i = (int)m_logicalSystems.size() - 1; i >= 0; --i)
-        {
-            m_logicalSystems[i]->terminate(m_world);
-        }
-    }
-
-    void IApp::destroyLogicalSystems()
-    {
-        for (int i = (int)m_logicalSystems.size() - 1; i >= 0; --i)
-        {
-            SAFE_DELETE(m_logicalSystems[i]);
-        }
-
-        m_logicalSystems.clear();
     }
 
     bool IApp::addRenderSystem(IRenderSystem* sys)

@@ -10,6 +10,8 @@ systems/AngularVelocitySystem.cpp
 systems/AngularVelocitySystem.h
 systems/LinearVelocitySystem.cpp
 systems/LinearVelocitySystem.h
+EcsWorld.cpp
+EcsWorld.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

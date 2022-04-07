@@ -31,10 +31,11 @@ namespace blink
 
     tstring MeshBuilder::getUniqueId() const
     {
+        //
         return fmt::format("file_{0}", m_filePath);
     }
 
-    bool MeshBuilder::build(Geometry* geometry) const
+    bool MeshBuilder::build(Geometry* geometry, bool calcInertiaTensor) const
     {
         tstring fileContent;
         if (!File::readFileIntoString(fileContent, m_filePath))
@@ -48,7 +49,12 @@ namespace blink
         tstring err;
         tstring warn;
 
-        bool ret = loader.LoadASCIIFromString(&model, &err, &warn, fileContent.data(), static_cast<unsigned int>(fileContent.length()), EMPTY_STRING);
+        bool ret = loader.LoadASCIIFromString(&model,
+                                              &err,
+                                              &warn,
+                                              fileContent.data(),
+                                              static_cast<unsigned int>(fileContent.length()),
+                                              EMPTY_STRING);
         if (!warn.empty())
         {
             LOGW(warn);
@@ -88,7 +94,8 @@ namespace blink
         auto itPos = primitive.attributes.find("POSITION");
         auto itNormal = primitive.attributes.find("NORMAL");
         auto itUv0 = primitive.attributes.find("TEXCOORD_0");
-        if (itPos == primitive.attributes.end() || itNormal == primitive.attributes.end() || itUv0 == primitive.attributes.end())
+        if (itPos == primitive.attributes.end() || itNormal == primitive.attributes.end()
+            || itUv0 == primitive.attributes.end())
         {
             LOGE("Unsupport primitive attributes, must be POSITION, NORMAL and TEXCOORD_0. {0}", m_filePath);
             return false;
@@ -104,7 +111,8 @@ namespace blink
         const auto& buffViewUv0 = model.bufferViews[accessorUv0.bufferView];
         const auto& buffViewIndices = model.bufferViews[accessorIndices.bufferView];
 
-        if (buffViewPos.buffer != buffViewNormal.buffer || buffViewPos.buffer != buffViewUv0.buffer || buffViewPos.buffer != buffViewIndices.buffer)
+        if (buffViewPos.buffer != buffViewNormal.buffer || buffViewPos.buffer != buffViewUv0.buffer
+            || buffViewPos.buffer != buffViewIndices.buffer)
         {
             LOGE("Only single buffer currently supported. {0}", m_filePath);
             return false;
@@ -119,7 +127,8 @@ namespace blink
                                   buffViewPos.byteOffset,
                                   buffViewNormal.byteOffset,
                                   buffViewUv0.byteOffset,
-                                  buffViewIndices.byteOffset))
+                                  buffViewIndices.byteOffset,
+                                  calcInertiaTensor))
         {
             return false;
         }

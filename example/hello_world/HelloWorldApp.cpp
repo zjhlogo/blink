@@ -42,8 +42,10 @@ HelloWorldApp::~HelloWorldApp()
 bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 {
     stdcpp_set_os_api();
-    m_world.set_threads(4);
-    m_world.set_target_fps(60.0f);
+
+    auto& world = m_ecsWorld.getWorld();
+    world.set_threads(4);
+    world.set_target_fps(60.0f);
 
     auto& logicalDevice = renderModule.getLogicalDevice();
     auto& swapchain = renderModule.getSwapchain();
@@ -51,22 +53,21 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     // add logical systems
 
     // physics systems
-    addLogicalSystem(new blink::BeginPhysicsSimulationSystem());
-    addLogicalSystem(new blink::DynamicIntegrateSystem());
-    addLogicalSystem(new blink::EndPhysicsSimulationSystem());
+    m_ecsWorld.addSystem(new blink::BeginPhysicsSimulationSystem());
+    m_ecsWorld.addSystem(new blink::DynamicIntegrateSystem());
+    m_ecsWorld.addSystem(new blink::EndPhysicsSimulationSystem());
 
     // prefab system
-    auto prefabSystem = new PrefabInitializeSystem();
-    addLogicalSystem(prefabSystem);
+    m_ecsWorld.addSystem(new PrefabInitializeSystem());
 
     // entity creation system
     const auto& extent = swapchain.getImageExtent();
-    addLogicalSystem(new EntityCreationSystem(prefabSystem, glm::vec2(extent.width, extent.height)));
+    m_ecsWorld.addSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
 
     // add user command system
-    addLogicalSystem(new UserCommandSystem());
+    m_ecsWorld.addSystem(new UserCommandSystem());
 
-    if (!initializeLogicalSystems()) return false;
+    if (!m_ecsWorld.initialize()) return false;
 
     // add render systems
     addRenderSystem(new SceneRenderSystem(this));
@@ -82,13 +83,13 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 void HelloWorldApp::terminate()
 {
     terminateRenderSystems();
-    terminateLogicalSystems();
+    m_ecsWorld.terminate();
 }
 
 void HelloWorldApp::renderUi()
 {
-    auto* entityCreation = getLogicalSystem<EntityCreationSystem>();
-    auto* userCommand = getLogicalSystem<UserCommandSystem>();
+    auto* entityCreation = m_ecsWorld.findSystem<EntityCreationSystem>();
+    auto* userCommand = m_ecsWorld.findSystem<UserCommandSystem>();
 
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
     ImGui::Begin("Properties",

@@ -13,13 +13,13 @@
 
 namespace blink
 {
-    bool BeginPhysicsSimulationSystem::initialize(flecs::world& world)
+    bool BeginPhysicsSimulationSystem::initialize()
     {
-        // TODO: 
+        // TODO:
         return true;
     }
 
-    void BeginPhysicsSimulationSystem::terminate(flecs::world& world)
+    void BeginPhysicsSimulationSystem::terminate()
     {
         //
     }

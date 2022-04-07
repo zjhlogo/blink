@@ -16,7 +16,7 @@ namespace blink
     class AngularVelocitySystem : public ILogicalSystem
     {
     public:
-        virtual bool initialize(flecs::world& world) override;
-        virtual void terminate(flecs::world& world) override;
+        virtual bool initialize() override;
+        virtual void terminate() override;
     };
 } // namespace blink

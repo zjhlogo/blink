@@ -29,13 +29,16 @@ namespace blink
                 {
                     while (renderModule.processEvent())
                     {
-                        app.executeLogicalSystems();
+                        app.stepEcsWorld();
 
                         auto result = renderModule.render(
-                            [&](VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)
+                            [&](VulkanCommandBuffer& commandBuffer,
+                                VulkanUniformBuffer& pfub,
+                                VulkanUniformBuffer& pmub,
+                                VulkanUniformBuffer& piub)
                             {
                                 //
-                                app.executeRenderSystems(commandBuffer, pfub, pmub, piub);
+                                app.render(commandBuffer, pfub, pmub, piub);
                             });
 
                         if (result == VulkanRenderModule::RenderResult::Recreate)

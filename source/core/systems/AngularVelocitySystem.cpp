@@ -10,13 +10,15 @@
 **/
 
 #include "AngularVelocitySystem.h"
+#include "../EcsWorld.h"
 #include "../components/Components.h"
 
 namespace blink
 {
-    bool AngularVelocitySystem::initialize(flecs::world& world)
+    bool AngularVelocitySystem::initialize()
     {
-        world.system<Rotation, const AngularVelocity>("apply angular velocity")
+        m_ecsWorld->getWorld()
+            .system<Rotation, const AngularVelocity>("apply angular velocity")
             .each(
                 [](flecs::entity e, Rotation& rot, const AngularVelocity& vel)
                 {
@@ -27,7 +29,7 @@ namespace blink
         return true;
     }
 
-    void AngularVelocitySystem::terminate(flecs::world& world)
+    void AngularVelocitySystem::terminate()
     {
         //
     }

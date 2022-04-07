@@ -8,6 +8,7 @@
  *********************************************************************/
 #include "PrefabInitializeSystem.h"
 
+#include <core/EcsWorld.h>
 #include <core/components/Components.h>
 #include <physics/components/Components.h>
 
@@ -15,8 +16,10 @@ PrefabInitializeSystem::PrefabInitializeSystem()
 {
 }
 
-bool PrefabInitializeSystem::initialize(flecs::world& world)
+bool PrefabInitializeSystem::initialize()
 {
+    auto& world = m_ecsWorld->getWorld();
+
     // rigid body prefab
     prefabRigidBody = world.prefab("RigidBody")
                           .set_override<blink::Position>({glm::zero<glm::vec3>()})
@@ -29,7 +32,7 @@ bool PrefabInitializeSystem::initialize(flecs::world& world)
     return true;
 }
 
-void PrefabInitializeSystem::terminate(flecs::world& world)
+void PrefabInitializeSystem::terminate()
 {
     //
 }

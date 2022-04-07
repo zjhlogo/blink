@@ -38,7 +38,8 @@ namespace blink
     bool Geometry::uploadData(const std::vector<uint16>& indices,
                               const std::vector<glm::vec3>& positions,
                               const std::vector<glm::vec3>& normals,
-                              const std::vector<glm::vec2>& uv0s)
+                              const std::vector<glm::vec2>& uv0s,
+                              bool calcInertiaTensor)
     {
         destroy();
 
@@ -57,7 +58,8 @@ namespace blink
 
         m_buffer = new VulkanBuffer(m_logicalDevice);
         m_buffer->createBuffer(m_offsetUv0s + sizeUv0s,
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+                                   | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(
@@ -68,6 +70,12 @@ namespace blink
                 memcpy(((uint8*)destBuffer + m_offsetNormals), normals.data(), sizeNormals);
                 memcpy(((uint8*)destBuffer + m_offsetUv0s), uv0s.data(), sizeUv0s);
             });
+
+        if (calcInertiaTensor)
+        {
+            m_inertiaTensor = CalculateInertiaTensor(positions.data(), positions.size());
+        }
+
         return true;
     }
 
@@ -78,7 +86,8 @@ namespace blink
                               VkDeviceSize offsetPosition,
                               VkDeviceSize offsetNormal,
                               VkDeviceSize offsetUv0,
-                              VkDeviceSize offsetIndices)
+                              VkDeviceSize offsetIndices,
+                              bool calcInertiaTensor)
     {
         destroy();
 
@@ -92,10 +101,16 @@ namespace blink
 
         m_buffer = new VulkanBuffer(m_logicalDevice);
         m_buffer->createBuffer(dataSize,
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+                                   | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(data, dataSize);
+
+        if (calcInertiaTensor)
+        {
+            m_inertiaTensor = CalculateInertiaTensor((glm::vec3*)((int8*)data + offsetPosition), numVertices);
+        }
 
         return true;
     }
@@ -125,7 +140,8 @@ namespace blink
             uint32 currInputMask = (1 << i);
             if ((currInputMask & allInputMask) == currInputMask)
             {
-                if (currInputMask != VulkanPipeline::InputLocation_Position && currInputMask != VulkanPipeline::InputLocation_Normal
+                if (currInputMask != VulkanPipeline::InputLocation_Position
+                    && currInputMask != VulkanPipeline::InputLocation_Normal
                     && currInputMask != VulkanPipeline::InputLocation_Uv0)
                 {
                     return false;
@@ -147,5 +163,34 @@ namespace blink
         m_offsetNormals = 0;
         m_offsetUv0s = 0;
         m_offsetIndices = 0;
+    }
+
+    glm::mat3 Geometry::CalculateInertiaTensor(const glm::vec3* verts, std::size_t count)
+    {
+        glm::mat3 m = glm::zero<glm::mat3>();
+        float invM = 1.0f / count;
+
+        for (std::size_t i = 0; i < count; ++i)
+        {
+            const auto& vert = verts[i];
+            float xx = vert.x * vert.x;
+            float yy = vert.y * vert.y;
+            float zz = vert.z * vert.z;
+            float xy = vert.x * vert.y;
+            float xz = vert.x * vert.z;
+            float yz = vert.y * vert.z;
+
+            m[0][0] += invM * (yy + zz);
+            m[0][1] -= invM * xy;
+            m[0][2] -= invM * xz;
+            m[1][0] -= invM * xy;
+            m[1][1] += invM * (xx + zz);
+            m[1][2] -= invM * yz;
+            m[2][0] -= invM * xz;
+            m[2][1] -= invM * yz;
+            m[2][2] += invM * (xx + yy);
+        }
+
+        return m;
     }
 } // namespace blink

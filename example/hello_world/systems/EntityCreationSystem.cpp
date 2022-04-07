@@ -19,18 +19,21 @@
 #include <blink/geometries/builder/TetrahedronBuilder.h>
 #include <blink/materials/Material.h>
 #include <blink/resources/ResourceMgr.h>
+#include <core/EcsWorld.h>
 #include <core/components/Components.h>
 #include <imgui/imgui.h>
 #include <physics/components/Components.h>
 
-EntityCreationSystem::EntityCreationSystem(PrefabInitializeSystem* prefabSystem, const glm::vec2& surfaceSize)
-    : m_prefabSystem(prefabSystem)
-    , m_surfaceSize(surfaceSize)
+EntityCreationSystem::EntityCreationSystem(const glm::vec2& surfaceSize)
+    : m_surfaceSize(surfaceSize)
 {
 }
 
-bool EntityCreationSystem::initialize(flecs::world& world)
+bool EntityCreationSystem::initialize()
 {
+    auto& world = m_ecsWorld->getWorld();
+    auto prefabSystem = m_ecsWorld->findSystem<PrefabInitializeSystem>();
+
     // create camera
     m_camera = world.entity();
     m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)});
@@ -65,34 +68,37 @@ bool EntityCreationSystem::initialize(flecs::world& world)
 
     // load box
     {
-        m_box = world.entity().is_a(m_prefabSystem->prefabRigidBody);
+        m_box = world.entity().is_a(prefabSystem->prefabRigidBody);
         m_box.set<blink::Position>({glm::vec3(-1.5f, 0.0f, 0.0f)});
 
         blink::BoxBuilder builder;
-        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
         auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
         m_box.set<blink::StaticModel>({geometry, material});
+        m_box.set<blink::PhysicsMass>(blink::PhysicsMass(10.0f, geometry->getInertiaTensor() * 10.0f));
     }
 
     // load sphere
     {
-        m_sphere = world.entity().is_a(m_prefabSystem->prefabRigidBody);
+        m_sphere = world.entity().is_a(prefabSystem->prefabRigidBody);
 
         blink::SphereUvBuilder builder;
-        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
         auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
+        m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, geometry->getInertiaTensor()));
     }
 
     // load tetrahedron
     {
-        m_tetrahedron = world.entity().is_a(m_prefabSystem->prefabRigidBody);
+        m_tetrahedron = world.entity().is_a(prefabSystem->prefabRigidBody);
         m_tetrahedron.set<blink::Position>({glm::vec3(1.5f, 0.0f, 0.0f)});
 
         blink::TetrahedronBuilder builder;
-        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder);
+        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
         auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
         m_tetrahedron.set<blink::StaticModel>({geometry, material});
+        m_tetrahedron.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, geometry->getInertiaTensor()));
     }
 
     // auto e2 = world.entity();
@@ -105,12 +111,12 @@ bool EntityCreationSystem::initialize(flecs::world& world)
     return true;
 }
 
-void EntityCreationSystem::terminate(flecs::world& world)
+void EntityCreationSystem::terminate()
 {
     //
 }
 
-void EntityCreationSystem::framePreUpdate(flecs::world& world)
+void EntityCreationSystem::framePreUpdate()
 {
     if (m_lightDataDirty)
     {

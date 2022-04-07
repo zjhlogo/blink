@@ -9,6 +9,7 @@
 #include "UserCommandSystem.h"
 #include "../components/UserCommandComponents.h"
 
+#include <core/EcsWorld.h>
 #include <imgui/imgui.h>
 #include <physics/components/Components.h>
 
@@ -16,9 +17,10 @@ UserCommandSystem::UserCommandSystem()
 {
 }
 
-bool UserCommandSystem::initialize(flecs::world& world)
+bool UserCommandSystem::initialize()
 {
-    world.system<blink::PhysicsAccumulate>("process user command push me")
+    m_ecsWorld->getWorld()
+        .system<blink::PhysicsAccumulate>("process user command push me")
         .each(
             [&](flecs::entity e, blink::PhysicsAccumulate& pa)
             {
@@ -30,17 +32,17 @@ bool UserCommandSystem::initialize(flecs::world& world)
     return true;
 }
 
-void UserCommandSystem::terminate(flecs::world& world)
+void UserCommandSystem::terminate()
 {
     //
 }
 
-void UserCommandSystem::framePreUpdate(flecs::world& world)
+void UserCommandSystem::framePreUpdate()
 {
     //
 }
 
-void UserCommandSystem::framePostUpdate(flecs::world& world)
+void UserCommandSystem::framePostUpdate()
 {
     m_pushMeClicked = false;
 }
