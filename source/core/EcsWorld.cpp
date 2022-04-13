@@ -12,6 +12,21 @@
 
 namespace blink
 {
+    static int my_run_action(ecs_world_t* world, ecs_app_desc_t* desc)
+    {
+        if (desc->init)
+        {
+            desc->init(world);
+        }
+
+        return 0;
+    }
+
+    EcsWorld::EcsWorld()
+    {
+        ecs_app_set_run_action(my_run_action);
+        m_world.app().threads(4).target_fps(60.0f).enable_rest().run();
+    }
 
     bool EcsWorld::initialize()
     {

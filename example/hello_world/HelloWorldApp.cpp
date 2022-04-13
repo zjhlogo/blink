@@ -43,10 +43,6 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 {
     stdcpp_set_os_api();
 
-    auto& world = m_ecsWorld.getWorld();
-    world.set_threads(4);
-    world.set_target_fps(60.0f);
-
     auto& logicalDevice = renderModule.getLogicalDevice();
     auto& swapchain = renderModule.getSwapchain();
 

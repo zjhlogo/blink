@@ -22,6 +22,8 @@ namespace blink
     class EcsWorld
     {
     public:
+        EcsWorld();
+
         bool initialize();
         void terminate();
 

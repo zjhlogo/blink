@@ -19,15 +19,13 @@ UserCommandSystem::UserCommandSystem()
 
 bool UserCommandSystem::initialize()
 {
-    m_ecsWorld->getWorld()
-        .system<blink::PhysicsAccumulate>("process user command push me")
-        .each(
-            [&](flecs::entity e, blink::PhysicsAccumulate& pa)
-            {
-                if (!m_pushMeClicked) return;
+    m_ecsWorld->getWorld().system<blink::PhysicsAccumulate>().each(
+        [&](flecs::entity e, blink::PhysicsAccumulate& pa)
+        {
+            if (!m_pushMeClicked) return;
 
-                pa.torqueAccum += blink::randomVec3Normalized() * 1000.0f;
-            });
+            pa.torqueAccum += blink::randomVec3Normalized() * 1000.0f;
+        });
 
     return true;
 }

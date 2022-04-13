@@ -35,13 +35,13 @@ bool EntityCreationSystem::initialize()
     auto prefabSystem = m_ecsWorld->findSystem<PrefabInitializeSystem>();
 
     // create camera
-    m_camera = world.entity();
+    m_camera = world.entity("camera");
     m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)});
     m_camera.set<blink::Rotation>({glm::identity<glm::quat>()});
     m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 10.0f});
 
     // light
-    m_light = world.entity();
+    m_light = world.entity("light");
     m_light.set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)});
     m_light.set<blink::LightData>(m_lightData);
 
@@ -68,7 +68,7 @@ bool EntityCreationSystem::initialize()
 
     // load box
     {
-        m_box = world.entity().is_a(prefabSystem->prefabRigidBody);
+        m_box = world.entity("box").is_a(prefabSystem->prefabRigidBody);
         m_box.set<blink::Position>({glm::vec3(-1.5f, 0.0f, 0.0f)});
 
         blink::BoxBuilder builder;
@@ -80,7 +80,7 @@ bool EntityCreationSystem::initialize()
 
     // load sphere
     {
-        m_sphere = world.entity().is_a(prefabSystem->prefabRigidBody);
+        m_sphere = world.entity("sphere").is_a(prefabSystem->prefabRigidBody);
 
         blink::SphereUvBuilder builder;
         auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
@@ -91,7 +91,7 @@ bool EntityCreationSystem::initialize()
 
     // load tetrahedron
     {
-        m_tetrahedron = world.entity().is_a(prefabSystem->prefabRigidBody);
+        m_tetrahedron = world.entity("tetrahedron").is_a(prefabSystem->prefabRigidBody);
         m_tetrahedron.set<blink::Position>({glm::vec3(1.5f, 0.0f, 0.0f)});
 
         blink::TetrahedronBuilder builder;

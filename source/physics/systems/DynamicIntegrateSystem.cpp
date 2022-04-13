@@ -17,8 +17,7 @@ namespace blink
     bool DynamicIntegrateSystem::initialize()
     {
         m_ecsWorld->getWorld()
-            .system<PhysicsVelocity, Position, Rotation, const PhysicsMass, const PhysicsDamping, const PhysicsAccumulate>(
-                "calculate physics velocity")
+            .system<PhysicsVelocity, Position, Rotation, const PhysicsMass, const PhysicsDamping, const PhysicsAccumulate>()
             .each(
                 [](flecs::entity e,
                    PhysicsVelocity& pv,
