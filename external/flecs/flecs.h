@@ -2340,7 +2340,6 @@ struct ecs_filter_t {
     bool match_empty_tables;   /* See ecs_filter_desc_t */
     
     char *name;                /* Name of filter (optional) */
-    char *expr;                /* Expression of filter (if provided) */
     char *variable_names[1];   /* Array with variable names */
 
     ecs_iterable_t iterable;   /* Iterable mixin */
@@ -2567,6 +2566,7 @@ typedef struct ecs_filter_iter_t {
     ecs_iter_kind_t kind; 
     ecs_term_iter_t term_iter;
     int32_t matches_left;
+    int32_t pivot_term;
 } ecs_filter_iter_t;
 
 /** Query-iterator specific data */
@@ -3895,6 +3895,14 @@ FLECS_API extern const ecs_entity_t EcsAcyclic;
  *   If With(R, O) and R(X, Y) then O(X, Y)
  */
 FLECS_API extern const ecs_entity_t EcsWith;
+
+/* Ensure that relationship target is child of specified entity.
+ * 
+ * Behavior:
+ *   If OneOf(R, O) and R(X, Y), Y must be a child of O
+ *   If OneOf(R) and R(X, Y), Y must be a child of R
+ */
+FLECS_API extern const ecs_entity_t EcsOneOf;
 
 /* Can be added to relation to indicate that it should never hold data, even
  * when it or the relation object is a component. */
@@ -10188,6 +10196,7 @@ typedef struct EcsMember {
     ecs_entity_t type;
     int32_t count;
     ecs_entity_t unit;
+    int32_t offset;
 } EcsMember;
 
 /* Element type of members vector in EcsStruct */
@@ -12402,6 +12411,7 @@ static const flecs::entity_t Exclusive = EcsExclusive;
 static const flecs::entity_t Acyclic = EcsAcyclic;
 static const flecs::entity_t Symmetric = EcsSymmetric;
 static const flecs::entity_t With = EcsWith;
+static const flecs::entity_t OneOf = EcsOneOf;
 
 /* Builtin relationships */
 static const flecs::entity_t IsA = EcsIsA;
@@ -12940,6 +12950,7 @@ struct enum_type {
 
         ecs_log_push();
         ecs_add_id(world, id, flecs::Exclusive);
+        ecs_add_id(world, id, flecs::OneOf);
         ecs_add_id(world, id, flecs::Tag);
         data.id = id;
         data.min = FLECS_ENUM_MAX(int);
@@ -19352,7 +19363,7 @@ struct untyped_component : entity {
 #   ifdef FLECS_META
 
 /** Add member. */
-untyped_component& member(flecs::entity_t type_id, const char *name, int32_t count = 0) {
+untyped_component& member(flecs::entity_t type_id, const char *name, int32_t count = 0, size_t offset = 0) {
     ecs_entity_desc_t desc = {};
     desc.name = name;
     desc.add[0] = ecs_pair(flecs::ChildOf, m_id);
@@ -19364,13 +19375,14 @@ untyped_component& member(flecs::entity_t type_id, const char *name, int32_t cou
     Member m = {};
     m.type = type_id;
     m.count = count;
+    m.offset = static_cast<int32_t>(offset);
     e.set<Member>(m);
 
     return *this;
 }
 
 /** Add member with unit. */
-untyped_component& member(flecs::entity_t type_id, flecs::entity_t unit, const char *name, int32_t count = 0) {
+untyped_component& member(flecs::entity_t type_id, flecs::entity_t unit, const char *name, int32_t count = 0, size_t offset = 0) {
     ecs_entity_desc_t desc = {};
     desc.name = name;
     desc.add[0] = ecs_pair(flecs::ChildOf, m_id);
@@ -19383,6 +19395,7 @@ untyped_component& member(flecs::entity_t type_id, flecs::entity_t unit, const c
     m.type = type_id;
     m.unit = unit;
     m.count = count;
+    m.offset = static_cast<int32_t>(offset);
     e.set<Member>(m);
 
     return *this;
@@ -19390,24 +19403,24 @@ untyped_component& member(flecs::entity_t type_id, flecs::entity_t unit, const c
 
 /** Add member. */
 template <typename MemberType>
-untyped_component& member(const char *name, int32_t count = 0) {
+untyped_component& member(const char *name, int32_t count = 0, size_t offset = 0) {
     flecs::entity_t type_id = _::cpp_type<MemberType>::id(m_world);
-    return member(type_id, name, count);
+    return member(type_id, name, count, offset);
 }
 
 /** Add member with unit. */
 template <typename MemberType>
-untyped_component& member(flecs::entity_t unit, const char *name, int32_t count = 0) {
+untyped_component& member(flecs::entity_t unit, const char *name, int32_t count = 0, size_t offset = 0) {
     flecs::entity_t type_id = _::cpp_type<MemberType>::id(m_world);
-    return member(type_id, unit, name, count);
+    return member(type_id, unit, name, count, offset);
 }
 
 /** Add member with unit. */
 template <typename MemberType, typename UnitType>
-untyped_component& member(const char *name, int32_t count = 0) {
+untyped_component& member(const char *name, int32_t count = 0, size_t offset = 0) {
     flecs::entity_t type_id = _::cpp_type<MemberType>::id(m_world);
     flecs::entity_t unit_id = _::cpp_type<UnitType>::id(m_world);
-    return member(type_id, unit_id, name, count);
+    return member(type_id, unit_id, name, count, offset);
 }
 
 /** Add constant. */
@@ -20469,6 +20482,38 @@ struct term_builder_i : term_id_builder_i<Base> {
     Base& inout(flecs::inout_kind_t inout) {
         ecs_assert(m_term != nullptr, ECS_INVALID_PARAMETER, NULL);
         m_term->inout = static_cast<ecs_inout_kind_t>(inout);
+        return *this;
+    }
+
+    /** Scheduler annotation to indicate system uses add<T> */
+    Base& add() {
+        ecs_assert(m_term != nullptr, ECS_INVALID_PARAMETER, NULL);
+        m_term->inout = static_cast<ecs_inout_kind_t>(flecs::Out);
+        m_term->subj.set.mask = flecs::Nothing;
+        return *this;
+    }
+
+    /** Scheduler annotation to indicate sytem uses add<T>, remove<T> or set<T> */
+    Base& write() {
+        ecs_assert(m_term != nullptr, ECS_INVALID_PARAMETER, NULL);
+        m_term->inout = static_cast<ecs_inout_kind_t>(flecs::Out);
+        m_term->subj.set.mask = flecs::Nothing;
+        return *this;
+    }
+
+    /** Scheduler annotation to indicate sytem uses get<T> */
+    Base& read() {
+        ecs_assert(m_term != nullptr, ECS_INVALID_PARAMETER, NULL);
+        m_term->inout = static_cast<ecs_inout_kind_t>(flecs::In);
+        m_term->subj.set.mask = flecs::Nothing;
+        return *this;
+    }
+
+    /** Scheduler annotation to indicate sytem uses get_mut<T> */
+    Base& read_write() {
+        ecs_assert(m_term != nullptr, ECS_INVALID_PARAMETER, NULL);
+        m_term->inout = static_cast<ecs_inout_kind_t>(flecs::InOut);
+        m_term->subj.set.mask = flecs::Nothing;
         return *this;
     }
 
