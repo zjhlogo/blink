@@ -35,24 +35,24 @@ namespace blink
                     auto inverseInertiaTensorWorld = matRot * pm.inverseInertiaTensor;
                     auto angularAcceleration = inverseInertiaTensorWorld * pa.torqueAccum;
 
-                    auto deltaTime = e.delta_time();
+                    auto dt = e.delta_time();
 
                     // update linear velocity from both acceleration and impulse
-                    pv.linearVelocity += linearAcceleration * deltaTime;
-                    pv.angularVelocity += angularAcceleration * deltaTime;
+                    pv.linearVelocity += linearAcceleration * dt;
+                    pv.angularVelocity += angularAcceleration * dt;
 
                     // impose drag
-                    pv.linearVelocity *= glm::pow(pd.linearDamping, deltaTime);
-                    pv.angularVelocity *= glm::pow(pd.angularDamping, deltaTime);
+                    pv.linearVelocity *= glm::pow(pd.linearDamping, dt);
+                    pv.angularVelocity *= glm::pow(pd.angularDamping, dt);
 
                     // update linear and angular position
-                    pos.value += pv.linearVelocity * deltaTime;
-                    rot.value += (glm::quat(pv.angularVelocity * deltaTime) * rot.value * 0.5f);
+                    pos.value += pv.linearVelocity * dt;
+                    rot.value += (glm::quat(pv.angularVelocity * dt) * rot.value * 0.5f);
                     rot.value = glm::normalize(rot.value);
 
                     // impose drag
-                    pv.linearVelocity *= glm::pow(pd.linearDamping, deltaTime);
-                    pv.angularVelocity *= glm::pow(pd.angularDamping, deltaTime);
+                    pv.linearVelocity *= glm::pow(pd.linearDamping, dt);
+                    pv.angularVelocity *= glm::pow(pd.angularDamping, dt);
                 });
 
         return true;

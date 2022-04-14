@@ -10,6 +10,7 @@
 **/
 
 #include "EntityCreationSystem.h"
+#include "../components/PendulumComponents.h"
 #include "PrefabInitializeSystem.h"
 
 #include <blink/components/Components.h>
@@ -36,9 +37,9 @@ bool EntityCreationSystem::initialize()
 
     // create camera
     m_camera = world.entity("camera");
-    m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)});
-    m_camera.set<blink::Rotation>({glm::identity<glm::quat>()});
-    m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 10.0f});
+    m_camera.set<blink::Position>({glm::vec3(0.0f, 20.0f, 0.0f)});
+    m_camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f))});
+    m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 100.0f});
 
     // light
     m_light = world.entity("light");
@@ -66,40 +67,45 @@ bool EntityCreationSystem::initialize()
     //    .set<blink::StaticModel>({blink::ResourceMgr::getInstance().createGeometry("resource/monkey.gltf"),
     //                              blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl")});
 
-    // load box
-    {
-        m_box = world.entity("box").is_a(prefabSystem->prefabRigidBody);
-        m_box.set<blink::Position>({glm::vec3(-1.5f, 0.0f, 0.0f)});
+    //// load box
+    //{
+    //    m_box = world.entity("box").is_a(prefabSystem->prefabRigidBody);
+    //    m_box.set<blink::Position>({glm::vec3(-1.5f, 0.0f, 0.0f)});
 
-        blink::BoxBuilder builder;
-        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
-        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
-        m_box.set<blink::StaticModel>({geometry, material});
-        m_box.set<blink::PhysicsMass>(blink::PhysicsMass(10.0f, geometry->getInertiaTensor() * 10.0f));
-    }
+    //    blink::BoxBuilder builder;
+    //    auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
+    //    auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
+    //    m_box.set<blink::StaticModel>({geometry, material});
+    //    m_box.set<blink::PhysicsMass>(blink::PhysicsMass(10.0f, geometry->getInertiaTensor() * 10.0f));
+    //}
 
     // load sphere
     {
         m_sphere = world.entity("sphere").is_a(prefabSystem->prefabRigidBody);
+        m_sphere.set<blink::Position>({glm::vec3(5.0f, -5.0f, 0.0f)});
 
         blink::SphereUvBuilder builder;
         auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
         auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
+        m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(10.0f, glm::identity<glm::mat3>()));
+        m_sphere.set<blink::PhysicsVelocity>({glm::vec3(-0.1f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
+        m_sphere.set<blink::PhysicsDamping>({0.95f, 0.95f});
         m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, geometry->getInertiaTensor()));
+        m_sphere.set<SinglePendulum>({glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, -9.8f, 0.0f)});
     }
 
-    // load tetrahedron
-    {
-        m_tetrahedron = world.entity("tetrahedron").is_a(prefabSystem->prefabRigidBody);
-        m_tetrahedron.set<blink::Position>({glm::vec3(1.5f, 0.0f, 0.0f)});
+    //// load tetrahedron
+    //{
+    //    m_tetrahedron = world.entity("tetrahedron").is_a(prefabSystem->prefabRigidBody);
+    //    m_tetrahedron.set<blink::Position>({glm::vec3(1.5f, 0.0f, 0.0f)});
 
-        blink::TetrahedronBuilder builder;
-        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
-        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
-        m_tetrahedron.set<blink::StaticModel>({geometry, material});
-        m_tetrahedron.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, geometry->getInertiaTensor()));
-    }
+    //    blink::TetrahedronBuilder builder;
+    //    auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
+    //    auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
+    //    m_tetrahedron.set<blink::StaticModel>({geometry, material});
+    //    m_tetrahedron.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, geometry->getInertiaTensor()));
+    //}
 
     // auto e2 = world.entity();
     // e2.set<blink::Position>({glm::vec3(0.5f, 0.0f, 0.0f)});

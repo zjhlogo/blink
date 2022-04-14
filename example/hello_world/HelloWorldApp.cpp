@@ -11,6 +11,7 @@
 #include "HelloWorldApp.h"
 #include "systems/EntityCreationSystem.h"
 #include "systems/PrefabInitializeSystem.h"
+#include "systems/SinglePendulumSystem.h"
 #include "systems/UserCommandSystem.h"
 
 #include <blink/blink.h>
@@ -49,9 +50,10 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     // add logical systems
 
     // physics systems
-    m_ecsWorld.addSystem(new blink::BeginPhysicsSimulationSystem());
-    m_ecsWorld.addSystem(new blink::DynamicIntegrateSystem());
-    m_ecsWorld.addSystem(new blink::EndPhysicsSimulationSystem());
+    // m_ecsWorld.addSystem(new blink::BeginPhysicsSimulationSystem());
+    // m_ecsWorld.addSystem(new blink::DynamicIntegrateSystem());
+    // m_ecsWorld.addSystem(new blink::EndPhysicsSimulationSystem());
+    m_ecsWorld.addSystem(new SinglePendulumSystem());
 
     // prefab system
     m_ecsWorld.addSystem(new PrefabInitializeSystem());
