@@ -17,4 +17,7 @@ public:
 
     virtual bool initialize() override;
     virtual void terminate() override;
+
+    virtual void framePostUpdate() override;
+
 };

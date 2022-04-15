@@ -102,7 +102,12 @@ namespace blink
     {
         // acquire an image and wait for it became ready to use
         uint32_t imageIndex{};
-        auto result = vkAcquireNextImageKHR(*m_logicalDevice, *m_swapchain, UINT64_MAX, VK_NULL_HANDLE, *m_acquireImageFence, &imageIndex);
+        auto result = vkAcquireNextImageKHR(*m_logicalDevice,
+                                            *m_swapchain,
+                                            UINT64_MAX,
+                                            VK_NULL_HANDLE,
+                                            *m_acquireImageFence,
+                                            &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain

@@ -35,12 +35,15 @@ namespace blink
         destroy();
     }
 
-    bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe, bool lineList)
+    bool VulkanPipeline::create(const tstring& vertexShader,
+                                const tstring& fragmentShader,
+                                VkPolygonMode polygonMode,
+                                VkPrimitiveTopology topology)
     {
         m_vertexShader = vertexShader;
         m_fragmentShader = fragmentShader;
-        m_wireframe = wireframe;
-        m_lineList = lineList;
+        m_polygonMode = polygonMode;
+        m_topology = topology;
 
         return recreate();
     }
@@ -69,8 +72,8 @@ namespace blink
                                    fragmentShaderCode,
                                    vertexInputBindings,
                                    vertexInputAttributes,
-                                   m_wireframe,
-                                   m_lineList)
+                                   m_polygonMode,
+                                   m_topology)
             == VK_NULL_HANDLE)
             return false;
 
@@ -158,8 +161,8 @@ namespace blink
                                                       const std::vector<uint8>& fragmentShaderCode,
                                                       const std::vector<VkVertexInputBindingDescription>& bindings,
                                                       const std::vector<VkVertexInputAttributeDescription>& attributes,
-                                                      bool wireframe,
-                                                      bool lineList)
+                                                      VkPolygonMode polygonMode,
+                                                      VkPrimitiveTopology topology)
     {
         destroyGraphicsPipeline();
 
@@ -204,7 +207,7 @@ namespace blink
         // input assembly state
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        inputAssembly.topology = lineList ? VK_PRIMITIVE_TOPOLOGY_LINE_LIST : VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        inputAssembly.topology = topology;
 
         // viewport state
         const auto& extent = m_swapchain.getImageExtent();
@@ -222,7 +225,7 @@ namespace blink
         rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
-        rasterizer.polygonMode = wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
+        rasterizer.polygonMode = polygonMode;
         rasterizer.lineWidth = 1.0f;
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;

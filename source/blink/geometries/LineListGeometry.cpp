@@ -28,8 +28,7 @@ namespace blink
 
     bool LineListGeometry::uploadData(const std::vector<uint16>& indices, const std::vector<glm::vec3>& positions)
     {
-        destroy();
-
+        // swap buffer
         m_offsetIndices = 0;
         m_numIndices = static_cast<uint32>(indices.size());
         VkDeviceSize sizeIndices = sizeof(uint16) * m_numIndices;
@@ -37,13 +36,10 @@ namespace blink
         m_offsetPositions = ALIGN_BYTES_4(m_offsetIndices + sizeIndices);
         VkDeviceSize sizePositions = sizeof(glm::vec3) * positions.size();
 
-        m_buffer = new VulkanBuffer(m_logicalDevice);
-        m_buffer->createBuffer(m_offsetPositions + sizePositions,
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
-                                   | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                               VK_SHARING_MODE_EXCLUSIVE);
+        auto buffer = swapBuffer();
+        assert(buffer->getBufferSize() >= (m_offsetPositions + sizePositions));
 
-        m_buffer->uploadBuffer(
+        buffer->uploadBuffer(
             [&](void* destBuffer, VkDeviceSize destBufferSize)
             {
                 memcpy(((uint8*)destBuffer + m_offsetIndices), indices.data(), sizeIndices);
@@ -51,6 +47,7 @@ namespace blink
             });
 
         m_vertexInputMask = VulkanPipeline::InputLocation_Position;
+        m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
 
         return true;
     }
@@ -67,9 +64,30 @@ namespace blink
 
     void LineListGeometry::destroy()
     {
-        SAFE_DELETE(m_buffer);
+        for (auto buffer : m_bufferList)
+        {
+            SAFE_DELETE(buffer);
+        }
 
+        m_currentBuffer = 0;
         m_offsetPositions = 0;
         m_offsetIndices = 0;
+    }
+
+    VulkanBuffer* LineListGeometry::swapBuffer()
+    {
+        m_currentBuffer = (m_currentBuffer + 1) % BUFFER_COUNT;
+
+        auto buffer = m_bufferList[m_currentBuffer];
+        if (buffer) return buffer;
+
+        buffer = new VulkanBuffer(m_logicalDevice);
+        buffer->createBuffer(DEFAULT_BUFFER_SIZE,
+                             VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+                                 | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                             VK_SHARING_MODE_EXCLUSIVE);
+        m_bufferList[m_currentBuffer] = buffer;
+
+        return buffer;
     }
 } // namespace blink

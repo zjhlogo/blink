@@ -19,7 +19,7 @@ namespace blink
     {
         //
         destroyRenderSystems();
-        m_ecsWorld.destroySystems();
+        m_ecsWorld.destroyAllSystems();
     }
 
     void IApp::stepEcsWorld()

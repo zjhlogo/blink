@@ -34,7 +34,8 @@ namespace blink
         virtual VkDeviceSize getVertexInputOffset(uint32 inputMask) const = 0;
         virtual VkDeviceSize getIndicesOffset() const = 0;
 
-        bool hasAllVertexInputs(uint32 requireInputMask) const;
+        bool checkInputMask(uint32 requireInputMask) const;
+        VkPrimitiveTopology getTopology() const { return m_topology; }
 
     protected:
         IGeometry(VulkanLogicalDevice& logicalDevice);
@@ -45,6 +46,8 @@ namespace blink
 
         uint32 m_numVertices{};
         uint32 m_numIndices{};
+
         uint32 m_vertexInputMask{};
+        VkPrimitiveTopology m_topology{VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST};
     };
 } // namespace blink

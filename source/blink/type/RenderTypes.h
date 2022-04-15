@@ -41,26 +41,4 @@ namespace blink
         alignas(16) glm::mat4 matLocalToWorld;
         alignas(16) glm::mat3x4 matLocalToWorldInvT;
     };
-
-    struct RenderDataGeo
-    {
-        glm::vec3 pos;
-        glm::quat rot;
-        PerInstanceUniforms piu;
-        IGeometry* geometry;
-    };
-
-    struct RenderDataLight
-    {
-        glm::vec3 pos;
-        glm::vec3 color;
-        float intensity;
-    };
-
-    struct RenderFeatureData
-    {
-        int order;
-        Material* material;
-    };
-
 } // namespace blink

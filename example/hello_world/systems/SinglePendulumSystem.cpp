@@ -12,6 +12,7 @@
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
 #include <physics/components/Components.h>
+#include <blink/systems/DebugLineSystem.h>
 
 bool SinglePendulumSystem::initialize()
 {
@@ -53,4 +54,18 @@ bool SinglePendulumSystem::initialize()
 void SinglePendulumSystem::terminate()
 {
     //
+}
+
+void SinglePendulumSystem::framePostUpdate()
+{
+    static auto pendulumQuery = m_ecsWorld->getWorld().query_builder<const blink::Position, const SinglePendulum>().build();
+
+    auto debugLineSystem = m_ecsWorld->findSystem<blink::DebugLineSystem>();
+
+    pendulumQuery.each(
+        [&](flecs::entity e, const blink::Position& pos, const SinglePendulum& pendulum)
+        {
+            // add debug line
+            debugLineSystem->addLine(pendulum.anchorPoint, pos.value);
+        });
 }

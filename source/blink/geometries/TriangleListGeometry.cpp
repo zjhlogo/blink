@@ -63,6 +63,7 @@ namespace blink
 
         m_vertexInputMask = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Normal
                             | VulkanPipeline::InputLocation_Uv0;
+        m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
         return true;
     }

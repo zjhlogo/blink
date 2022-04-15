@@ -48,7 +48,10 @@ namespace blink
 
         operator VkPipeline() const { return m_pipeline; };
 
-        bool create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe = false, bool lineList = false);
+        bool create(const tstring& vertexShader,
+                    const tstring& fragmentShader,
+                    VkPolygonMode polygonMode,
+                    VkPrimitiveTopology topology);
         bool recreate();
         void destroy();
 
@@ -71,8 +74,8 @@ namespace blink
                                           const std::vector<uint8>& fragmentShaderCode,
                                           const std::vector<VkVertexInputBindingDescription>& bindings,
                                           const std::vector<VkVertexInputAttributeDescription>& attributes,
-                                          bool wireframe,
-                                          bool lineList);
+                                          VkPolygonMode polygonMode,
+                                          VkPrimitiveTopology topology);
         void destroyGraphicsPipeline();
 
         VkShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
@@ -96,8 +99,8 @@ namespace blink
         uint32 m_vertexInputMasks{};
         tstring m_vertexShader;
         tstring m_fragmentShader;
-        bool m_wireframe{};
-        bool m_lineList{};
+        VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};
+        VkPrimitiveTopology m_topology{VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST};
     };
 
 } // namespace blink

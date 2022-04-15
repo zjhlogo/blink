@@ -37,8 +37,8 @@ bool EntityCreationSystem::initialize()
 
     // create camera
     m_camera = world.entity("camera");
-    m_camera.set<blink::Position>({glm::vec3(0.0f, 20.0f, 0.0f)});
-    m_camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f))});
+    m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 30.0f)});
+    m_camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))});
     m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 100.0f});
 
     // light
@@ -114,7 +114,7 @@ bool EntityCreationSystem::initialize()
     // e2.set<blink::Rotation>({glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f))});
     // e2.set<blink::StaticModel>({m_geometry, m_wireframe });
 
-    // world.entity().set<blink::RenderFeature>({0, "resource/materials/wireframe.mtl"});
+    world.entity().set<blink::RenderFeature>({blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
 
     return true;
 }

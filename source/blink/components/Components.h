@@ -10,6 +10,9 @@
 **/
 #pragma once
 
+#include "../type/RenderLayers.h"
+#include "../type/RenderOrders.h"
+
 #include <foundation/BaseTypesGlm.h>
 
 namespace blink
@@ -37,9 +40,15 @@ namespace blink
         float intensity;
     };
 
+    struct Renderable
+    {
+        uint32 renderLayer; // see RenderLayers
+    };
+
     struct RenderFeature
     {
         int order;
-        Material* material;
+        uint32 renderLayer; // see RenderLayers
+        Material* overrideMaterial;
     };
 } // namespace blink

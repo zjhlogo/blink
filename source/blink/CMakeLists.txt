@@ -15,6 +15,7 @@ geometries_builder/BoxBuilder.cpp
 geometries_builder/BoxBuilder.h
 geometries_builder/IGeometryBuilder.cpp
 geometries_builder/IGeometryBuilder.h
+geometries_builder/LineBuilder.h
 geometries_builder/LineListBuilder.cpp
 geometries_builder/LineListBuilder.h
 geometries_builder/MeshBuilder.cpp
@@ -31,8 +32,12 @@ resources/IResource.cpp
 resources/IResource.h
 resources/ResourceMgr.cpp
 resources/ResourceMgr.h
+systems/DebugLineSystem.cpp
+systems/DebugLineSystem.h
 textures/Texture2d.cpp
 textures/Texture2d.h
+type/RenderLayers.h
+type/RenderOrders.h
 type/RenderTypes.h
 app.cpp
 app.h

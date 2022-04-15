@@ -10,6 +10,8 @@
 #include "EcsWorld.h"
 #include "base/ILogicalSystem.h"
 
+#include <foundation/Log.h>
+
 namespace blink
 {
     static int my_run_action(ecs_world_t* world, ecs_app_desc_t* desc)
@@ -57,7 +59,7 @@ namespace blink
         return true;
     }
 
-    void EcsWorld::destroySystems()
+    void EcsWorld::destroyAllSystems()
     {
         for (int i = (int)m_logicalSystems.size() - 1; i >= 0; --i)
         {
@@ -69,6 +71,8 @@ namespace blink
 
     void EcsWorld::step()
     {
+        //LOGI("frame tick: {0}", m_frameTick);
+
         for (auto sys : m_logicalSystems)
         {
             sys->framePreUpdate();
@@ -81,5 +85,7 @@ namespace blink
         {
             sys->framePostUpdate();
         }
+
+        ++m_frameTick;
     }
 } // namespace blink

@@ -18,6 +18,7 @@
 #include <blink/components/Components.h>
 #include <blink/materials/Material.h>
 #include <blink/resources/ResourceMgr.h>
+#include <blink/systems/DebugLineSystem.h>
 #include <core/systems/AngularVelocitySystem.h>
 #include <core/systems/LinearVelocitySystem.h>
 #include <flecs/flecs_os_api_stdcpp.h>
@@ -64,6 +65,8 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 
     // add user command system
     m_ecsWorld.addSystem(new UserCommandSystem());
+
+    m_ecsWorld.addSystem(new blink::DebugLineSystem());
 
     if (!m_ecsWorld.initialize()) return false;
 

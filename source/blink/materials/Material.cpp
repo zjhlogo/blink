@@ -67,7 +67,13 @@ namespace blink
                                      const VkDescriptorBufferInfo& piubi)
     {
         auto inputMask = m_pipeline->getVertexInputMask();
-        if (!geometry->hasAllVertexInputs(inputMask)) return false;
+        if (!geometry->checkInputMask(inputMask)) return false;
+        if (m_topology != geometry->getTopology()) return false;
+
+        if (m_topology == VK_PRIMITIVE_TOPOLOGY_LINE_LIST)
+        {
+            vkCmdSetLineWidth(commandBuffer, 1.0f);
+        }
 
         VkBuffer buffer = *geometry->getVulkanBuffer();
 
@@ -96,7 +102,7 @@ namespace blink
         loadTextures();
 
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
-        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_wireframe, m_lineList))
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_polygonMode, m_topology))
         {
             return false;
         }
@@ -127,8 +133,8 @@ namespace blink
         m_filePath.clear();
         m_vertexShader.clear();
         m_fragmentShader.clear();
-        m_wireframe = false;
-        m_lineList = false;
+        m_polygonMode = VK_POLYGON_MODE_FILL;
+        m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         m_texturePaths.clear();
     }
 
@@ -178,7 +184,10 @@ namespace blink
             auto jwireframe = j["wireframe"];
             if (!jwireframe.is_null())
             {
-                m_wireframe = jwireframe.get<bool>();
+                if (jwireframe.get<bool>())
+                {
+                    m_polygonMode = VK_POLYGON_MODE_LINE;
+                }
             }
         }
 
@@ -187,7 +196,10 @@ namespace blink
             auto jlinelist = j["line_list"];
             if (!jlinelist.is_null())
             {
-                m_lineList = jlinelist.get<bool>();
+                if (jlinelist.get<bool>())
+                {
+                    m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+                }
             }
         }
 

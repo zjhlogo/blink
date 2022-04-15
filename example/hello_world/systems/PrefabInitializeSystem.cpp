@@ -8,6 +8,7 @@
  *********************************************************************/
 #include "PrefabInitializeSystem.h"
 
+#include <blink/components/Components.h>
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
 #include <physics/components/Components.h>
@@ -37,7 +38,8 @@ bool PrefabInitializeSystem::initialize()
                           .set_override<blink::PhysicsVelocity>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>()})
                           .set_override<blink::PhysicsMass>(blink::PhysicsMass(1.0f, glm::identity<glm::mat3>()))
                           .set_override<blink::PhysicsDamping>({0.9f, 0.9f})
-                          .set_override<blink::PhysicsAccumulate>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>()});
+                          .set_override<blink::PhysicsAccumulate>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>()})
+                          .set_override<blink::Renderable>({blink::RenderLayers::NORMAL});
 
     return true;
 }

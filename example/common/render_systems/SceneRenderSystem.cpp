@@ -21,6 +21,22 @@
 #include <map>
 #include <unordered_map>
 
+struct RenderDataGeo
+{
+    glm::vec3 pos;
+    glm::quat rot;
+    blink::PerInstanceUniforms piu;
+    blink::IGeometry* geometry;
+    blink::uint32 renderLayer;
+};
+
+struct RenderDataLight
+{
+    glm::vec3 pos;
+    glm::vec3 color;
+    float intensity;
+};
+
 SceneRenderSystem::SceneRenderSystem(blink::IApp* app)
     : m_app(app)
 {
@@ -50,7 +66,7 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
     const auto& world = m_app->getEcsWorld().getWorld();
 
     // collect light data
-    blink::RenderDataLight rdLight{};
+    RenderDataLight rdLight{};
     {
         static auto lightDataQuery = world.query_builder<const blink::Position, const blink::LightData>().build();
         lightDataQuery.each(
@@ -91,12 +107,20 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
     }
 
     // group render object by materials
-    std::unordered_map<blink::Material*, std::vector<blink::RenderDataGeo>> renderDatas;
+    std::unordered_map<blink::Material*, std::vector<RenderDataGeo>> renderDatas;
     {
-        static auto staticModelQuery =
-            world.query_builder<const blink::Position, const blink::Rotation, const blink::StaticModel>().build();
-        staticModelQuery.each(
-            [&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::StaticModel& model)
+        static auto renderObjQuery = world
+                                         .query_builder<const blink::Position,
+                                                        const blink::Rotation,
+                                                        const blink::Renderable,
+                                                        const blink::StaticModel>()
+                                         .build();
+        renderObjQuery.each(
+            [&](flecs::entity e,
+                const blink::Position& pos,
+                const blink::Rotation& rot,
+                const blink::Renderable& renderable,
+                const blink::StaticModel& model)
             {
                 auto material = model.material;
                 if (!material) return;
@@ -111,95 +135,101 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
                 auto findIt = renderDatas.find(material);
                 if (findIt != renderDatas.end())
                 {
-                    findIt->second.push_back({pos.value, rot.value, piu, geometry});
+                    findIt->second.push_back({pos.value, rot.value, piu, geometry, renderable.renderLayer});
                 }
                 else
                 {
-                    std::vector<blink::RenderDataGeo> dataLists;
-                    dataLists.push_back({pos.value, rot.value, piu, geometry});
+                    std::vector<RenderDataGeo> dataLists;
+                    dataLists.push_back({pos.value, rot.value, piu, geometry, renderable.renderLayer});
                     renderDatas.emplace(material, dataLists);
                 }
             });
     }
 
     // group render features
-    std::map<int, blink::RenderFeatureData> renderFeatureDatas;
+    std::map<int, blink::RenderFeature> renderFeatures;
     {
         static auto renderFeatureQuery = world.query_builder<const blink::RenderFeature>().build();
         renderFeatureQuery.each(
-            [&](flecs::entity e, const blink::RenderFeature& feature)
+            [&](flecs::entity e, const blink::RenderFeature& renderFeature)
             {
-                auto findIt = renderFeatureDatas.find(feature.order);
-                if (findIt != renderFeatureDatas.end())
+                auto findIt = renderFeatures.find(renderFeature.order);
+                if (findIt != renderFeatures.end())
                 {
-                    LOGE("duplicate render feature order {0} <-> {1}",
-                         findIt->second.material->getId(),
-                         feature.material->getId());
+                    LOGE("duplicate render feature order {0}", renderFeature.order);
                 }
                 else
                 {
-                    auto material = feature.material;
-                    if (!material) return;
-
-                    blink::RenderFeatureData renderFeatureData{feature.order, material};
-                    renderFeatureDatas.emplace(feature.order, renderFeatureData);
+                    renderFeatures.emplace(renderFeature.order, renderFeature);
                 }
             });
     }
 
     // start rendering
+    // for each camera
     for (const auto& pfu : pfus)
     {
         // bind per camera uniforms
         VkDescriptorBufferInfo pfubi{};
         pfub.appendData(&pfu, sizeof(pfu), &pfubi);
 
-        // render mesh group by material
-        for (const auto& kvp : renderDatas)
-        {
-            blink::Material* material = kvp.first;
-
-            material->bindPipeline(commandBuffer);
-
-            // bind per material uniform
-            VkDescriptorBufferInfo pmubi{};
-            material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
-
-            for (const auto& renderData : kvp.second)
-            {
-                // bind per instance uniform
-                VkDescriptorBufferInfo piubi{};
-                piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
-
-                // update vertex input and uniform buffers
-                material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
-
-                vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
-            }
-        }
-
         // render features
-        for (const auto& kvpFeature : renderFeatureDatas)
+        for (const auto& kvpFeature : renderFeatures)
         {
-            blink::Material* material = kvpFeature.second.material;
-            material->bindPipeline(commandBuffer);
+            const auto& renderFeatureData = kvpFeature.second;
 
-            // bind per material uniform
-            VkDescriptorBufferInfo pmubi{};
-            material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
-
-            for (const auto& kvp : renderDatas)
+            if (renderFeatureData.overrideMaterial == nullptr)
             {
-                for (const auto& renderData : kvp.second)
+                // render mesh group by material
+                for (const auto& kvp : renderDatas)
                 {
-                    // bind per instance uniform
-                    VkDescriptorBufferInfo piubi{};
-                    piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
+                    blink::Material* material = kvp.first;
 
-                    // update vertex input and uniform buffers
-                    material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
+                    material->bindPipeline(commandBuffer);
 
-                    vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                    // bind per material uniform
+                    VkDescriptorBufferInfo pmubi{};
+                    material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
+
+                    for (const auto& renderData : kvp.second)
+                    {
+                        if ((renderData.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+
+                        // bind per instance uniform
+                        VkDescriptorBufferInfo piubi{};
+                        piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
+
+                        // update vertex input and uniform buffers
+                        material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
+
+                        vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                    }
+                }
+            }
+            else
+            {
+                blink::Material* material = renderFeatureData.overrideMaterial;
+                material->bindPipeline(commandBuffer);
+
+                // bind per material uniform
+                VkDescriptorBufferInfo pmubi{};
+                material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
+
+                for (const auto& kvp : renderDatas)
+                {
+                    for (const auto& renderData : kvp.second)
+                    {
+                        if ((renderData.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+
+                        // bind per instance uniform
+                        VkDescriptorBufferInfo piubi{};
+                        piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
+
+                        // update vertex input and uniform buffers
+                        material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
+
+                        vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                    }
                 }
             }
         }

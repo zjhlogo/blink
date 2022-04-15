@@ -73,8 +73,8 @@ namespace blink
         tstring m_filePath;
         tstring m_vertexShader;
         tstring m_fragmentShader;
-        bool m_wireframe{};
-        bool m_lineList{};
+        VkPolygonMode m_polygonMode{ VK_POLYGON_MODE_FILL };
+        VkPrimitiveTopology m_topology{ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
         std::vector<tstring> m_texturePaths;
 
         VulkanPipeline* m_pipeline{};
@@ -82,6 +82,7 @@ namespace blink
         std::vector<VkDescriptorImageInfo> m_imageInfos;
 
         PerMaterialUniforms m_pmu{0.5f, 0.5f, glm::vec3(1.0f, 0.0f, 1.0f)};
+
     };
 
 } // namespace blink

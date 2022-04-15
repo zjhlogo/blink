@@ -32,7 +32,7 @@ namespace blink
         ResourceMgr::getInstance().releaseGeometry(this);
     }
 
-    bool IGeometry::hasAllVertexInputs(uint32 requireInputMask) const
+    bool IGeometry::checkInputMask(uint32 requireInputMask) const
     {
         return (requireInputMask & m_vertexInputMask) == requireInputMask;
     }
