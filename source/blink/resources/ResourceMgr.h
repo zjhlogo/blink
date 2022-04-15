@@ -10,6 +10,8 @@
 **/
 #pragma once
 
+#include "../geometries/IGeometry.h"
+
 #include <foundation/BaseTypes.h>
 
 #include <unordered_map>
@@ -20,9 +22,7 @@ namespace blink
     class VulkanSwapchain;
 
     class Texture2d;
-    class Geometry;
     class Material;
-    class IGeometryBuilder;
 
     class ResourceMgr
     {
@@ -39,9 +39,25 @@ namespace blink
         Texture2d* createTexture2d(const tstring& filePath);
         void releaseTexture2d(Texture2d* texture);
 
-        Geometry* createGeometry(const IGeometryBuilder& builder, bool calcInertiaTensor = false);
-        Geometry* createGeometry(const tstring& filePath, bool calcInertiaTensor = false);
-        void releaseGeometry(Geometry* geometry);
+        template <typename T, typename = std::enable_if_t<std::is_base_of<IGeometry, T>::value>>
+        T* createGeometry(const tstring& uniqueId)
+        {
+            auto it = m_geometryMap.find(uniqueId);
+            if (it != m_geometryMap.end())
+            {
+                it->second->incRef();
+                return dynamic_cast<T*>(it->second);
+            }
+
+            auto geometry = new T(*m_logicalDevice);
+            geometry->setId(uniqueId);
+            geometry->incRef();
+            m_geometryMap.emplace(std::make_pair(geometry->getId(), geometry));
+
+            return geometry;
+        }
+
+        void releaseGeometry(IGeometry* geometry);
 
         Material* createMaterial(const tstring& filePath);
         void releaseMaterial(Material* material);
@@ -55,7 +71,8 @@ namespace blink
         VulkanSwapchain* m_swapchain{};
 
         std::unordered_map<tstring, Texture2d*> m_texture2dMap;
-        std::unordered_map<tstring, Geometry*> m_geometryMap;
+        std::unordered_map<tstring, IGeometry*> m_geometryMap;
         std::unordered_map<tstring, Material*> m_materialMap;
     };
+
 } // namespace blink

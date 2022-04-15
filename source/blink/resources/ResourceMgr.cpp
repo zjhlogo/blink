@@ -10,9 +10,6 @@
 **/
 
 #include "ResourceMgr.h"
-#include "../geometries/Geometry.h"
-#include "../geometries/builder/IGeometryBuilder.h"
-#include "../geometries/builder/MeshBuilder.h"
 #include "../materials/Material.h"
 #include "../textures/Texture2d.h"
 
@@ -115,71 +112,7 @@ namespace blink
         }
     }
 
-    Geometry* ResourceMgr::createGeometry(const IGeometryBuilder& builder, bool calcInertiaTensor)
-    {
-        auto uniqueId = builder.getUniqueId();
-
-        auto it = m_geometryMap.find(uniqueId);
-        if (it != m_geometryMap.end())
-        {
-            it->second->incRef();
-            return it->second;
-        }
-
-        // create new
-        std::vector<glm::vec3> vertsPos;
-        std::vector<glm::vec3> vertsNormal;
-        std::vector<glm::vec2> vertsUv0;
-        std::vector<uint16> indices;
-        if (!builder.build(vertsPos, indices, &vertsNormal, &vertsUv0))
-        {
-            return nullptr;
-        }
-
-        auto geometry = new Geometry(*m_logicalDevice);
-        if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0, calcInertiaTensor))
-        {
-            SAFE_DELETE(geometry);
-            return nullptr;
-        }
-
-        geometry->setId(uniqueId);
-        geometry->incRef();
-        m_geometryMap.emplace(std::make_pair(geometry->getId(), geometry));
-
-        return geometry;
-    }
-
-    Geometry* ResourceMgr::createGeometry(const tstring& filePath, bool calcInertiaTensor)
-    {
-        MeshBuilder builder;
-        builder.filePath(filePath);
-
-        auto uniqueId = builder.getUniqueId();
-
-        auto it = m_geometryMap.find(uniqueId);
-        if (it != m_geometryMap.end())
-        {
-            it->second->incRef();
-            return it->second;
-        }
-
-        // create new
-        auto geometry = new Geometry(*m_logicalDevice);
-        if (!builder.build(geometry, calcInertiaTensor))
-        {
-            SAFE_DELETE(geometry);
-            return nullptr;
-        }
-
-        geometry->setId(uniqueId);
-        geometry->incRef();
-        m_geometryMap.emplace(std::make_pair(geometry->getId(), geometry));
-
-        return geometry;
-    }
-
-    void ResourceMgr::releaseGeometry(Geometry* geometry)
+    void ResourceMgr::releaseGeometry(IGeometry* geometry)
     {
         auto it = m_geometryMap.find(geometry->getId());
         if (it != m_geometryMap.end())

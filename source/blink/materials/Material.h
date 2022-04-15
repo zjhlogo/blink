@@ -27,7 +27,7 @@ namespace blink
     class VulkanUniformBuffer;
     class Texture2d;
     class ResourceMgr;
-    class Geometry;
+    class IGeometry;
 
     class Material : public IResource
     {
@@ -39,7 +39,7 @@ namespace blink
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
         bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pmub, VkDescriptorBufferInfo& pmubi);
         bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
-                               Geometry* geometry,
+                               IGeometry* geometry,
                                const VkDescriptorBufferInfo& pfubi,
                                const VkDescriptorBufferInfo& pmubi,
                                const VkDescriptorBufferInfo& piubi);
@@ -74,6 +74,7 @@ namespace blink
         tstring m_vertexShader;
         tstring m_fragmentShader;
         bool m_wireframe{};
+        bool m_lineList{};
         std::vector<tstring> m_texturePaths;
 
         VulkanPipeline* m_pipeline{};

@@ -14,10 +14,10 @@
 #include "PrefabInitializeSystem.h"
 
 #include <blink/components/Components.h>
-#include <blink/geometries/builder/BoxBuilder.h>
-#include <blink/geometries/builder/PlaneBuilder.h>
-#include <blink/geometries/builder/SphereUvBuilder.h>
-#include <blink/geometries/builder/TetrahedronBuilder.h>
+#include <blink/geometries_builder/BoxBuilder.h>
+#include <blink/geometries_builder/PlaneBuilder.h>
+#include <blink/geometries_builder/SphereUvBuilder.h>
+#include <blink/geometries_builder/TetrahedronBuilder.h>
 #include <blink/materials/Material.h>
 #include <blink/resources/ResourceMgr.h>
 #include <core/EcsWorld.h>
@@ -45,6 +45,8 @@ bool EntityCreationSystem::initialize()
     m_light = world.entity("light");
     m_light.set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)});
     m_light.set<blink::LightData>(m_lightData);
+
+    glm::mat3 inertiaTensor;
 
     //// load plane
     //{
@@ -85,13 +87,13 @@ bool EntityCreationSystem::initialize()
         m_sphere.set<blink::Position>({glm::vec3(5.0f, -5.0f, 0.0f)});
 
         blink::SphereUvBuilder builder;
-        auto geometry = blink::ResourceMgr::getInstance().createGeometry(builder, true);
-        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/wireframe.mtl");
+        auto geometry = builder.build(true, true, &inertiaTensor);
+        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
         m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(10.0f, glm::identity<glm::mat3>()));
         m_sphere.set<blink::PhysicsVelocity>({glm::vec3(-0.1f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
         m_sphere.set<blink::PhysicsDamping>({0.95f, 0.95f});
-        m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, geometry->getInertiaTensor()));
+        m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, inertiaTensor));
         m_sphere.set<SinglePendulum>({glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, -9.8f, 0.0f)});
     }
 

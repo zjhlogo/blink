@@ -10,7 +10,8 @@
 **/
 
 #include "MeshBuilder.h"
-#include "../../resources/ResourceMgr.h"
+#include "../geometries/TriangleListGeometry.h"
+#include "../resources/ResourceMgr.h"
 
 #include <foundation/File.h>
 #include <foundation/Log.h>
@@ -35,7 +36,7 @@ namespace blink
         return fmt::format("file_{0}", m_filePath);
     }
 
-    bool MeshBuilder::build(Geometry* geometry, bool calcInertiaTensor) const
+    IGeometry* MeshBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
     {
         tstring fileContent;
         if (!File::readFileIntoString(fileContent, m_filePath))
@@ -120,6 +121,7 @@ namespace blink
 
         const auto& buffer = model.buffers[buffViewPos.buffer];
 
+        auto geometry = ResourceMgr::getInstance().createGeometry<TriangleListGeometry>(getUniqueId());
         if (!geometry->uploadData(buffer.data.data(),
                                   buffer.data.size(),
                                   static_cast<uint32>(accessorPos.count),
@@ -127,12 +129,18 @@ namespace blink
                                   buffViewPos.byteOffset,
                                   buffViewNormal.byteOffset,
                                   buffViewUv0.byteOffset,
-                                  buffViewIndices.byteOffset,
-                                  calcInertiaTensor))
+                                  buffViewIndices.byteOffset))
         {
-            return false;
+            SAFE_RELEASE(geometry);
+            return nullptr;
         }
 
-        return true;
+        if (inertiaTensorOut)
+        {
+            *inertiaTensorOut = CalculateInertiaTensor((glm::vec3*)(buffer.data.data() + buffViewPos.byteOffset),
+                                                       accessorPos.count);
+        }
+
+        return geometry;
     }
 } // namespace blink

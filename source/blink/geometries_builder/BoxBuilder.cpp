@@ -10,6 +10,8 @@
 **/
 
 #include "BoxBuilder.h"
+#include "../geometries/TriangleListGeometry.h"
+#include "../resources/ResourceMgr.h"
 #include "PlaneBuilder.h"
 
 #include <foundation/BuiltinFormatter.h>
@@ -32,56 +34,79 @@ namespace blink
         return *this;
     }
 
-    tstring BoxBuilder::getUniqueId() const { return fmt::format("box_{0}_{1}", m_size, m_segment); }
-
-    bool BoxBuilder::build(std::vector<glm::vec3>& positionsOut,
-                           std::vector<uint16>& indicesOut,
-                           std::vector<glm::vec3>* normalsOut,
-                           std::vector<glm::vec2>* uvsOut) const
+    tstring BoxBuilder::getUniqueId() const
     {
+        //
+        return fmt::format("box_{0}_{1}", m_size, m_segment);
+    }
+
+    IGeometry* BoxBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
+    {
+        std::vector<glm::vec3> vertsPos;
+        std::vector<uint16> indices;
+        std::vector<glm::vec3> vertsNormal;
+        std::vector<glm::vec2> vertsUv0;
+
+        std::vector<glm::vec3>* pVertsNormal = nullptr;
+        std::vector<glm::vec2>* pVertsUv0 = nullptr;
+        if (buildNormal) pVertsNormal = &vertsNormal;
+        if (buildUv) pVertsUv0 = &vertsUv0;
+
         PlaneBuilder builder;
 
         // top
         builder.size(m_size.x, m_size.z)
             .segment(m_segment.x, m_segment.z)
             .translate(glm::vec3(0.0f, 0.5f * m_size.y, 0.0f))
-            .build(positionsOut, indicesOut, normalsOut, uvsOut);
+            .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // bottom
         builder.size(m_size.x, m_size.z)
             .segment(m_segment.x, m_segment.z)
             .orient(glm::angleAxis(glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f)))
             .translate(glm::vec3(0.0f, -0.5f * m_size.y, 0.0f))
-            .build(positionsOut, indicesOut, normalsOut, uvsOut);
+            .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // front
         builder.size(m_size.x, m_size.y)
             .segment(m_segment.x, m_segment.y)
             .orient(glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)))
             .translate(glm::vec3(0.0f, 0.0f, 0.5f * m_size.z))
-            .build(positionsOut, indicesOut, normalsOut, uvsOut);
+            .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // back
         builder.size(m_size.x, m_size.y)
             .segment(m_segment.x, m_segment.y)
             .orient(glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)))
             .translate(glm::vec3(0.0f, 0.0f, -0.5f * m_size.z))
-            .build(positionsOut, indicesOut, normalsOut, uvsOut);
+            .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // left
         builder.size(m_size.y, m_size.z)
             .segment(m_segment.y, m_segment.z)
             .orient(glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)))
             .translate(glm::vec3(-0.5f * m_size.x, 0.0f, 0.0f))
-            .build(positionsOut, indicesOut, normalsOut, uvsOut);
+            .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // right
         builder.size(m_size.y, m_size.z)
             .segment(m_segment.y, m_segment.z)
             .orient(glm::angleAxis(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f)))
             .translate(glm::vec3(0.5f * m_size.x, 0.0f, 0.0f))
-            .build(positionsOut, indicesOut, normalsOut, uvsOut);
+            .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
-        return true;
+        auto geometry = ResourceMgr::getInstance().createGeometry<TriangleListGeometry>(getUniqueId());
+        if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
+        {
+            SAFE_RELEASE(geometry);
+            return nullptr;
+        }
+
+        if (inertiaTensorOut)
+        {
+            *inertiaTensorOut = CalculateInertiaTensor(vertsPos.data(), vertsPos.size());
+        }
+
+        return geometry;
     }
 } // namespace blink

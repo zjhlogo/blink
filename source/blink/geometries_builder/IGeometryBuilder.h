@@ -10,7 +10,7 @@
 **/
 #pragma once
 
-#include "../Geometry.h"
+#include "../geometries/IGeometry.h"
 
 #include <foundation/BaseTypesGlm.h>
 
@@ -20,20 +20,12 @@ namespace blink
 {
     class VulkanLogicalDevice;
     class VulkanCommandPool;
-    class Geometry;
+    class IGeometry;
 
     class IGeometryBuilder
     {
     public:
         virtual tstring getUniqueId() const = 0;
-
-        virtual bool build(std::vector<glm::vec3>& positionsOut,
-                           std::vector<uint16>& indicesOut,
-                           std::vector<glm::vec3>* normalsOut = nullptr,
-                           std::vector<glm::vec2>* uvsOut = nullptr) const
-        {
-            return false;
-        };
 
         template <typename T> static void buildTangent(std::vector<T>& verts, const std::vector<uint16>& indis)
         {
@@ -132,5 +124,8 @@ namespace blink
                 }
             }
         }
+
+    protected:
+        glm::mat3 CalculateInertiaTensor(const glm::vec3* verts, std::size_t count) const;
     };
 } // namespace blink

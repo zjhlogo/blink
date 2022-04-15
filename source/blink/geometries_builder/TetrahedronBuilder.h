@@ -21,10 +21,7 @@ namespace blink
         TetrahedronBuilder& radius(float radius);
 
         virtual tstring getUniqueId() const override;
-        virtual bool build(std::vector<glm::vec3>& positionsOut,
-            std::vector<uint16>& indicesOut,
-            std::vector<glm::vec3>* normalsOut = nullptr,
-            std::vector<glm::vec2>* uvsOut = nullptr) const override;
+        IGeometry* build(bool buildNormal = true, bool buildUv = true, glm::mat3* inertiaTensorOut = nullptr) const;
 
     private:
         glm::vec3 m_center{};

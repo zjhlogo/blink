@@ -14,12 +14,12 @@
 
 namespace blink
 {
-    class Geometry;
+    class IGeometry;
     class Material;
 
     struct StaticModel
     {
-        Geometry* geometry;
+        IGeometry* geometry;
         Material* material;
     };
 

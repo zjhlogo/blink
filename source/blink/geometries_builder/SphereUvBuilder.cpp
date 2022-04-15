@@ -9,6 +9,8 @@
 
 **/
 #include "SphereUvBuilder.h"
+#include "../geometries/TriangleListGeometry.h"
+#include "../resources/ResourceMgr.h"
 
 #include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
@@ -42,16 +44,23 @@ namespace blink
         return fmt::format("sphereuv_{0}_{1}_{2}_{3}", m_center, m_radius, m_rings, m_sections);
     }
 
-    bool SphereUvBuilder::build(std::vector<glm::vec3>& positionsOut,
-                                std::vector<uint16>& indicesOut,
-                                std::vector<glm::vec3>* normalsOut,
-                                std::vector<glm::vec2>* uvsOut) const
+    IGeometry* SphereUvBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
     {
+        std::vector<glm::vec3> vertsPos;
+        std::vector<uint16> indices;
+        std::vector<glm::vec3> vertsNormal;
+        std::vector<glm::vec2> vertsUv0;
+
+        std::vector<glm::vec3>* pVertsNormal = nullptr;
+        std::vector<glm::vec2>* pVertsUv0 = nullptr;
+        if (buildNormal) pVertsNormal = &vertsNormal;
+        if (buildUv) pVertsUv0 = &vertsUv0;
+
         float const R = 1.0f / (m_rings - 1);
         float const S = 1.0f / m_sections;
 
         // calculate the vertex position
-        uint16 startIndex = static_cast<uint16>(positionsOut.size());
+        uint16 startIndex = static_cast<uint16>(vertsPos.size());
         for (uint16 r = 0; r < m_rings; ++r)
         {
             float const y = sin(-glm::half_pi<float>() + glm::pi<float>() * r * R);
@@ -60,9 +69,9 @@ namespace blink
                 float const x = sin(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
                 float const z = cos(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
 
-                positionsOut.push_back({x * m_radius + m_center.x, y * m_radius + m_center.y, z * m_radius + m_center.z});
-                if (normalsOut) normalsOut->push_back({x, y, z});
-                if (uvsOut) uvsOut->push_back({s * S, r * R});
+                vertsPos.push_back({x * m_radius + m_center.x, y * m_radius + m_center.y, z * m_radius + m_center.z});
+                if (pVertsNormal) pVertsNormal->push_back({x, y, z});
+                if (pVertsUv0) pVertsUv0->push_back({s * S, r * R});
             }
         }
 
@@ -74,16 +83,28 @@ namespace blink
 
             for (uint16 s = 0; s < m_sections; ++s)
             {
-                indicesOut.push_back(currRingIndex + s);
-                indicesOut.push_back(prevRingIndex + s);
-                indicesOut.push_back(currRingIndex + s + 1);
+                indices.push_back(currRingIndex + s);
+                indices.push_back(prevRingIndex + s);
+                indices.push_back(currRingIndex + s + 1);
 
-                indicesOut.push_back(currRingIndex + s + 1);
-                indicesOut.push_back(prevRingIndex + s);
-                indicesOut.push_back(prevRingIndex + s + 1);
+                indices.push_back(currRingIndex + s + 1);
+                indices.push_back(prevRingIndex + s);
+                indices.push_back(prevRingIndex + s + 1);
             }
         }
 
-        return true;
+        auto geometry = ResourceMgr::getInstance().createGeometry<TriangleListGeometry>(getUniqueId());
+        if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
+        {
+            SAFE_RELEASE(geometry);
+            return nullptr;
+        }
+
+        if (inertiaTensorOut)
+        {
+            *inertiaTensorOut = CalculateInertiaTensor(vertsPos.data(), vertsPos.size());
+        }
+
+        return geometry;
     }
 } // namespace blink

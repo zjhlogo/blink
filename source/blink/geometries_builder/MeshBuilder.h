@@ -22,7 +22,7 @@ namespace blink
         MeshBuilder& filePath(const tstring& filePath);
 
         virtual tstring getUniqueId() const;
-        bool build(Geometry* geometry, bool calcInertiaTensor = false) const;
+        IGeometry* build(bool buildNormal = true, bool buildUv = true, glm::mat3* inertiaTensorOut = nullptr) const;
 
     private:
         tstring m_filePath;

@@ -14,7 +14,7 @@
 
 namespace blink
 {
-    class Geometry;
+    class IGeometry;
     class Material;
 
     struct PerFrameUniforms
@@ -47,7 +47,7 @@ namespace blink
         glm::vec3 pos;
         glm::quat rot;
         PerInstanceUniforms piu;
-        Geometry* geometry;
+        IGeometry* geometry;
     };
 
     struct RenderDataLight

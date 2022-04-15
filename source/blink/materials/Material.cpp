@@ -10,7 +10,7 @@
 **/
 
 #include "Material.h"
-#include "../geometries/Geometry.h"
+#include "../geometries/IGeometry.h"
 #include "../resources/ResourceMgr.h"
 #include "../textures/Texture2d.h"
 
@@ -41,7 +41,7 @@ namespace blink
 
     void Material::release()
     {
-        // 
+        //
         ResourceMgr::getInstance().releaseMaterial(this);
     }
 
@@ -51,7 +51,9 @@ namespace blink
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
     }
 
-    bool Material::bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pmub, VkDescriptorBufferInfo& pmubi)
+    bool Material::bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
+                                           VulkanUniformBuffer& pmub,
+                                           VkDescriptorBufferInfo& pmubi)
     {
         pmub.appendData(&m_pmu, sizeof(m_pmu), &pmubi);
 
@@ -59,7 +61,7 @@ namespace blink
     }
 
     bool Material::updateBufferInfos(VulkanCommandBuffer& commandBuffer,
-                                     Geometry* geometry,
+                                     IGeometry* geometry,
                                      const VkDescriptorBufferInfo& pfubi,
                                      const VkDescriptorBufferInfo& pmubi,
                                      const VkDescriptorBufferInfo& piubi)
@@ -94,7 +96,7 @@ namespace blink
         loadTextures();
 
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
-        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_wireframe))
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_wireframe, m_lineList))
         {
             return false;
         }
@@ -126,6 +128,7 @@ namespace blink
         m_vertexShader.clear();
         m_fragmentShader.clear();
         m_wireframe = false;
+        m_lineList = false;
         m_texturePaths.clear();
     }
 
@@ -176,6 +179,15 @@ namespace blink
             if (!jwireframe.is_null())
             {
                 m_wireframe = jwireframe.get<bool>();
+            }
+        }
+
+        // linelist
+        {
+            auto jlinelist = j["line_list"];
+            if (!jlinelist.is_null())
+            {
+                m_lineList = jlinelist.get<bool>();
             }
         }
 

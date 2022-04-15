@@ -35,11 +35,12 @@ namespace blink
         destroy();
     }
 
-    bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe)
+    bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, bool wireframe, bool lineList)
     {
         m_vertexShader = vertexShader;
         m_fragmentShader = fragmentShader;
         m_wireframe = wireframe;
+        m_lineList = lineList;
 
         return recreate();
     }
@@ -64,7 +65,13 @@ namespace blink
         m_numTextures = (int)generateDescriptorSetLayout(layoutBindings, m_writeSets, fragmentShaderCode);
 
         if (createDescriptorSetLayout(layoutBindings) == VK_NULL_HANDLE) return false;
-        if (createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_wireframe) == VK_NULL_HANDLE)
+        if (createGraphicsPipeline(vertexShaderCode,
+                                   fragmentShaderCode,
+                                   vertexInputBindings,
+                                   vertexInputAttributes,
+                                   m_wireframe,
+                                   m_lineList)
+            == VK_NULL_HANDLE)
             return false;
 
         return true;
@@ -107,12 +114,20 @@ namespace blink
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                m_pipelineLayout,
+                                0,
+                                1,
+                                &descriptorSet,
+                                0,
+                                nullptr);
 
         return true;
     }
 
-    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
+    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(
+        const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
     {
         destroyDescriptorSetLayout();
 
@@ -143,7 +158,8 @@ namespace blink
                                                       const std::vector<uint8>& fragmentShaderCode,
                                                       const std::vector<VkVertexInputBindingDescription>& bindings,
                                                       const std::vector<VkVertexInputAttributeDescription>& attributes,
-                                                      bool wireframe)
+                                                      bool wireframe,
+                                                      bool lineList)
     {
         destroyGraphicsPipeline();
 
@@ -188,7 +204,7 @@ namespace blink
         // input assembly state
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        inputAssembly.topology = lineList ? VK_PRIMITIVE_TOPOLOGY_LINE_LIST : VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
         // viewport state
         const auto& extent = m_swapchain.getImageExtent();
@@ -229,7 +245,8 @@ namespace blink
 
         // color blending state
         VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT
+                                              | VK_COLOR_COMPONENT_A_BIT;
         colorBlendAttachment.blendEnable = VK_FALSE;
 
         VkPipelineColorBlendStateCreateInfo colorBlending{};

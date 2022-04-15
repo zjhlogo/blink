@@ -9,7 +9,7 @@
 #include "SceneRenderSystem.h"
 
 #include <blink/components/Components.h>
-#include <blink/geometries/Geometry.h>
+#include <blink/geometries/IGeometry.h>
 #include <blink/materials/Material.h>
 #include <blink/type/RenderTypes.h>
 #include <core/components/Components.h>
