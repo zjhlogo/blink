@@ -37,7 +37,7 @@ bool EntityCreationSystem::initialize()
 
     // create camera
     m_camera = world.entity("camera");
-    m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 30.0f)});
+    m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 20.0f)});
     m_camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))});
     m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 100.0f});
 
@@ -84,7 +84,7 @@ bool EntityCreationSystem::initialize()
     // load sphere
     {
         m_sphere = world.entity("sphere").is_a(prefabSystem->prefabRigidBody);
-        m_sphere.set<blink::Position>({glm::vec3(5.0f, -5.0f, 0.0f)});
+        m_sphere.set<blink::Position>({glm::vec3(5.0f, 0.0f, 0.0f)});
 
         blink::SphereUvBuilder builder;
         auto geometry = builder.build(true, true, &inertiaTensor);
