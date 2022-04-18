@@ -10,6 +10,8 @@
 
 #include "IGeometryBuilder.h"
 
+#include <core/base/Color.h>
+
 #include <vector>
 
 namespace blink
@@ -23,7 +25,7 @@ namespace blink
 
         virtual tstring getUniqueId() const override;
 
-        void addLine(const glm::vec3& start, const glm::vec3& end);
+        void addLine(const glm::vec3& start, const glm::vec3& end, const Color& color);
         void reset();
 
         bool build(LineListGeometry* geometry) const;
@@ -31,6 +33,7 @@ namespace blink
     private:
         int m_uniqueId{};
         std::vector<uint16> m_indices;
-        std::vector<glm::vec3> m_verts;
+        std::vector<glm::vec3> m_vertsPos;
+        std::vector<Color> m_vertsColor;
     };
 } // namespace blink

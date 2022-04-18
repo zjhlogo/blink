@@ -40,7 +40,8 @@ namespace blink
         static const uint32 InputLocation_Uv5 = 1 << 7;      // inTexCoord6
         static const uint32 InputLocation_Uv6 = 1 << 8;      // inTexCoord7
         static const uint32 InputLocation_Uv7 = 1 << 9;      // inTexCoord8
-        static const uint32 MaxInputLocationMaskBit = 10;
+        static const uint32 InputLocation_Color = 1 << 10;   // inColor
+        static const uint32 MaxInputLocationMaskBit = 11;
 
     public:
         VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);

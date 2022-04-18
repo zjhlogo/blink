@@ -70,7 +70,7 @@ namespace blink
         if (!geometry->checkInputMask(inputMask)) return false;
         if (m_topology != geometry->getTopology()) return false;
 
-        if (m_topology == VK_PRIMITIVE_TOPOLOGY_LINE_LIST)
+        if (m_topology == VK_PRIMITIVE_TOPOLOGY_LINE_LIST || m_topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP)
         {
             vkCmdSetLineWidth(commandBuffer, 1.0f);
         }

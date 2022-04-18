@@ -9,10 +9,10 @@
 #include "SinglePendulumSystem.h"
 #include "../components/PendulumComponents.h"
 
+#include <blink/systems/DebugLineSystem.h>
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
 #include <physics/components/Components.h>
-#include <blink/systems/DebugLineSystem.h>
 
 bool SinglePendulumSystem::initialize()
 {
@@ -66,6 +66,6 @@ void SinglePendulumSystem::framePostUpdate()
         [&](flecs::entity e, const blink::Position& pos, const SinglePendulum& pendulum)
         {
             // add debug line
-            debugLineSystem->addLine(pendulum.anchorPoint, pos.value);
+            debugLineSystem->addLine(pendulum.anchorPoint, pos.value, blink::Color::WHITE);
         });
 }

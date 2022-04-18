@@ -50,9 +50,9 @@ namespace blink
         m_lineListBuilder.reset();
     }
 
-    void DebugLineSystem::addLine(const glm::vec3& p1, const glm::vec3& p2)
+    void DebugLineSystem::addLine(const glm::vec3& p1, const glm::vec3& p2, const Color& color)
     {
         //
-        m_lineListBuilder.addLine(p1, p2);
+        m_lineListBuilder.addLine(p1, p2, color);
     }
 } // namespace blink

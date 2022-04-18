@@ -26,7 +26,9 @@ namespace blink
         destroy();
     }
 
-    bool LineListGeometry::uploadData(const std::vector<uint16>& indices, const std::vector<glm::vec3>& positions)
+    bool LineListGeometry::uploadData(const std::vector<uint16>& indices,
+                                      const std::vector<glm::vec3>& positions,
+                                      const std::vector<Color>& colors)
     {
         // swap buffer
         m_offsetIndices = 0;
@@ -36,17 +38,21 @@ namespace blink
         m_offsetPositions = ALIGN_BYTES_4(m_offsetIndices + sizeIndices);
         VkDeviceSize sizePositions = sizeof(glm::vec3) * positions.size();
 
+        m_offsetColors = ALIGN_BYTES_4(m_offsetPositions + sizePositions);
+        VkDeviceSize sizeColors = sizeof(Color) * colors.size();
+
         auto buffer = swapBuffer();
-        assert(buffer->getBufferSize() >= (m_offsetPositions + sizePositions));
+        assert(buffer->getBufferSize() >= (m_offsetColors + sizeColors));
 
         buffer->uploadBuffer(
             [&](void* destBuffer, VkDeviceSize destBufferSize)
             {
                 memcpy(((uint8*)destBuffer + m_offsetIndices), indices.data(), sizeIndices);
                 memcpy(((uint8*)destBuffer + m_offsetPositions), positions.data(), sizePositions);
+                memcpy(((uint8*)destBuffer + m_offsetColors), colors.data(), sizeColors);
             });
 
-        m_vertexInputMask = VulkanPipeline::InputLocation_Position;
+        m_vertexInputMask = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Color;
         m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
 
         return true;
@@ -57,6 +63,10 @@ namespace blink
         if (inputMask == VulkanPipeline::InputLocation_Position)
         {
             return m_offsetPositions;
+        }
+        else if (inputMask == VulkanPipeline::InputLocation_Color)
+        {
+            return m_offsetColors;
         }
 
         return 0;
@@ -71,6 +81,7 @@ namespace blink
 
         m_currentBuffer = 0;
         m_offsetPositions = 0;
+        m_offsetColors = 0;
         m_offsetIndices = 0;
     }
 

@@ -10,6 +10,8 @@
 
 #include "IGeometry.h"
 
+#include <core/base/Color.h>
+
 #include <vector>
 
 namespace blink
@@ -27,7 +29,9 @@ namespace blink
         static const VkDeviceSize DEFAULT_BUFFER_SIZE = 32 * 1024;
 
     public:
-        bool uploadData(const std::vector<uint16>& indices, const std::vector<glm::vec3>& positions);
+        bool uploadData(const std::vector<uint16>& indices,
+                        const std::vector<glm::vec3>& positions,
+                        const std::vector<Color>& colors);
 
         virtual VulkanBuffer* getVulkanBuffer() const override { return m_bufferList[m_currentBuffer]; }
         virtual VkDeviceSize getVertexInputOffset(uint32 inputMask) const override;
@@ -45,6 +49,7 @@ namespace blink
         VulkanBuffer* m_bufferList[BUFFER_COUNT]{};
 
         VkDeviceSize m_offsetPositions{};
+        VkDeviceSize m_offsetColors{};
         VkDeviceSize m_offsetIndices{};
     };
 } // namespace blink

@@ -4,6 +4,8 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(libcore)
 
 set(SOURCE_FILES
+base/Color.cpp
+base/Color.h
 base/ILogicalSystem.h
 components/Components.h
 systems/AngularVelocitySystem.cpp

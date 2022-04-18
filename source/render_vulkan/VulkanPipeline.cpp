@@ -328,9 +328,13 @@ namespace blink
         return shaderModule;
     }
 
-    static VkFormat getVertexInputFormat(const spirv_cross::SPIRType& type)
+    static VkFormat getVertexInputFormat(const spirv_cross::SPIRType& type, const tstring& name)
     {
-        if (type.basetype == spirv_cross::SPIRType::BaseType::Float && type.width == 32)
+        if (name == "inColor")
+        {
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        }
+        else if (type.basetype == spirv_cross::SPIRType::BaseType::Float && type.width == 32)
         {
             if (type.vecsize == 1)
             {
@@ -382,7 +386,7 @@ namespace blink
 
             attributeDesc[i].location = location;
             attributeDesc[i].binding = location;
-            attributeDesc[i].format = getVertexInputFormat(type);
+            attributeDesc[i].format = getVertexInputFormat(type, input.name);
             attributeDesc[i].offset = 0;
 
             // TODO: validate location

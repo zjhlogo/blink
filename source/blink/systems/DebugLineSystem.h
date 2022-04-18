@@ -8,8 +8,10 @@
  *********************************************************************/
 #pragma once
 
-#include <core/base/ILogicalSystem.h>
 #include "../geometries_builder/LineListBuilder.h"
+
+#include <core/base/Color.h>
+#include <core/base/ILogicalSystem.h>
 
 namespace blink
 {
@@ -25,7 +27,7 @@ namespace blink
         virtual void terminate() override;
         virtual void framePostUpdate() override;
 
-        void addLine(const glm::vec3& p1, const glm::vec3& p2);
+        void addLine(const glm::vec3& p1, const glm::vec3& p2, const Color& color);
 
     private:
         flecs::entity m_debug;
@@ -33,7 +35,6 @@ namespace blink
         LineListBuilder m_lineListBuilder;
         Material* m_debugMaterial{};
         LineListGeometry* m_debugGeometry{};
-
     };
 
 } // namespace blink
