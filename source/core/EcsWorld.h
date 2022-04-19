@@ -22,6 +22,10 @@ namespace blink
     class EcsWorld
     {
     public:
+        static const float FIXED_FPS;
+        static const float FIXED_DT;
+
+    public:
         EcsWorld();
 
         bool initialize();

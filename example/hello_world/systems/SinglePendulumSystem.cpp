@@ -43,6 +43,7 @@ bool SinglePendulumSystem::initialize()
 
                 // update position
                 pos.value += velocityTangent * dt;
+                pos.value = sp.anchorPoint + glm::normalize(pos.value - sp.anchorPoint) * sp.length;
 
                 // update velocity
                 pv.linearVelocity = velocityTangent * glm::pow(pd.linearDamping, dt);
@@ -66,6 +67,6 @@ void SinglePendulumSystem::framePostUpdate()
         [&](flecs::entity e, const blink::Position& pos, const SinglePendulum& pendulum)
         {
             // add debug line
-            debugLineSystem->addLine(pendulum.anchorPoint, pos.value, blink::Color::WHITE);
+            debugLineSystem->addLine(pendulum.anchorPoint, pos.value, blink::Color::RED);
         });
 }

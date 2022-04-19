@@ -19,7 +19,7 @@ namespace blink
 {
     bool DebugLineSystem::initialize()
     {
-        m_debugMaterial = ResourceMgr::getInstance().createMaterial("resource/materials/wireframe_linelist.mtl");
+        m_debugMaterial = ResourceMgr::getInstance().createMaterial("resource/materials/debug_line.mtl");
         m_debugGeometry = ResourceMgr::getInstance().createGeometry<LineListGeometry>(m_lineListBuilder.getUniqueId());
 
         auto& world = m_ecsWorld->getWorld();

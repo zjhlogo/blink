@@ -1,3 +1,6 @@
+glslc -o debug_line.frag.spv debug_line.frag
+glslc -o debug_line.vert.spv debug_line.vert
+
 glslc -o wireframe.frag.spv wireframe.frag
 glslc -o wireframe.vert.spv wireframe.vert
 

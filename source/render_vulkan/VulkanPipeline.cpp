@@ -330,6 +330,7 @@ namespace blink
 
     static VkFormat getVertexInputFormat(const spirv_cross::SPIRType& type, const tstring& name)
     {
+        // TODO: find a better way to check the color input
         if (name == "inColor")
         {
             return VK_FORMAT_R8G8B8A8_UNORM;
@@ -380,14 +381,21 @@ namespace blink
             auto location = glsl.get_decoration(input.id, spv::DecorationLocation);
             // auto binding = glsl.get_decoration(input.id, spv::DecorationBinding);
 
-            bindingDesc[i].binding = location;
-            bindingDesc[i].stride = (type.vecsize * type.width) >> 3;
-            bindingDesc[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
             attributeDesc[i].location = location;
             attributeDesc[i].binding = location;
             attributeDesc[i].format = getVertexInputFormat(type, input.name);
             attributeDesc[i].offset = 0;
+
+            bindingDesc[i].binding = location;
+            if (attributeDesc[i].format == VK_FORMAT_R8G8B8A8_UNORM)
+            {
+                bindingDesc[i].stride = 4;
+            }
+            else
+            {
+                bindingDesc[i].stride = (type.vecsize * type.width) >> 3;
+            }
+            bindingDesc[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
             // TODO: validate location
             vertexInputMasks |= (1 << location);

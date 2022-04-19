@@ -12,6 +12,7 @@
 
 #include <core/EcsWorld.h>
 
+#include <chrono>
 #include <vector>
 
 namespace blink
@@ -24,7 +25,7 @@ namespace blink
     class IApp
     {
     public:
-        IApp(){};
+        IApp();
         virtual ~IApp();
 
         virtual bool initialize(VulkanRenderModule& renderModule) = 0;
@@ -46,6 +47,10 @@ namespace blink
 
     protected:
         EcsWorld m_ecsWorld;
+        std::chrono::steady_clock::time_point m_lastTime;
+        float m_deltaTime{};
+        float m_elapseTime{};
+
         std::vector<IRenderSystem*> m_renderSystems;
     };
 

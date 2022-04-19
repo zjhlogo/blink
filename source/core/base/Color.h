@@ -17,9 +17,9 @@ namespace blink
         uint32 value;
         struct
         {
-            uint8 b;
-            uint8 g;
             uint8 r;
+            uint8 g;
+            uint8 b;
             uint8 a;
         };
 

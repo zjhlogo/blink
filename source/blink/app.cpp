@@ -15,17 +15,30 @@
 
 namespace blink
 {
-    IApp::~IApp()
+    IApp::IApp()
     {
         //
+        m_lastTime = std::chrono::steady_clock::now();
+    }
+
+    IApp::~IApp()
+    {
         destroyRenderSystems();
         m_ecsWorld.destroyAllSystems();
     }
 
     void IApp::stepEcsWorld()
     {
-        //
-        m_ecsWorld.step();
+        auto currTime = std::chrono::steady_clock::now();
+        m_deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(currTime - m_lastTime).count() / 1000.0f;
+        m_lastTime = currTime;
+
+        m_elapseTime += m_deltaTime;
+        while (m_elapseTime > EcsWorld::FIXED_DT)
+        {
+            m_elapseTime -= ((int)(m_elapseTime / EcsWorld::FIXED_DT) * EcsWorld::FIXED_DT);
+            m_ecsWorld.step();
+        }
     }
 
     void IApp::render(VulkanCommandBuffer& commandBuffer,

@@ -37,9 +37,9 @@ bool EntityCreationSystem::initialize()
 
     // create camera
     m_camera = world.entity("camera");
-    m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 20.0f)});
+    m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 100.0f)});
     m_camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))});
-    m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 100.0f});
+    m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 1000.0f});
 
     // light
     m_light = world.entity("light");
@@ -84,17 +84,20 @@ bool EntityCreationSystem::initialize()
     // load sphere
     {
         m_sphere = world.entity("sphere").is_a(prefabSystem->prefabRigidBody);
-        m_sphere.set<blink::Position>({glm::vec3(5.0f, 0.0f, 0.0f)});
+
+        auto pos = glm::vec3(20.0f, 0.0f, 0.0f);
+        auto anchorPos = glm::vec3(0.0f, 30.0f, 0.0f);
+        m_sphere.set<blink::Position>({pos});
 
         blink::SphereUvBuilder builder;
-        auto geometry = builder.build(true, true, &inertiaTensor);
+        auto geometry = builder.radius(1.5f).build(true, true, &inertiaTensor);
         auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
-        m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(10.0f, glm::identity<glm::mat3>()));
-        m_sphere.set<blink::PhysicsVelocity>({glm::vec3(-0.1f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
+        m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, glm::identity<glm::mat3>()));
+        m_sphere.set<blink::PhysicsVelocity>({glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
         m_sphere.set<blink::PhysicsDamping>({0.95f, 0.95f});
         m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, inertiaTensor));
-        m_sphere.set<SinglePendulum>({glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, -9.8f, 0.0f)});
+        m_sphere.set<SinglePendulum>({anchorPos, glm::length(pos - anchorPos), glm::vec3(0.0f, -980.0f, 0.0f)});
     }
 
     //// load tetrahedron

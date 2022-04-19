@@ -13,6 +13,7 @@
 struct SinglePendulum
 {
 	glm::vec3 anchorPoint;
+	float length;
 	glm::vec3 gravity;
 };
 

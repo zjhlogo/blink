@@ -1,0 +1,7 @@
+{
+    "vertex_shader" : "resource/shaders/debug_line.vert.spv",
+    "fragment_shader" : "resource/shaders/debug_line.frag.spv",
+    
+    "wireframe" : true,
+    "line_list" : true
+}

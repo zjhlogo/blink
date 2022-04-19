@@ -14,6 +14,9 @@
 
 namespace blink
 {
+    const float EcsWorld::FIXED_FPS = 60.0f;
+    const float EcsWorld::FIXED_DT = 1.0f / EcsWorld::FIXED_FPS;
+
     static int my_run_action(ecs_world_t* world, ecs_app_desc_t* desc)
     {
         if (desc->init)
@@ -27,7 +30,7 @@ namespace blink
     EcsWorld::EcsWorld()
     {
         ecs_app_set_run_action(my_run_action);
-        m_world.app().threads(4).target_fps(60.0f).enable_rest().run();
+        m_world.app().threads(4).target_fps(FIXED_FPS).enable_rest().run();
     }
 
     bool EcsWorld::initialize()
@@ -79,7 +82,7 @@ namespace blink
         }
 
         //
-        m_world.progress();
+        m_world.progress(FIXED_DT);
 
         for (auto sys : m_logicalSystems)
         {

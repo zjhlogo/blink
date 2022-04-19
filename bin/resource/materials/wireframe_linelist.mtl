@@ -1,7 +1,0 @@
-{
-    "vertex_shader" : "resource/shaders/wireframe.vert.spv",
-    "fragment_shader" : "resource/shaders/wireframe.frag.spv",
-    
-    "wireframe" : true,
-    "line_list" : true
-}
