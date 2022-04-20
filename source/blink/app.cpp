@@ -34,9 +34,9 @@ namespace blink
         m_lastTime = currTime;
 
         m_elapseTime += m_deltaTime;
-        while (m_elapseTime > EcsWorld::FIXED_DT)
+        while (m_elapseTime >= EcsWorld::FIXED_DT)
         {
-            m_elapseTime -= ((int)(m_elapseTime / EcsWorld::FIXED_DT) * EcsWorld::FIXED_DT);
+            m_elapseTime = std::fmodf(m_elapseTime, EcsWorld::FIXED_DT);
             m_ecsWorld.step();
         }
     }

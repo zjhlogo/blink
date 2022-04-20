@@ -43,7 +43,7 @@ bool EntityCreationSystem::initialize()
 
     // light
     m_light = world.entity("light");
-    m_light.set<blink::Position>({glm::vec3(0.0f, 0.0f, 4.0f)});
+    m_light.set<blink::Position>({glm::vec3(200.0f, 200.0f, -200.0f)});
     m_light.set<blink::LightData>(m_lightData);
 
     glm::mat3 inertiaTensor;
@@ -93,8 +93,7 @@ bool EntityCreationSystem::initialize()
         auto geometry = builder.radius(1.5f).build(true, true, &inertiaTensor);
         auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
-        m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, glm::identity<glm::mat3>()));
-        m_sphere.set<blink::PhysicsVelocity>({glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
+        m_sphere.set<blink::PhysicsVelocity>({glm::vec3(0.0f, 0.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
         m_sphere.set<blink::PhysicsDamping>({0.95f, 0.95f});
         m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, inertiaTensor));
         m_sphere.set<SinglePendulum>({anchorPos, glm::length(pos - anchorPos), glm::vec3(0.0f, -980.0f, 0.0f)});
