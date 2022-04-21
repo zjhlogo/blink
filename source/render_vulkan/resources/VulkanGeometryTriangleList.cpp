@@ -27,6 +27,14 @@ namespace blink
 
     bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16>& indices,
                                                 const std::vector<glm::vec3>& positions,
+                                                const std::vector<Color>& colors)
+    {
+        assert(false && "not support");
+        return false;
+    }
+
+    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16>& indices,
+                                                const std::vector<glm::vec3>& positions,
                                                 const std::vector<glm::vec3>& normals,
                                                 const std::vector<glm::vec2>& uv0s)
     {

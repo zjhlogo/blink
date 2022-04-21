@@ -7,10 +7,8 @@
  *
  */
 #pragma once
-#include <foundation/BaseTypes.h>
+#include <core/resources/IGeometry.h>
 #include <vulkan/vulkan.h>
-
-#include <vector>
 
 namespace blink
 {
@@ -52,7 +50,7 @@ namespace blink
         bool create(const tstring& vertexShader,
                     const tstring& fragmentShader,
                     VkPolygonMode polygonMode,
-                    VkPrimitiveTopology topology);
+                    PrimitiveTopology topology);
         bool recreate();
         void destroy();
 

@@ -10,8 +10,8 @@
 #include "VulkanContext.h"
 #include "VulkanImage.h"
 #include "VulkanLogicalDevice.h"
-#include "VulkanTexture.h"
 #include "VulkanWindow.h"
+#include "resources/VulkanTexture.h"
 #include "utils/VulkanUtils.h"
 
 #include <foundation/Log.h>
@@ -38,7 +38,9 @@ namespace blink
     {
         if (!createSwapChain()) return false;
         if (!createSwapchainImageViews()) return false;
-        if (!createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
+        if (!createRenderPass(m_swapChainImageFormat,
+                              VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice())))
+            return false;
         if (!createFramebuffers(m_renderPass)) return false;
 
         return true;
@@ -62,7 +64,9 @@ namespace blink
 
         if (!createSwapChain()) return false;
         if (!createSwapchainImageViews()) return false;
-        if (!createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
+        if (!createRenderPass(m_swapChainImageFormat,
+                              VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice())))
+            return false;
         if (!createFramebuffers(m_renderPass)) return false;
 
         return true;
@@ -154,11 +158,16 @@ namespace blink
 
         std::vector<VkQueueFamilyProperties> queueFamilies;
         VulkanUtils::getPhysicalDeviceQueueFamilyProperties(queueFamilies, physicalDevice);
-        VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, physicalDevice, surface, queueFamilies);
+        VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex,
+                                                        presentFamilyIndex,
+                                                        physicalDevice,
+                                                        surface,
+                                                        queueFamilies);
 
         if (graphicsFamilyIndex != presentFamilyIndex)
         {
-            uint32_t queueFamilyIndexs[2] = {static_cast<uint32_t>(graphicsFamilyIndex), static_cast<uint32_t>(presentFamilyIndex)};
+            uint32_t queueFamilyIndexs[2] = {static_cast<uint32_t>(graphicsFamilyIndex),
+                                             static_cast<uint32_t>(presentFamilyIndex)};
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
             createInfo.pQueueFamilyIndices = queueFamilyIndexs;

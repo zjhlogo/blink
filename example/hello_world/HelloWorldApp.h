@@ -16,10 +16,10 @@
 class HelloWorldApp : public blink::IApp, public IGuiWindow
 {
 public:
-    HelloWorldApp();
-    virtual ~HelloWorldApp();
+    HelloWorldApp() = default;
+    virtual ~HelloWorldApp() = default;
 
-    virtual bool initialize(blink::VulkanRenderModule& renderModule) override;
+    virtual bool initialize() override;
     virtual void terminate() override;
 
     virtual void renderUi() override;

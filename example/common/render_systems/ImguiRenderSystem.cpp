@@ -29,8 +29,7 @@ static void imguiCheckVkResult(VkResult err)
     if (err < 0) abort();
 }
 
-ImguiRenderSystem::ImguiRenderSystem(blink::VulkanRenderModule& renderModule)
-    : m_renderModule(renderModule)
+ImguiRenderSystem::ImguiRenderSystem()
 {
     //
 }
@@ -43,9 +42,10 @@ ImguiRenderSystem::~ImguiRenderSystem()
 
 bool ImguiRenderSystem::initialize()
 {
-    auto& context = m_renderModule.getContext();
-    auto& logicalDevice = m_renderModule.getLogicalDevice();
-    auto& swapchain = m_renderModule.getSwapchain();
+    auto renderModule = dynamic_cast<blink::VulkanRenderModule*>(blink::getRenderModule());
+    auto& context = renderModule->getContext();
+    auto& logicalDevice = renderModule->getLogicalDevice();
+    auto& swapchain = renderModule->getSwapchain();
 
     // 1: create descriptor pool for IMGUI
     // the size of the pool is very oversize, but it's copied from imgui demo itself.
@@ -112,16 +112,14 @@ bool ImguiRenderSystem::initialize()
 
 void ImguiRenderSystem::terminate()
 {
-    auto& logicalDevice = m_renderModule.getLogicalDevice();
+    auto renderModule = dynamic_cast<blink::VulkanRenderModule*>(blink::getRenderModule());
+    auto& logicalDevice = renderModule->getLogicalDevice();
 
     vkDestroyDescriptorPool(logicalDevice, m_imguiPool, nullptr);
     ImGui_ImplVulkan_Shutdown();
 }
 
-void ImguiRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
-                               blink::VulkanUniformBuffer& pfub,
-                               blink::VulkanUniformBuffer& pmub,
-                               blink::VulkanUniformBuffer& piub)
+void ImguiRenderSystem::render(blink::IRenderData& renderData)
 {
     if (m_allWindows.empty()) return;
 
@@ -137,7 +135,8 @@ void ImguiRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
 
     // Rendering
     ImGui::Render();
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+    auto vulkanRenderData = (blink::VulkanRenderData*)&renderData;
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *vulkanRenderData->commandBuffer);
 }
 
 void ImguiRenderSystem::addWindow(IGuiWindow* window)

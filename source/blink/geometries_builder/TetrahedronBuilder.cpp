@@ -9,9 +9,8 @@
 
 **/
 #include "TetrahedronBuilder.h"
-#include "../geometries/TriangleListGeometry.h"
-#include "../resources/ResourceMgr.h"
 
+#include <core/modules/IResModule.h>
 #include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
@@ -94,7 +93,7 @@ namespace blink
         indices.push_back(startIndex + 2);
         indices.push_back(startIndex + 3);
 
-        auto geometry = ResourceMgr::getInstance().createGeometry<TriangleListGeometry>(getUniqueId());
+        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_RELEASE(geometry);

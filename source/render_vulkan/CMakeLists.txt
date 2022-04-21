@@ -4,7 +4,7 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(librender_vulkan)
 
 set(SOURCE_FILES
-base/IRenderSystem.h
+resources/VulkanGeometry.h
 resources/VulkanGeometryLineList.cpp
 resources/VulkanGeometryLineList.h
 resources/VulkanGeometryTriangleList.cpp
@@ -37,8 +37,8 @@ VulkanPipeline.cpp
 VulkanPipeline.h
 VulkanRenderModule.cpp
 VulkanRenderModule.h
-VulkanResourceModule.cpp
-VulkanResourceModule.h
+VulkanResModule.cpp
+VulkanResModule.h
 VulkanSemaphore.cpp
 VulkanSemaphore.h
 VulkanSwapchain.cpp

@@ -10,9 +10,8 @@
 **/
 
 #include "MeshBuilder.h"
-#include "../geometries/TriangleListGeometry.h"
-#include "../resources/ResourceMgr.h"
 
+#include <core/modules/IResModule.h>
 #include <foundation/File.h>
 #include <foundation/Log.h>
 
@@ -121,7 +120,7 @@ namespace blink
 
         const auto& buffer = model.buffers[buffViewPos.buffer];
 
-        auto geometry = ResourceMgr::getInstance().createGeometry<TriangleListGeometry>(getUniqueId());
+        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(buffer.data.data(),
                                   buffer.data.size(),
                                   static_cast<uint32>(accessorPos.count),

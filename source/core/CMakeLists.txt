@@ -7,12 +7,12 @@ set(SOURCE_FILES
 base/Color.cpp
 base/Color.h
 base/ILogicalSystem.h
+base/IRenderSystem.h
 components/Components.h
-modules/IResourceModule.h
+modules/IRenderModule.h
+modules/IResModule.h
 resources/IGeometry.cpp
 resources/IGeometry.h
-resources/IGeometryLineList.h
-resources/IGeometryTriangleList.h
 resources/IMaterial.cpp
 resources/IMaterial.h
 resources/IResource.h

@@ -7,14 +7,14 @@
  * \date   04/21/2022
  *********************************************************************/
 #include "IMaterial.h"
-#include "../modules/IResourceModule.h"
+#include "../modules/IResModule.h"
 
 namespace blink
 {
 	void IMaterial::release()
 	{
 		//
-		getResourceModule()->releaseMaterial(this);
+		getResModule()->releaseMaterial(this);
 	}
 
 }

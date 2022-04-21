@@ -7,14 +7,14 @@
  *
  */
 #include "VulkanTexture.h"
-#include "VulkanBuffer.h"
-#include "VulkanCommandBuffer.h"
-#include "VulkanCommandPool.h"
-#include "VulkanContext.h"
-#include "VulkanImage.h"
-#include "VulkanLogicalDevice.h"
-#include "VulkanMemory.h"
-#include "utils/VulkanUtils.h"
+#include "../VulkanBuffer.h"
+#include "../VulkanCommandBuffer.h"
+#include "../VulkanCommandPool.h"
+#include "../VulkanContext.h"
+#include "../VulkanImage.h"
+#include "../VulkanLogicalDevice.h"
+#include "../VulkanMemory.h"
+#include "../utils/VulkanUtils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <tinygltf/stb_image.h>

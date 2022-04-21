@@ -16,8 +16,6 @@
 
 namespace blink
 {
-    class LineListGeometry;
-
     class LineListBuilder : public IGeometryBuilder
     {
     public:
@@ -28,7 +26,7 @@ namespace blink
         void addLine(const glm::vec3& start, const glm::vec3& end, const Color& color);
         void reset();
 
-        bool build(LineListGeometry* geometry) const;
+        bool build(IGeometry* geometry) const;
 
     private:
         int m_uniqueId{};

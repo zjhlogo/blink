@@ -7,7 +7,6 @@
  * \date   04/15/2022
  *********************************************************************/
 #include "LineListBuilder.h"
-#include "../geometries/LineListGeometry.h"
 
 #include <foundation/BuiltinFormatter.h>
 
@@ -48,7 +47,7 @@ namespace blink
         m_vertsColor.clear();
     }
 
-    bool LineListBuilder::build(LineListGeometry* geometry) const
+    bool LineListBuilder::build(IGeometry* geometry) const
     {
         if (!geometry->uploadData(m_indices, m_vertsPos, m_vertsColor))
         {

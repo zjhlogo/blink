@@ -16,8 +16,6 @@
 
 #include <blink/blink.h>
 #include <blink/components/Components.h>
-#include <blink/materials/Material.h>
-#include <blink/resources/ResourceMgr.h>
 #include <blink/systems/DebugLineSystem.h>
 #include <core/systems/AngularVelocitySystem.h>
 #include <core/systems/LinearVelocitySystem.h>
@@ -31,22 +29,9 @@
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
 
-HelloWorldApp::HelloWorldApp()
-{
-    //
-}
-
-HelloWorldApp::~HelloWorldApp()
-{
-    //
-}
-
-bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
+bool HelloWorldApp::initialize()
 {
     stdcpp_set_os_api();
-
-    auto& logicalDevice = renderModule.getLogicalDevice();
-    auto& swapchain = renderModule.getSwapchain();
 
     // add logical systems
 
@@ -60,8 +45,7 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
     m_ecsWorld.addSystem(new PrefabInitializeSystem());
 
     // entity creation system
-    const auto& extent = swapchain.getImageExtent();
-    m_ecsWorld.addSystem(new EntityCreationSystem(glm::vec2(extent.width, extent.height)));
+    m_ecsWorld.addSystem(new EntityCreationSystem());
 
     // add user command system
     m_ecsWorld.addSystem(new UserCommandSystem());
@@ -72,7 +56,7 @@ bool HelloWorldApp::initialize(blink::VulkanRenderModule& renderModule)
 
     // add render systems
     addRenderSystem(new SceneRenderSystem(this));
-    auto guiRenderSystem = new ImguiRenderSystem(renderModule);
+    auto guiRenderSystem = new ImguiRenderSystem();
     addRenderSystem(guiRenderSystem);
     if (!initializeRenderSystems()) return false;
 

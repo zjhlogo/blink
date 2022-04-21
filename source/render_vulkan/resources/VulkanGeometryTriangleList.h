@@ -8,23 +8,22 @@
  *********************************************************************/
 #pragma once
 
-#include <core/resources/IGeometryTriangleList.h>
-#include <vulkan/vulkan_core.h>
-
-#include <vector>
+#include "VulkanGeometry.h"
 
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanCommandBuffer;
-    class VulkanBuffer;
-    class ResourceMgr;
 
-    class VulkanGeometryTriangleList : public IGeometryTriangleList
+    class VulkanGeometryTriangleList : public VulkanGeometry
     {
-        friend ResourceMgr;
-
     public:
+        VulkanGeometryTriangleList(VulkanLogicalDevice& logicalDevice);
+        virtual ~VulkanGeometryTriangleList();
+
+        virtual bool uploadData(const std::vector<uint16>& indices,
+                                const std::vector<glm::vec3>& positions,
+                                const std::vector<Color>& colors) override;
+
         virtual bool uploadData(const std::vector<uint16>& indices,
                                 const std::vector<glm::vec3>& positions,
                                 const std::vector<glm::vec3>& normals,
@@ -39,14 +38,11 @@ namespace blink
                                 std::size_t offsetUv0,
                                 std::size_t offsetIndices) override;
 
-        VulkanBuffer* getVulkanBuffer() const { return m_buffer; }
-        VkDeviceSize getVertexInputOffset(uint32 inputMask) const;
-        VkDeviceSize getIndicesOffset() const { return m_offsetIndices; }
+        virtual VulkanBuffer* getVulkanBuffer() const override { return m_buffer; }
+        virtual VkDeviceSize getVertexInputOffset(uint32 inputMask) const override;
+        virtual VkDeviceSize getIndicesOffset() const override { return m_offsetIndices; }
 
     protected:
-        VulkanGeometryTriangleList(VulkanLogicalDevice& logicalDevice);
-        virtual ~VulkanGeometryTriangleList();
-
         void destroy();
 
     protected:

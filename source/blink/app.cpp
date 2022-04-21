@@ -11,8 +11,6 @@
 
 #include "app.h"
 
-#include <render_vulkan/base/IRenderSystem.h>
-
 namespace blink
 {
     IApp::IApp()
@@ -41,14 +39,11 @@ namespace blink
         }
     }
 
-    void IApp::render(VulkanCommandBuffer& commandBuffer,
-                      VulkanUniformBuffer& pfub,
-                      VulkanUniformBuffer& pmub,
-                      VulkanUniformBuffer& piub)
+    void IApp::render(IRenderData& renderData)
     {
         for (auto sys : m_renderSystems)
         {
-            sys->render(commandBuffer, pfub, pmub, piub);
+            sys->render(renderData);
         }
     }
 

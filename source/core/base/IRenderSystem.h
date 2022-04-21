@@ -10,20 +10,21 @@
 **/
 #pragma once
 
+#include <core/base/IRenderSystem.h>
 #include <foundation/BaseTypesGlm.h>
 
 namespace blink
 {
-    class VulkanCommandBuffer;
-    class VulkanUniformBuffer;
+    class IRenderData
+    {
+    };
 
     class IRenderSystem
     {
     public:
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
-        virtual void render(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub) = 0;
-
+        virtual void render(IRenderData& renderData) = 0;
     };
 
 } // namespace blink

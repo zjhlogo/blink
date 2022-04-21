@@ -7,6 +7,7 @@
  *
  */
 #pragma once
+#include <core/modules/IRenderModule.h>
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
 
@@ -27,30 +28,41 @@ namespace blink
     class VulkanSemaphore;
     class VulkanFence;
 
-    class VulkanRenderModule
+    class VulkanRenderData : public IRenderData
     {
     public:
-        enum RenderResult
+        VulkanRenderData(VulkanCommandBuffer* _commandBuffer,
+                         VulkanUniformBuffer* _pfub,
+                         VulkanUniformBuffer* _pmub,
+                         VulkanUniformBuffer* _piub)
+            : commandBuffer(_commandBuffer)
+            , pfub(_pfub)
+            , pmub(_pmub)
+            , piub(_piub)
         {
-            Success,
-            Failed,
-            Recreate
-        };
+        }
 
-        typedef std::function<void(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pfub, VulkanUniformBuffer& pmub, VulkanUniformBuffer& piub)>
-            RenderCb;
+        VulkanCommandBuffer* commandBuffer;
+        VulkanUniformBuffer* pfub;
+        VulkanUniformBuffer* pmub;
+        VulkanUniformBuffer* piub;
+    };
 
+    class VulkanRenderModule : public IRenderModule
+    {
     public:
-        VulkanRenderModule();
-        virtual ~VulkanRenderModule();
+        VulkanRenderModule() = default;
+        virtual ~VulkanRenderModule() = default;
 
-        bool createDevice(const glm::ivec2& deviceSize);
-        void destroyDevice();
+        virtual bool createDevice(const glm::ivec2& deviceSize) override;
+        virtual void destroyDevice() override;
 
-        bool processEvent();
-        RenderResult render(const RenderCb& cb);
+        virtual bool processEvent() override;
+        virtual RenderResult render(const RenderCb& cb) override;
 
-        void waitIdle();
+        virtual void waitIdle() override;
+
+        virtual glm::vec2 getSurfaceSize() const override;
 
         VulkanContext& getContext() const { return *m_context; };
         VulkanLogicalDevice& getLogicalDevice() const { return *m_logicalDevice; };

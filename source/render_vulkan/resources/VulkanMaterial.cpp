@@ -7,19 +7,19 @@
  * \date   04/21/2022
  *********************************************************************/
 #include "VulkanMaterial.h"
-#include "../VulkanResourceModule.h"
+#include "../VulkanCommandBuffer.h"
+#include "../VulkanImage.h"
+#include "../VulkanLogicalDevice.h"
+#include "../VulkanPipeline.h"
+#include "../VulkanResModule.h"
+#include "../VulkanSwapchain.h"
+#include "../VulkanUniformBuffer.h"
 #include "VulkanTexture.h"
 
-#include <core/modules/IResourceModule.h>
+#include <core/modules/IResModule.h>
 #include <core/resources/IGeometry.h>
 #include <foundation/File.h>
 #include <foundation/Log.h>
-#include <render_vulkan/VulkanCommandBuffer.h>
-#include <render_vulkan/VulkanImage.h>
-#include <render_vulkan/VulkanLogicalDevice.h>
-#include <render_vulkan/VulkanPipeline.h>
-#include <render_vulkan/VulkanSwapchain.h>
-#include <render_vulkan/VulkanUniformBuffer.h>
 #include <tinygltf/json.hpp>
 
 namespace blink
@@ -52,7 +52,7 @@ namespace blink
     }
 
     bool VulkanMaterial::updateBufferInfos(VulkanCommandBuffer& commandBuffer,
-                                           IGeometry* geometry,
+                                           VulkanGeometry* geometry,
                                            const VkDescriptorBufferInfo& pfubi,
                                            const VkDescriptorBufferInfo& pmubi,
                                            const VkDescriptorBufferInfo& piubi)
@@ -61,7 +61,7 @@ namespace blink
         if (!geometry->checkInputMask(inputMask)) return false;
         if (m_topology != geometry->getTopology()) return false;
 
-        if (m_topology == VK_PRIMITIVE_TOPOLOGY_LINE_LIST || m_topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP)
+        if (m_topology == PrimitiveTopology::LineList)
         {
             vkCmdSetLineWidth(commandBuffer, 1.0f);
         }
@@ -125,7 +125,7 @@ namespace blink
         m_vertexShader.clear();
         m_fragmentShader.clear();
         m_polygonMode = VK_POLYGON_MODE_FILL;
-        m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        m_topology = PrimitiveTopology::TriangleList;
         m_texturePaths.clear();
     }
 
@@ -189,7 +189,7 @@ namespace blink
             {
                 if (jlinelist.get<bool>())
                 {
-                    m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+                    m_topology = PrimitiveTopology::LineList;
                 }
             }
         }
@@ -213,8 +213,9 @@ namespace blink
     {
         for (const auto& filePath : m_texturePaths)
         {
-            auto texture = getResourceModule()->createTexture2d(filePath);
-            if (!texture) texture = getResourceModule()->createTexture2d(VulkanResourceModule::DEFAULT_TEXTURE);
+            auto resModule = getResModule();
+            auto texture = resModule->createTexture2d(filePath);
+            if (!texture) texture = resModule->createTexture2d(VulkanResModule::DEFAULT_TEXTURE);
             if (!texture) return false;
 
             m_textures.push_back(texture);

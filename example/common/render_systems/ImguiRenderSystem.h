@@ -9,34 +9,25 @@
 
 #include "../guis/IGuiWindow.h"
 
-#include <render_vulkan/base/IRenderSystem.h>
+#include <core/base/IRenderSystem.h>
 #include <vulkan/vulkan.h>
 
 #include <vector>
 
-namespace blink
-{
-    class VulkanRenderModule;
-}
-
 class ImguiRenderSystem : public blink::IRenderSystem
 {
 public:
-    ImguiRenderSystem(blink::VulkanRenderModule& renderModule);
+    ImguiRenderSystem();
     virtual ~ImguiRenderSystem();
 
     virtual bool initialize() override;
     virtual void terminate() override;
-    virtual void render(blink::VulkanCommandBuffer& commandBuffer,
-                        blink::VulkanUniformBuffer& pfub,
-                        blink::VulkanUniformBuffer& pmub,
-                        blink::VulkanUniformBuffer& piub) override;
+    virtual void render(blink::IRenderData& renderData) override;
 
     void addWindow(IGuiWindow* window);
     void removeWindow(IGuiWindow* window);
 
 private:
-    blink::VulkanRenderModule& m_renderModule;
     VkDescriptorPool m_imguiPool{};
 
     std::vector<IGuiWindow*> m_allWindows;

@@ -8,8 +8,10 @@
  *********************************************************************/
 #pragma once
 
+#include "VulkanGeometry.h"
+
 #include <core/resources/IMaterial.h>
-#include <foundation/BaseTypesGlm.h>
+#include <core/resources/ITexture2d.h>
 #include <vulkan/vulkan.h>
 
 #include <vector>
@@ -25,30 +27,6 @@ namespace blink
     class VulkanMaterial : public IMaterial
     {
     public:
-        virtual bool recreate() override;
-
-        void bindPipeline(VulkanCommandBuffer& commandBuffer);
-        bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
-                                     VulkanUniformBuffer& pmub,
-                                     VkDescriptorBufferInfo& pmubi);
-        bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
-                               IGeometry* geometry,
-                               const VkDescriptorBufferInfo& pfubi,
-                               const VkDescriptorBufferInfo& pmubi,
-                               const VkDescriptorBufferInfo& piubi);
-
-        float getRoughness() const { return m_pmu.roughness; };
-        void setRoughness(float roughness) { m_pmu.roughness = roughness; };
-
-        float getMetallic() const { return m_pmu.metallic; };
-        void setMetallic(float metallic) { m_pmu.metallic = metallic; };
-
-        const glm::vec3& getColor() const { return m_pmu.color; };
-        void setColor(const glm::vec3& color) { m_pmu.color = color; };
-
-        VulkanPipeline& getPipeline() const { return *m_pipeline; };
-
-    private:
         VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~VulkanMaterial();
 
@@ -58,6 +36,31 @@ namespace blink
         bool loadConfigFromFile(const tstring& filePath);
         bool loadTextures();
 
+        virtual bool recreate() override;
+
+        void bindPipeline(VulkanCommandBuffer& commandBuffer);
+
+        bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
+                                     VulkanUniformBuffer& pmub,
+                                     VkDescriptorBufferInfo& pmubi);
+
+        bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
+                               VulkanGeometry* geometry,
+                               const VkDescriptorBufferInfo& pfubi,
+                               const VkDescriptorBufferInfo& pmubi,
+                               const VkDescriptorBufferInfo& piubi);
+
+        virtual float getRoughness() const override { return m_pmu.roughness; };
+        virtual void setRoughness(float roughness) override { m_pmu.roughness = roughness; };
+
+        virtual float getMetallic() const override { return m_pmu.metallic; };
+        virtual void setMetallic(float metallic) override { m_pmu.metallic = metallic; };
+
+        virtual const glm::vec3& getColor() const override { return m_pmu.color; };
+        virtual void setColor(const glm::vec3& color) override { m_pmu.color = color; };
+
+        VulkanPipeline& getPipeline() const { return *m_pipeline; };
+
     private:
         VulkanLogicalDevice& m_logicalDevice;
         VulkanSwapchain& m_swapchain;
@@ -66,7 +69,7 @@ namespace blink
         tstring m_vertexShader;
         tstring m_fragmentShader;
         VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};
-        VkPrimitiveTopology m_topology{VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST};
+        PrimitiveTopology m_topology{PrimitiveTopology::TriangleList};
         std::vector<tstring> m_texturePaths;
 
         VulkanPipeline* m_pipeline{};

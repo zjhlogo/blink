@@ -18,18 +18,15 @@
 #include "VulkanWindow.h"
 #include "utils/VulkanUtils.h"
 
+#include <core/modules/IResModule.h>
 #include <foundation/Log.h>
 
 namespace blink
 {
-    VulkanRenderModule::VulkanRenderModule()
+    IRenderModule* getRenderModule()
     {
-        //
-    }
-
-    VulkanRenderModule::~VulkanRenderModule()
-    {
-        //
+        static VulkanRenderModule s_vulkanRenderModule;
+        return &s_vulkanRenderModule;
     }
 
     bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
@@ -111,6 +108,8 @@ namespace blink
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
+            getSwapchain().recreate();
+            getResModule()->recreate();
             return RenderResult::Recreate;
         }
         m_acquireImageFence->wait();
@@ -140,7 +139,11 @@ namespace blink
                 m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(imageIndex), rect);
 
                 // record commands
-                cb(*m_commandBuffer, *m_perFrameUniformBuffer, *m_perMaterialUniformBuffer, *m_perInstanceUniformBuffer);
+                VulkanRenderData renderData{m_commandBuffer,
+                                            m_perFrameUniformBuffer,
+                                            m_perMaterialUniformBuffer,
+                                            m_perInstanceUniformBuffer};
+                cb(renderData);
 
                 m_commandBuffer->endRenderPass();
             }
@@ -179,6 +182,8 @@ namespace blink
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
+            getSwapchain().recreate();
+            getResModule()->recreate();
             return RenderResult::Recreate;
         }
 
@@ -192,6 +197,12 @@ namespace blink
             m_logicalDevice->waitGraphicsQueueIdle();
             m_logicalDevice->waitDeviceIdle();
         }
+    }
+
+    glm::vec2 VulkanRenderModule::getSurfaceSize() const
+    {
+        const auto& ext = m_swapchain->getImageExtent();
+        return glm::vec2(ext.width, ext.height);
     }
 
     bool VulkanRenderModule::createSyncObjects()

@@ -8,7 +8,7 @@
 #pragma once
 
 #include <blink/app.h>
-#include <render_vulkan/base/IRenderSystem.h>
+#include <core/base/IRenderSystem.h>
 
 class SceneRenderSystem : public blink::IRenderSystem
 {
@@ -18,10 +18,7 @@ public:
 
     virtual bool initialize() override;
     virtual void terminate() override;
-    virtual void render(blink::VulkanCommandBuffer& commandBuffer,
-                        blink::VulkanUniformBuffer& pfub,
-                        blink::VulkanUniformBuffer& pmub,
-                        blink::VulkanUniformBuffer& piub) override;
+    virtual void render(blink::IRenderData& renderData) override;
 
 private:
     blink::IApp* m_app{};

@@ -10,10 +10,9 @@
 **/
 
 #include "BoxBuilder.h"
-#include "../geometries/TriangleListGeometry.h"
-#include "../resources/ResourceMgr.h"
 #include "PlaneBuilder.h"
 
+#include <core/modules/IResModule.h>
 #include <foundation/BuiltinFormatter.h>
 
 namespace blink
@@ -95,7 +94,7 @@ namespace blink
             .translate(glm::vec3(0.5f * m_size.x, 0.0f, 0.0f))
             .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
-        auto geometry = ResourceMgr::getInstance().createGeometry<TriangleListGeometry>(getUniqueId());
+        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_RELEASE(geometry);

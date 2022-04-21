@@ -8,36 +8,44 @@
  *********************************************************************/
 #pragma once
 
-#include <core/resources/IGeometryLineList.h>
-#include <vulkan/vulkan_core.h>
+#include "VulkanGeometry.h"
 
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanCommandBuffer;
-    class VulkanBuffer;
-    class ResourceMgr;
 
-    class VulkanGeometryLineList : public IGeometryLineList
+    class VulkanGeometryLineList : public VulkanGeometry
     {
-        friend ResourceMgr;
-
         static const int BUFFER_COUNT = 2;
         static const VkDeviceSize DEFAULT_BUFFER_SIZE = 32 * 1024;
 
     public:
+        VulkanGeometryLineList(VulkanLogicalDevice& logicalDevice);
+        virtual ~VulkanGeometryLineList();
+
         virtual bool uploadData(const std::vector<uint16>& indices,
                                 const std::vector<glm::vec3>& positions,
                                 const std::vector<Color>& colors) override;
 
-        VulkanBuffer* getVulkanBuffer() const { return m_bufferList[m_currentBuffer]; }
-        VkDeviceSize getVertexInputOffset(uint32 inputMask) const;
-        VkDeviceSize getIndicesOffset() const { return m_offsetIndices; }
+        virtual bool uploadData(const std::vector<uint16>& indices,
+                                const std::vector<glm::vec3>& positions,
+                                const std::vector<glm::vec3>& normals,
+                                const std::vector<glm::vec2>& uv0s) override;
+
+        virtual bool uploadData(const void* data,
+                                std::size_t dataSize,
+                                uint32 numVertices,
+                                uint32 numIndices,
+                                std::size_t offsetPosition,
+                                std::size_t offsetNormal,
+                                std::size_t offsetUv0,
+                                std::size_t offsetIndices) override;
+
+        virtual VulkanBuffer* getVulkanBuffer() const override { return m_bufferList[m_currentBuffer]; }
+        virtual VkDeviceSize getVertexInputOffset(uint32 inputMask) const override;
+        virtual VkDeviceSize getIndicesOffset() const override { return m_offsetIndices; }
 
     protected:
-        VulkanGeometryLineList(VulkanLogicalDevice& logicalDevice);
-        virtual ~VulkanGeometryLineList();
-
         void destroy();
         VulkanBuffer* swapBuffer();
 

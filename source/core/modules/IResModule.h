@@ -1,6 +1,6 @@
 
 /*********************************************************************
- * \file   IResourceModule.h
+ * \file   IResModule.h
  * \brief
  *
  * \author zjhlogo
@@ -14,7 +14,7 @@
 
 namespace blink
 {
-    class IResourceModule
+    class IResModule
     {
     public:
         virtual bool initialize() = 0;
@@ -32,5 +32,5 @@ namespace blink
         virtual void recreate() = 0;
     };
 
-    IResourceModule* getResourceModule();
+    IResModule* getResModule();
 } // namespace blink

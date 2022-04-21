@@ -9,14 +9,14 @@
 #include "SceneRenderSystem.h"
 
 #include <blink/components/Components.h>
-#include <blink/geometries/IGeometry.h>
-#include <blink/materials/Material.h>
 #include <blink/type/RenderTypes.h>
 #include <core/components/Components.h>
 #include <foundation/Log.h>
 #include <glm/gtx/quaternion.hpp>
 #include <render_vulkan/VulkanCommandBuffer.h>
+#include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanUniformBuffer.h>
+#include <render_vulkan/resources/VulkanMaterial.h>
 
 #include <map>
 #include <unordered_map>
@@ -58,10 +58,7 @@ void SceneRenderSystem::terminate()
     //
 }
 
-void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
-                               blink::VulkanUniformBuffer& pfub,
-                               blink::VulkanUniformBuffer& pmub,
-                               blink::VulkanUniformBuffer& piub)
+void SceneRenderSystem::render(blink::IRenderData& renderData)
 {
     const auto& world = m_app->getEcsWorld().getWorld();
 
@@ -107,7 +104,7 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
     }
 
     // group render object by materials
-    std::unordered_map<blink::Material*, std::vector<RenderDataGeo>> renderDatas;
+    std::unordered_map<blink::IMaterial*, std::vector<RenderDataGeo>> renderDatas;
     {
         static auto renderObjQuery = world
                                          .query_builder<const blink::Position,
@@ -165,13 +162,15 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
             });
     }
 
+    auto vulkanRenderData = (blink::VulkanRenderData*)&renderData;
+
     // start rendering
     // for each camera
     for (const auto& pfu : pfus)
     {
         // bind per camera uniforms
         VkDescriptorBufferInfo pfubi{};
-        pfub.appendData(&pfu, sizeof(pfu), &pfubi);
+        vulkanRenderData->pfub->appendData(&pfu, sizeof(pfu), &pfubi);
 
         // render features
         for (const auto& kvpFeature : renderFeatures)
@@ -183,52 +182,63 @@ void SceneRenderSystem::render(blink::VulkanCommandBuffer& commandBuffer,
                 // render mesh group by material
                 for (const auto& kvp : renderDatas)
                 {
-                    blink::Material* material = kvp.first;
+                    blink::IMaterial* material = kvp.first;
+                    auto vulkanMaterial = dynamic_cast<blink::VulkanMaterial*>(material);
 
-                    material->bindPipeline(commandBuffer);
+                    vulkanMaterial->bindPipeline(*vulkanRenderData->commandBuffer);
 
                     // bind per material uniform
                     VkDescriptorBufferInfo pmubi{};
-                    material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
+                    vulkanMaterial->bindPerMaterialUniforms(*vulkanRenderData->commandBuffer, *vulkanRenderData->pmub, pmubi);
 
-                    for (const auto& renderData : kvp.second)
+                    for (const auto& rdo : kvp.second)
                     {
-                        if ((renderData.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+                        if ((rdo.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
                         // bind per instance uniform
                         VkDescriptorBufferInfo piubi{};
-                        piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
+                        vulkanRenderData->piub->appendData(&rdo.piu, sizeof(rdo.piu), &piubi);
 
                         // update vertex input and uniform buffers
-                        material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
+                        vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,
+                                                          (blink::VulkanGeometry*)rdo.geometry,
+                                                          pfubi,
+                                                          pmubi,
+                                                          piubi);
 
-                        vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, rdo.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
                 }
             }
             else
             {
-                blink::Material* material = renderFeatureData.overrideMaterial;
-                material->bindPipeline(commandBuffer);
+                blink::IMaterial* material = renderFeatureData.overrideMaterial;
+                auto vulkanMaterial = dynamic_cast<blink::VulkanMaterial*>(material);
+
+                vulkanMaterial->bindPipeline(*vulkanRenderData->commandBuffer);
 
                 // bind per material uniform
                 VkDescriptorBufferInfo pmubi{};
-                material->bindPerMaterialUniforms(commandBuffer, pmub, pmubi);
+                vulkanMaterial->bindPerMaterialUniforms(*vulkanRenderData->commandBuffer, *vulkanRenderData->pmub, pmubi);
 
                 for (const auto& kvp : renderDatas)
                 {
-                    for (const auto& renderData : kvp.second)
+                    for (const auto& rdo : kvp.second)
                     {
-                        if ((renderData.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+                        if ((rdo.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
                         // bind per instance uniform
                         VkDescriptorBufferInfo piubi{};
-                        piub.appendData(&renderData.piu, sizeof(renderData.piu), &piubi);
+                        vulkanRenderData->piub->appendData(&rdo.piu, sizeof(rdo.piu), &piubi);
 
                         // update vertex input and uniform buffers
-                        material->updateBufferInfos(commandBuffer, renderData.geometry, pfubi, pmubi, piubi);
+                        vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,
+                                                          (blink::VulkanGeometry*)rdo.geometry,
+                                                          pfubi,
+                                                          pmubi,
+                                                          piubi);
 
-                        vkCmdDrawIndexed(commandBuffer, renderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, rdo.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
                 }
             }

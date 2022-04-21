@@ -8,6 +8,7 @@
  *********************************************************************/
 #pragma once
 
+#include "IGeometry.h"
 #include "IResource.h"
 
 #include <foundation/BaseTypesGlm.h>
@@ -23,10 +24,17 @@ namespace blink
 
     class IMaterial : public IResource
     {
-        friend class IResourceModule;
-
     public:
         virtual void release() override;
+
+        virtual float getRoughness() const = 0;
+        virtual void setRoughness(float roughness) = 0;
+
+        virtual float getMetallic() const = 0;
+        virtual void setMetallic(float metallic) = 0;
+
+        virtual const glm::vec3& getColor() const = 0;
+        virtual void setColor(const glm::vec3& color) = 0;
 
         virtual bool recreate() = 0;
     };

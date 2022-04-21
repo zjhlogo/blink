@@ -7,20 +7,19 @@
  * \date   4/15 2022
  *********************************************************************/
 #include "DebugLineSystem.h"
-#include "../geometries/LineListGeometry.h"
-#include "../materials/Material.h"
-#include "../resources/ResourceMgr.h"
 
 #include <blink/components/Components.h>
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
+#include <core/modules/IResModule.h>
 
 namespace blink
 {
     bool DebugLineSystem::initialize()
     {
-        m_debugMaterial = ResourceMgr::getInstance().createMaterial("resource/materials/debug_line.mtl");
-        m_debugGeometry = ResourceMgr::getInstance().createGeometry<LineListGeometry>(m_lineListBuilder.getUniqueId());
+        auto resModule = getResModule();
+        m_debugMaterial = resModule->createMaterial("resource/materials/debug_line.mtl");
+        m_debugGeometry = resModule->createGeometry(m_lineListBuilder.getUniqueId(), PrimitiveTopology::LineList);
 
         auto& world = m_ecsWorld->getWorld();
 

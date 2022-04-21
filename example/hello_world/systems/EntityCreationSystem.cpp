@@ -18,28 +18,27 @@
 #include <blink/geometries_builder/PlaneBuilder.h>
 #include <blink/geometries_builder/SphereUvBuilder.h>
 #include <blink/geometries_builder/TetrahedronBuilder.h>
-#include <blink/materials/Material.h>
-#include <blink/resources/ResourceMgr.h>
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
+#include <core/modules/IRenderModule.h>
+#include <core/modules/IResModule.h>
 #include <imgui/imgui.h>
 #include <physics/components/Components.h>
-
-EntityCreationSystem::EntityCreationSystem(const glm::vec2& surfaceSize)
-    : m_surfaceSize(surfaceSize)
-{
-}
 
 bool EntityCreationSystem::initialize()
 {
     auto& world = m_ecsWorld->getWorld();
     auto prefabSystem = m_ecsWorld->findSystem<PrefabInitializeSystem>();
+    auto resModule = blink::getResModule();
+    auto renderModule = blink::getRenderModule();
+
+    const auto& surfaceSize = renderModule->getSurfaceSize();
 
     // create camera
     m_camera = world.entity("camera");
     m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 100.0f)});
     m_camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))});
-    m_camera.set<blink::CameraData>({glm::radians(45.0f), m_surfaceSize.x / m_surfaceSize.y, 0.1f, 1000.0f});
+    m_camera.set<blink::CameraData>({glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f});
 
     // light
     m_light = world.entity("light");
@@ -91,7 +90,7 @@ bool EntityCreationSystem::initialize()
 
         blink::SphereUvBuilder builder;
         auto geometry = builder.radius(1.5f).build(true, true, &inertiaTensor);
-        auto material = blink::ResourceMgr::getInstance().createMaterial("resource/materials/simple_lit.mtl");
+        auto material = resModule->createMaterial("resource/materials/simple_lit.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
         m_sphere.set<blink::PhysicsVelocity>({glm::vec3(0.0f, 0.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
         m_sphere.set<blink::PhysicsDamping>({0.95f, 0.95f});
@@ -154,7 +153,7 @@ void EntityCreationSystem::renderMaterialPropertyUi()
 {
     if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        blink::Material* material = m_sphere.get<blink::StaticModel>()->material;
+        blink::IMaterial* material = m_sphere.get<blink::StaticModel>()->material;
         auto roughness = material->getRoughness();
         if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
         {

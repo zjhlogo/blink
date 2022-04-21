@@ -12,12 +12,11 @@
 
 #include <core/base/Color.h>
 #include <core/base/ILogicalSystem.h>
+#include <core/resources/IGeometry.h>
+#include <core/resources/IMaterial.h>
 
 namespace blink
 {
-    class Material;
-    class LineListGeometry;
-
     class DebugLineSystem : public ILogicalSystem
     {
     public:
@@ -33,8 +32,8 @@ namespace blink
         flecs::entity m_debug;
 
         LineListBuilder m_lineListBuilder;
-        Material* m_debugMaterial{};
-        LineListGeometry* m_debugGeometry{};
+        IMaterial* m_debugMaterial{};
+        IGeometry* m_debugGeometry{};
     };
 
 } // namespace blink

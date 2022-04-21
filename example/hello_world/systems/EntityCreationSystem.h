@@ -16,8 +16,6 @@
 class EntityCreationSystem : public blink::ILogicalSystem
 {
 public:
-    EntityCreationSystem(const glm::vec2& surfaceSize);
-
     virtual bool initialize() override;
     virtual void terminate() override;
 
@@ -27,8 +25,6 @@ public:
     void renderMaterialPropertyUi();
 
 private:
-    glm::vec2 m_surfaceSize;
-
     blink::LightData m_lightData{glm::one<glm::vec3>(), 100.0f};
     bool m_lightDataDirty{};
 

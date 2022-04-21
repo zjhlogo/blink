@@ -13,17 +13,15 @@
 #include "../type/RenderLayers.h"
 #include "../type/RenderOrders.h"
 
-#include <foundation/BaseTypesGlm.h>
+#include <core/resources/IGeometry.h>
+#include <core/resources/IMaterial.h>
 
 namespace blink
 {
-    class IGeometry;
-    class Material;
-
     struct StaticModel
     {
         IGeometry* geometry;
-        Material* material;
+        IMaterial* material;
     };
 
     struct CameraData
@@ -49,6 +47,6 @@ namespace blink
     {
         int order;
         uint32 renderLayer; // see RenderLayers
-        Material* overrideMaterial;
+        IMaterial* overrideMaterial;
     };
 } // namespace blink

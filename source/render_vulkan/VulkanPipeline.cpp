@@ -13,7 +13,6 @@
 #include "VulkanImage.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanSwapchain.h"
-#include "VulkanTexture.h"
 #include "utils/VulkanUtils.h"
 
 #include <foundation/File.h>
@@ -38,12 +37,20 @@ namespace blink
     bool VulkanPipeline::create(const tstring& vertexShader,
                                 const tstring& fragmentShader,
                                 VkPolygonMode polygonMode,
-                                VkPrimitiveTopology topology)
+                                PrimitiveTopology topology)
     {
         m_vertexShader = vertexShader;
         m_fragmentShader = fragmentShader;
         m_polygonMode = polygonMode;
-        m_topology = topology;
+
+        if (topology == PrimitiveTopology::LineList)
+        {
+            m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        }
+        else if (topology == PrimitiveTopology::TriangleList)
+        {
+            m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        }
 
         return recreate();
     }

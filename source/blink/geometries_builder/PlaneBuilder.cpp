@@ -10,9 +10,8 @@
 **/
 
 #include "PlaneBuilder.h"
-#include "../geometries/TriangleListGeometry.h"
-#include "../resources/ResourceMgr.h"
 
+#include <core/modules/IResModule.h>
 #include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
@@ -71,7 +70,7 @@ namespace blink
 
         if (!generateData(vertsPos, indices, pVertsNormal, pVertsUv0)) return nullptr;
 
-        auto geometry = ResourceMgr::getInstance().createGeometry<TriangleListGeometry>(getUniqueId());
+        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_RELEASE(geometry);

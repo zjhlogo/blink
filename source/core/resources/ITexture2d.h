@@ -13,8 +13,6 @@ namespace blink
 {
     class ITexture2d : public ITexture
     {
-        friend class IResourceModule;
-
     public:
         virtual void release() override;
 

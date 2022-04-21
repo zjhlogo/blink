@@ -10,8 +10,7 @@
 **/
 #pragma once
 
-#include "../geometries/IGeometry.h"
-
+#include <core/resources/IGeometry.h>
 #include <foundation/BaseTypesGlm.h>
 
 #include <vector>

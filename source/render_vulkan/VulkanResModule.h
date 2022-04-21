@@ -1,6 +1,6 @@
 
 /*********************************************************************
- * \file   VulkanResourceModule.h
+ * \file   VulkanResModule.h
  * \brief
  *
  * \author zjhlogo
@@ -8,7 +8,7 @@
  *********************************************************************/
 #pragma once
 
-#include <core/modules/IResourceModule.h>
+#include <core/modules/IResModule.h>
 
 #include <unordered_map>
 
@@ -17,7 +17,7 @@ namespace blink
     class VulkanLogicalDevice;
     class VulkanSwapchain;
 
-    class VulkanResourceModule : public IResourceModule
+    class VulkanResModule : public IResModule
     {
     public:
         static const tstring DEFAULT_TEXTURE;

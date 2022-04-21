@@ -1,26 +1,43 @@
 
 /*********************************************************************
- * \file   VulkanResourceModule.cpp
+ * \file   VulkanResModule.cpp
  * \brief
  *
  * \author zjhlogo
  * \date   04/21/2022
  *********************************************************************/
-#include "VulkanResourceModule.h"
+#include "VulkanResModule.h"
+#include "resources/VulkanGeometryLineList.h"
+#include "resources/VulkanGeometryTriangleList.h"
+#include "resources/VulkanMaterial.h"
 #include "resources/VulkanTexture.h"
 
 #include <render_vulkan/VulkanCommandPool.h>
 #include <render_vulkan/VulkanDescriptorPool.h>
 #include <render_vulkan/VulkanLogicalDevice.h>
+#include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
 
 namespace blink
 {
-    const tstring VulkanResourceModule::DEFAULT_TEXTURE = "resource/pink.png";
+    IResModule* getResModule()
+    {
+        static VulkanResModule s_vulkanResModule;
+        return &s_vulkanResModule;
+    }
 
-    bool VulkanResourceModule::initialize() { return true; }
+    const tstring VulkanResModule::DEFAULT_TEXTURE = "resource/pink.png";
 
-    void VulkanResourceModule::terminate()
+    bool VulkanResModule::initialize()
+    {
+        auto vulkanRenderModule = dynamic_cast<VulkanRenderModule*>(getRenderModule());
+        m_logicalDevice = &vulkanRenderModule->getLogicalDevice();
+        m_swapchain = &vulkanRenderModule->getSwapchain();
+
+        return true;
+    }
+
+    void VulkanResModule::terminate()
     {
         for (auto kvp : m_materialMap)
         {
@@ -44,7 +61,7 @@ namespace blink
         m_swapchain = nullptr;
     }
 
-    void VulkanResourceModule::recreate()
+    void VulkanResModule::recreate()
     {
         for (auto kvp : m_materialMap)
         {
@@ -53,7 +70,7 @@ namespace blink
         }
     }
 
-    ITexture2d* VulkanResourceModule::createTexture2d(const tstring& filePath)
+    ITexture2d* VulkanResModule::createTexture2d(const tstring& filePath)
     {
         auto it = m_texture2dMap.find(filePath);
         if (it != m_texture2dMap.end())
@@ -77,7 +94,7 @@ namespace blink
         return texture;
     }
 
-    void VulkanResourceModule::releaseTexture2d(ITexture2d* texture)
+    void VulkanResModule::releaseTexture2d(ITexture2d* texture)
     {
         auto it = m_texture2dMap.find(texture->getId());
         if (it != m_texture2dMap.end())
@@ -86,7 +103,33 @@ namespace blink
         }
     }
 
-    void VulkanResourceModule::releaseGeometry(IGeometry* geometry)
+    IGeometry* VulkanResModule::createGeometry(const tstring& uniqueId, PrimitiveTopology topology)
+    {
+        auto it = m_geometryMap.find(uniqueId);
+        if (it != m_geometryMap.end())
+        {
+            it->second->incRef();
+            return it->second;
+        }
+
+        IGeometry* geometry = nullptr;
+        if (topology == PrimitiveTopology::TriangleList)
+        {
+            geometry = new VulkanGeometryTriangleList(*m_logicalDevice);
+        }
+        else if (topology == PrimitiveTopology::LineList)
+        {
+            geometry = new VulkanGeometryLineList(*m_logicalDevice);
+        }
+
+        geometry->setId(uniqueId);
+        geometry->incRef();
+        m_geometryMap.emplace(std::make_pair(geometry->getId(), geometry));
+
+        return geometry;
+    }
+
+    void VulkanResModule::releaseGeometry(IGeometry* geometry)
     {
         auto it = m_geometryMap.find(geometry->getId());
         if (it != m_geometryMap.end())
@@ -95,7 +138,7 @@ namespace blink
         }
     }
 
-    IMaterial* VulkanResourceModule::createMaterial(const tstring& filePath)
+    IMaterial* VulkanResModule::createMaterial(const tstring& filePath)
     {
         // find from map
         auto it = m_materialMap.find(filePath);
@@ -120,7 +163,7 @@ namespace blink
         return material;
     }
 
-    void VulkanResourceModule::releaseMaterial(IMaterial* material)
+    void VulkanResModule::releaseMaterial(IMaterial* material)
     {
         auto it = m_materialMap.find(material->getId());
         if (it != m_materialMap.end())

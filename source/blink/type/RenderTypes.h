@@ -14,9 +14,6 @@
 
 namespace blink
 {
-    class IGeometry;
-    class Material;
-
     struct PerFrameUniforms
     {
         alignas(16) glm::mat4 matWorldToCamera;

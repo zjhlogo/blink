@@ -11,31 +11,24 @@
 #pragma once
 
 #include <core/EcsWorld.h>
+#include <core/base/IRenderSystem.h>
 
 #include <chrono>
 #include <vector>
 
 namespace blink
 {
-    class VulkanCommandBuffer;
-    class VulkanUniformBuffer;
-    class VulkanRenderModule;
-    class IRenderSystem;
-
     class IApp
     {
     public:
         IApp();
         virtual ~IApp();
 
-        virtual bool initialize(VulkanRenderModule& renderModule) = 0;
+        virtual bool initialize() = 0;
         virtual void terminate() = 0;
 
         void stepEcsWorld();
-        void render(VulkanCommandBuffer& commandBuffer,
-                    VulkanUniformBuffer& pfub,
-                    VulkanUniformBuffer& pmub,
-                    VulkanUniformBuffer& piub);
+        void render(IRenderData& renderData);
 
         EcsWorld& getEcsWorld() { return m_ecsWorld; };
 

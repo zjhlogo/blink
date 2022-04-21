@@ -10,54 +10,45 @@
 **/
 
 #include "blink.h"
-#include "resources/ResourceMgr.h"
 
-#include <render_vulkan/VulkanRenderModule.h>
-#include <render_vulkan/VulkanSwapchain.h>
+#include <core/modules/IRenderModule.h>
+#include <core/modules/IResModule.h>
 
 namespace blink
 {
     int run(IApp& app)
     {
-        VulkanRenderModule renderModule;
+        auto renderModule = getRenderModule();
+        auto resModule = getResModule();
 
-        if (renderModule.createDevice({1280, 720}))
+        if (renderModule->createDevice({1280, 720}))
         {
-            if (ResourceMgr::getInstance().initialize(renderModule.getLogicalDevice(), renderModule.getSwapchain()))
+            if (resModule->initialize())
             {
-                if (app.initialize(renderModule))
+                if (app.initialize())
                 {
-                    while (renderModule.processEvent())
+                    while (renderModule->processEvent())
                     {
                         app.stepEcsWorld();
 
-                        auto result = renderModule.render(
-                            [&](VulkanCommandBuffer& commandBuffer,
-                                VulkanUniformBuffer& pfub,
-                                VulkanUniformBuffer& pmub,
-                                VulkanUniformBuffer& piub)
+                        auto result = renderModule->render(
+                            [&](IRenderData& renderData)
                             {
                                 //
-                                app.render(commandBuffer, pfub, pmub, piub);
+                                app.render(renderData);
                             });
-
-                        if (result == VulkanRenderModule::RenderResult::Recreate)
-                        {
-                            renderModule.getSwapchain().recreate();
-                            ResourceMgr::getInstance().recreate();
-                        }
                     }
 
-                    renderModule.waitIdle();
+                    renderModule->waitIdle();
                 }
 
                 app.terminate();
             }
 
-            ResourceMgr::getInstance().terminate();
+            resModule->terminate();
         }
 
-        renderModule.destroyDevice();
+        renderModule->destroyDevice();
         return 0;
     }
 
