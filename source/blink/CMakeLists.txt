@@ -5,12 +5,6 @@ project(libblink)
 
 set(SOURCE_FILES
 components/Components.h
-geometries/IGeometry.cpp
-geometries/IGeometry.h
-geometries/LineListGeometry.cpp
-geometries/LineListGeometry.h
-geometries/TriangleListGeometry.cpp
-geometries/TriangleListGeometry.h
 geometries_builder/BoxBuilder.cpp
 geometries_builder/BoxBuilder.h
 geometries_builder/IGeometryBuilder.cpp
@@ -26,16 +20,8 @@ geometries_builder/SphereUvBuilder.cpp
 geometries_builder/SphereUvBuilder.h
 geometries_builder/TetrahedronBuilder.cpp
 geometries_builder/TetrahedronBuilder.h
-materials/Material.cpp
-materials/Material.h
-resources/IResource.cpp
-resources/IResource.h
-resources/ResourceMgr.cpp
-resources/ResourceMgr.h
 systems/DebugLineSystem.cpp
 systems/DebugLineSystem.h
-textures/Texture2d.cpp
-textures/Texture2d.h
 type/RenderLayers.h
 type/RenderOrders.h
 type/RenderTypes.h

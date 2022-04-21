@@ -67,7 +67,9 @@ namespace blink
         destroyTextureImage();
 
         VkFormat depthFormat = VulkanUtils::findSupportedFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice(),
-                                                                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                                                                {VK_FORMAT_D32_SFLOAT,
+                                                                 VK_FORMAT_D32_SFLOAT_S8_UINT,
+                                                                 VK_FORMAT_D24_UNORM_S8_UINT},
                                                                 VK_IMAGE_TILING_OPTIMAL,
                                                                 VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
@@ -76,7 +78,9 @@ namespace blink
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         m_textureImage->allocateImageMemory();
         m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-        m_textureImage->transitionImageLayout(depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        m_textureImage->transitionImageLayout(depthFormat,
+                                              VK_IMAGE_LAYOUT_UNDEFINED,
+                                              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
         return true;
     }
@@ -96,16 +100,23 @@ namespace blink
         // create staging buffer
         VulkanBuffer* stagingBuffer = new VulkanBuffer(m_logicalDevice);
         stagingBuffer->createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
-        VulkanMemory* bufferMemory = stagingBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        VulkanMemory* bufferMemory = stagingBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                                                                         | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         // copy buffer into staging buffer memory
         bufferMemory->uploadData(pixels, imageSize, 0);
 
         // create image
         m_textureImage = new VulkanImage(m_logicalDevice);
-        m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        m_textureImage->createImage(VK_IMAGE_TYPE_2D,
+                                    width,
+                                    height,
+                                    VK_FORMAT_R8G8B8A8_UNORM,
+                                    VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
         m_textureImage->allocateImageMemory();
 
-        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM,
+                                              VK_IMAGE_LAYOUT_UNDEFINED,
+                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         // copy buffer to image
         {
@@ -125,11 +136,18 @@ namespace blink
                     region.imageOffset = {0, 0, 0};
                     region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
 
-                    vkCmdCopyBufferToImage(commandBuffer, *stagingBuffer, *m_textureImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                    vkCmdCopyBufferToImage(commandBuffer,
+                                           *stagingBuffer,
+                                           *m_textureImage,
+                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                           1,
+                                           &region);
                 });
         }
 
-        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM,
+                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         // destroy staging buffer
         SAFE_DELETE(stagingBuffer);

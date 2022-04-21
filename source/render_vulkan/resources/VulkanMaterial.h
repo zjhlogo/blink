@@ -1,18 +1,14 @@
-/**
 
-    @file      Material.h
-    @brief
-    @details   ~
-    @author    zjhlogo
-    @date      1.11.2021
-    @copyright Copyright zjhlogo, 2021. All right reserved.
-
-**/
+/*********************************************************************
+ * \file   VulkanMaterial.h
+ * \brief
+ *
+ * \author zjhlogo
+ * \date   04/21/2022
+ *********************************************************************/
 #pragma once
 
-#include "../resources/IResource.h"
-#include "../type/RenderTypes.h"
-
+#include <core/resources/IMaterial.h>
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
 
@@ -25,19 +21,16 @@ namespace blink
     class VulkanPipeline;
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
-    class Texture2d;
-    class ResourceMgr;
-    class IGeometry;
 
-    class Material : public IResource
+    class VulkanMaterial : public IMaterial
     {
-        friend ResourceMgr;
-
     public:
-        virtual void release() override;
+        virtual bool recreate() override;
 
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
-        bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer, VulkanUniformBuffer& pmub, VkDescriptorBufferInfo& pmubi);
+        bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
+                                     VulkanUniformBuffer& pmub,
+                                     VkDescriptorBufferInfo& pmubi);
         bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
                                IGeometry* geometry,
                                const VkDescriptorBufferInfo& pfubi,
@@ -56,11 +49,10 @@ namespace blink
         VulkanPipeline& getPipeline() const { return *m_pipeline; };
 
     private:
-        Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
-        ~Material();
+        VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
+        ~VulkanMaterial();
 
         bool create(const tstring& filePath);
-        bool recreate();
         void destroy();
 
         bool loadConfigFromFile(const tstring& filePath);
@@ -73,16 +65,15 @@ namespace blink
         tstring m_filePath;
         tstring m_vertexShader;
         tstring m_fragmentShader;
-        VkPolygonMode m_polygonMode{ VK_POLYGON_MODE_FILL };
-        VkPrimitiveTopology m_topology{ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
+        VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};
+        VkPrimitiveTopology m_topology{VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST};
         std::vector<tstring> m_texturePaths;
 
         VulkanPipeline* m_pipeline{};
-        std::vector<Texture2d*> m_textures;
+        std::vector<ITexture2d*> m_textures;
         std::vector<VkDescriptorImageInfo> m_imageInfos;
 
         PerMaterialUniforms m_pmu{0.5f, 0.5f, glm::vec3(1.0f, 0.0f, 1.0f)};
-
     };
 
 } // namespace blink

@@ -8,6 +8,7 @@
  */
 #pragma once
 
+#include <core/resources/ITexture2d.h>
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
 
@@ -19,7 +20,7 @@ namespace blink
     class VulkanLogicalDevice;
     class VulkanCommandPool;
 
-    class VulkanTexture
+    class VulkanTexture : public ITexture2d
     {
     public:
         VulkanTexture(VulkanLogicalDevice& logicalDevice);

@@ -5,6 +5,14 @@ project(librender_vulkan)
 
 set(SOURCE_FILES
 base/IRenderSystem.h
+resources/VulkanGeometryLineList.cpp
+resources/VulkanGeometryLineList.h
+resources/VulkanGeometryTriangleList.cpp
+resources/VulkanGeometryTriangleList.h
+resources/VulkanMaterial.cpp
+resources/VulkanMaterial.h
+resources/VulkanTexture.cpp
+resources/VulkanTexture.h
 utils/VulkanUtils.cpp
 utils/VulkanUtils.h
 VulkanBuffer.cpp
@@ -29,12 +37,12 @@ VulkanPipeline.cpp
 VulkanPipeline.h
 VulkanRenderModule.cpp
 VulkanRenderModule.h
+VulkanResourceModule.cpp
+VulkanResourceModule.h
 VulkanSemaphore.cpp
 VulkanSemaphore.h
 VulkanSwapchain.cpp
 VulkanSwapchain.h
-VulkanTexture.cpp
-VulkanTexture.h
 VulkanUniformBuffer.cpp
 VulkanUniformBuffer.h
 VulkanWindow.cpp

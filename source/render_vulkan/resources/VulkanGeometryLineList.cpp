@@ -1,34 +1,33 @@
 
 /*********************************************************************
- * \file   LineListGeometry.cpp
+ * \file   VulkanGeometryLineList.cpp
  * \brief
  *
  * \author zjhlogo
  * \date   04/15/2022
  *********************************************************************/
-#include "LineListGeometry.h"
+#include "VulkanGeometryLineList.h"
 
-#include <blink/resources/ResourceMgr.h>
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanPipeline.h>
 
 namespace blink
 {
-    LineListGeometry::LineListGeometry(VulkanLogicalDevice& logicalDevice)
-        : IGeometry(logicalDevice)
+    VulkanGeometryLineList::VulkanGeometryLineList(VulkanLogicalDevice& logicalDevice)
+        : m_logicalDevice(logicalDevice)
     {
         //
     }
 
-    LineListGeometry::~LineListGeometry()
+    VulkanGeometryLineList::~VulkanGeometryLineList()
     {
         //
         destroy();
     }
 
-    bool LineListGeometry::uploadData(const std::vector<uint16>& indices,
-                                      const std::vector<glm::vec3>& positions,
-                                      const std::vector<Color>& colors)
+    bool VulkanGeometryLineList::uploadData(const std::vector<uint16>& indices,
+                                            const std::vector<glm::vec3>& positions,
+                                            const std::vector<Color>& colors)
     {
         // swap buffer
         m_offsetIndices = 0;
@@ -53,12 +52,12 @@ namespace blink
             });
 
         m_vertexInputMask = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Color;
-        m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        m_topology = PrimitiveTopology::LineList;
 
         return true;
     }
 
-    VkDeviceSize LineListGeometry::getVertexInputOffset(uint32 inputMask) const
+    VkDeviceSize VulkanGeometryLineList::getVertexInputOffset(uint32 inputMask) const
     {
         if (inputMask == VulkanPipeline::InputLocation_Position)
         {
@@ -72,7 +71,7 @@ namespace blink
         return 0;
     }
 
-    void LineListGeometry::destroy()
+    void VulkanGeometryLineList::destroy()
     {
         for (auto buffer : m_bufferList)
         {
@@ -85,7 +84,7 @@ namespace blink
         m_offsetIndices = 0;
     }
 
-    VulkanBuffer* LineListGeometry::swapBuffer()
+    VulkanBuffer* VulkanGeometryLineList::swapBuffer()
     {
         m_currentBuffer = (m_currentBuffer + 1) % BUFFER_COUNT;
 

@@ -1,35 +1,34 @@
 
 /*********************************************************************
- * \file   TriangleListGeometry.cpp
+ * \file   VulkanGeometryTriangleList.cpp
  * \brief
  *
  * \author zjhlogo
  * \date   04/15/2022
  *********************************************************************/
-#include "TriangleListGeometry.h"
+#include "VulkanGeometryTriangleList.h"
 
-#include <blink/resources/ResourceMgr.h>
 #include <render_vulkan/VulkanBuffer.h>
 #include <render_vulkan/VulkanPipeline.h>
 
 namespace blink
 {
-    TriangleListGeometry::TriangleListGeometry(VulkanLogicalDevice& logicalDevice)
-        : IGeometry(logicalDevice)
+    VulkanGeometryTriangleList::VulkanGeometryTriangleList(VulkanLogicalDevice& logicalDevice)
+        : m_logicalDevice(logicalDevice)
     {
         //
     }
 
-    TriangleListGeometry::~TriangleListGeometry()
+    VulkanGeometryTriangleList::~VulkanGeometryTriangleList()
     {
         //
         destroy();
     }
 
-    bool TriangleListGeometry::uploadData(const std::vector<uint16>& indices,
-                                          const std::vector<glm::vec3>& positions,
-                                          const std::vector<glm::vec3>& normals,
-                                          const std::vector<glm::vec2>& uv0s)
+    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16>& indices,
+                                                const std::vector<glm::vec3>& positions,
+                                                const std::vector<glm::vec3>& normals,
+                                                const std::vector<glm::vec2>& uv0s)
     {
         destroy();
 
@@ -63,19 +62,19 @@ namespace blink
 
         m_vertexInputMask = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Normal
                             | VulkanPipeline::InputLocation_Uv0;
-        m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        m_topology = PrimitiveTopology::TriangleList;
 
         return true;
     }
 
-    bool TriangleListGeometry::uploadData(const void* data,
-                                          VkDeviceSize dataSize,
-                                          uint32 numVertices,
-                                          uint32 numIndices,
-                                          VkDeviceSize offsetPosition,
-                                          VkDeviceSize offsetNormal,
-                                          VkDeviceSize offsetUv0,
-                                          VkDeviceSize offsetIndices)
+    bool VulkanGeometryTriangleList::uploadData(const void* data,
+                                                std::size_t dataSize,
+                                                uint32 numVertices,
+                                                uint32 numIndices,
+                                                std::size_t offsetPosition,
+                                                std::size_t offsetNormal,
+                                                std::size_t offsetUv0,
+                                                std::size_t offsetIndices)
     {
         destroy();
 
@@ -101,7 +100,7 @@ namespace blink
         return true;
     }
 
-    VkDeviceSize TriangleListGeometry::getVertexInputOffset(uint32 inputMask) const
+    VkDeviceSize VulkanGeometryTriangleList::getVertexInputOffset(uint32 inputMask) const
     {
         if (inputMask == VulkanPipeline::InputLocation_Position)
         {
@@ -119,7 +118,7 @@ namespace blink
         return 0;
     }
 
-    void TriangleListGeometry::destroy()
+    void VulkanGeometryTriangleList::destroy()
     {
         SAFE_DELETE(m_buffer);
 

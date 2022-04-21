@@ -1,17 +1,13 @@
-/**
 
-    @file      ResourceMgr.cpp
-    @brief
-    @details   ~
-    @author    zjhlogo
-    @date      5.11.2021
-    @copyright © zjhlogo, 2021. All right reserved.
-
-**/
-
-#include "ResourceMgr.h"
-#include "../materials/Material.h"
-#include "../textures/Texture2d.h"
+/*********************************************************************
+ * \file   VulkanResourceModule.cpp
+ * \brief
+ *
+ * \author zjhlogo
+ * \date   04/21/2022
+ *********************************************************************/
+#include "VulkanResourceModule.h"
+#include "resources/VulkanTexture.h"
 
 #include <render_vulkan/VulkanCommandPool.h>
 #include <render_vulkan/VulkanDescriptorPool.h>
@@ -20,33 +16,11 @@
 
 namespace blink
 {
-    const tstring ResourceMgr::DEFAULT_TEXTURE = "resource/pink.png";
+    const tstring VulkanResourceModule::DEFAULT_TEXTURE = "resource/pink.png";
 
-    ResourceMgr::ResourceMgr()
-    {
-        //
-    }
+    bool VulkanResourceModule::initialize() { return true; }
 
-    ResourceMgr::~ResourceMgr()
-    {
-        //
-    }
-
-    ResourceMgr& ResourceMgr::getInstance()
-    {
-        static ResourceMgr s_resourceMgr;
-        return s_resourceMgr;
-    }
-
-    bool ResourceMgr::initialize(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
-    {
-        m_logicalDevice = &logicalDevice;
-        m_swapchain = &swapchain;
-
-        return true;
-    }
-
-    void ResourceMgr::terminate()
+    void VulkanResourceModule::terminate()
     {
         for (auto kvp : m_materialMap)
         {
@@ -70,7 +44,7 @@ namespace blink
         m_swapchain = nullptr;
     }
 
-    void ResourceMgr::recreate()
+    void VulkanResourceModule::recreate()
     {
         for (auto kvp : m_materialMap)
         {
@@ -79,7 +53,7 @@ namespace blink
         }
     }
 
-    Texture2d* ResourceMgr::createTexture2d(const tstring& filePath)
+    ITexture2d* VulkanResourceModule::createTexture2d(const tstring& filePath)
     {
         auto it = m_texture2dMap.find(filePath);
         if (it != m_texture2dMap.end())
@@ -89,8 +63,8 @@ namespace blink
         }
 
         // create new
-        auto texture = new Texture2d();
-        if (!texture->create(*m_logicalDevice, filePath))
+        auto texture = new VulkanTexture(*m_logicalDevice);
+        if (!texture->createTexture2D(filePath))
         {
             SAFE_DELETE(texture);
             return nullptr;
@@ -103,7 +77,7 @@ namespace blink
         return texture;
     }
 
-    void ResourceMgr::releaseTexture2d(Texture2d* texture)
+    void VulkanResourceModule::releaseTexture2d(ITexture2d* texture)
     {
         auto it = m_texture2dMap.find(texture->getId());
         if (it != m_texture2dMap.end())
@@ -112,7 +86,7 @@ namespace blink
         }
     }
 
-    void ResourceMgr::releaseGeometry(IGeometry* geometry)
+    void VulkanResourceModule::releaseGeometry(IGeometry* geometry)
     {
         auto it = m_geometryMap.find(geometry->getId());
         if (it != m_geometryMap.end())
@@ -121,7 +95,7 @@ namespace blink
         }
     }
 
-    Material* ResourceMgr::createMaterial(const tstring& filePath)
+    IMaterial* VulkanResourceModule::createMaterial(const tstring& filePath)
     {
         // find from map
         auto it = m_materialMap.find(filePath);
@@ -132,7 +106,7 @@ namespace blink
         }
 
         // create new
-        auto material = new Material(*m_logicalDevice, *m_swapchain);
+        auto material = new VulkanMaterial(*m_logicalDevice, *m_swapchain);
         if (!material->create(filePath))
         {
             SAFE_DELETE(material);
@@ -146,7 +120,7 @@ namespace blink
         return material;
     }
 
-    void ResourceMgr::releaseMaterial(Material* material)
+    void VulkanResourceModule::releaseMaterial(IMaterial* material)
     {
         auto it = m_materialMap.find(material->getId());
         if (it != m_materialMap.end())

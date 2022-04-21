@@ -1,19 +1,17 @@
-/**
 
-    @file      Material.cpp
-    @brief
-    @details   ~
-    @author    zjhlogo
-    @date      1.11.2021
-    @copyright Copyright zjhlogo, 2021. All right reserved.
+/*********************************************************************
+ * \file   VulkanMaterial.cpp
+ * \brief
+ *
+ * \author zjhlogo
+ * \date   04/21/2022
+ *********************************************************************/
+#include "VulkanMaterial.h"
+#include "../VulkanResourceModule.h"
+#include "VulkanTexture.h"
 
-**/
-
-#include "Material.h"
-#include "../geometries/IGeometry.h"
-#include "../resources/ResourceMgr.h"
-#include "../textures/Texture2d.h"
-
+#include <core/modules/IResourceModule.h>
+#include <core/resources/IGeometry.h>
 #include <foundation/File.h>
 #include <foundation/Log.h>
 #include <render_vulkan/VulkanCommandBuffer.h>
@@ -21,50 +19,43 @@
 #include <render_vulkan/VulkanLogicalDevice.h>
 #include <render_vulkan/VulkanPipeline.h>
 #include <render_vulkan/VulkanSwapchain.h>
-#include <render_vulkan/VulkanTexture.h>
 #include <render_vulkan/VulkanUniformBuffer.h>
 #include <tinygltf/json.hpp>
 
 namespace blink
 {
-    Material::Material(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
+    VulkanMaterial::VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
         : m_logicalDevice(logicalDevice)
         , m_swapchain(swapchain)
     {
     }
 
-    Material::~Material()
+    VulkanMaterial::~VulkanMaterial()
     {
         //
         destroy();
     }
 
-    void Material::release()
-    {
-        //
-        ResourceMgr::getInstance().releaseMaterial(this);
-    }
-
-    void Material::bindPipeline(VulkanCommandBuffer& commandBuffer)
+    void VulkanMaterial::bindPipeline(VulkanCommandBuffer& commandBuffer)
     {
         //
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
     }
 
-    bool Material::bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
-                                           VulkanUniformBuffer& pmub,
-                                           VkDescriptorBufferInfo& pmubi)
+    bool VulkanMaterial::bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
+                                                 VulkanUniformBuffer& pmub,
+                                                 VkDescriptorBufferInfo& pmubi)
     {
         pmub.appendData(&m_pmu, sizeof(m_pmu), &pmubi);
 
         return true;
     }
 
-    bool Material::updateBufferInfos(VulkanCommandBuffer& commandBuffer,
-                                     IGeometry* geometry,
-                                     const VkDescriptorBufferInfo& pfubi,
-                                     const VkDescriptorBufferInfo& pmubi,
-                                     const VkDescriptorBufferInfo& piubi)
+    bool VulkanMaterial::updateBufferInfos(VulkanCommandBuffer& commandBuffer,
+                                           IGeometry* geometry,
+                                           const VkDescriptorBufferInfo& pfubi,
+                                           const VkDescriptorBufferInfo& pmubi,
+                                           const VkDescriptorBufferInfo& piubi)
     {
         auto inputMask = m_pipeline->getVertexInputMask();
         if (!geometry->checkInputMask(inputMask)) return false;
@@ -92,7 +83,7 @@ namespace blink
         return m_pipeline->bindDescriptorSets(commandBuffer, pfubi, pmubi, piubi, m_imageInfos);
     }
 
-    bool Material::create(const tstring& filePath)
+    bool VulkanMaterial::create(const tstring& filePath)
     {
         destroy();
 
@@ -110,7 +101,7 @@ namespace blink
         return true;
     }
 
-    bool Material::recreate()
+    bool VulkanMaterial::recreate()
     {
         if (m_pipeline)
         {
@@ -120,7 +111,7 @@ namespace blink
         return true;
     }
 
-    void Material::destroy()
+    void VulkanMaterial::destroy()
     {
         for (auto texture : m_textures)
         {
@@ -138,7 +129,7 @@ namespace blink
         m_texturePaths.clear();
     }
 
-    bool Material::loadConfigFromFile(const tstring& filePath)
+    bool VulkanMaterial::loadConfigFromFile(const tstring& filePath)
     {
         tstring fileContent;
         if (!File::readFileIntoString(fileContent, filePath))
@@ -218,17 +209,17 @@ namespace blink
         return true;
     }
 
-    bool Material::loadTextures()
+    bool VulkanMaterial::loadTextures()
     {
         for (const auto& filePath : m_texturePaths)
         {
-            auto texture = ResourceMgr::getInstance().createTexture2d(filePath);
-            if (!texture) texture = ResourceMgr::getInstance().createTexture2d(ResourceMgr::DEFAULT_TEXTURE);
+            auto texture = getResourceModule()->createTexture2d(filePath);
+            if (!texture) texture = getResourceModule()->createTexture2d(VulkanResourceModule::DEFAULT_TEXTURE);
             if (!texture) return false;
 
             m_textures.push_back(texture);
 
-            auto vulkanTexture = texture->getVulkanTexture();
+            auto vulkanTexture = dynamic_cast<VulkanTexture*>(texture);
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

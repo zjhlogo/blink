@@ -1,6 +1,6 @@
 
 /*********************************************************************
- * \file   LineListGeometry.h
+ * \file   VulkanGeometryLineList.h
  * \brief
  *
  * \author zjhlogo
@@ -8,11 +8,8 @@
  *********************************************************************/
 #pragma once
 
-#include "IGeometry.h"
-
-#include <core/base/Color.h>
-
-#include <vector>
+#include <core/resources/IGeometryLineList.h>
+#include <vulkan/vulkan_core.h>
 
 namespace blink
 {
@@ -21,7 +18,7 @@ namespace blink
     class VulkanBuffer;
     class ResourceMgr;
 
-    class LineListGeometry : public IGeometry
+    class VulkanGeometryLineList : public IGeometryLineList
     {
         friend ResourceMgr;
 
@@ -29,22 +26,23 @@ namespace blink
         static const VkDeviceSize DEFAULT_BUFFER_SIZE = 32 * 1024;
 
     public:
-        bool uploadData(const std::vector<uint16>& indices,
-                        const std::vector<glm::vec3>& positions,
-                        const std::vector<Color>& colors);
+        virtual bool uploadData(const std::vector<uint16>& indices,
+                                const std::vector<glm::vec3>& positions,
+                                const std::vector<Color>& colors) override;
 
-        virtual VulkanBuffer* getVulkanBuffer() const override { return m_bufferList[m_currentBuffer]; }
-        virtual VkDeviceSize getVertexInputOffset(uint32 inputMask) const override;
-        virtual VkDeviceSize getIndicesOffset() const override { return m_offsetIndices; }
+        VulkanBuffer* getVulkanBuffer() const { return m_bufferList[m_currentBuffer]; }
+        VkDeviceSize getVertexInputOffset(uint32 inputMask) const;
+        VkDeviceSize getIndicesOffset() const { return m_offsetIndices; }
 
     protected:
-        LineListGeometry(VulkanLogicalDevice& logicalDevice);
-        virtual ~LineListGeometry();
+        VulkanGeometryLineList(VulkanLogicalDevice& logicalDevice);
+        virtual ~VulkanGeometryLineList();
 
         void destroy();
         VulkanBuffer* swapBuffer();
 
     protected:
+        VulkanLogicalDevice& m_logicalDevice;
         int m_currentBuffer{};
         VulkanBuffer* m_bufferList[BUFFER_COUNT]{};
 

@@ -8,6 +8,17 @@ base/Color.cpp
 base/Color.h
 base/ILogicalSystem.h
 components/Components.h
+modules/IResourceModule.h
+resources/IGeometry.cpp
+resources/IGeometry.h
+resources/IGeometryLineList.h
+resources/IGeometryTriangleList.h
+resources/IMaterial.cpp
+resources/IMaterial.h
+resources/IResource.h
+resources/ITexture.h
+resources/ITexture2d.cpp
+resources/ITexture2d.h
 systems/AngularVelocitySystem.cpp
 systems/AngularVelocitySystem.h
 systems/LinearVelocitySystem.cpp
