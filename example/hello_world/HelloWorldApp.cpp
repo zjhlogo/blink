@@ -17,8 +17,6 @@
 #include <blink/blink.h>
 #include <blink/components/Components.h>
 #include <blink/systems/DebugLineSystem.h>
-#include <core/systems/AngularVelocitySystem.h>
-#include <core/systems/LinearVelocitySystem.h>
 #include <flecs/flecs_os_api_stdcpp.h>
 #include <imgui/imgui.h>
 #include <physics/systems/BeginPhysicsSimulationSystem.h>

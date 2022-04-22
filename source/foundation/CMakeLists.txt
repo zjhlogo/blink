@@ -18,7 +18,7 @@ Log.cpp
 Log.h
 PathParser.cpp
 PathParser.h
-PreDefine.h
+PreDefineMacro.h
 StringBuilder.cpp
 StringBuilder.h
 )

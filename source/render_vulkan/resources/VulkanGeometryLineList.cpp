@@ -51,7 +51,7 @@ namespace blink
                 memcpy(((uint8*)destBuffer + m_offsetColors), colors.data(), sizeColors);
             });
 
-        m_vertexInputMask = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Color;
+        m_vertexAttrFlags = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Color;
         m_topology = PrimitiveTopology::LineList;
 
         return true;
@@ -79,7 +79,7 @@ namespace blink
         return false;
     }
 
-    VkDeviceSize VulkanGeometryLineList::getVertexInputOffset(uint32 inputMask) const
+    VkDeviceSize VulkanGeometryLineList::getVertexInputOffset(VertexAttrs vertexAttrs) const
     {
         if (inputMask == VulkanPipeline::InputLocation_Position)
         {

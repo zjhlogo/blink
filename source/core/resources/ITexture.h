@@ -14,7 +14,5 @@ namespace blink
 {
     class ITexture : public IResource
     {
-        friend class IResourceModule;
-
     };
 } // namespace blink

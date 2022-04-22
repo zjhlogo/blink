@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <core/resources/IGeometry.h>
+#include <core/types/VertexAttrs.h>
 #include <vulkan/vulkan.h>
 
 namespace blink
@@ -27,19 +28,6 @@ namespace blink
             PerInstanceUniformIndex,
             SamplerUniformIndexBegin
         };
-
-        static const uint32 InputLocation_Position = 1 << 0; // inPosition
-        static const uint32 InputLocation_Normal = 1 << 1;   // inNormal
-        static const uint32 InputLocation_Uv0 = 1 << 2;      // inTexCoord1
-        static const uint32 InputLocation_Uv1 = 1 << 3;      // inTexCoord2
-        static const uint32 InputLocation_Uv2 = 1 << 4;      // inTexCoord3
-        static const uint32 InputLocation_Uv3 = 1 << 5;      // inTexCoord4
-        static const uint32 InputLocation_Uv4 = 1 << 6;      // inTexCoord5
-        static const uint32 InputLocation_Uv5 = 1 << 7;      // inTexCoord6
-        static const uint32 InputLocation_Uv6 = 1 << 8;      // inTexCoord7
-        static const uint32 InputLocation_Uv7 = 1 << 9;      // inTexCoord8
-        static const uint32 InputLocation_Color = 1 << 10;   // inColor
-        static const uint32 MaxInputLocationMaskBit = 11;
 
     public:
         VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
@@ -63,7 +51,7 @@ namespace blink
         VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
         VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };
 
-        uint32 getVertexInputMask() const { return m_vertexInputMasks; };
+        VertexAttrs getVertexAttrFlags() const { return m_vertexAttrs; };
 
     private:
         VkDescriptorSetLayout createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings);
@@ -78,9 +66,9 @@ namespace blink
         void destroyGraphicsPipeline();
 
         VkShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
-        uint32 generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
-                                       std::vector<VkVertexInputAttributeDescription>& attributeDesc,
-                                       const std::vector<uint8>& vertexShaderCode);
+        VertexAttrs generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
+                                            std::vector<VkVertexInputAttributeDescription>& attributeDesc,
+                                            const std::vector<uint8>& vertexShaderCode);
         size_t generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
                                            std::vector<VkWriteDescriptorSet>& writeSets,
                                            const std::vector<uint8>& fragmentShaderCode);
@@ -95,7 +83,7 @@ namespace blink
 
         int m_numTextures{};
         std::vector<VkWriteDescriptorSet> m_writeSets;
-        uint32 m_vertexInputMasks{};
+        VertexAttrs m_vertexAttrs{};
         tstring m_vertexShader;
         tstring m_fragmentShader;
         VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};

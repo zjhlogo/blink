@@ -57,8 +57,8 @@ namespace blink
                                            const VkDescriptorBufferInfo& pmubi,
                                            const VkDescriptorBufferInfo& piubi)
     {
-        auto inputMask = m_pipeline->getVertexInputMask();
-        if (!geometry->checkInputMask(inputMask)) return false;
+        auto pipelineVertexAttrs = m_pipeline->getVertexAttrFlags();
+        if (!geometry->hasVertexAttributes(pipelineVertexAttrs)) return false;
         if (m_topology != geometry->getTopology()) return false;
 
         if (m_topology == PrimitiveTopology::LineList)
@@ -70,10 +70,10 @@ namespace blink
 
         for (int i = 0; i < VulkanPipeline::MaxInputLocationMaskBit; ++i)
         {
-            uint32 currInputMask = (1 << i);
-            if ((currInputMask & inputMask) == currInputMask)
+            VertexAttrFlags currVertexAttrFlag = static_cast<VertexAttrFlags>(1 << i);
+            if ((currVertexAttrFlag & pipelineVertexAttrs) == currVertexAttrFlag)
             {
-                auto offset = geometry->getVertexInputOffset(currInputMask);
+                auto offset = geometry->getVertexInputOffset(currVertexAttrFlag);
                 vkCmdBindVertexBuffers(commandBuffer, i, 1, &buffer, &offset);
             }
         }

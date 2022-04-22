@@ -10,8 +10,8 @@
 
 #include "IResource.h"
 
-#include <core/base/Color.h>
-#include <foundation/BaseTypesGlm.h>
+#include <core/types/Color.h>
+#include <core/types/VertexAttrs.h>
 
 #include <vector>
 
@@ -51,14 +51,14 @@ namespace blink
         uint32 getNumVertices() const { return m_numVertices; };
         uint32 getNumIndices() const { return m_numIndices; };
 
-        bool checkInputMask(uint32 requireInputMask) const;
+        bool hasVertexAttrs(VertexAttrs requiredVertexAttrs) const;
         PrimitiveTopology getTopology() const { return m_topology; }
 
     protected:
         uint32 m_numVertices{};
         uint32 m_numIndices{};
 
-        uint32 m_vertexInputMask{};
+        VertexAttrs m_vertexAttrs{};
         PrimitiveTopology m_topology{PrimitiveTopology::TriangleList};
     };
 } // namespace blink

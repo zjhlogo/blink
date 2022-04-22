@@ -7,7 +7,7 @@
  * \date   04/21/2022
  *********************************************************************/
 #pragma once
-#include "../base/IRenderSystem.h"
+#include "../IRenderSystem.h"
 
 #include <functional>
 

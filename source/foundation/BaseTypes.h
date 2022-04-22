@@ -8,7 +8,7 @@
  */
 #pragma once
 
-#include "PreDefine.h"
+#include "PreDefineMacro.h"
 
 #include <cstdint>
 #include <string>

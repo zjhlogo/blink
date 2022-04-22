@@ -19,7 +19,7 @@ namespace blink
     {
     public:
         virtual VulkanBuffer* getVulkanBuffer() const = 0;
-        virtual VkDeviceSize getVertexInputOffset(uint32 inputMask) const = 0;
+        virtual VkDeviceSize getVertexInputOffset(VertexAttrs vertexAttrs) const = 0;
         virtual VkDeviceSize getIndicesOffset() const = 0;
     };
 } // namespace blink

@@ -10,7 +10,6 @@
 **/
 #pragma once
 
-#include <core/base/IRenderSystem.h>
 #include <foundation/BaseTypesGlm.h>
 
 namespace blink

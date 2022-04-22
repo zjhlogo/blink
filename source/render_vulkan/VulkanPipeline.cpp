@@ -68,7 +68,7 @@ namespace blink
         // generate vertex input desc
         std::vector<VkVertexInputBindingDescription> vertexInputBindings;
         std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
-        m_vertexInputMasks = generateVertexInputDesc(vertexInputBindings, vertexInputAttributes, vertexShaderCode);
+        m_vertexAttrs = generateVertexInputDesc(vertexInputBindings, vertexInputAttributes, vertexShaderCode);
 
         // generate layout bindings
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
@@ -94,7 +94,7 @@ namespace blink
 
         m_numTextures = 0;
         m_writeSets.clear();
-        m_vertexInputMasks = 0;
+        m_vertexAttrs = {};
     }
 
     bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer,
@@ -365,16 +365,16 @@ namespace blink
         return VK_FORMAT_UNDEFINED;
     }
 
-    uint32 VulkanPipeline::generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
-                                                   std::vector<VkVertexInputAttributeDescription>& attributeDesc,
-                                                   const std::vector<uint8>& vertexShaderCode)
+    VertexAttrs VulkanPipeline::generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
+                                                        std::vector<VkVertexInputAttributeDescription>& attributeDesc,
+                                                        const std::vector<uint8>& vertexShaderCode)
     {
         spirv_cross::CompilerGLSL glsl((uint32_t*)vertexShaderCode.data(), vertexShaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
         bindingDesc.resize(resources.stage_inputs.size());
         attributeDesc.resize(resources.stage_inputs.size());
-        uint32 vertexInputMasks = 0;
+        VertexAttrs vertexAttrs{};
 
         // vertex inputs
         for (int i = 0; i < resources.stage_inputs.size(); ++i)
@@ -404,11 +404,10 @@ namespace blink
             }
             bindingDesc[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-            // TODO: validate location
-            vertexInputMasks |= (1 << location);
+            vertexAttrs.set(1 << location);
         }
 
-        return vertexInputMasks;
+        return vertexAttrs;
     }
 
     size_t VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,

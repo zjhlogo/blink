@@ -4,10 +4,6 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(libcore)
 
 set(SOURCE_FILES
-base/Color.cpp
-base/Color.h
-base/ILogicalSystem.h
-base/IRenderSystem.h
 components/Components.h
 modules/IRenderModule.h
 modules/IResModule.h
@@ -19,12 +15,13 @@ resources/IResource.h
 resources/ITexture.h
 resources/ITexture2d.cpp
 resources/ITexture2d.h
-systems/AngularVelocitySystem.cpp
-systems/AngularVelocitySystem.h
-systems/LinearVelocitySystem.cpp
-systems/LinearVelocitySystem.h
+types/Color.cpp
+types/Color.h
+types/VertexAttrs.h
 EcsWorld.cpp
 EcsWorld.h
+ILogicalSystem.h
+IRenderSystem.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

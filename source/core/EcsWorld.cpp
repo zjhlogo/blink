@@ -8,7 +8,7 @@
  * \date   04/07/2022
  *********************************************************************/
 #include "EcsWorld.h"
-#include "base/ILogicalSystem.h"
+#include "ILogicalSystem.h"
 
 #include <foundation/Log.h>
 
@@ -74,7 +74,7 @@ namespace blink
 
     void EcsWorld::step()
     {
-        //LOGI("frame tick: {0}", m_frameTick);
+        // LOGI("frame tick: {0}", m_frameTick);
 
         for (auto sys : m_logicalSystems)
         {

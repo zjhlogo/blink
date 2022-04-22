@@ -23,14 +23,4 @@ namespace blink
     {
         glm::quat value;
     };
-
-    struct LinearVelocity
-    {
-        glm::vec3 value;
-    };
-
-    struct AngularVelocity
-    {
-        glm::vec3 value;
-    };
 } // namespace blink

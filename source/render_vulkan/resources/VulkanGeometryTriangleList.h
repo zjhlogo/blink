@@ -39,7 +39,7 @@ namespace blink
                                 std::size_t offsetIndices) override;
 
         virtual VulkanBuffer* getVulkanBuffer() const override { return m_buffer; }
-        virtual VkDeviceSize getVertexInputOffset(uint32 inputMask) const override;
+        virtual VkDeviceSize getVertexInputOffset(VertexAttrs vertexAttrs) const override;
         virtual VkDeviceSize getIndicesOffset() const override { return m_offsetIndices; }
 
     protected:

@@ -17,9 +17,9 @@ namespace blink
         getResModule()->releaseGeometry(this);
     }
 
-    bool IGeometry::checkInputMask(uint32 requireInputMask) const
+    bool IGeometry::hasVertexAttrs(VertexAttrs requiredVertexAttrs) const
     {
-        return (requireInputMask & m_vertexInputMask) == requireInputMask;
+        return (requiredVertexAttrs & m_vertexAttrs) == requiredVertexAttrs;
     }
 
 } // namespace blink

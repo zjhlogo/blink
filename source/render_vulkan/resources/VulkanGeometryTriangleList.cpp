@@ -68,8 +68,8 @@ namespace blink
                 memcpy(((uint8*)destBuffer + m_offsetUv0s), uv0s.data(), sizeUv0s);
             });
 
-        m_vertexInputMask = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Normal
-                            | VulkanPipeline::InputLocation_Uv0;
+        m_vertexAttrs = VertexAttrs::Position | VertexAttrs::Normal | VertexAttrs::Uv0;
+
         m_topology = PrimitiveTopology::TriangleList;
 
         return true;
@@ -102,13 +102,12 @@ namespace blink
 
         m_buffer->uploadBuffer(data, dataSize);
 
-        m_vertexInputMask = VulkanPipeline::InputLocation_Position | VulkanPipeline::InputLocation_Normal
-                            | VulkanPipeline::InputLocation_Uv0;
+        m_vertexAttrs = VertexAttrs::Position | VertexAttrs::Normal | VertexAttrs::Uv0;
 
         return true;
     }
 
-    VkDeviceSize VulkanGeometryTriangleList::getVertexInputOffset(uint32 inputMask) const
+    VkDeviceSize VulkanGeometryTriangleList::getVertexInputOffset(VertexAttrs vertexAttrs) const
     {
         if (inputMask == VulkanPipeline::InputLocation_Position)
         {
