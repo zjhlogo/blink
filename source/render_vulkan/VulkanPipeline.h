@@ -83,7 +83,7 @@ namespace blink
 
         int m_numTextures{};
         std::vector<VkWriteDescriptorSet> m_writeSets;
-        VertexAttrs m_vertexAttrs{};
+        VertexAttrs m_vertexAttrs{VertexAttrs::None};
         tstring m_vertexShader;
         tstring m_fragmentShader;
         VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};

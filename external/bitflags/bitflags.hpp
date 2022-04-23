@@ -510,6 +510,7 @@ private:
 
 #define END_RAW_BITFLAGS(NAME)                                                   \
         static constexpr int end_   = __LINE__;                                  \
+        static constexpr int count_ = end_ - begin_ - 2;                         \
     };                                                                           \
     using NAME = bf::bitflags<                                                   \
         NAME##Impl< bf::bitflags< NAME##Impl<std::uint8_t> >::underlying_type >, \
@@ -533,6 +534,7 @@ private:
 
 #define END_BITFLAGS(NAME)                                                      \
         static constexpr int end_   = __LINE__;                                 \
+        static constexpr int count_ = end_ - begin_ - 2;                        \
     };                                                                          \
     using NAME = bf::bitflags<                                                  \
         NAME##Impl< bf::bitflags< NAME##Impl<std::uint8_t> >::underlying_type > \

@@ -109,15 +109,15 @@ namespace blink
 
     VkDeviceSize VulkanGeometryTriangleList::getVertexInputOffset(VertexAttrs vertexAttrs) const
     {
-        if (inputMask == VulkanPipeline::InputLocation_Position)
+        if (vertexAttrs == VertexAttrs::Position)
         {
             return m_offsetPositions;
         }
-        else if (inputMask == VulkanPipeline::InputLocation_Normal)
+        else if (vertexAttrs == VertexAttrs::Normal)
         {
             return m_offsetNormals;
         }
-        else if (inputMask == VulkanPipeline::InputLocation_Uv0)
+        else if (vertexAttrs == VertexAttrs::Uv0)
         {
             return m_offsetUv0s;
         }

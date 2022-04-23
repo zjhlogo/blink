@@ -11,7 +11,7 @@
 #pragma once
 
 #include <core/EcsWorld.h>
-#include <core/base/IRenderSystem.h>
+#include <core/IRenderSystem.h>
 
 #include <chrono>
 #include <vector>

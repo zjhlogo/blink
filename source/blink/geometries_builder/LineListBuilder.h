@@ -10,7 +10,7 @@
 
 #include "IGeometryBuilder.h"
 
-#include <core/base/Color.h>
+#include <core/types/Color.h>
 
 #include <vector>
 

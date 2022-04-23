@@ -7,7 +7,7 @@
  * \date   2/19 2022
  *********************************************************************/
 
-#include <core/base/ILogicalSystem.h>
+#include <core/ILogicalSystem.h>
 
 class PrefabInitializeSystem : public blink::ILogicalSystem
 {

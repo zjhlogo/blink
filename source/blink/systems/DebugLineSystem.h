@@ -10,10 +10,10 @@
 
 #include "../geometries_builder/LineListBuilder.h"
 
-#include <core/base/Color.h>
-#include <core/base/ILogicalSystem.h>
+#include <core/ILogicalSystem.h>
 #include <core/resources/IGeometry.h>
 #include <core/resources/IMaterial.h>
+#include <core/types/Color.h>
 
 namespace blink
 {

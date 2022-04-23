@@ -58,7 +58,7 @@ namespace blink
         uint32 m_numVertices{};
         uint32 m_numIndices{};
 
-        VertexAttrs m_vertexAttrs{};
+        VertexAttrs m_vertexAttrs{VertexAttrs::None};
         PrimitiveTopology m_topology{PrimitiveTopology::TriangleList};
     };
 } // namespace blink

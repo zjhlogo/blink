@@ -94,7 +94,7 @@ namespace blink
 
         m_numTextures = 0;
         m_writeSets.clear();
-        m_vertexAttrs = {};
+        m_vertexAttrs = VertexAttrs::None;
     }
 
     bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer,

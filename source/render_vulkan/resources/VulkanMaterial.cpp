@@ -58,7 +58,7 @@ namespace blink
                                            const VkDescriptorBufferInfo& piubi)
     {
         auto pipelineVertexAttrs = m_pipeline->getVertexAttrFlags();
-        if (!geometry->hasVertexAttributes(pipelineVertexAttrs)) return false;
+        if (!geometry->hasVertexAttrs(pipelineVertexAttrs)) return false;
         if (m_topology != geometry->getTopology()) return false;
 
         if (m_topology == PrimitiveTopology::LineList)
@@ -68,12 +68,12 @@ namespace blink
 
         VkBuffer buffer = *geometry->getVulkanBuffer();
 
-        for (int i = 0; i < VulkanPipeline::MaxInputLocationMaskBit; ++i)
+        for (int i = 0; i < VertexAttrs::count_; ++i)
         {
-            VertexAttrFlags currVertexAttrFlag = static_cast<VertexAttrFlags>(1 << i);
-            if ((currVertexAttrFlag & pipelineVertexAttrs) == currVertexAttrFlag)
+            VertexAttrs::underlying_type currVertexAttr = 1 << i;
+            if (pipelineVertexAttrs.contains(currVertexAttr))
             {
-                auto offset = geometry->getVertexInputOffset(currVertexAttrFlag);
+                auto offset = geometry->getVertexInputOffset(currVertexAttr);
                 vkCmdBindVertexBuffers(commandBuffer, i, 1, &buffer, &offset);
             }
         }
