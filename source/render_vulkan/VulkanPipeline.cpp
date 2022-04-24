@@ -100,28 +100,31 @@ namespace blink
     }
 
     bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer,
-                                            const VkDescriptorBufferInfo& pfuBufferInfo,
-                                            const VkDescriptorBufferInfo& pmuBufferInfo,
-                                            const VkDescriptorBufferInfo& piuBufferInfo,
-                                            const std::vector<VkDescriptorImageInfo>& imageInfos)
+                                            const std::vector<NamedBufferInfo>& bufferInfos,
+                                            const std::vector<NamedTextureInfo>& textureInfos)
     {
-        // uniforms binding
         auto descriptorSet = m_logicalDevice.getDescriptorPool().allocateDescriptorSet(m_descriptorSetLayout);
 
-        m_writeSets[PerFrameUniformIndex].dstSet = descriptorSet;
-        m_writeSets[PerFrameUniformIndex].pBufferInfo = &pfuBufferInfo;
+        // uniforms binding
+        for (const auto& bufferInfo : bufferInfos)
+        {
+            auto it = m_writeSetNameIndexMap.find(bufferInfo.name);
+            if (it == m_writeSetNameIndexMap.end()) continue;
 
-        m_writeSets[PerMaterialUniformIndex].dstSet = descriptorSet;
-        m_writeSets[PerMaterialUniformIndex].pBufferInfo = &pmuBufferInfo;
-
-        m_writeSets[PerInstanceUniformIndex].dstSet = descriptorSet;
-        m_writeSets[PerInstanceUniformIndex].pBufferInfo = &piuBufferInfo;
+            int index = it->second;
+            m_writeSets[index].dstSet = descriptorSet;
+            m_writeSets[index].pBufferInfo = &bufferInfo.bufferInfo;
+        }
 
         // sampler binding
-        for (int i = 0; i < m_numTextures; ++i)
+        for (const auto& textureInfo : textureInfos)
         {
-            m_writeSets[SamplerUniformIndexBegin + i].dstSet = descriptorSet;
-            m_writeSets[SamplerUniformIndexBegin + i].pImageInfo = &imageInfos[i];
+            auto it = m_writeSetNameIndexMap.find(textureInfo.name);
+            if (it == m_writeSetNameIndexMap.end()) continue;
+
+            int index = it->second;
+            m_writeSets[index].dstSet = descriptorSet;
+            m_writeSets[index].pImageInfo = &textureInfo.imageInfo;
         }
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
@@ -444,7 +447,7 @@ namespace blink
             descriptorWrites.descriptorCount = 1;
 
             tstring name = uniform.name;
-            writeSetNameIndexMap.insert({ name, (int)writeSets.size() });
+            writeSetNameIndexMap.insert({name, (int)writeSets.size()});
 
             writeSets.push_back(descriptorWrites);
         }

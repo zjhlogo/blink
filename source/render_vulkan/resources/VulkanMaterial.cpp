@@ -10,7 +10,6 @@
 #include "../VulkanCommandBuffer.h"
 #include "../VulkanImage.h"
 #include "../VulkanLogicalDevice.h"
-#include "../VulkanPipeline.h"
 #include "../VulkanResModule.h"
 #include "../VulkanSwapchain.h"
 #include "../VulkanUniformBuffer.h"
@@ -53,21 +52,21 @@ namespace blink
 
     bool VulkanMaterial::updateBufferInfos(VulkanCommandBuffer& commandBuffer,
                                            VulkanGeometry* geometry,
-                                           const VkDescriptorBufferInfo& pfubi,
-                                           const VkDescriptorBufferInfo& pmubi,
-                                           const VkDescriptorBufferInfo& piubi)
+                                           const std::vector<VulkanPipeline::NamedBufferInfo>& bufferInfos)
     {
+        // check validation
         auto pipelineVertexAttrs = m_pipeline->getVertexAttrFlags();
         if (!geometry->hasVertexAttrs(pipelineVertexAttrs)) return false;
         if (m_topology != geometry->getTopology()) return false;
 
+        // set line width when nessary
         if (m_topology == PrimitiveTopology::LineList)
         {
             vkCmdSetLineWidth(commandBuffer, 1.0f);
         }
 
+        // setup vertex buffer
         VkBuffer buffer = *geometry->getVulkanBuffer();
-
         for (int i = 0; i < VertexAttrs::count_; ++i)
         {
             VertexAttrs::underlying_type currVertexAttr = 1 << i;
@@ -78,9 +77,11 @@ namespace blink
             }
         }
 
+        // setup index buffer
         vkCmdBindIndexBuffer(commandBuffer, buffer, geometry->getIndicesOffset(), VK_INDEX_TYPE_UINT16);
 
-        return m_pipeline->bindDescriptorSets(commandBuffer, pfubi, pmubi, piubi, m_imageInfos);
+        // bind uniforms
+        return m_pipeline->bindDescriptorSets(commandBuffer, bufferInfos, m_textureInfos);
     }
 
     bool VulkanMaterial::create(const tstring& filePath)
@@ -113,12 +114,11 @@ namespace blink
 
     void VulkanMaterial::destroy()
     {
-        for (auto texture : m_textures)
+        for (auto& texture : m_textureInfos)
         {
-            SAFE_RELEASE(texture);
+            SAFE_RELEASE(texture.texture);
         }
-        m_textures.clear();
-        m_imageInfos.clear();
+        m_textureInfos.clear();
 
         SAFE_DELETE(m_pipeline);
         m_filePath.clear();
@@ -126,7 +126,6 @@ namespace blink
         m_fragmentShader.clear();
         m_polygonMode = VK_POLYGON_MODE_FILL;
         m_topology = PrimitiveTopology::TriangleList;
-        m_texturePaths.clear();
     }
 
     bool VulkanMaterial::loadConfigFromFile(const tstring& filePath)
@@ -201,7 +200,8 @@ namespace blink
             {
                 for (int i = 0; i < jtextures.size(); ++i)
                 {
-                    m_texturePaths.push_back(jtextures[i].get<tstring>());
+                    auto texObj = jtextures[i];
+                    m_textureInfos.push_back({texObj["name"].get<tstring>(), texObj["path"].get<tstring>()});
                 }
             }
         }
@@ -211,14 +211,14 @@ namespace blink
 
     bool VulkanMaterial::loadTextures()
     {
-        for (const auto& filePath : m_texturePaths)
+        for (auto& texInfo : m_textureInfos)
         {
             auto resModule = getResModule();
-            auto texture = resModule->createTexture2d(filePath);
+            auto texture = resModule->createTexture2d(texInfo.path);
             if (!texture) texture = resModule->createTexture2d(VulkanResModule::DEFAULT_TEXTURE);
             if (!texture) return false;
 
-            m_textures.push_back(texture);
+            texInfo.texture = texture;
 
             auto vulkanTexture = dynamic_cast<VulkanTexture*>(texture);
 
@@ -226,7 +226,8 @@ namespace blink
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             imageInfo.imageView = vulkanTexture->getTextureImage()->getImageView();
             imageInfo.sampler = vulkanTexture->getTextureSampler();
-            m_imageInfos.push_back(imageInfo);
+
+            texInfo.imageInfo = imageInfo;
         }
 
         return true;

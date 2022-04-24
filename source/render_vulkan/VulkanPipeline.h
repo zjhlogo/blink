@@ -19,9 +19,25 @@ namespace blink
     class VulkanSwapchain;
     class VulkanTexture;
     class VulkanCommandBuffer;
+    class ITexture2d;
 
     class VulkanPipeline
     {
+    public:
+        struct NamedBufferInfo
+        {
+            tstring name;
+            VkDescriptorBufferInfo bufferInfo;
+        };
+
+        struct NamedTextureInfo
+        {
+            tstring name;
+            tstring path;
+            ITexture2d* texture;
+            VkDescriptorImageInfo imageInfo;
+        };
+
     public:
         VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~VulkanPipeline();
@@ -36,10 +52,8 @@ namespace blink
         void destroy();
 
         bool bindDescriptorSets(VulkanCommandBuffer& commandBuffer,
-                                const VkDescriptorBufferInfo& pfuBufferInfo,
-                                const VkDescriptorBufferInfo& pmuBufferInfo,
-                                const VkDescriptorBufferInfo& piuBufferInfo,
-                                const std::vector<VkDescriptorImageInfo>& imageInfos);
+                                const std::vector<NamedBufferInfo>& bufferInfos,
+                                const std::vector<NamedTextureInfo>& textureInfos);
 
         VkDescriptorSetLayout getDestriptorSetLayout() const { return m_descriptorSetLayout; };
         VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };

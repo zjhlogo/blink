@@ -8,11 +8,11 @@
  *********************************************************************/
 #pragma once
 
+#include "../VulkanPipeline.h"
 #include "VulkanGeometry.h"
 
 #include <core/resources/IMaterial.h>
 #include <core/resources/ITexture2d.h>
-#include <vulkan/vulkan.h>
 
 #include <vector>
 
@@ -20,7 +20,6 @@ namespace blink
 {
     class VulkanLogicalDevice;
     class VulkanSwapchain;
-    class VulkanPipeline;
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
 
@@ -46,9 +45,7 @@ namespace blink
 
         bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
                                VulkanGeometry* geometry,
-                               const VkDescriptorBufferInfo& pfubi,
-                               const VkDescriptorBufferInfo& pmubi,
-                               const VkDescriptorBufferInfo& piubi);
+                               const std::vector<VulkanPipeline::NamedBufferInfo>& bufferInfos);
 
         virtual float getRoughness() const override { return m_pmu.roughness; };
         virtual void setRoughness(float roughness) override { m_pmu.roughness = roughness; };
@@ -70,11 +67,9 @@ namespace blink
         tstring m_fragmentShader;
         VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};
         PrimitiveTopology m_topology{PrimitiveTopology::TriangleList};
-        std::vector<tstring> m_texturePaths;
+        std::vector<VulkanPipeline::NamedTextureInfo> m_textureInfos;
 
         VulkanPipeline* m_pipeline{};
-        std::vector<ITexture2d*> m_textures;
-        std::vector<VkDescriptorImageInfo> m_imageInfos;
 
         PerMaterialUniforms m_pmu{0.5f, 0.5f, glm::vec3(1.0f, 0.0f, 1.0f)};
     };

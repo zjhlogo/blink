@@ -3,6 +3,9 @@
     "fragment_shader" : "resource/shaders/simple_lit.frag.spv",
 
     "textures" : [
-        "resource/grid.png"
+        {
+            "name" : "texSampler",
+            "path" : "resource/grid.png"
+        }
     ]
 }
