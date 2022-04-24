@@ -3,6 +3,13 @@
 
 #include "uniforms.inc"
 
+layout(set = 0, binding = 2) uniform PerMaterialUniforms
+{
+    float roughness;
+    float metallic;
+    vec3 color;
+} pmu;
+
 const float PI = 3.14159265359;
 
 layout(location = 0) in vec3 fragNormal;

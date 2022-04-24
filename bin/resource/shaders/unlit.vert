@@ -10,6 +10,6 @@ layout(location = 0) out vec2 fragTexCoord;
 
 void main()
 {
-    gl_Position = pfu.matWorldToProjection * piu.matLocalToWorld * vec4(inPosition, 1.0);
+    gl_Position = piu.matLocalToProjection * vec4(inPosition, 1.0);
     fragTexCoord = vec2(inTexCoord.x, 1.0 - inTexCoord.y); // flip y for vulkan
 }

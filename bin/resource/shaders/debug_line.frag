@@ -3,6 +3,11 @@
 
 #include "uniforms.inc"
 
+layout(set = 0, binding = 2) uniform PerMaterialUniforms
+{
+    vec3 color;
+} pmu;
+
 layout(location = 0) in vec4 fragColor;
 
 layout(location = 0) out vec4 outColor;

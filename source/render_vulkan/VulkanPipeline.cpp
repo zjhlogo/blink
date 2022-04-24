@@ -72,7 +72,8 @@ namespace blink
 
         // generate layout bindings
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-        m_numTextures = (int)generateDescriptorSetLayout(layoutBindings, m_writeSets, fragmentShaderCode);
+        m_numTextures = (int)
+            generateDescriptorSetLayout(layoutBindings, m_writeSets, m_writeSetNameIndexMap, fragmentShaderCode);
 
         if (createDescriptorSetLayout(layoutBindings) == VK_NULL_HANDLE) return false;
         if (createGraphicsPipeline(vertexShaderCode,
@@ -94,6 +95,7 @@ namespace blink
 
         m_numTextures = 0;
         m_writeSets.clear();
+        m_writeSetNameIndexMap.clear();
         m_vertexAttrs = VertexAttrs::None;
     }
 
@@ -412,66 +414,42 @@ namespace blink
 
     size_t VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
                                                        std::vector<VkWriteDescriptorSet>& writeSets,
+                                                       std::unordered_map<tstring, int>& writeSetNameIndexMap,
                                                        const std::vector<uint8>& fragmentShaderCode)
     {
         layoutBindings.clear();
         writeSets.clear();
+        writeSetNameIndexMap.clear();
 
         spirv_cross::CompilerGLSL glsl((uint32_t*)fragmentShaderCode.data(), fragmentShaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
-        // pfu
+        // uniform buffers
+        for (const auto& uniform : resources.uniform_buffers)
         {
-            VkDescriptorSetLayoutBinding pfuLayoutBinding{};
-            pfuLayoutBinding.binding = PerFrameUniformIndex;
-            pfuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pfuLayoutBinding.descriptorCount = 1;
-            pfuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-            layoutBindings.push_back(pfuLayoutBinding);
+            auto set = glsl.get_decoration(uniform.id, spv::DecorationDescriptorSet);
+            auto binding = glsl.get_decoration(uniform.id, spv::DecorationBinding);
 
-            VkWriteDescriptorSet pfuDescriptorWrites{};
-            pfuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            pfuDescriptorWrites.dstBinding = PerFrameUniformIndex;
-            pfuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pfuDescriptorWrites.descriptorCount = 1;
-            writeSets.push_back(pfuDescriptorWrites);
+            VkDescriptorSetLayoutBinding layoutBinding{};
+            layoutBinding.binding = binding;
+            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            layoutBinding.descriptorCount = 1;
+            layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBindings.push_back(layoutBinding);
+
+            VkWriteDescriptorSet descriptorWrites{};
+            descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites.dstBinding = binding;
+            descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites.descriptorCount = 1;
+
+            tstring name = uniform.name;
+            writeSetNameIndexMap.insert({ name, (int)writeSets.size() });
+
+            writeSets.push_back(descriptorWrites);
         }
 
-        // pmu
-        {
-            VkDescriptorSetLayoutBinding pmuLayoutBinding{};
-            pmuLayoutBinding.binding = PerMaterialUniformIndex;
-            pmuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pmuLayoutBinding.descriptorCount = 1;
-            pmuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-            layoutBindings.push_back(pmuLayoutBinding);
-
-            VkWriteDescriptorSet pmuDescriptorWrites{};
-            pmuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            pmuDescriptorWrites.dstBinding = PerMaterialUniformIndex;
-            pmuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            pmuDescriptorWrites.descriptorCount = 1;
-            writeSets.push_back(pmuDescriptorWrites);
-        }
-
-        // piu
-        {
-            VkDescriptorSetLayoutBinding piuLayoutBinding{};
-            piuLayoutBinding.binding = PerInstanceUniformIndex;
-            piuLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            piuLayoutBinding.descriptorCount = 1;
-            piuLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-            layoutBindings.push_back(piuLayoutBinding);
-
-            VkWriteDescriptorSet piuDescriptorWrites{};
-            piuDescriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            piuDescriptorWrites.dstBinding = PerInstanceUniformIndex;
-            piuDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            piuDescriptorWrites.descriptorCount = 1;
-            writeSets.push_back(piuDescriptorWrites);
-        }
-
-        // samples
+        // uniform samples
         for (int i = 0; i < resources.sampled_images.size(); ++i)
         {
             const auto& sample = resources.sampled_images[i];

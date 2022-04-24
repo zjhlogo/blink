@@ -62,35 +62,35 @@ namespace blink
         // bottom
         builder.size(m_size.x, m_size.z)
             .segment(m_segment.x, m_segment.z)
-            .orient(glm::angleAxis(glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)))
+            .orient(glm::angleAxis(glm::pi<float>(), glm::right()))
             .translate(glm::vec3(0.0f, -0.5f * m_size.y, 0.0f))
             .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // front
         builder.size(m_size.x, m_size.y)
             .segment(m_segment.x, m_segment.y)
-            .orient(glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)))
+            .orient(glm::angleAxis(glm::half_pi<float>(), glm::right()))
             .translate(glm::vec3(0.0f, 0.0f, 0.5f * m_size.z))
             .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // back
         builder.size(m_size.x, m_size.y)
             .segment(m_segment.x, m_segment.y)
-            .orient(glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)))
+            .orient(glm::angleAxis(-glm::half_pi<float>(), glm::right()))
             .translate(glm::vec3(0.0f, 0.0f, -0.5f * m_size.z))
             .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // left
         builder.size(m_size.y, m_size.z)
             .segment(m_segment.y, m_segment.z)
-            .orient(glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)))
+            .orient(glm::angleAxis(glm::half_pi<float>(), -glm::forward()))
             .translate(glm::vec3(-0.5f * m_size.x, 0.0f, 0.0f))
             .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
         // right
         builder.size(m_size.y, m_size.z)
             .segment(m_segment.y, m_segment.z)
-            .orient(glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)))
+            .orient(glm::angleAxis(-glm::half_pi<float>(), -glm::forward()))
             .translate(glm::vec3(0.5f * m_size.x, 0.0f, 0.0f))
             .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 

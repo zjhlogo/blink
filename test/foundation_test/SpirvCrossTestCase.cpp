@@ -16,7 +16,7 @@
 TEST(SpirvCrossTestCase, parseUniforms)
 {
     std::vector<blink::uint8> buffer;
-    blink::File::readFileIntoBuffer(buffer, "resource/shaders/simple_lit.frag.spv");
+    blink::File::readFileIntoBuffer(buffer, "resource/shaders/pbr_lit.frag.spv");
 
     spirv_cross::CompilerGLSL glsl((uint32_t*)buffer.data(), buffer.size() / sizeof(uint32_t));
     auto resources = glsl.get_shader_resources();
@@ -35,8 +35,13 @@ TEST(SpirvCrossTestCase, parseUniforms)
         auto structSize = glsl.get_declared_struct_size(baseType);
         for (int i = 0; i < baseType.member_types.size(); ++i)
         {
-            auto memberType = baseType.member_types[i];
+            auto memberTypeId = baseType.member_types[i];
+            auto memberType = glsl.get_type(memberTypeId);
             auto memberName = glsl.get_member_name(uniform.base_type_id, i);
+            auto memberOffset = glsl.get_member_decoration(uniform.base_type_id, i, spv::DecorationOffset);
+            auto memberBaseType = memberType.basetype;  // float, int ...
+            auto rowSize = memberType.vecsize; // row
+            auto colSize = memberType.columns; // col
         }
     }
 

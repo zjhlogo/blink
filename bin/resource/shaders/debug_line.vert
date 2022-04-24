@@ -10,6 +10,6 @@ layout(location = 0) out vec4 fragColor;
 
 void main()
 {
-    gl_Position = pfu.matWorldToProjection * piu.matLocalToWorld * vec4(inPosition, 1.0);
+    gl_Position = piu.matLocalToProjection * vec4(inPosition, 1.0);
     fragColor = inColor;
 }

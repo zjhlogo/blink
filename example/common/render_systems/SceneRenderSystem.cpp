@@ -180,7 +180,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
             if (renderFeatureData.overrideMaterial == nullptr)
             {
                 // render mesh group by material
-                for (const auto& kvp : renderDatas)
+                for (auto& kvp : renderDatas)
                 {
                     blink::IMaterial* material = kvp.first;
                     auto vulkanMaterial = dynamic_cast<blink::VulkanMaterial*>(material);
@@ -191,12 +191,13 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                     VkDescriptorBufferInfo pmubi{};
                     vulkanMaterial->bindPerMaterialUniforms(*vulkanRenderData->commandBuffer, *vulkanRenderData->pmub, pmubi);
 
-                    for (const auto& rdo : kvp.second)
+                    for (auto& rdo : kvp.second)
                     {
                         if ((rdo.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
                         // bind per instance uniform
                         VkDescriptorBufferInfo piubi{};
+                        rdo.piu.matLocalToProjection = pfu.matWorldToProjection * rdo.piu.matLocalToWorld;
                         vulkanRenderData->piub->appendData(&rdo.piu, sizeof(rdo.piu), &piubi);
 
                         // update vertex input and uniform buffers
@@ -221,14 +222,15 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 VkDescriptorBufferInfo pmubi{};
                 vulkanMaterial->bindPerMaterialUniforms(*vulkanRenderData->commandBuffer, *vulkanRenderData->pmub, pmubi);
 
-                for (const auto& kvp : renderDatas)
+                for (auto& kvp : renderDatas)
                 {
-                    for (const auto& rdo : kvp.second)
+                    for (auto& rdo : kvp.second)
                     {
                         if ((rdo.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
                         // bind per instance uniform
                         VkDescriptorBufferInfo piubi{};
+                        rdo.piu.matLocalToProjection = pfu.matWorldToProjection * rdo.piu.matLocalToWorld;
                         vulkanRenderData->piub->appendData(&rdo.piu, sizeof(rdo.piu), &piubi);
 
                         // update vertex input and uniform buffers

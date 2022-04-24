@@ -11,6 +11,8 @@
 #include <core/types/VertexAttrs.h>
 #include <vulkan/vulkan.h>
 
+#include <unordered_map>
+
 namespace blink
 {
     class VulkanLogicalDevice;
@@ -20,15 +22,6 @@ namespace blink
 
     class VulkanPipeline
     {
-    public:
-        enum PredefineBindingIndex
-        {
-            PerFrameUniformIndex = 0,
-            PerMaterialUniformIndex,
-            PerInstanceUniformIndex,
-            SamplerUniformIndexBegin
-        };
-
     public:
         VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~VulkanPipeline();
@@ -71,6 +64,7 @@ namespace blink
                                             const std::vector<uint8>& vertexShaderCode);
         size_t generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
                                            std::vector<VkWriteDescriptorSet>& writeSets,
+                                           std::unordered_map<tstring, int>& writeSetNameIndexMap,
                                            const std::vector<uint8>& fragmentShaderCode);
 
     private:
@@ -83,6 +77,7 @@ namespace blink
 
         int m_numTextures{};
         std::vector<VkWriteDescriptorSet> m_writeSets;
+        std::unordered_map<tstring, int> m_writeSetNameIndexMap;
         VertexAttrs m_vertexAttrs{VertexAttrs::None};
         tstring m_vertexShader;
         tstring m_fragmentShader;

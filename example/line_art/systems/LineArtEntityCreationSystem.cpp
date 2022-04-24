@@ -25,7 +25,7 @@ bool LineArtEntityCreationSystem::initialize()
         auto halfSurfaceSize = surfaceSize * 0.5f;
         auto camera = world.entity("camera");
         camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 100.0f)});
-        camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))});
+        camera.set<blink::Rotation>({glm::quatLookAt(glm::forward(), glm::up())});
         camera.set<blink::CameraData>(
             {glm::ortho(-halfSurfaceSize.x, halfSurfaceSize.x, -halfSurfaceSize.y, halfSurfaceSize.y, -1000.0f, 1000.0f)});
     }
@@ -38,8 +38,9 @@ bool LineArtEntityCreationSystem::initialize()
         plane.set<blink::Renderable>({blink::RenderLayers::NORMAL});
 
         blink::PlaneBuilder builder;
-        auto geometry =
-            builder.size(surfaceSize.x, surfaceSize.x).orient(glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f))).build();
+        auto geometry = builder.size(surfaceSize.x, surfaceSize.y)
+                            .orient(glm::angleAxis(glm::half_pi<float>(), glm::right()))
+                            .build(false, false);
         auto material = resModule->createMaterial("resource/materials/sdf.mtl");
         plane.set<blink::StaticModel>({geometry, material});
     }
