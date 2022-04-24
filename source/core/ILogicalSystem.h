@@ -10,13 +10,13 @@
 **/
 #pragma once
 
+#include "EcsWorld.h"
+
 #include <flecs/flecs.h>
 #include <foundation/BaseTypesGlm.h>
 
 namespace blink
 {
-    class EcsWorld;
-
     class ILogicalSystem
     {
     public:
@@ -30,7 +30,6 @@ namespace blink
 
     protected:
         EcsWorld* m_ecsWorld{};
-
     };
 
 } // namespace blink

@@ -12,3 +12,6 @@ glslc -o simple_lit.vert.spv simple_lit.vert
 
 glslc -o pbr_lit.frag.spv pbr_lit.frag
 glslc -o pbr_lit.vert.spv pbr_lit.vert
+
+glslc -o sdf.frag.spv sdf.frag
+glslc -o sdf.vert.spv sdf.vert
