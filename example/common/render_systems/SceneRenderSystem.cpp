@@ -97,7 +97,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, pfu.cameraPos + pfu.cameraDir, up);
 
                 pfu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pfu.matWorldToCamera)));
-                pfu.matCameraToProjection = glm::perspective(camera.fov, camera.aspect, camera.near, camera.far);
+                pfu.matCameraToProjection = camera.matCameraToProjection;
                 pfu.matWorldToProjection = pfu.matCameraToProjection * pfu.matWorldToCamera;
                 pfus.push_back(pfu);
             });

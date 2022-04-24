@@ -20,6 +20,7 @@ add_subdirectory(source/blink)
 
 add_subdirectory(example/common)
 add_subdirectory(example/hello_world)
+add_subdirectory(example/line_art)
 
 add_subdirectory(external/flecs)
 add_subdirectory(external/fmt)

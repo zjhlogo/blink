@@ -41,6 +41,7 @@ namespace blink
         destroy();
 
         m_offsetIndices = 0;
+        m_numVertices = static_cast<uint32>(positions.size());
         m_numIndices = static_cast<uint32>(indices.size());
         VkDeviceSize sizeIndices = sizeof(uint16) * m_numIndices;
 

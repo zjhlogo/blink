@@ -26,10 +26,7 @@ namespace blink
 
     struct CameraData
     {
-        float fov;
-        float aspect;
-        float near;
-        float far;
+        glm::mat4 matCameraToProjection;
     };
 
     struct LightData

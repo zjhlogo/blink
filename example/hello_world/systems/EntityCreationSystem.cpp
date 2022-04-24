@@ -38,7 +38,7 @@ bool EntityCreationSystem::initialize()
     m_camera = world.entity("camera");
     m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 100.0f)});
     m_camera.set<blink::Rotation>({glm::quatLookAt(glm::forward(), glm::up())});
-    m_camera.set<blink::CameraData>({glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f});
+    m_camera.set<blink::CameraData>({glm::perspective(glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f)});
 
     // light
     m_light = world.entity("light");
