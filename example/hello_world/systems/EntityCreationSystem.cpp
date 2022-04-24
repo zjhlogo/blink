@@ -37,7 +37,7 @@ bool EntityCreationSystem::initialize()
     // create camera
     m_camera = world.entity("camera");
     m_camera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 100.0f)});
-    m_camera.set<blink::Rotation>({glm::quatLookAt(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))});
+    m_camera.set<blink::Rotation>({glm::quatLookAt(glm::forward(), glm::up())});
     m_camera.set<blink::CameraData>({glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f});
 
     // light
@@ -84,18 +84,20 @@ bool EntityCreationSystem::initialize()
     {
         m_sphere = world.entity("sphere").is_a(prefabSystem->prefabRigidBody);
 
-        auto pos = glm::vec3(20.0f, 0.0f, 0.0f);
+        auto startPos = glm::vec3(20.0f, 20.0f, 0.0f);
+        auto startVelocity = glm::vec3(0.0f, 0.0f, 200.0f);
         auto anchorPos = glm::vec3(0.0f, 30.0f, 0.0f);
-        m_sphere.set<blink::Position>({pos});
+        m_sphere.set<blink::Position>({startPos});
 
         blink::SphereUvBuilder builder;
         auto geometry = builder.radius(1.5f).build(true, true, &inertiaTensor);
         auto material = resModule->createMaterial("resource/materials/simple_lit.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
-        m_sphere.set<blink::PhysicsVelocity>({glm::vec3(0.0f, 0.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f)});
+        m_sphere.set<blink::PhysicsVelocity>({startVelocity, glm::vec3(0.0f, 0.0f, 0.0f)});
         m_sphere.set<blink::PhysicsDamping>({0.95f, 0.95f});
         m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, inertiaTensor));
-        m_sphere.set<SinglePendulum>({anchorPos, glm::length(pos - anchorPos), glm::vec3(0.0f, -980.0f, 0.0f)});
+        m_sphere.set<SinglePendulum>(
+            {anchorPos, startPos, startVelocity, glm::length(startPos - anchorPos), glm::vec3(0.0f, -980.0f, 0.0f)});
     }
 
     //// load tetrahedron

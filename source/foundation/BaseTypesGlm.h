@@ -14,13 +14,24 @@
 
 namespace blink
 {
-    extern const glm::vec3 VEC3_PX;
-    extern const glm::vec3 VEC3_NX;
-    extern const glm::vec3 VEC3_PY;
-    extern const glm::vec3 VEC3_NY;
-    extern const glm::vec3 VEC3_PZ;
-    extern const glm::vec3 VEC3_NZ;
-
     glm::vec3 randomVec3Normalized();
 
 } // namespace blink
+
+namespace glm
+{
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec3 forward()
+    {
+        return vec3(0.0f, 0.0f, -1.0f);
+    }
+
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec3 up()
+    {
+        return vec3(0.0f, 1.0f, 0.0f);
+    }
+
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec3 right()
+    {
+        return vec3(1.0f, 0.0f, 0.0f);
+    }
+}

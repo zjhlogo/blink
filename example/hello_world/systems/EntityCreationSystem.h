@@ -30,7 +30,7 @@ private:
 
     flecs::entity m_camera;
     flecs::entity m_light;
-    flecs::entity m_box;
+    //flecs::entity m_box;
     flecs::entity m_sphere;
-    flecs::entity m_tetrahedron;
+    //flecs::entity m_tetrahedron;
 };

@@ -92,8 +92,8 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
 
                 pfu.cameraPos = pos.value;
 
-                pfu.cameraDir = glm::rotate(rot.value, glm::vec3(0.0f, 0.0f, -1.0f));
-                auto up = glm::rotate(rot.value, glm::vec3(0.0f, 1.0f, 0.0f));
+                pfu.cameraDir = glm::rotate(rot.value, glm::forward());
+                auto up = glm::rotate(rot.value, glm::up());
                 pfu.matWorldToCamera = glm::lookAt(pfu.cameraPos, pfu.cameraPos + pfu.cameraDir, up);
 
                 pfu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pfu.matWorldToCamera)));
