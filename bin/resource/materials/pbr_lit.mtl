@@ -1,7 +1,21 @@
 {
     "vertex_shader" : "resource/shaders/pbr_lit.vert.spv",
     "fragment_shader" : "resource/shaders/pbr_lit.frag.spv",
-    "roughness" : 0.2,
-    "metallic" : 0.5,
-    "color" : [0.5, 0.5, 0.5]
+    "uniforms" : [
+        {
+            "name" : "roughness",
+            "type" : "float",
+            "value" : 0.2
+        },
+        {
+            "name" : "metallic",
+            "type" : "float",
+            "value" : 0.5
+        },
+        {
+            "name" : "color",
+            "type" : "vec3",
+            "value" : [0.5, 0.5, 0.5]
+        }
+    ]
 }

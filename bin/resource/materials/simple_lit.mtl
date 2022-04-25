@@ -2,6 +2,14 @@
     "vertex_shader" : "resource/shaders/simple_lit.vert.spv",
     "fragment_shader" : "resource/shaders/simple_lit.frag.spv",
 
+    "uniforms" : [
+        {
+            "name" : "color",
+            "type" : "vec3",
+            "value" : [0.5, 0.5, 0.5]
+        }
+    ],
+
     "textures" : [
         {
             "name" : "texSampler",

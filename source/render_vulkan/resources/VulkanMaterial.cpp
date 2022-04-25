@@ -41,18 +41,91 @@ namespace blink
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
     }
 
-    bool VulkanMaterial::bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
-                                                 VulkanUniformBuffer& pmub,
-                                                 VkDescriptorBufferInfo& pmubi)
+    bool VulkanMaterial::uploadPerCameraUniforms(const VkDescriptorBufferInfo& pcubi)
     {
-        pmub.appendData(&m_pmu, sizeof(m_pmu), &pmubi);
+        int index = m_pipeline->getPerCameraUniformIndex();
+        m_descriptorInfoList[index].bufferInfo = pcubi;
+        return true;
+    }
+
+    bool VulkanMaterial::uploadPerMaterialUniforms(VulkanUniformBuffer& pmub)
+    {
+        const auto& writeSets = m_pipeline->getWriteDescriptorSets();
+        const auto& writeSetNames = m_pipeline->getWriteDescriptorSetNames();
+
+        // check uniforms in shader and upload
+        for (std::size_t i = 0; i < writeSets.size(); ++i)
+        {
+            const auto& writeSet = writeSets[i];
+            auto& descriptorInfo = m_descriptorInfoList[i];
+
+            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+            {
+                // get uniform data
+                auto it = m_uniformMap.find(writeSetNames[i]);
+                if (it == m_uniformMap.end()) continue;
+
+                const auto& variable = it->second;
+                switch (variable.type)
+                {
+                case UniformType::Int:
+                    pmub.appendData(&variable.value.iValue, sizeof(variable.value.iValue), &m_descriptorInfoList[i].bufferInfo);
+                    break;
+                case UniformType::Float:
+                    pmub.appendData(&variable.value.fValue, sizeof(variable.value.fValue), &m_descriptorInfoList[i].bufferInfo);
+                    break;
+                case UniformType::Vec2:
+                    pmub.appendData(&variable.value.vec2Value,
+                                    sizeof(variable.value.vec2Value),
+                                    &m_descriptorInfoList[i].bufferInfo);
+                    break;
+                case UniformType::Vec3:
+                    pmub.appendData(&variable.value.vec3Value,
+                                    sizeof(variable.value.vec3Value),
+                                    &m_descriptorInfoList[i].bufferInfo);
+                    break;
+                case UniformType::Vec4:
+                    pmub.appendData(&variable.value.vec4Value,
+                                    sizeof(variable.value.vec4Value),
+                                    &m_descriptorInfoList[i].bufferInfo);
+                    break;
+                case UniformType::Mat3:
+                    pmub.appendData(&variable.value.mat3Value,
+                                    sizeof(variable.value.mat3Value),
+                                    &m_descriptorInfoList[i].bufferInfo);
+                    break;
+                case UniformType::Mat4:
+                    pmub.appendData(&variable.value.mat4Value,
+                                    sizeof(variable.value.mat4Value),
+                                    &m_descriptorInfoList[i].bufferInfo);
+                    break;
+                }
+            }
+            else if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+            {
+                // get texture
+                auto it = m_textureInfoMap.find(writeSetNames[i]);
+                if (it == m_textureInfoMap.end()) continue;
+
+                const auto& texInfo = it->second;
+                auto& imageInfo = m_descriptorInfoList[i].imageInfo;
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageView = texInfo.texture->getTextureImage()->getImageView();
+                imageInfo.sampler = texInfo.texture->getTextureSampler();
+            }
+        }
 
         return true;
     }
 
-    bool VulkanMaterial::updateBufferInfos(VulkanCommandBuffer& commandBuffer,
-                                           VulkanGeometry* geometry,
-                                           const std::vector<VulkanPipeline::NamedBufferInfo>& bufferInfos)
+    bool VulkanMaterial::uploadPerInstanceUniforms(const VkDescriptorBufferInfo& piubi)
+    {
+        int index = m_pipeline->getPerInstanceUniformIndex();
+        m_descriptorInfoList[index].bufferInfo = piubi;
+        return true;
+    }
+
+    bool VulkanMaterial::updateBufferInfos(VulkanCommandBuffer& commandBuffer, VulkanGeometry* geometry)
     {
         // check validation
         auto pipelineVertexAttrs = m_pipeline->getVertexAttrFlags();
@@ -81,7 +154,7 @@ namespace blink
         vkCmdBindIndexBuffer(commandBuffer, buffer, geometry->getIndicesOffset(), VK_INDEX_TYPE_UINT16);
 
         // bind uniforms
-        return m_pipeline->bindDescriptorSets(commandBuffer, bufferInfos, m_textureInfos);
+        return m_pipeline->bindDescriptorSets(commandBuffer, m_descriptorInfoList);
     }
 
     bool VulkanMaterial::create(const tstring& filePath)
@@ -99,6 +172,9 @@ namespace blink
             return false;
         }
 
+        const auto& writeSets = m_pipeline->getWriteDescriptorSets();
+        m_descriptorInfoList.resize(writeSets.size());
+
         return true;
     }
 
@@ -114,11 +190,12 @@ namespace blink
 
     void VulkanMaterial::destroy()
     {
-        for (auto& texture : m_textureInfos)
+        for (auto& kvp : m_textureInfoMap)
         {
-            SAFE_RELEASE(texture.texture);
+            auto& texInfo = kvp.second;
+            SAFE_RELEASE(texInfo.texture);
         }
-        m_textureInfos.clear();
+        m_textureInfoMap.clear();
 
         SAFE_DELETE(m_pipeline);
         m_filePath.clear();
@@ -141,33 +218,6 @@ namespace blink
 
         m_vertexShader = j["vertex_shader"].get<tstring>();
         m_fragmentShader = j["fragment_shader"].get<tstring>();
-
-        // roughness
-        {
-            auto jroughness = j["roughness"];
-            if (!jroughness.is_null())
-            {
-                m_pmu.roughness = jroughness.get<float>();
-            }
-        }
-
-        // metallic
-        {
-            auto jmetallic = j["metallic"];
-            if (!jmetallic.is_null())
-            {
-                m_pmu.metallic = jmetallic.get<float>();
-            }
-        }
-
-        // color
-        {
-            auto jcolor = j["color"];
-            if (jcolor.is_array() && jcolor.size() == 3)
-            {
-                m_pmu.color = glm::vec3(jcolor[0].get<float>(), jcolor[1].get<float>(), jcolor[2].get<float>());
-            }
-        }
 
         // wireframe
         {
@@ -193,6 +243,98 @@ namespace blink
             }
         }
 
+        // uniforms
+        {
+            auto juniforms = j["uniforms"];
+            if (juniforms.is_array())
+            {
+                for (int i = 0; i < juniforms.size(); ++i)
+                {
+                    auto juniform = juniforms[i];
+                    auto type = juniform["type"].get<tstring>();
+                    if (type == "int")
+                    {
+                        setInt(juniform["name"].get<tstring>(), juniform["value"].get<int>());
+                    }
+                    else if (type == "float")
+                    {
+                        setFloat(juniform["name"].get<tstring>(), juniform["value"].get<float>());
+                    }
+                    else if (type == "vec2")
+                    {
+                        auto jvec2 = juniform["value"];
+                        if (jvec2.is_array() && jvec2.size() == 2)
+                        {
+                            auto value = glm::vec2(jvec2[0].get<float>(), jvec2[1].get<float>());
+                            setVec2(juniform["name"].get<tstring>(), value);
+                        }
+                    }
+                    else if (type == "vec3")
+                    {
+                        auto jvec3 = juniform["value"];
+                        if (jvec3.is_array() && jvec3.size() == 3)
+                        {
+                            auto value = glm::vec3(jvec3[0].get<float>(), jvec3[1].get<float>(), jvec3[2].get<float>());
+                            setVec3(juniform["name"].get<tstring>(), value);
+                        }
+                    }
+                    else if (type == "vec4")
+                    {
+                        auto jvec4 = juniform["value"];
+                        if (jvec4.is_array() && jvec4.size() == 4)
+                        {
+                            auto value = glm::vec4(jvec4[0].get<float>(),
+                                                   jvec4[1].get<float>(),
+                                                   jvec4[2].get<float>(),
+                                                   jvec4[3].get<float>());
+                            setVec4(juniform["name"].get<tstring>(), value);
+                        }
+                    }
+                    else if (type == "mat3")
+                    {
+                        auto jmat3 = juniform["value"];
+                        if (jmat3.is_array() && jmat3.size() == 9)
+                        {
+                            auto value = glm::mat3(jmat3[0].get<float>(),
+                                                   jmat3[1].get<float>(),
+                                                   jmat3[2].get<float>(),
+                                                   jmat3[3].get<float>(),
+                                                   jmat3[4].get<float>(),
+                                                   jmat3[5].get<float>(),
+                                                   jmat3[6].get<float>(),
+                                                   jmat3[7].get<float>(),
+                                                   jmat3[8].get<float>());
+                            setMat3(juniform["name"].get<tstring>(), value);
+                        }
+                    }
+                    else if (type == "mat4")
+                    {
+                        auto jmat4 = juniform["value"];
+                        if (jmat4.is_array() && jmat4.size() == 16)
+                        {
+                            auto value = glm::mat4(jmat4[0].get<float>(),
+                                                   jmat4[1].get<float>(),
+                                                   jmat4[2].get<float>(),
+                                                   jmat4[3].get<float>(),
+                                                   jmat4[4].get<float>(),
+                                                   jmat4[5].get<float>(),
+                                                   jmat4[6].get<float>(),
+                                                   jmat4[7].get<float>(),
+                                                   jmat4[8].get<float>(),
+                                                   jmat4[9].get<float>(),
+                                                   jmat4[10].get<float>(),
+                                                   jmat4[11].get<float>(),
+                                                   jmat4[12].get<float>(),
+                                                   jmat4[13].get<float>(),
+                                                   jmat4[14].get<float>(),
+                                                   jmat4[15].get<float>());
+                            setMat4(juniform["name"].get<tstring>(), value);
+                        }
+                    }
+                }
+            }
+        }
+
         // textures
         {
             auto jtextures = j["textures"];
@@ -200,8 +342,12 @@ namespace blink
             {
                 for (int i = 0; i < jtextures.size(); ++i)
                 {
-                    auto texObj = jtextures[i];
-                    m_textureInfos.push_back({texObj["name"].get<tstring>(), texObj["path"].get<tstring>()});
+                    auto jtexture = jtextures[i];
+                    TextureInfo texInfo;
+                    texInfo.name = jtexture["name"].get<tstring>();
+                    texInfo.path = jtexture["path"].get<tstring>();
+                    texInfo.texture = nullptr;
+                    m_textureInfoMap.insert({texInfo.name, texInfo});
                 }
             }
         }
@@ -211,23 +357,19 @@ namespace blink
 
     bool VulkanMaterial::loadTextures()
     {
-        for (auto& texInfo : m_textureInfos)
+        auto resModule = getResModule();
+
+        for (auto& kvp : m_textureInfoMap)
         {
-            auto resModule = getResModule();
+            auto& texInfo = kvp.second;
+            if (texInfo.texture != nullptr) continue;
+
             auto texture = resModule->createTexture2d(texInfo.path);
             if (!texture) texture = resModule->createTexture2d(VulkanResModule::DEFAULT_TEXTURE);
-            if (!texture) return false;
-
-            texInfo.texture = texture;
+            if (!texture) continue;
 
             auto vulkanTexture = dynamic_cast<VulkanTexture*>(texture);
-
-            VkDescriptorImageInfo imageInfo{};
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = vulkanTexture->getTextureImage()->getImageView();
-            imageInfo.sampler = vulkanTexture->getTextureSampler();
-
-            texInfo.imageInfo = imageInfo;
+            texInfo.texture = vulkanTexture;
         }
 
         return true;

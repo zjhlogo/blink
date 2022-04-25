@@ -14,7 +14,7 @@
 
 namespace blink
 {
-    struct PerFrameUniforms
+    struct PerCameraUniforms
     {
         alignas(16) glm::mat4 matWorldToCamera;
         alignas(16) glm::mat3x4 matWorldToCameraInvT;

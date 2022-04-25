@@ -25,6 +25,14 @@ namespace blink
 
     class VulkanMaterial : public IMaterial
     {
+    private:
+        struct TextureInfo
+        {
+            tstring name;
+            tstring path;
+            VulkanTexture* texture;
+        };
+
     public:
         VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~VulkanMaterial();
@@ -39,22 +47,11 @@ namespace blink
 
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
 
-        bool bindPerMaterialUniforms(VulkanCommandBuffer& commandBuffer,
-                                     VulkanUniformBuffer& pmub,
-                                     VkDescriptorBufferInfo& pmubi);
+        bool uploadPerCameraUniforms(const VkDescriptorBufferInfo& pcubi);
+        bool uploadPerMaterialUniforms(VulkanUniformBuffer& pmub);
+        bool uploadPerInstanceUniforms(const VkDescriptorBufferInfo& piubi);
 
-        bool updateBufferInfos(VulkanCommandBuffer& commandBuffer,
-                               VulkanGeometry* geometry,
-                               const std::vector<VulkanPipeline::NamedBufferInfo>& bufferInfos);
-
-        virtual float getRoughness() const override { return m_pmu.roughness; };
-        virtual void setRoughness(float roughness) override { m_pmu.roughness = roughness; };
-
-        virtual float getMetallic() const override { return m_pmu.metallic; };
-        virtual void setMetallic(float metallic) override { m_pmu.metallic = metallic; };
-
-        virtual const glm::vec3& getColor() const override { return m_pmu.color; };
-        virtual void setColor(const glm::vec3& color) override { m_pmu.color = color; };
+        bool updateBufferInfos(VulkanCommandBuffer& commandBuffer, VulkanGeometry* geometry);
 
         VulkanPipeline& getPipeline() const { return *m_pipeline; };
 
@@ -67,11 +64,11 @@ namespace blink
         tstring m_fragmentShader;
         VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};
         PrimitiveTopology m_topology{PrimitiveTopology::TriangleList};
-        std::vector<VulkanPipeline::NamedTextureInfo> m_textureInfos;
+
+        std::vector<VulkanPipeline::DescriptorInfo> m_descriptorInfoList;
+        std::unordered_map<tstring, TextureInfo> m_textureInfoMap;
 
         VulkanPipeline* m_pipeline{};
-
-        PerMaterialUniforms m_pmu{0.5f, 0.5f, glm::vec3(1.0f, 0.0f, 1.0f)};
     };
 
 } // namespace blink

@@ -72,8 +72,12 @@ namespace blink
 
         // generate layout bindings
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-        m_numTextures = (int)
-            generateDescriptorSetLayout(layoutBindings, m_writeSets, m_writeSetNameIndexMap, fragmentShaderCode);
+        generateDescriptorSetLayout(layoutBindings,
+                                    m_writeSets,
+                                    m_writeSetNames,
+                                    m_perCameraUniformIndex,
+                                    m_perInstanceUniformIndex,
+                                    fragmentShaderCode);
 
         if (createDescriptorSetLayout(layoutBindings) == VK_NULL_HANDLE) return false;
         if (createGraphicsPipeline(vertexShaderCode,
@@ -93,38 +97,42 @@ namespace blink
         destroyGraphicsPipeline();
         destroyDescriptorSetLayout();
 
-        m_numTextures = 0;
         m_writeSets.clear();
-        m_writeSetNameIndexMap.clear();
+        m_writeSetNames.clear();
+        m_perCameraUniformIndex = -1;
+        m_perInstanceUniformIndex = -1;
         m_vertexAttrs = VertexAttrs::None;
     }
 
     bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer,
-                                            const std::vector<NamedBufferInfo>& bufferInfos,
-                                            const std::vector<NamedTextureInfo>& textureInfos)
+                                            const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList)
     {
+        assert(m_writeSets.size() == descriptorInfoList.size());
+
         auto descriptorSet = m_logicalDevice.getDescriptorPool().allocateDescriptorSet(m_descriptorSetLayout);
 
-        // uniforms binding
-        for (const auto& bufferInfo : bufferInfos)
+        for (std::size_t i = 0; i < m_writeSets.size(); ++i)
         {
-            auto it = m_writeSetNameIndexMap.find(bufferInfo.name);
-            if (it == m_writeSetNameIndexMap.end()) continue;
+            auto& writeSet = m_writeSets[i];
+            writeSet.dstSet = descriptorSet;
 
-            int index = it->second;
-            m_writeSets[index].dstSet = descriptorSet;
-            m_writeSets[index].pBufferInfo = &bufferInfo.bufferInfo;
-        }
+            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+            {
+                writeSet.pBufferInfo = &descriptorInfoList[i].bufferInfo;
+            }
+            else
+            {
+                writeSet.pBufferInfo = nullptr;
+            }
 
-        // sampler binding
-        for (const auto& textureInfo : textureInfos)
-        {
-            auto it = m_writeSetNameIndexMap.find(textureInfo.name);
-            if (it == m_writeSetNameIndexMap.end()) continue;
-
-            int index = it->second;
-            m_writeSets[index].dstSet = descriptorSet;
-            m_writeSets[index].pImageInfo = &textureInfo.imageInfo;
+            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+            {
+                writeSet.pImageInfo = &descriptorInfoList[i].imageInfo;
+            }
+            else
+            {
+                writeSet.pImageInfo = nullptr;
+            }
         }
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
@@ -415,21 +423,26 @@ namespace blink
         return vertexAttrs;
     }
 
-    size_t VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
-                                                       std::vector<VkWriteDescriptorSet>& writeSets,
-                                                       std::unordered_map<tstring, int>& writeSetNameIndexMap,
-                                                       const std::vector<uint8>& fragmentShaderCode)
+    void VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
+                                                     std::vector<VkWriteDescriptorSet>& writeSets,
+                                                     std::vector<tstring>& writeSetNames,
+                                                     int& perCameraUniformIndex,
+                                                     int& perInstanceUniformIndex,
+                                                     const std::vector<uint8>& fragmentShaderCode)
     {
         layoutBindings.clear();
         writeSets.clear();
-        writeSetNameIndexMap.clear();
+        writeSetNames.clear();
+        perCameraUniformIndex = -1;
+        perInstanceUniformIndex = -1;
 
         spirv_cross::CompilerGLSL glsl((uint32_t*)fragmentShaderCode.data(), fragmentShaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
         // uniform buffers
-        for (const auto& uniform : resources.uniform_buffers)
+        for (int i = 0; i < resources.uniform_buffers.size(); ++i)
         {
+            const auto& uniform = resources.uniform_buffers[i];
             auto set = glsl.get_decoration(uniform.id, spv::DecorationDescriptorSet);
             auto binding = glsl.get_decoration(uniform.id, spv::DecorationBinding);
 
@@ -446,10 +459,17 @@ namespace blink
             descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites.descriptorCount = 1;
 
-            tstring name = uniform.name;
-            writeSetNameIndexMap.insert({name, (int)writeSets.size()});
-
             writeSets.push_back(descriptorWrites);
+            writeSetNames.push_back(uniform.name);
+
+            if (uniform.name == "PerCameraUniforms")
+            {
+                perCameraUniformIndex = i;
+            }
+            else if (uniform.name == "PerInstanceUniforms")
+            {
+                perInstanceUniformIndex = i;
+            }
         }
 
         // uniform samples
@@ -457,7 +477,6 @@ namespace blink
         {
             const auto& sample = resources.sampled_images[i];
 
-            // auto name = sample.name;
             auto type = glsl.get_type(sample.type_id);
             // auto baseType = glsl.get_type(sample.base_type_id);
 
@@ -475,9 +494,9 @@ namespace blink
             imageDescriptorWrites.dstBinding = binding;
             imageDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             imageDescriptorWrites.descriptorCount = 1;
-            writeSets.push_back(imageDescriptorWrites);
-        }
 
-        return resources.sampled_images.size();
+            writeSets.push_back(imageDescriptorWrites);
+            writeSetNames.push_back(sample.name);
+        }
     }
 } // namespace blink

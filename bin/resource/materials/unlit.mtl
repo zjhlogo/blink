@@ -3,6 +3,9 @@
     "fragment_shader" : "resource/shaders/unlit.frag.spv",
     
     "textures" : [
-        "resource/grid.png"
+        {
+            "name" : "texSampler",
+            "path" : "resource/grid.png"
+        }
     ]
 }

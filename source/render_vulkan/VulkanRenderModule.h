@@ -32,18 +32,18 @@ namespace blink
     {
     public:
         VulkanRenderData(VulkanCommandBuffer* _commandBuffer,
-                         VulkanUniformBuffer* _pfub,
+                         VulkanUniformBuffer* _pcub,
                          VulkanUniformBuffer* _pmub,
                          VulkanUniformBuffer* _piub)
             : commandBuffer(_commandBuffer)
-            , pfub(_pfub)
+            , pcub(_pcub)
             , pmub(_pmub)
             , piub(_piub)
         {
         }
 
         VulkanCommandBuffer* commandBuffer;
-        VulkanUniformBuffer* pfub;
+        VulkanUniformBuffer* pcub;
         VulkanUniformBuffer* pmub;
         VulkanUniformBuffer* piub;
     };
