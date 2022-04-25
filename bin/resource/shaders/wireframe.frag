@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "uniforms.inc"
+#include "builtin_uniforms.inc"
 
 layout(set = 0, binding = 2) uniform PerMaterialUniforms
 {

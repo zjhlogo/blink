@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "uniforms.inc"
+#include "builtin_uniforms.inc"
 
 layout(set = 0, binding = 2) uniform PerMaterialUniforms
 {
@@ -55,7 +55,7 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness)
     float dotLH = clamp(dot(L, H), 0.001, 1.0);
     float dotNH = clamp(dot(N, H), 0.001, 1.0);
 
-    vec3 lightColor = pfu.lightColorAndIntensity.xyz;
+    vec3 lightColor = pcu.lightColorAndIntensity.xyz;
     vec3 color = vec3(0.0);
 
     float D = D_GGX(dotNH, roughness);
@@ -70,8 +70,8 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness)
 void main()
 {
     vec3 N = normalize(fragNormal);
-    vec3 V = normalize(pfu.cameraPos - fragWorldPos);
-    vec3 L = normalize(pfu.lightPos - fragWorldPos);
+    vec3 V = normalize(pcu.cameraPos - fragWorldPos);
+    vec3 L = normalize(pcu.lightPos - fragWorldPos);
 
     vec3 Lo = vec3(0.0);
     Lo += BRDF(L, V, N, pmu.metallic, pmu.roughness);

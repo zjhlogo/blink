@@ -17,6 +17,7 @@ resources/ITexture2d.cpp
 resources/ITexture2d.h
 types/Color.cpp
 types/Color.h
+types/UniformTypes.h
 types/VertexAttrs.h
 EcsWorld.cpp
 EcsWorld.h

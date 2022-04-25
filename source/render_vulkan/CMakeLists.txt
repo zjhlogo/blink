@@ -43,6 +43,8 @@ VulkanSemaphore.cpp
 VulkanSemaphore.h
 VulkanSwapchain.cpp
 VulkanSwapchain.h
+VulkanUniformBlock.cpp
+VulkanUniformBlock.h
 VulkanUniformBuffer.cpp
 VulkanUniformBuffer.h
 VulkanWindow.cpp

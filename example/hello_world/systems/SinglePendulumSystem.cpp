@@ -49,7 +49,6 @@ bool SinglePendulumSystem::initialize()
                 pos.value = sp.anchorPoint + glm::normalize(pos.value - sp.anchorPoint) * sp.length;
 
                 // correct velocity
-                // 根据机械能守恒定律
                 auto dh = glm::dot(pos.value - sp.startPos, glm::normalize(sp.gravity));
                 auto strength = glm::sqrt(glm::length2(sp.startVelocity) + 2.0f * glm::length(sp.gravity) * dh);
                 pv.linearVelocity = glm::normalize(velocityTangent) * strength;

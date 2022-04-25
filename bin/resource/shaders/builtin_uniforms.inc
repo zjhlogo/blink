@@ -1,4 +1,4 @@
-layout(set = 0, binding = 0) uniform PerFrameUniforms
+layout(set = 0, binding = 0) uniform PerCameraUniforms
 {
     mat4 matWorldToCamera;
     mat3 matWorldToCameraInvT;
@@ -9,7 +9,7 @@ layout(set = 0, binding = 0) uniform PerFrameUniforms
     vec3 cameraDir;
     vec3 lightPos;
     vec4 lightColorAndIntensity;
-} pfu;
+} pcu;
 
 layout(set = 0, binding = 1) uniform PerInstanceUniforms
 {

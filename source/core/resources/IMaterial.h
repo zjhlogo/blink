@@ -11,7 +11,9 @@
 #include "IGeometry.h"
 #include "IResource.h"
 
+#include <core/types/UniformTypes.h>
 #include <foundation/BaseTypesGlm.h>
+
 #include <unordered_map>
 
 namespace blink
@@ -19,18 +21,6 @@ namespace blink
     class IMaterial : public IResource
     {
     protected:
-        enum class UniformType
-        {
-            None,
-            Int,
-            Float,
-            Vec2,
-            Vec3,
-            Vec4,
-            Mat3,
-            Mat4
-        };
-
         union UniformValue
         {
             int iValue;
@@ -76,6 +66,5 @@ namespace blink
 
     protected:
         std::unordered_map<tstring, UniformVariable> m_uniformMap;
-
     };
 } // namespace blink

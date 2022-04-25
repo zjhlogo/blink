@@ -27,5 +27,4 @@ namespace blink
     RAW_FLAG(Uv7)
     RAW_FLAG(Color)
     END_RAW_BITFLAGS(VertexAttrs)
-
 } // namespace blink
