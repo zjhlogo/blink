@@ -26,8 +26,9 @@ namespace blink
 
     enum class UniformBinding
     {
-        Camera = 0,
-        Instance,
+        Frame = 0,
+        Camera,
+        Entity,
         Material,
     };
 

@@ -13,11 +13,11 @@ layout(location = 2) out vec3 fragWorldPos;
 
 void main()
 {
-    vec4 worldPos = piu.matLocalToWorld * vec4(inPosition, 1.0);
+    vec4 worldPos = eu.matLocalToWorld * vec4(inPosition, 1.0);
     
     fragWorldPos = worldPos.xyz;
-    fragNormal = piu.matLocalToWorldInvT * inNormal;
+    fragNormal = eu.matLocalToWorldInvT * inNormal;
     fragTexCoord = vec2(inTexCoord.x, 1.0 - inTexCoord.y); // flip y for vulkan
 
-    gl_Position = pcu.matWorldToProjection * worldPos;
+    gl_Position = cu.matWorldToProjection * worldPos;
 }

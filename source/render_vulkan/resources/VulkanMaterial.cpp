@@ -241,11 +241,10 @@ namespace blink
                 for (int i = 0; i < jtextures.size(); ++i)
                 {
                     auto jtexture = jtextures[i];
-                    TextureInfo texInfo;
-                    texInfo.binding = jtexture["binding"].get<int>();
+                    TextureInfo texInfo{};
+                    texInfo.name = jtexture["name"].get<tstring>();
                     texInfo.path = jtexture["path"].get<tstring>();
-                    texInfo.texture = nullptr;
-                    m_textureInfoMap.insert({texInfo.binding, texInfo});
+                    m_textureInfoMap.insert({texInfo.name, texInfo});
                 }
             }
         }

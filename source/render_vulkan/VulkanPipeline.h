@@ -54,7 +54,7 @@ namespace blink
         VulkanUniformBlock* getUniformBlock(UniformBinding binding);
         int getUniformWriteSetIndexFromBinding(UniformBinding binding);
         const std::unordered_map<uint32, int>& getUniformWriteSetIndexMap() const { return m_uniformWriteSetIndexMap; };
-        const std::unordered_map<uint32, int>& getTextureWriteSetIndexMap() const { return m_textureWriteSetIndexMap; };
+        const std::unordered_map<tstring, int>& getTextureWriteSetIndexMap() const { return m_textureWriteSetIndexMap; };
 
     private:
         VkDescriptorSetLayout createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings);
@@ -88,7 +88,7 @@ namespace blink
 
         std::vector<VkWriteDescriptorSet> m_writeSets;
         std::unordered_map<uint32, int> m_uniformWriteSetIndexMap;
-        std::unordered_map<uint32, int> m_textureWriteSetIndexMap;
+        std::unordered_map<tstring, int> m_textureWriteSetIndexMap;
 
         std::unordered_map<uint32, VulkanUniformBlock> m_uniformBlocks;
 

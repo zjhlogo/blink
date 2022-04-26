@@ -28,7 +28,7 @@ namespace blink
     private:
         struct TextureInfo
         {
-            int binding;
+            tstring name;
             tstring path;
             VulkanTexture* texture;
         };
@@ -63,7 +63,7 @@ namespace blink
         PrimitiveTopology m_topology{PrimitiveTopology::TriangleList};
 
         std::vector<VulkanPipeline::DescriptorInfo> m_descriptorInfoList;
-        std::unordered_map<int, TextureInfo> m_textureInfoMap;
+        std::unordered_map<tstring, TextureInfo> m_textureInfoMap;
 
         VulkanPipeline* m_pipeline{};
     };

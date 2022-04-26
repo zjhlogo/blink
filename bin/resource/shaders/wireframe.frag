@@ -3,14 +3,14 @@
 
 #include "builtin_uniforms.inc"
 
-layout(set = 0, binding = 2) uniform PerMaterialUniforms
+layout(set = 0, binding = 3) uniform MaterialUniforms
 {
     vec3 color;
-} pmu;
+} mu;
 
 layout(location = 0) out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(pmu.color, 1.0);
+    outColor = vec4(mu.color, 1.0);
 }

@@ -1,18 +1,25 @@
-layout(set = 0, binding = 0) uniform PerCameraUniforms
+layout(set = 0, binding = 0) uniform FrameUniforms
+{
+    vec3 lightPos;
+    float time;
+    vec3 lightColor;
+    float lightIntensity;
+    vec2 screenResolution;
+} fu;
+
+layout(set = 0, binding = 1) uniform CameraUniforms
 {
     mat4 matWorldToCamera;
-    mat3 matWorldToCameraInvT;
     mat4 matCameraToProjection;
     mat4 matWorldToProjection;
+    mat3 matWorldToCameraInvT;
     vec3 cameraPos;
     vec3 cameraDir;
-    vec3 lightPos;
-    vec4 lightColorAndIntensity;
-} pcu;
+} cu;
 
-layout(set = 0, binding = 1) uniform PerInstanceUniforms
+layout(set = 0, binding = 2) uniform EntityUniforms
 {
     mat4 matLocalToWorld;
-    mat3 matLocalToWorldInvT;
     mat4 matLocalToProjection;
-} piu;
+    mat3 matLocalToWorldInvT;
+} eu;

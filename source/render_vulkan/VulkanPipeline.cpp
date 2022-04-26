@@ -551,7 +551,7 @@ namespace blink
             imageDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             imageDescriptorWrites.descriptorCount = 1;
 
-            m_textureWriteSetIndexMap.insert({binding, static_cast<int>(m_writeSets.size())});
+            m_textureWriteSetIndexMap.insert({sample.name, static_cast<int>(m_writeSets.size())});
             m_writeSets.push_back(imageDescriptorWrites);
         }
     }

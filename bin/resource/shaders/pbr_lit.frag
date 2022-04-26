@@ -3,12 +3,12 @@
 
 #include "builtin_uniforms.inc"
 
-layout(set = 0, binding = 2) uniform PerMaterialUniforms
+layout(set = 0, binding = 3) uniform MaterialUniforms
 {
+    vec3 color;
     float roughness;
     float metallic;
-    vec3 color;
-} pmu;
+} mu;
 
 const float PI = 3.14159265359;
 
@@ -17,11 +17,6 @@ layout(location = 1) in vec2 fragTexCoord;
 layout(location = 2) in vec3 fragWorldPos;
 
 layout(location = 0) out vec4 outColor;
-
-vec3 materialColor()
-{
-    return pmu.color;
-}
 
 float D_GGX(float dotNH, float roughness)
 {
@@ -42,7 +37,7 @@ float G_SchlicksmithGGX(float dotNL, float dotNV, float roughness)
 
 vec3 F_Schlick(float cosTheta, float metallic)
 {
-    vec3 F0 = mix(vec3(0.04), materialColor(), metallic);
+    vec3 F0 = mix(vec3(0.04), mu.color, metallic);
     vec3 F = F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
     return F;
 }
@@ -55,14 +50,13 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness)
     float dotLH = clamp(dot(L, H), 0.001, 1.0);
     float dotNH = clamp(dot(N, H), 0.001, 1.0);
 
-    vec3 lightColor = pcu.lightColorAndIntensity.xyz;
     vec3 color = vec3(0.0);
 
     float D = D_GGX(dotNH, roughness);
     float G = G_SchlicksmithGGX(dotNL, dotNV, roughness);
     vec3 F = F_Schlick(dotNV, metallic);
     vec3 spec = D * F * G / (4.0 * dotNL * dotNV);
-    color += spec * dotNL * lightColor;
+    color += spec * dotNL * fu.lightColor;
 
     return color;
 }
@@ -70,13 +64,13 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness)
 void main()
 {
     vec3 N = normalize(fragNormal);
-    vec3 V = normalize(pcu.cameraPos - fragWorldPos);
-    vec3 L = normalize(pcu.lightPos - fragWorldPos);
+    vec3 V = normalize(cu.cameraPos - fragWorldPos);
+    vec3 L = normalize(fu.lightPos - fragWorldPos);
 
     vec3 Lo = vec3(0.0);
-    Lo += BRDF(L, V, N, pmu.metallic, pmu.roughness);
+    Lo += BRDF(L, V, N, mu.metallic, mu.roughness);
 
-    vec3 color = materialColor() * 0.02;
+    vec3 color = mu.color * 0.02;
     color += Lo;
 
     color = pow(color, vec3(0.4545));

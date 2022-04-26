@@ -32,20 +32,20 @@ namespace blink
     {
     public:
         VulkanRenderData(VulkanCommandBuffer* _commandBuffer,
-                         VulkanUniformBuffer* _pcub,
-                         VulkanUniformBuffer* _pmub,
-                         VulkanUniformBuffer* _piub)
+                         VulkanUniformBuffer* _fub,
+                         VulkanUniformBuffer* _mub,
+                         VulkanUniformBuffer* _eub)
             : commandBuffer(_commandBuffer)
-            , pcub(_pcub)
-            , pmub(_pmub)
-            , piub(_piub)
+            , fub(_fub)
+            , mub(_mub)
+            , eub(_eub)
         {
         }
 
         VulkanCommandBuffer* commandBuffer;
-        VulkanUniformBuffer* pcub;
-        VulkanUniformBuffer* pmub;
-        VulkanUniformBuffer* piub;
+        VulkanUniformBuffer* fub;
+        VulkanUniformBuffer* mub;
+        VulkanUniformBuffer* eub;
     };
 
     class VulkanRenderModule : public IRenderModule

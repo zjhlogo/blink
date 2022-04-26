@@ -20,17 +20,27 @@
 #include <map>
 #include <unordered_map>
 
+struct FrameRenderData
+{
+    glm::vec3 lightPos;
+    glm::vec3 lightColor;
+    float lightIntensity;
+    float time;
+    glm::vec2 screenResolution;
+
+    bool uploaded;
+    VkDescriptorBufferInfo fubi;
+};
+
 struct CameraRenderData
 {
-    glm::mat4 matWorldToCamera;
-    glm::mat3 matWorldToCameraInvT;
     glm::mat4 matCameraToProjection;
     glm::mat4 matWorldToProjection;
+    glm::quat cameraRot;
     glm::vec3 cameraPos;
-    glm::vec3 cameraDir;
-    glm::vec3 lightPos;
-    glm::vec4 lightColorAndIntensity;
+
     int cameraId;
+    VkDescriptorBufferInfo cubi;
 };
 
 struct EntityRenderData
@@ -40,82 +50,103 @@ struct EntityRenderData
     blink::IGeometry* geometry;
     blink::uint32 renderLayer;
     int cameraId;
-    VkDescriptorBufferInfo piubi;
+    VkDescriptorBufferInfo eubi;
 };
 
 struct MaterialRenderData
 {
     int cameraId;
-    VkDescriptorBufferInfo pmubi;
+    VkDescriptorBufferInfo mubi;
     std::vector<EntityRenderData> entityRenderDatas;
 };
 
-struct LightRenderData
+void uploadFrameUniforms(FrameRenderData& frd, blink::VulkanMaterial* vulkanMaterial, blink::VulkanRenderData* vulkanRenderData)
 {
-    glm::vec3 pos;
-    glm::vec3 color;
-    float intensity;
-};
+    if (frd.uploaded)
+    {
+        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Frame, frd.fubi);
+        return;
+    }
+
+    auto& pipeline = vulkanMaterial->getPipeline();
+    auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Frame);
+    if (!uniformBlock) return;
+
+    // upload per frame uniforms
+    uniformBlock->prepareBuffer();
+    uniformBlock->setUniformMember("lightPos", frd.lightPos);
+    uniformBlock->setUniformMember("lightColor", frd.lightColor);
+    uniformBlock->setUniformMember("screenResolution", frd.screenResolution);
+    uniformBlock->setUniformMember("time", frd.time);
+    uniformBlock->setUniformMember("lightIntensity", frd.lightIntensity);
+    vulkanRenderData->fub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &frd.fubi);
+    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Frame, frd.fubi);
+
+    frd.uploaded = true;
+}
 
 void uploadCameraUniforms(CameraRenderData& crd,
-                          VkDescriptorBufferInfo& pcubi,
                           int cameraId,
                           blink::VulkanMaterial* vulkanMaterial,
                           blink::VulkanRenderData* vulkanRenderData)
 {
     if (crd.cameraId == cameraId)
     {
-        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Camera, pcubi);
+        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Camera, crd.cubi);
         return;
     }
 
     auto& pipeline = vulkanMaterial->getPipeline();
-    auto pcub = pipeline.getUniformBlock(blink::UniformBinding::Camera);
-    if (!pcub) return;
+    auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Camera);
+    if (!uniformBlock) return;
+
+    auto cameraDir = glm::rotate(crd.cameraRot, glm::forward());
+    auto up = glm::rotate(crd.cameraRot, glm::up());
+    auto matWorldToCamera = glm::lookAt(crd.cameraPos, crd.cameraPos + cameraDir, up);
+    auto matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(matWorldToCamera)));
+    crd.matWorldToProjection = crd.matCameraToProjection * matWorldToCamera;
 
     // upload per camera uniforms
-    pcub->prepareBuffer();
-    pcub->setUniformMember("matWorldToCamera", crd.matWorldToCamera);
-    pcub->setUniformMember("matWorldToCameraInvT", crd.matWorldToCameraInvT);
-    pcub->setUniformMember("matCameraToProjection", crd.matCameraToProjection);
-    pcub->setUniformMember("matWorldToProjection", crd.matWorldToProjection);
-    pcub->setUniformMember("cameraPos", crd.cameraPos);
-    pcub->setUniformMember("cameraDir", crd.cameraDir);
-    pcub->setUniformMember("lightPos", crd.lightPos);
-    pcub->setUniformMember("lightColorAndIntensity", crd.lightColorAndIntensity);
-    vulkanRenderData->pcub->appendData(pcub->getBufferData(), pcub->getBufferSize(), &pcubi);
-    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Camera, pcubi);
+    uniformBlock->prepareBuffer();
+    uniformBlock->setUniformMember("matWorldToCamera", matWorldToCamera);
+    uniformBlock->setUniformMember("matCameraToProjection", crd.matCameraToProjection);
+    uniformBlock->setUniformMember("matWorldToProjection", crd.matWorldToProjection);
+    uniformBlock->setUniformMember("matWorldToCameraInvT", matWorldToCameraInvT);
+    uniformBlock->setUniformMember("cameraPos", crd.cameraPos);
+    uniformBlock->setUniformMember("cameraDir", cameraDir);
+    vulkanRenderData->fub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &crd.cubi);
+    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Camera, crd.cubi);
 
     crd.cameraId = cameraId;
 }
 
-void uploadInstanceUniforms(EntityRenderData& erd,
-                            const CameraRenderData& pcu,
-                            int cameraId,
-                            blink::VulkanMaterial* vulkanMaterial,
-                            blink::VulkanRenderData* vulkanRenderData)
+void uploadEntityUniforms(EntityRenderData& erd,
+                          const CameraRenderData& pcu,
+                          int cameraId,
+                          blink::VulkanMaterial* vulkanMaterial,
+                          blink::VulkanRenderData* vulkanRenderData)
 {
     // bind per instance uniform
     if (erd.cameraId == cameraId)
     {
-        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Instance, erd.piubi);
+        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Entity, erd.eubi);
         return;
     }
 
     auto& pipeline = vulkanMaterial->getPipeline();
-    auto piub = pipeline.getUniformBlock(blink::UniformBinding::Instance);
-    if (!piub) return;
+    auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Entity);
+    if (!uniformBlock) return;
 
     auto matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), erd.pos) * glm::mat4_cast(erd.rot);
     auto matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(matLocalToWorld)));
     auto matLocalToProjection = pcu.matWorldToProjection * matLocalToWorld;
 
-    piub->prepareBuffer();
-    piub->setUniformMember("matLocalToWorld", matLocalToWorld);
-    piub->setUniformMember("matLocalToWorldInvT", matLocalToWorldInvT);
-    piub->setUniformMember("matLocalToProjection", matLocalToProjection);
-    vulkanRenderData->piub->appendData(piub->getBufferData(), piub->getBufferSize(), &erd.piubi);
-    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Instance, erd.piubi);
+    uniformBlock->prepareBuffer();
+    uniformBlock->setUniformMember("matLocalToWorld", matLocalToWorld);
+    uniformBlock->setUniformMember("matLocalToWorldInvT", matLocalToWorldInvT);
+    uniformBlock->setUniformMember("matLocalToProjection", matLocalToProjection);
+    vulkanRenderData->eub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &erd.eubi);
+    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Entity, erd.eubi);
 
     erd.cameraId = cameraId;
 }
@@ -128,16 +159,16 @@ void uploadMaterialUniforms(MaterialRenderData& mrd,
     // bind per material uniform
     if (mrd.cameraId == cameraId)
     {
-        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Material, mrd.pmubi);
+        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Material, mrd.mubi);
         return;
     }
 
     auto& pipeline = vulkanMaterial->getPipeline();
-    auto pmub = pipeline.getUniformBlock(blink::UniformBinding::Material);
-    if (!pmub) return;
+    auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Material);
+    if (!uniformBlock) return;
 
-    vulkanRenderData->piub->appendData(pmub->getBufferData(), pmub->getBufferSize(), &mrd.pmubi);
-    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Material, mrd.pmubi);
+    vulkanRenderData->mub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &mrd.mubi);
+    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Material, mrd.mubi);
 
     mrd.cameraId = cameraId;
 }
@@ -166,17 +197,21 @@ void SceneRenderSystem::terminate()
 void SceneRenderSystem::render(blink::IRenderData& renderData)
 {
     const auto& world = m_app->getEcsWorld().getWorld();
+    auto renderModule = blink::getRenderModule();
+    const auto& surfaceSize = renderModule->getSurfaceSize();
 
     // collect light data
-    LightRenderData lightGroups{};
+    FrameRenderData frd{};
     {
+        frd.time = std::fmodf(world.time(), 1.0f);
+        frd.screenResolution = surfaceSize;
         static auto lightDataQuery = world.query_builder<const blink::Position, const blink::LightData>().build();
         lightDataQuery.each(
-            [&lightGroups](flecs::entity e, const blink::Position& pos, const blink::LightData& light)
+            [&frd](flecs::entity e, const blink::Position& pos, const blink::LightData& light)
             {
-                lightGroups.pos = pos.value;
-                lightGroups.color = light.color;
-                lightGroups.intensity = light.intensity;
+                frd.lightPos = pos.value;
+                frd.lightColor = light.color;
+                frd.lightIntensity = light.intensity;
             });
     }
 
@@ -186,27 +221,19 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
         static auto cameraDataQuery =
             world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
         cameraDataQuery.each(
-            [&cameraGroups, &lightGroups](flecs::entity e,
-                                          const blink::Position& pos,
-                                          const blink::Rotation& rot,
-                                          const blink::CameraData& camera)
+            [&cameraGroups](flecs::entity e,
+                            const blink::Position& pos,
+                            const blink::Rotation& rot,
+                            const blink::CameraData& camera)
             {
                 // setup perframe uniforms
                 CameraRenderData pcu;
 
-                pcu.lightPos = lightGroups.pos;
-                pcu.lightColorAndIntensity = glm::vec4(lightGroups.color, lightGroups.intensity);
-
                 pcu.cameraPos = pos.value;
-
-                pcu.cameraDir = glm::rotate(rot.value, glm::forward());
-                auto up = glm::rotate(rot.value, glm::up());
-                pcu.matWorldToCamera = glm::lookAt(pcu.cameraPos, pcu.cameraPos + pcu.cameraDir, up);
-
-                pcu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pcu.matWorldToCamera)));
+                pcu.cameraRot = rot.value;
                 pcu.matCameraToProjection = camera.matCameraToProjection;
-                pcu.matWorldToProjection = pcu.matCameraToProjection * pcu.matWorldToCamera;
                 pcu.cameraId = 0;
+
                 cameraGroups.push_back(pcu);
             });
     }
@@ -236,8 +263,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 auto findIt = materialGroups.find(material);
                 if (findIt != materialGroups.end())
                 {
-                    findIt->second.entityRenderDatas.push_back(
-                        {pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
+                    findIt->second.entityRenderDatas.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
                 }
                 else
                 {
@@ -276,8 +302,6 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
     int cameraId = 1;
     for (auto& crd : cameraGroups)
     {
-        VkDescriptorBufferInfo pcubi{};
-
         // render features
         for (const auto& kvpFeature : featureGroups)
         {
@@ -295,14 +319,15 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
 
                     vulkanMaterial->bindPipeline(*vulkanRenderData->commandBuffer);
 
-                    uploadCameraUniforms(crd, pcubi, cameraId, vulkanMaterial, vulkanRenderData);
+                    uploadFrameUniforms(frd, vulkanMaterial, vulkanRenderData);
+                    uploadCameraUniforms(crd, cameraId, vulkanMaterial, vulkanRenderData);
                     uploadMaterialUniforms(mrd, cameraId, vulkanMaterial, vulkanRenderData);
 
                     for (auto& erd : mrd.entityRenderDatas)
                     {
                         if ((erd.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
-                        uploadInstanceUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
+                        uploadEntityUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
                         vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,
@@ -319,8 +344,8 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
 
                 vulkanMaterial->bindPipeline(*vulkanRenderData->commandBuffer);
 
-                uploadCameraUniforms(crd, pcubi, cameraId, vulkanMaterial, vulkanRenderData);
-
+                uploadFrameUniforms(frd, vulkanMaterial, vulkanRenderData);
+                uploadCameraUniforms(crd, cameraId, vulkanMaterial, vulkanRenderData);
                 MaterialRenderData mrd{};
                 uploadMaterialUniforms(mrd, cameraId, vulkanMaterial, vulkanRenderData);
 
@@ -331,7 +356,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                     {
                         if ((erd.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
-                        uploadInstanceUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
+                        uploadEntityUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
                         vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,

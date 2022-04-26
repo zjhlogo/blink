@@ -12,7 +12,7 @@
 
     "textures" : [
         {
-            "binding" : 3,
+            "name" : "texSampler",
             "path" : "resource/grid.png"
         }
     ]
