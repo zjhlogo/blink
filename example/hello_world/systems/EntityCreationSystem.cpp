@@ -153,23 +153,23 @@ void EntityCreationSystem::renderLightPropertyUi()
 
 void EntityCreationSystem::renderMaterialPropertyUi()
 {
-    if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        blink::IMaterial* material = m_sphere.get<blink::StaticModel>()->material;
-        auto roughness = material->getRoughness();
-        if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
-        {
-            material->setRoughness(roughness);
-        }
-        auto metallic = material->getMetallic();
-        if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
-        {
-            material->setMetallic(metallic);
-        }
-        glm::vec3 color = material->getColor();
-        if (ImGui::ColorEdit3("color2", (float*)&color))
-        {
-            material->setColor(color);
-        }
-    }
+    //if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
+    //{
+    //    blink::IMaterial* material = m_sphere.get<blink::StaticModel>()->material;
+    //    auto roughness = material->getRoughness();
+    //    if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
+    //    {
+    //        material->setRoughness(roughness);
+    //    }
+    //    auto metallic = material->getMetallic();
+    //    if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
+    //    {
+    //        material->setMetallic(metallic);
+    //    }
+    //    glm::vec3 color = material->getColor();
+    //    if (ImGui::ColorEdit3("color2", (float*)&color))
+    //    {
+    //        material->setColor(color);
+    //    }
+    //}
 }

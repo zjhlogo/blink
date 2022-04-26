@@ -4,7 +4,7 @@
     
     "textures" : [
         {
-            "name" : "texSampler",
+            "binding" : 3,
             "path" : "resource/grid.png"
         }
     ]

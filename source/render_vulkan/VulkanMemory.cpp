@@ -55,6 +55,8 @@ namespace blink
 
     bool VulkanMemory::uploadData(const void* srcData, VkDeviceSize srcDataSize, VkDeviceSize destOffset)
     {
+        if (srcDataSize <= 0) return false;
+
         void* mapedBuffer{};
         vkMapMemory(m_logicalDevice, m_memory, destOffset, srcDataSize, 0, &mapedBuffer);
         memcpy(mapedBuffer, srcData, static_cast<size_t>(srcDataSize));
@@ -65,6 +67,8 @@ namespace blink
 
     bool VulkanMemory::uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, CustomCopyCb cb)
     {
+        if (destDataSize <= 0) return false;
+
         void* mapedBuffer{};
         vkMapMemory(m_logicalDevice, m_memory, destOffset, destDataSize, 0, &mapedBuffer);
         cb(mapedBuffer, destDataSize);

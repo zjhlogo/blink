@@ -7,6 +7,8 @@
  *
  */
 #pragma once
+#include "VulkanUniformBlock.h"
+
 #include <core/resources/IGeometry.h>
 #include <core/types/VertexAttrs.h>
 #include <vulkan/vulkan.h>
@@ -22,6 +24,13 @@ namespace blink
     class VulkanPipeline
     {
     public:
+        enum class PredefineUniformBinding
+        {
+            PerCameraUniformBinding = 0,
+            PerInstanceUniformBinding,
+            PerMaterialUniformBinding,
+        };
+
         union DescriptorInfo
         {
             VkDescriptorImageInfo imageInfo;
@@ -48,10 +57,11 @@ namespace blink
         VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; };
         VertexAttrs getVertexAttrFlags() const { return m_vertexAttrs; };
 
-        const std::vector<VkWriteDescriptorSet>& getWriteDescriptorSets() const { return m_writeSets; };
-        const std::vector<tstring>& getWriteDescriptorSetNames() const { return m_writeSetNames; };
-        int getPerCameraUniformIndex() const { return m_perCameraUniformIndex; };
-        int getPerInstanceUniformIndex() const { return m_perInstanceUniformIndex; };
+        std::size_t getWriteSetCount() const { return m_writeSets.size(); };
+        VulkanUniformBlock* getPredefineUniformBlock(PredefineUniformBinding binding);
+        int getUniformWriteSetIndexFromBinding(PredefineUniformBinding binding);
+        const std::unordered_map<uint32, int>& getUniformWriteSetIndexMap() const { return m_uniformWriteSetIndexMap; };
+        const std::unordered_map<uint32, int>& getTextureWriteSetIndexMap() const { return m_textureWriteSetIndexMap; };
 
     private:
         VkDescriptorSetLayout createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings);
@@ -66,15 +76,14 @@ namespace blink
         void destroyGraphicsPipeline();
 
         VkShaderModule createShaderModule(const std::vector<uint8>& shaderCode);
+
         VertexAttrs generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
                                             std::vector<VkVertexInputAttributeDescription>& attributeDesc,
                                             const std::vector<uint8>& vertexShaderCode);
+
         void generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
-                                         std::vector<VkWriteDescriptorSet>& writeSets,
-                                         std::vector<tstring>& writeSetNames,
-                                         int& perCameraUniformIndex,
-                                         int& perInstanceUniformIndex,
-                                         const std::vector<uint8>& fragmentShaderCode);
+                                         const std::vector<uint8>& shaderCode,
+                                         uint32 shaderStageBits);
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
@@ -85,9 +94,10 @@ namespace blink
         VkPipeline m_pipeline{};
 
         std::vector<VkWriteDescriptorSet> m_writeSets;
-        std::vector<tstring> m_writeSetNames;
-        int m_perCameraUniformIndex{-1};
-        int m_perInstanceUniformIndex{-1};
+        std::unordered_map<uint32, int> m_uniformWriteSetIndexMap;
+        std::unordered_map<uint32, int> m_textureWriteSetIndexMap;
+
+        std::unordered_map<uint32, VulkanUniformBlock> m_uniformBlocks;
 
         VertexAttrs m_vertexAttrs{VertexAttrs::None};
         tstring m_vertexShader;

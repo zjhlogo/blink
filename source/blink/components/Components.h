@@ -10,8 +10,8 @@
 **/
 #pragma once
 
-#include "../type/RenderLayers.h"
-#include "../type/RenderOrders.h"
+#include "../types/RenderLayers.h"
+#include "../types/RenderOrders.h"
 
 #include <core/resources/IGeometry.h>
 #include <core/resources/IMaterial.h>

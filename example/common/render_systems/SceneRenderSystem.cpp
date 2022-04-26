@@ -9,7 +9,6 @@
 #include "SceneRenderSystem.h"
 
 #include <blink/components/Components.h>
-#include <blink/type/RenderTypes.h>
 #include <core/components/Components.h>
 #include <foundation/Log.h>
 #include <glm/gtx/quaternion.hpp>
@@ -21,11 +20,31 @@
 #include <map>
 #include <unordered_map>
 
+struct PerCameraUniforms
+{
+    glm::mat4 matWorldToCamera;
+    glm::mat3 matWorldToCameraInvT;
+    glm::mat4 matCameraToProjection;
+    glm::mat4 matWorldToProjection;
+    glm::vec3 cameraPos;
+    glm::vec3 cameraDir;
+    glm::vec3 lightPos;
+    glm::vec4 lightColorAndIntensity;
+    int cameraId;
+};
+
+struct PerInstanceUniforms
+{
+    glm::mat4 matLocalToWorld;
+    glm::mat3 matLocalToWorldInvT;
+    glm::mat4 matLocalToProjection;
+};
+
 struct InternalRenderData
 {
     glm::vec3 pos;
     glm::quat rot;
-    blink::PerInstanceUniforms piu;
+    PerInstanceUniforms piu;
     blink::IGeometry* geometry;
     blink::uint32 renderLayer;
     int cameraId;
@@ -38,6 +57,63 @@ struct RenderDataLight
     glm::vec3 color;
     float intensity;
 };
+
+void uploadPerCameraUniforms(PerCameraUniforms& pcu,
+                             VkDescriptorBufferInfo& pcubi,
+                             int cameraId,
+                             blink::VulkanMaterial* vulkanMaterial,
+                             blink::VulkanRenderData* vulkanRenderData)
+{
+    if (pcu.cameraId == cameraId)
+    {
+        vulkanMaterial->uploadPerCameraUniforms(pcubi);
+        return;
+    }
+
+    auto& pipeline = vulkanMaterial->getPipeline();
+    auto pcub = pipeline.getPredefineUniformBlock(blink::VulkanPipeline::PredefineUniformBinding::PerCameraUniformBinding);
+    if (!pcub) return;
+
+    // upload per camera uniforms
+    pcub->prepareBuffer();
+    pcub->setUniformMember("matWorldToCamera", pcu.matWorldToCamera);
+    pcub->setUniformMember("matWorldToCameraInvT", pcu.matWorldToCameraInvT);
+    pcub->setUniformMember("matCameraToProjection", pcu.matCameraToProjection);
+    pcub->setUniformMember("matWorldToProjection", pcu.matWorldToProjection);
+    pcub->setUniformMember("cameraPos", pcu.cameraPos);
+    pcub->setUniformMember("cameraDir", pcu.cameraDir);
+    pcub->setUniformMember("lightPos", pcu.lightPos);
+    pcub->setUniformMember("lightColorAndIntensity", pcu.lightColorAndIntensity);
+    vulkanRenderData->pcub->appendData(pcub->getBufferData(), pcub->getBufferSize(), &pcubi);
+    vulkanMaterial->uploadPerCameraUniforms(pcubi);
+
+    pcu.cameraId = cameraId;
+}
+
+void uploadPerInstanceUniforms(InternalRenderData& ird,
+                               int cameraId,
+                               blink::VulkanMaterial* vulkanMaterial,
+                               blink::VulkanRenderData* vulkanRenderData)
+{
+    // bind per instance uniform
+    if (ird.cameraId == cameraId)
+    {
+        vulkanMaterial->uploadPerInstanceUniforms(ird.piubi);
+        return;
+    }
+
+    auto& pipeline = vulkanMaterial->getPipeline();
+    auto piub = pipeline.getPredefineUniformBlock(blink::VulkanPipeline::PredefineUniformBinding::PerInstanceUniformBinding);
+    if (!piub) return;
+
+    piub->prepareBuffer();
+    piub->setUniformMember("matLocalToWorld", ird.piu.matLocalToWorld);
+    piub->setUniformMember("matLocalToWorldInvT", ird.piu.matLocalToWorld);
+    piub->setUniformMember("matLocalToProjection", ird.piu.matLocalToProjection);
+    vulkanRenderData->piub->appendData(piub->getBufferData(), piub->getBufferSize(), &ird.piubi);
+
+    ird.cameraId = cameraId;
+}
 
 SceneRenderSystem::SceneRenderSystem(blink::IApp* app)
     : m_app(app)
@@ -78,7 +154,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
     }
 
     // collect camera data into pcus
-    std::vector<blink::PerCameraUniforms> pcus;
+    std::vector<PerCameraUniforms> pcus;
     {
         static auto cameraDataQuery =
             world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
@@ -87,7 +163,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
              &rdLight](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera)
             {
                 // setup perframe uniforms
-                blink::PerCameraUniforms pcu;
+                PerCameraUniforms pcu;
 
                 pcu.lightPos = rdLight.pos;
                 pcu.lightColorAndIntensity = glm::vec4(rdLight.color, rdLight.intensity);
@@ -101,6 +177,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 pcu.matWorldToCameraInvT = glm::transpose(glm::inverse(glm::mat3(pcu.matWorldToCamera)));
                 pcu.matCameraToProjection = camera.matCameraToProjection;
                 pcu.matWorldToProjection = pcu.matCameraToProjection * pcu.matWorldToCamera;
+                pcu.cameraId = 0;
                 pcus.push_back(pcu);
             });
     }
@@ -127,7 +204,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 auto geometry = model.geometry;
                 if (!geometry) return;
 
-                blink::PerInstanceUniforms piu;
+                PerInstanceUniforms piu;
                 piu.matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), pos.value) * glm::mat4_cast(rot.value);
                 piu.matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(piu.matLocalToWorld)));
 
@@ -170,11 +247,9 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
 
     // for each camera
     int cameraId = 1;
-    for (const auto& pcu : pcus)
+    for (auto& pcu : pcus)
     {
-        // bind per camera uniforms
         VkDescriptorBufferInfo pcubi{};
-        vulkanRenderData->pcub->appendData(&pcu, sizeof(pcu), &pcubi);
 
         // render features
         for (const auto& kvpFeature : renderFeatures)
@@ -191,28 +266,22 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
 
                     vulkanMaterial->bindPipeline(*vulkanRenderData->commandBuffer);
 
+                    uploadPerCameraUniforms(pcu, pcubi, cameraId, vulkanMaterial, vulkanRenderData);
+
                     // upload per material uniform
                     vulkanMaterial->uploadPerMaterialUniforms(*vulkanRenderData->pmub);
-                    vulkanMaterial->uploadPerCameraUniforms(pcubi);
 
-                    for (auto& rdo : kvp.second)
+                    for (auto& ird : kvp.second)
                     {
-                        if ((rdo.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+                        if ((ird.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
-                        // bind per instance uniform
-                        if (rdo.cameraId != cameraId)
-                        {
-                            rdo.cameraId = cameraId;
-                            rdo.piu.matLocalToProjection = pcu.matWorldToProjection * rdo.piu.matLocalToWorld;
-                            vulkanRenderData->piub->appendData(&rdo.piu, sizeof(rdo.piu), &rdo.piubi);
-                        }
-                        vulkanMaterial->uploadPerInstanceUniforms(rdo.piubi);
+                        uploadPerInstanceUniforms(ird, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
                         vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,
-                                                          (blink::VulkanGeometry*)rdo.geometry);
+                                                          (blink::VulkanGeometry*)ird.geometry);
 
-                        vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, rdo.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, ird.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
                 }
             }
@@ -223,30 +292,25 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
 
                 vulkanMaterial->bindPipeline(*vulkanRenderData->commandBuffer);
 
+                uploadPerCameraUniforms(pcu, pcubi, cameraId, vulkanMaterial, vulkanRenderData);
+
                 // upload per material uniform
                 vulkanMaterial->uploadPerMaterialUniforms(*vulkanRenderData->pmub);
-                vulkanMaterial->uploadPerCameraUniforms(pcubi);
 
+                // render mesh group by material
                 for (auto& kvp : renderDatas)
                 {
-                    for (auto& rdo : kvp.second)
+                    for (auto& ird : kvp.second)
                     {
-                        if ((rdo.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+                        if ((ird.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
-                        // bind per instance uniform
-                        if (rdo.cameraId != cameraId)
-                        {
-                            rdo.cameraId = cameraId;
-                            rdo.piu.matLocalToProjection = pcu.matWorldToProjection * rdo.piu.matLocalToWorld;
-                            vulkanRenderData->piub->appendData(&rdo.piu, sizeof(rdo.piu), &rdo.piubi);
-                        }
-                        vulkanMaterial->uploadPerInstanceUniforms(rdo.piubi);
+                        uploadPerInstanceUniforms(ird, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
                         vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,
-                                                          (blink::VulkanGeometry*)rdo.geometry);
+                                                          (blink::VulkanGeometry*)ird.geometry);
 
-                        vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, rdo.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, ird.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
                 }
             }

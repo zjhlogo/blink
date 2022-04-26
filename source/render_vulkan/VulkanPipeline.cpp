@@ -72,22 +72,24 @@ namespace blink
 
         // generate layout bindings
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-        generateDescriptorSetLayout(layoutBindings,
-                                    m_writeSets,
-                                    m_writeSetNames,
-                                    m_perCameraUniformIndex,
-                                    m_perInstanceUniformIndex,
-                                    fragmentShaderCode);
+        generateDescriptorSetLayout(layoutBindings, vertexShaderCode, VK_SHADER_STAGE_VERTEX_BIT);
+        generateDescriptorSetLayout(layoutBindings, fragmentShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        if (createDescriptorSetLayout(layoutBindings) == VK_NULL_HANDLE) return false;
-        if (createGraphicsPipeline(vertexShaderCode,
-                                   fragmentShaderCode,
-                                   vertexInputBindings,
-                                   vertexInputAttributes,
-                                   m_polygonMode,
-                                   m_topology)
-            == VK_NULL_HANDLE)
+        if (VK_NULL_HANDLE == createDescriptorSetLayout(layoutBindings))
+        {
             return false;
+        }
+
+        if (VK_NULL_HANDLE
+            == createGraphicsPipeline(vertexShaderCode,
+                                      fragmentShaderCode,
+                                      vertexInputBindings,
+                                      vertexInputAttributes,
+                                      m_polygonMode,
+                                      m_topology))
+        {
+            return false;
+        }
 
         return true;
     }
@@ -98,9 +100,9 @@ namespace blink
         destroyDescriptorSetLayout();
 
         m_writeSets.clear();
-        m_writeSetNames.clear();
-        m_perCameraUniformIndex = -1;
-        m_perInstanceUniformIndex = -1;
+        m_uniformWriteSetIndexMap.clear();
+        m_textureWriteSetIndexMap.clear();
+        m_uniformBlocks.clear();
         m_vertexAttrs = VertexAttrs::None;
     }
 
@@ -149,10 +151,28 @@ namespace blink
         return true;
     }
 
+    VulkanUniformBlock* VulkanPipeline::getPredefineUniformBlock(PredefineUniformBinding binding)
+    {
+        auto it = m_uniformBlocks.find(static_cast<uint32>(binding));
+        if (it == m_uniformBlocks.end()) return nullptr;
+
+        return &it->second;
+    }
+
+    int VulkanPipeline::getUniformWriteSetIndexFromBinding(PredefineUniformBinding binding)
+    {
+        auto it = m_uniformWriteSetIndexMap.find(static_cast<uint32>(binding));
+        if (it == m_uniformWriteSetIndexMap.end()) return -1;
+
+        return it->second;
+    }
+
     VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(
         const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
     {
         destroyDescriptorSetLayout();
+
+        if (layoutBindings.size() <= 0) return VK_NULL_HANDLE;
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -424,33 +444,35 @@ namespace blink
     }
 
     void VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
-                                                     std::vector<VkWriteDescriptorSet>& writeSets,
-                                                     std::vector<tstring>& writeSetNames,
-                                                     int& perCameraUniformIndex,
-                                                     int& perInstanceUniformIndex,
-                                                     const std::vector<uint8>& fragmentShaderCode)
+                                                     const std::vector<uint8>& shaderCode,
+                                                     uint32 shaderStageBits)
     {
-        layoutBindings.clear();
-        writeSets.clear();
-        writeSetNames.clear();
-        perCameraUniformIndex = -1;
-        perInstanceUniformIndex = -1;
-
-        spirv_cross::CompilerGLSL glsl((uint32_t*)fragmentShaderCode.data(), fragmentShaderCode.size() / sizeof(uint32_t));
+        spirv_cross::CompilerGLSL glsl((uint32_t*)shaderCode.data(), shaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
         // uniform buffers
         for (int i = 0; i < resources.uniform_buffers.size(); ++i)
         {
             const auto& uniform = resources.uniform_buffers[i];
+
+            auto type = glsl.get_type(uniform.type_id);
+            auto baseType = glsl.get_type(uniform.base_type_id);
+
             auto set = glsl.get_decoration(uniform.id, spv::DecorationDescriptorSet);
             auto binding = glsl.get_decoration(uniform.id, spv::DecorationBinding);
+
+            auto indexIt = m_uniformWriteSetIndexMap.find(binding);
+            if (indexIt != m_uniformWriteSetIndexMap.end())
+            {
+                layoutBindings[indexIt->second].stageFlags |= shaderStageBits;
+                continue;
+            }
 
             VkDescriptorSetLayoutBinding layoutBinding{};
             layoutBinding.binding = binding;
             layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             layoutBinding.descriptorCount = 1;
-            layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBinding.stageFlags = shaderStageBits;
             layoutBindings.push_back(layoutBinding);
 
             VkWriteDescriptorSet descriptorWrites{};
@@ -459,16 +481,50 @@ namespace blink
             descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites.descriptorCount = 1;
 
-            writeSets.push_back(descriptorWrites);
-            writeSetNames.push_back(uniform.name);
+            m_uniformWriteSetIndexMap.insert({binding, static_cast<int>(m_writeSets.size())});
+            m_writeSets.push_back(descriptorWrites);
 
-            if (uniform.name == "PerCameraUniforms")
+            auto pair = m_uniformBlocks.insert({binding, {}});
+            auto& uniformBlock = pair.first->second;
+            auto structSize = glsl.get_declared_struct_size(baseType);
+            for (int i = 0; i < baseType.member_types.size(); ++i)
             {
-                perCameraUniformIndex = i;
-            }
-            else if (uniform.name == "PerInstanceUniforms")
-            {
-                perInstanceUniformIndex = i;
+                auto memberTypeId = baseType.member_types[i];
+                auto memberType = glsl.get_type(memberTypeId);
+                auto memberName = glsl.get_member_name(uniform.base_type_id, i);
+                auto memberOffset = glsl.get_member_decoration(uniform.base_type_id, i, spv::DecorationOffset);
+                auto memberBaseType = memberType.basetype; // float, int ...
+                auto rowSize = memberType.vecsize;         // row
+                auto colSize = memberType.columns;         // col
+
+                if (memberBaseType == spirv_cross::SPIRType::BaseType::Int && rowSize == 1 && colSize == 1)
+                {
+                    uniformBlock.addUniformMember(memberName, UniformType::Int, memberOffset);
+                }
+                else if (memberBaseType == spirv_cross::SPIRType::BaseType::Float && rowSize == 1 && colSize == 1)
+                {
+                    uniformBlock.addUniformMember(memberName, UniformType::Float, memberOffset);
+                }
+                else if (memberBaseType == spirv_cross::SPIRType::BaseType::Float && rowSize == 2 && colSize == 1)
+                {
+                    uniformBlock.addUniformMember(memberName, UniformType::Vec2, memberOffset);
+                }
+                else if (memberBaseType == spirv_cross::SPIRType::BaseType::Float && rowSize == 3 && colSize == 1)
+                {
+                    uniformBlock.addUniformMember(memberName, UniformType::Vec3, memberOffset);
+                }
+                else if (memberBaseType == spirv_cross::SPIRType::BaseType::Float && rowSize == 4 && colSize == 1)
+                {
+                    uniformBlock.addUniformMember(memberName, UniformType::Vec4, memberOffset);
+                }
+                else if (memberBaseType == spirv_cross::SPIRType::BaseType::Float && rowSize == 3 && colSize == 3)
+                {
+                    uniformBlock.addUniformMember(memberName, UniformType::Mat3, memberOffset);
+                }
+                else if (memberBaseType == spirv_cross::SPIRType::BaseType::Float && rowSize == 4 && colSize == 4)
+                {
+                    uniformBlock.addUniformMember(memberName, UniformType::Mat4, memberOffset);
+                }
             }
         }
 
@@ -495,8 +551,8 @@ namespace blink
             imageDescriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             imageDescriptorWrites.descriptorCount = 1;
 
-            writeSets.push_back(imageDescriptorWrites);
-            writeSetNames.push_back(sample.name);
+            m_textureWriteSetIndexMap.insert({binding, static_cast<int>(m_writeSets.size())});
+            m_writeSets.push_back(imageDescriptorWrites);
         }
     }
 } // namespace blink

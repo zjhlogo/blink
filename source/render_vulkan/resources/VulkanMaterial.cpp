@@ -43,76 +43,106 @@ namespace blink
 
     bool VulkanMaterial::uploadPerCameraUniforms(const VkDescriptorBufferInfo& pcubi)
     {
-        int index = m_pipeline->getPerCameraUniformIndex();
-        m_descriptorInfoList[index].bufferInfo = pcubi;
-        return true;
+        int uniformWriteSetIndex = m_pipeline->getUniformWriteSetIndexFromBinding(
+            VulkanPipeline::PredefineUniformBinding::PerCameraUniformBinding);
+        if (uniformWriteSetIndex != -1)
+        {
+            m_descriptorInfoList[uniformWriteSetIndex].bufferInfo = pcubi;
+            return true;
+        }
+        return false;
     }
 
     bool VulkanMaterial::uploadPerMaterialUniforms(VulkanUniformBuffer& pmub)
     {
-        const auto& writeSets = m_pipeline->getWriteDescriptorSets();
-        const auto& writeSetNames = m_pipeline->getWriteDescriptorSetNames();
+        // upload material uniform block
+        auto uniformBlock = m_pipeline->getPredefineUniformBlock(
+            VulkanPipeline::PredefineUniformBinding::PerMaterialUniformBinding);
 
-        // check uniforms in shader and upload
-        for (std::size_t i = 0; i < writeSets.size(); ++i)
+        int uniformWriteSetIndex = m_pipeline->getUniformWriteSetIndexFromBinding(
+            VulkanPipeline::PredefineUniformBinding::PerMaterialUniformBinding);
+        if (uniformWriteSetIndex != -1)
         {
-            const auto& writeSet = writeSets[i];
-            auto& descriptorInfo = m_descriptorInfoList[i];
+            uniformBlock->prepareBuffer();
 
-            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+            int memberCount = uniformBlock->getMemberCount();
+            for (int i = 0; i < memberCount; ++i)
             {
-                // get uniform data
-                auto it = m_uniformMap.find(writeSetNames[i]);
-                if (it == m_uniformMap.end()) continue;
+                const auto& memberName = uniformBlock->getMemberName(i);
+                auto memberType = uniformBlock->getMemberType(i);
 
-                const auto& variable = it->second;
-                switch (variable.type)
+                switch (memberType)
                 {
                 case UniformType::Int:
-                    pmub.appendData(&variable.value.iValue, sizeof(variable.value.iValue), &m_descriptorInfoList[i].bufferInfo);
-                    break;
-                case UniformType::Float:
-                    pmub.appendData(&variable.value.fValue, sizeof(variable.value.fValue), &m_descriptorInfoList[i].bufferInfo);
-                    break;
-                case UniformType::Vec2:
-                    pmub.appendData(&variable.value.vec2Value,
-                                    sizeof(variable.value.vec2Value),
-                                    &m_descriptorInfoList[i].bufferInfo);
-                    break;
-                case UniformType::Vec3:
-                    pmub.appendData(&variable.value.vec3Value,
-                                    sizeof(variable.value.vec3Value),
-                                    &m_descriptorInfoList[i].bufferInfo);
-                    break;
-                case UniformType::Vec4:
-                    pmub.appendData(&variable.value.vec4Value,
-                                    sizeof(variable.value.vec4Value),
-                                    &m_descriptorInfoList[i].bufferInfo);
-                    break;
-                case UniformType::Mat3:
-                    pmub.appendData(&variable.value.mat3Value,
-                                    sizeof(variable.value.mat3Value),
-                                    &m_descriptorInfoList[i].bufferInfo);
-                    break;
-                case UniformType::Mat4:
-                    pmub.appendData(&variable.value.mat4Value,
-                                    sizeof(variable.value.mat4Value),
-                                    &m_descriptorInfoList[i].bufferInfo);
-                    break;
+                {
+                    int value{};
+                    getInt(value, memberName);
+                    uniformBlock->setUniformMember(i, value);
+                }
+                break;
+                case blink::UniformType::Float:
+                {
+                    float value{};
+                    getFloat(value, memberName);
+                    uniformBlock->setUniformMember(i, value);
+                }
+                break;
+                case blink::UniformType::Vec2:
+                {
+                    glm::vec2 value{};
+                    getVec2(value, memberName);
+                    uniformBlock->setUniformMember(i, value);
+                }
+                break;
+                case blink::UniformType::Vec3:
+                {
+                    glm::vec3 value{};
+                    getVec3(value, memberName);
+                    uniformBlock->setUniformMember(i, value);
+                }
+                break;
+                case blink::UniformType::Vec4:
+                {
+                    glm::vec4 value{};
+                    getVec4(value, memberName);
+                    uniformBlock->setUniformMember(i, value);
+                }
+                break;
+                case blink::UniformType::Mat3:
+                {
+                    glm::mat3 value{};
+                    getMat3(value, memberName);
+                    uniformBlock->setUniformMember(i, value);
+                }
+                break;
+                case blink::UniformType::Mat4:
+                {
+                    glm::mat4 value{};
+                    getMat4(value, memberName);
+                    uniformBlock->setUniformMember(i, value);
+                }
+                break;
                 }
             }
-            else if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-            {
-                // get texture
-                auto it = m_textureInfoMap.find(writeSetNames[i]);
-                if (it == m_textureInfoMap.end()) continue;
 
-                const auto& texInfo = it->second;
-                auto& imageInfo = m_descriptorInfoList[i].imageInfo;
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = texInfo.texture->getTextureImage()->getImageView();
-                imageInfo.sampler = texInfo.texture->getTextureSampler();
-            }
+            pmub.appendData(uniformBlock->getBufferData(),
+                            uniformBlock->getBufferSize(),
+                            &m_descriptorInfoList[uniformWriteSetIndex].bufferInfo);
+        }
+
+        // upload texture sampler uniforms
+        const auto& textureWriteSetIndexMap = m_pipeline->getTextureWriteSetIndexMap();
+        for (auto kvp : textureWriteSetIndexMap)
+        {
+            auto it = m_textureInfoMap.find(kvp.first);
+            if (it == m_textureInfoMap.end()) continue;
+            const auto& texInfo = it->second;
+
+            auto& descriptorInfo = m_descriptorInfoList[kvp.second];
+            auto& imageInfo = descriptorInfo.imageInfo;
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = texInfo.texture->getTextureImage()->getImageView();
+            imageInfo.sampler = texInfo.texture->getTextureSampler();
         }
 
         return true;
@@ -120,9 +150,14 @@ namespace blink
 
     bool VulkanMaterial::uploadPerInstanceUniforms(const VkDescriptorBufferInfo& piubi)
     {
-        int index = m_pipeline->getPerInstanceUniformIndex();
-        m_descriptorInfoList[index].bufferInfo = piubi;
-        return true;
+        int uniformWriteSetIndex = m_pipeline->getUniformWriteSetIndexFromBinding(
+            VulkanPipeline::PredefineUniformBinding::PerInstanceUniformBinding);
+        if (uniformWriteSetIndex != -1)
+        {
+            m_descriptorInfoList[uniformWriteSetIndex].bufferInfo = piubi;
+            return true;
+        }
+        return false;
     }
 
     bool VulkanMaterial::updateBufferInfos(VulkanCommandBuffer& commandBuffer, VulkanGeometry* geometry)
@@ -172,8 +207,7 @@ namespace blink
             return false;
         }
 
-        const auto& writeSets = m_pipeline->getWriteDescriptorSets();
-        m_descriptorInfoList.resize(writeSets.size());
+        m_descriptorInfoList.resize(m_pipeline->getWriteSetCount());
 
         return true;
     }
@@ -344,10 +378,10 @@ namespace blink
                 {
                     auto jtexture = jtextures[i];
                     TextureInfo texInfo;
-                    texInfo.name = jtexture["name"].get<tstring>();
+                    texInfo.binding = jtexture["binding"].get<int>();
                     texInfo.path = jtexture["path"].get<tstring>();
                     texInfo.texture = nullptr;
-                    m_textureInfoMap.insert({texInfo.name, texInfo});
+                    m_textureInfoMap.insert({texInfo.binding, texInfo});
                 }
             }
         }

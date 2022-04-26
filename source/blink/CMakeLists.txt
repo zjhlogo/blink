@@ -22,9 +22,8 @@ geometries_builder/TetrahedronBuilder.cpp
 geometries_builder/TetrahedronBuilder.h
 systems/DebugLineSystem.cpp
 systems/DebugLineSystem.h
-type/RenderLayers.h
-type/RenderOrders.h
-type/RenderTypes.h
+types/RenderLayers.h
+types/RenderOrders.h
 app.cpp
 app.h
 blink.cpp
