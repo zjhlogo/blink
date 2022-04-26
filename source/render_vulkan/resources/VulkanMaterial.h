@@ -40,20 +40,17 @@ namespace blink
         bool create(const tstring& filePath);
         void destroy();
 
-        bool loadConfigFromFile(const tstring& filePath);
-        bool loadTextures();
-
         virtual bool recreate() override;
+        virtual bool setUniform(const tstring& memberName, UniformType type, const void* data) override;
 
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
-
-        bool uploadPerCameraUniforms(const VkDescriptorBufferInfo& pcubi);
-        bool uploadPerMaterialUniforms(VulkanUniformBuffer& pmub);
-        bool uploadPerInstanceUniforms(const VkDescriptorBufferInfo& piubi);
-
+        bool uploadUniformDescriptorBufferInfo(UniformBinding binding, const VkDescriptorBufferInfo& bufferInfo);
         bool updateBufferInfos(VulkanCommandBuffer& commandBuffer, VulkanGeometry* geometry);
 
         VulkanPipeline& getPipeline() const { return *m_pipeline; };
+
+    private:
+        bool loadTextures();
 
     private:
         VulkanLogicalDevice& m_logicalDevice;

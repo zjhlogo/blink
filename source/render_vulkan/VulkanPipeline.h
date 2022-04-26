@@ -24,13 +24,6 @@ namespace blink
     class VulkanPipeline
     {
     public:
-        enum class PredefineUniformBinding
-        {
-            PerCameraUniformBinding = 0,
-            PerInstanceUniformBinding,
-            PerMaterialUniformBinding,
-        };
-
         union DescriptorInfo
         {
             VkDescriptorImageInfo imageInfo;
@@ -58,8 +51,8 @@ namespace blink
         VertexAttrs getVertexAttrFlags() const { return m_vertexAttrs; };
 
         std::size_t getWriteSetCount() const { return m_writeSets.size(); };
-        VulkanUniformBlock* getPredefineUniformBlock(PredefineUniformBinding binding);
-        int getUniformWriteSetIndexFromBinding(PredefineUniformBinding binding);
+        VulkanUniformBlock* getUniformBlock(UniformBinding binding);
+        int getUniformWriteSetIndexFromBinding(UniformBinding binding);
         const std::unordered_map<uint32, int>& getUniformWriteSetIndexMap() const { return m_uniformWriteSetIndexMap; };
         const std::unordered_map<uint32, int>& getTextureWriteSetIndexMap() const { return m_textureWriteSetIndexMap; };
 

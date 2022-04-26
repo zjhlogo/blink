@@ -34,25 +34,28 @@ namespace blink
             return false;
         }
 
+        m_nameToIndexMap.insert({name, static_cast<int>(m_memberInfoList.size())});
+
         // auto offset = calculateOffset(type);
         m_uniformStructSize = offset + calculateSize(type);
         m_memberInfoList.push_back({name, type, offset});
+
         return true;
     }
 
-    const tstring& VulkanUniformBlock::getMemberName(int memberIndex)
+    const tstring& VulkanUniformBlock::getMemberName(int memberIndex) const
     {
         //
         return m_memberInfoList[memberIndex].name;
     }
 
-    UniformType VulkanUniformBlock::getMemberType(int memberIndex)
+    UniformType VulkanUniformBlock::getMemberType(int memberIndex) const
     {
         //
         return m_memberInfoList[memberIndex].type;
     }
 
-    uint32 VulkanUniformBlock::calculateSize(UniformType type)
+    uint32 VulkanUniformBlock::calculateSize(UniformType type) const
     {
         static const uint32 s_sizeMap[static_cast<int>(UniformType::NumTypes)] = {
             0,  // None
@@ -68,7 +71,7 @@ namespace blink
         return s_sizeMap[static_cast<int>(type)];
     }
 
-    uint32 VulkanUniformBlock::calculateOffset(UniformType type)
+    uint32 VulkanUniformBlock::calculateOffset(UniformType type) const
     {
         static const uint32 s_offsetMap[static_cast<int>(UniformType::NumTypes)] = {
             0,  // None

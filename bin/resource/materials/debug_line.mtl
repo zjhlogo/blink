@@ -3,5 +3,13 @@
     "fragment_shader" : "resource/shaders/debug_line.frag.spv",
     
     "wireframe" : true,
-    "line_list" : true
+    "line_list" : true,
+
+        "uniforms" : [
+        {
+            "name" : "color",
+            "type" : "vec3",
+            "value" : [1, 1, 1]
+        }
+    ]
 }

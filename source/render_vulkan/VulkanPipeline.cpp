@@ -151,7 +151,7 @@ namespace blink
         return true;
     }
 
-    VulkanUniformBlock* VulkanPipeline::getPredefineUniformBlock(PredefineUniformBinding binding)
+    VulkanUniformBlock* VulkanPipeline::getUniformBlock(UniformBinding binding)
     {
         auto it = m_uniformBlocks.find(static_cast<uint32>(binding));
         if (it == m_uniformBlocks.end()) return nullptr;
@@ -159,7 +159,7 @@ namespace blink
         return &it->second;
     }
 
-    int VulkanPipeline::getUniformWriteSetIndexFromBinding(PredefineUniformBinding binding)
+    int VulkanPipeline::getUniformWriteSetIndexFromBinding(UniformBinding binding)
     {
         auto it = m_uniformWriteSetIndexMap.find(static_cast<uint32>(binding));
         if (it == m_uniformWriteSetIndexMap.end()) return -1;

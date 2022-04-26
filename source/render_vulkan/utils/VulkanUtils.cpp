@@ -12,7 +12,8 @@
 
 namespace blink
 {
-    void VulkanUtils::enumerateInstanceExtensionProperties(std::vector<VkExtensionProperties>& propertiesOut, const char* layerName /*= nullptr*/)
+    void VulkanUtils::enumerateInstanceExtensionProperties(std::vector<VkExtensionProperties>& propertiesOut,
+                                                           const char* layerName /*= nullptr*/)
     {
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, nullptr);
@@ -20,7 +21,8 @@ namespace blink
         vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, propertiesOut.data());
     }
 
-    bool VulkanUtils::checkExtensionsSupported(const std::vector<VkExtensionProperties>& properties, const std::vector<const char*>& requiredExtensions)
+    bool VulkanUtils::checkExtensionsSupported(const std::vector<VkExtensionProperties>& properties,
+                                               const std::vector<const char*>& requiredExtensions)
     {
         for (const auto& requiredExtension : requiredExtensions)
         {
@@ -47,7 +49,8 @@ namespace blink
         vkEnumerateInstanceLayerProperties(&propertyCount, propertiesOut.data());
     }
 
-    bool VulkanUtils::checkValidationLayerSupported(const std::vector<VkLayerProperties>& properties, const std::vector<const char*>& requiredLayers)
+    bool VulkanUtils::checkValidationLayerSupported(const std::vector<VkLayerProperties>& properties,
+                                                    const std::vector<const char*>& requiredLayers)
     {
         for (const auto& requireLayer : requiredLayers)
         {
@@ -74,7 +77,8 @@ namespace blink
         vkEnumeratePhysicalDevices(instance, &deviceCount, devicesOut.data());
     }
 
-    void VulkanUtils::getPhysicalDeviceQueueFamilyProperties(std::vector<VkQueueFamilyProperties>& propertiesOut, VkPhysicalDevice device)
+    void VulkanUtils::getPhysicalDeviceQueueFamilyProperties(std::vector<VkQueueFamilyProperties>& propertiesOut,
+                                                             VkPhysicalDevice device)
     {
         uint32_t propertyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &propertyCount, nullptr);
@@ -82,7 +86,9 @@ namespace blink
         vkGetPhysicalDeviceQueueFamilyProperties(device, &propertyCount, propertiesOut.data());
     }
 
-    void VulkanUtils::getSurfaceFormats(std::vector<VkSurfaceFormatKHR>& formatsOut, VkPhysicalDevice device, VkSurfaceKHR surface)
+    void VulkanUtils::getSurfaceFormats(std::vector<VkSurfaceFormatKHR>& formatsOut,
+                                        VkPhysicalDevice device,
+                                        VkSurfaceKHR surface)
     {
         uint32 formatCount = 0;
         vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
@@ -90,7 +96,9 @@ namespace blink
         vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, formatsOut.data());
     }
 
-    void VulkanUtils::getSurfacePresentModes(std::vector<VkPresentModeKHR>& presentModesOut, VkPhysicalDevice device, VkSurfaceKHR surface)
+    void VulkanUtils::getSurfacePresentModes(std::vector<VkPresentModeKHR>& presentModesOut,
+                                             VkPhysicalDevice device,
+                                             VkSurfaceKHR surface)
     {
         uint32_t presentCount = 0;
         vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentCount, nullptr);
@@ -132,7 +140,9 @@ namespace blink
         }
     }
 
-    void VulkanUtils::destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* allocator)
+    void VulkanUtils::destroyDebugUtilsMessengerEXT(VkInstance instance,
+                                                    VkDebugUtilsMessengerEXT debugMessenger,
+                                                    const VkAllocationCallbacks* allocator)
     {
         auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr)
@@ -201,7 +211,9 @@ namespace blink
         return false;
     }
 
-    uint32_t VulkanUtils::findMemoryType(const VkPhysicalDeviceMemoryProperties& memProperties, uint32_t typeFilter, VkMemoryPropertyFlags properties)
+    uint32_t VulkanUtils::findMemoryType(const VkPhysicalDeviceMemoryProperties& memProperties,
+                                         uint32_t typeFilter,
+                                         VkMemoryPropertyFlags properties)
     {
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
         {

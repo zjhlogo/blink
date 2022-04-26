@@ -9,7 +9,6 @@
 #pragma once
 
 #include <core/types/UniformTypes.h>
-#include <foundation/BaseTypesGlm.h>
 
 #include <unordered_map>
 #include <vector>
@@ -46,6 +45,8 @@ namespace blink
         template <typename T> bool setUniformMember(int memberIndex, const T& value)
         {
             const auto& memberInfo = m_memberInfoList[memberIndex];
+            if (getUniformType<T>() != memberInfo.type) return false;
+
             T* pData = (T*)(m_bufferData.data() + memberInfo.offset);
             *pData = value;
             return true;
@@ -54,6 +55,8 @@ namespace blink
         template <> bool setUniformMember(int memberIndex, const glm::mat3& value)
         {
             const auto& memberInfo = m_memberInfoList[memberIndex];
+            if (UniformType::Mat3 != memberInfo.type) return false;
+
             glm::vec3* pData1 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset);
             glm::vec3* pData2 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset + 16);
             glm::vec3* pData3 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset + 32);
@@ -64,21 +67,17 @@ namespace blink
             return true;
         }
 
-        const tstring& getMemberName(int memberIndex);
-        UniformType getMemberType(int memberIndex);
+        const tstring& getMemberName(int memberIndex) const;
+        UniformType getMemberType(int memberIndex) const;
         int getMemberCount() const { return static_cast<int>(m_memberInfoList.size()); };
         const void* getBufferData() const { return m_bufferData.data(); };
         uint32 getBufferSize() const { return m_uniformStructSize; };
 
-        void setBinding(uint32 binding) { m_binding = binding; };
-        uint32 getBinding() const { return m_binding; };
+    private:
+        uint32 calculateSize(UniformType type) const;
+        uint32 calculateOffset(UniformType type) const;
 
     private:
-        uint32 calculateSize(UniformType type);
-        uint32 calculateOffset(UniformType type);
-
-    private:
-        uint32 m_binding{};
         uint32 m_uniformStructSize{};
 
         std::vector<UniformMemberInfo> m_memberInfoList;
