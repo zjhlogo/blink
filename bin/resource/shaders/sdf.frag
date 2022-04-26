@@ -7,5 +7,7 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(gl_FragCoord.x/fu.screenResolution.x, gl_FragCoord.y/fu.screenResolution.y, gl_FragCoord.z, 1.0);
+    vec2 st = (gl_FragCoord.xy * 2.0 - fu.screenResolution) / fu.screenResolution.y;
+    st.y = -st.y;
+    outColor = vec4(st.x, st.y, 0, 1.0);
 }
