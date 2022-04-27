@@ -1,8 +1,8 @@
 
 /*********************************************************************
  * \file   LineArtEntityCreationSystem.h
- * \brief  
- * 
+ * \brief
+ *
  * \author zjhlogo
  * \date   04/24/2022
  *********************************************************************/
@@ -16,4 +16,8 @@ class LineArtEntityCreationSystem : public blink::ILogicalSystem
 public:
     virtual bool initialize() override;
     virtual void terminate() override;
+    virtual void framePostUpdate() override;
+
+private:
+    blink::IMaterial* m_material{};
 };

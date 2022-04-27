@@ -20,11 +20,17 @@ namespace blink
         virtual void release() override;
         virtual bool recreate() = 0;
         virtual bool setUniform(const tstring& memberName, UniformType type, const void* data) = 0;
+        virtual bool getUniform(const tstring& memberName, UniformType type, void* dataOut) = 0;
 
         template <typename T> bool setUniform(const tstring& memberName, const T& value)
         {
             auto type = getUniformType<T>();
             return setUniform(memberName, type, &value);
+        }
+
+        template <typename T> const T& getUniform(const tstring& memberName)
+        {
+
         }
     };
 } // namespace blink

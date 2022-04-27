@@ -41,8 +41,8 @@ bool LineArtEntityCreationSystem::initialize()
         auto geometry = builder.size(surfaceSize.x, surfaceSize.y)
                             .orient(glm::angleAxis(glm::half_pi<float>(), glm::right()))
                             .build(false, false);
-        auto material = resModule->createMaterial("resource/materials/sdf.mtl");
-        plane.set<blink::StaticModel>({geometry, material});
+        m_material = resModule->createMaterial("resource/materials/sdf.mtl");
+        plane.set<blink::StaticModel>({geometry, m_material});
     }
 
     world.entity().set<blink::RenderFeature>({blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
@@ -53,4 +53,11 @@ bool LineArtEntityCreationSystem::initialize()
 void LineArtEntityCreationSystem::terminate()
 {
     //
+}
+
+void LineArtEntityCreationSystem::framePostUpdate()
+{
+    auto& world = m_ecsWorld->getWorld();
+    auto matRot4 = glm::rotate(glm::identity<glm::mat4>(), 1.0f * world.time(), glm::up());
+    m_material->setUniform("matRotate", glm::mat3(matRot4));
 }

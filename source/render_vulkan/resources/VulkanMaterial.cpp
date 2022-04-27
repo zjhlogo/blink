@@ -267,6 +267,7 @@ namespace blink
     bool VulkanMaterial::setUniform(const tstring& memberName, UniformType type, const void* data)
     {
         auto uniformBlock = m_pipeline->getUniformBlock(UniformBinding::Material);
+        uniformBlock->prepareBuffer();
 
         switch (type)
         {
