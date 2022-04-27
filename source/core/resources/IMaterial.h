@@ -28,7 +28,7 @@ namespace blink
             return setUniform(memberName, type, &value);
         }
 
-        template <typename T> const T& getUniform(const tstring& memberName)
+        template <typename T> bool getUniform(const tstring& memberName)
         {
 
         }

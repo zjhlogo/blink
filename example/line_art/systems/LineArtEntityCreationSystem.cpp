@@ -12,6 +12,7 @@
 #include <core/components/Components.h>
 #include <core/modules/IRenderModule.h>
 #include <core/modules/IResModule.h>
+#include <imgui/imgui.h>
 
 bool LineArtEntityCreationSystem::initialize()
 {
@@ -60,4 +61,26 @@ void LineArtEntityCreationSystem::framePostUpdate()
     auto& world = m_ecsWorld->getWorld();
     auto matRot4 = glm::rotate(glm::identity<glm::mat4>(), 1.0f * world.time(), glm::up());
     m_material->setUniform("matRotate", glm::mat3(matRot4));
+}
+
+void LineArtEntityCreationSystem::renderMaterialPropertyUi()
+{
+    if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        auto roughness = m_material->get
+        if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
+        {
+            material->setRoughness(roughness);
+        }
+        auto metallic = material->getMetallic();
+        if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
+        {
+            material->setMetallic(metallic);
+        }
+        glm::vec3 color = material->getColor();
+        if (ImGui::ColorEdit3("color2", (float*)&color))
+        {
+            material->setColor(color);
+        }
+    }
 }

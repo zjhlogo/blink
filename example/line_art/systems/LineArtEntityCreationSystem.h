@@ -18,6 +18,8 @@ public:
     virtual void terminate() override;
     virtual void framePostUpdate() override;
 
+    void renderMaterialPropertyUi();
+
 private:
     blink::IMaterial* m_material{};
 };
