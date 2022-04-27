@@ -75,7 +75,7 @@ vec3 calcRayDir(float halfFov)
 
 void main()
 {
-    vec3 dir = calcRayDir(14.0);
+    vec3 dir = calcRayDir(mu.fov);
     outColor = vec4(dir.x, dir.y, -dir.z, 1);
     // vec3 eye = vec3(0.0, 0.0, 5.0);
     

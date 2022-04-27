@@ -74,11 +74,11 @@ void uploadFrameUniforms(FrameRenderData& frd, blink::VulkanMaterial* vulkanMate
 
     // upload per frame uniforms
     uniformBlock->prepareBuffer();
-    uniformBlock->setUniformMember("lightPos", frd.lightPos);
-    uniformBlock->setUniformMember("lightColor", frd.lightColor);
-    uniformBlock->setUniformMember("screenResolution", frd.screenResolution);
-    uniformBlock->setUniformMember("time", frd.time);
-    uniformBlock->setUniformMember("lightIntensity", frd.lightIntensity);
+    uniformBlock->setUniformMember("lightPos", &frd.lightPos);
+    uniformBlock->setUniformMember("lightColor", &frd.lightColor);
+    uniformBlock->setUniformMember("screenResolution", &frd.screenResolution);
+    uniformBlock->setUniformMember("time", &frd.time);
+    uniformBlock->setUniformMember("lightIntensity", &frd.lightIntensity);
     vulkanRenderData->fub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &frd.fubi);
     vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Frame, frd.fubi);
 
@@ -108,12 +108,12 @@ void uploadCameraUniforms(CameraRenderData& crd,
 
     // upload per camera uniforms
     uniformBlock->prepareBuffer();
-    uniformBlock->setUniformMember("matWorldToCamera", matWorldToCamera);
-    uniformBlock->setUniformMember("matCameraToProjection", crd.matCameraToProjection);
-    uniformBlock->setUniformMember("matWorldToProjection", crd.matWorldToProjection);
-    uniformBlock->setUniformMember("matWorldToCameraInvT", matWorldToCameraInvT);
-    uniformBlock->setUniformMember("cameraPos", crd.cameraPos);
-    uniformBlock->setUniformMember("cameraDir", cameraDir);
+    uniformBlock->setUniformMember("matWorldToCamera", &matWorldToCamera);
+    uniformBlock->setUniformMember("matCameraToProjection", &crd.matCameraToProjection);
+    uniformBlock->setUniformMember("matWorldToProjection", &crd.matWorldToProjection);
+    uniformBlock->setUniformMember("matWorldToCameraInvT", &matWorldToCameraInvT);
+    uniformBlock->setUniformMember("cameraPos", &crd.cameraPos);
+    uniformBlock->setUniformMember("cameraDir", &cameraDir);
     vulkanRenderData->fub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &crd.cubi);
     vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Camera, crd.cubi);
 
@@ -142,9 +142,9 @@ void uploadEntityUniforms(EntityRenderData& erd,
     auto matLocalToProjection = pcu.matWorldToProjection * matLocalToWorld;
 
     uniformBlock->prepareBuffer();
-    uniformBlock->setUniformMember("matLocalToWorld", matLocalToWorld);
-    uniformBlock->setUniformMember("matLocalToWorldInvT", matLocalToWorldInvT);
-    uniformBlock->setUniformMember("matLocalToProjection", matLocalToProjection);
+    uniformBlock->setUniformMember("matLocalToWorld", &matLocalToWorld);
+    uniformBlock->setUniformMember("matLocalToWorldInvT", &matLocalToWorldInvT);
+    uniformBlock->setUniformMember("matLocalToProjection", &matLocalToProjection);
     vulkanRenderData->eub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &erd.eubi);
     vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Entity, erd.eubi);
 

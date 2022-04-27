@@ -31,10 +31,11 @@ namespace blink
 
         void reset();
         void prepareBuffer();
+        bool isReady();
 
         bool addUniformMember(const tstring& name, UniformType type, uint32 offset);
 
-        template <typename T> bool setUniformMember(const tstring& memberName, const T& value)
+        template <typename T> bool setUniformMember(const tstring& memberName, const T* value)
         {
             auto it = m_nameToIndexMap.find(memberName);
             if (it == m_nameToIndexMap.end()) return false;
@@ -42,17 +43,17 @@ namespace blink
             return setUniformMember(it->second, value);
         }
 
-        template <typename T> bool setUniformMember(int memberIndex, const T& value)
+        template <typename T> bool setUniformMember(int memberIndex, const T* value)
         {
             const auto& memberInfo = m_memberInfoList[memberIndex];
             if (getUniformType<T>() != memberInfo.type) return false;
 
             T* pData = (T*)(m_bufferData.data() + memberInfo.offset);
-            *pData = value;
+            *pData = *value;
             return true;
         }
 
-        template <> bool setUniformMember(int memberIndex, const glm::mat3& value)
+        template <> bool setUniformMember(int memberIndex, const glm::mat3* value)
         {
             const auto& memberInfo = m_memberInfoList[memberIndex];
             if (UniformType::Mat3 != memberInfo.type) return false;
@@ -61,9 +62,38 @@ namespace blink
             glm::vec3* pData2 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset + 16);
             glm::vec3* pData3 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset + 32);
 
-            *pData1 = value[0];
-            *pData2 = value[1];
-            *pData3 = value[2];
+            *pData1 = (*value)[0];
+            *pData2 = (*value)[1];
+            *pData3 = (*value)[2];
+            return true;
+        }
+
+        template <typename T> bool getUniformMember(T* valueOut, const tstring& memberName)
+        {
+            auto it = m_nameToIndexMap.find(memberName);
+            if (it == m_nameToIndexMap.end()) return false;
+
+            return getUniformMember(valueOut, it->second);
+        }
+
+        template <typename T> bool getUniformMember(T* valueOut, int memberIndex)
+        {
+            const auto& memberInfo = m_memberInfoList[memberIndex];
+            if (getUniformType<T>() != memberInfo.type) return false;
+
+            *valueOut = *(T*)(m_bufferData.data() + memberInfo.offset);
+            return true;
+        }
+
+        template <> bool getUniformMember(glm::mat3* valueOut, int memberIndex)
+        {
+            const auto& memberInfo = m_memberInfoList[memberIndex];
+            if (UniformType::Mat3 != memberInfo.type) return false;
+
+            (*valueOut)[0] = *(glm::vec3*)(m_bufferData.data() + memberInfo.offset);
+            (*valueOut)[1] = *(glm::vec3*)(m_bufferData.data() + memberInfo.offset + 16);
+            (*valueOut)[2] = *(glm::vec3*)(m_bufferData.data() + memberInfo.offset + 32);
+
             return true;
         }
 

@@ -41,13 +41,16 @@ namespace blink
         void destroy();
 
         virtual bool recreate() override;
-        virtual bool setUniform(const tstring& memberName, UniformType type, const void* data) override;
 
         void bindPipeline(VulkanCommandBuffer& commandBuffer);
         bool uploadUniformDescriptorBufferInfo(UniformBinding binding, const VkDescriptorBufferInfo& bufferInfo);
         bool updateBufferInfos(VulkanCommandBuffer& commandBuffer, VulkanGeometry* geometry);
 
         VulkanPipeline& getPipeline() const { return *m_pipeline; };
+
+    protected:
+        virtual bool setUniform(const tstring& memberName, UniformType type, const void* data) override;
+        virtual bool getUniform(void* dataOut, const tstring& memberName, UniformType type) override;
 
     private:
         bool loadTextures();

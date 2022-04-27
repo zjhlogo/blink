@@ -151,11 +151,13 @@ namespace blink
                         auto type = juniform["type"].get<tstring>();
                         if (type == "int")
                         {
-                            uniformBlock->setUniformMember(juniform["name"].get<tstring>(), juniform["value"].get<int>());
+                            auto value = juniform["value"].get<int>();
+                            uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
                         }
                         else if (type == "float")
                         {
-                            uniformBlock->setUniformMember(juniform["name"].get<tstring>(), juniform["value"].get<float>());
+                            auto value = juniform["value"].get<float>();
+                            uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
                         }
                         else if (type == "vec2")
                         {
@@ -163,7 +165,7 @@ namespace blink
                             if (jvec2.is_array() && jvec2.size() == 2)
                             {
                                 auto value = glm::vec2(jvec2[0].get<float>(), jvec2[1].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), value);
+                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "vec3")
@@ -172,7 +174,7 @@ namespace blink
                             if (jvec3.is_array() && jvec3.size() == 3)
                             {
                                 auto value = glm::vec3(jvec3[0].get<float>(), jvec3[1].get<float>(), jvec3[2].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), value);
+                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "vec4")
@@ -184,7 +186,7 @@ namespace blink
                                                        jvec4[1].get<float>(),
                                                        jvec4[2].get<float>(),
                                                        jvec4[3].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), value);
+                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "mat3")
@@ -201,7 +203,7 @@ namespace blink
                                                        jmat3[6].get<float>(),
                                                        jmat3[7].get<float>(),
                                                        jmat3[8].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), value);
+                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "mat4")
@@ -225,7 +227,7 @@ namespace blink
                                                        jmat4[13].get<float>(),
                                                        jmat4[14].get<float>(),
                                                        jmat4[15].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), value);
+                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
                             }
                         }
                     }
@@ -272,25 +274,58 @@ namespace blink
         switch (type)
         {
         case blink::UniformType::Int:
-            return uniformBlock->setUniformMember(memberName, *(int*)data);
+            return uniformBlock->setUniformMember(memberName, (int*)data);
             break;
         case blink::UniformType::Float:
-            return uniformBlock->setUniformMember(memberName, *(float*)data);
+            return uniformBlock->setUniformMember(memberName, (float*)data);
             break;
         case blink::UniformType::Vec2:
-            return uniformBlock->setUniformMember(memberName, *(glm::vec2*)data);
+            return uniformBlock->setUniformMember(memberName, (glm::vec2*)data);
             break;
         case blink::UniformType::Vec3:
-            return uniformBlock->setUniformMember(memberName, *(glm::vec3*)data);
+            return uniformBlock->setUniformMember(memberName, (glm::vec3*)data);
             break;
         case blink::UniformType::Vec4:
-            return uniformBlock->setUniformMember(memberName, *(glm::vec4*)data);
+            return uniformBlock->setUniformMember(memberName, (glm::vec4*)data);
             break;
         case blink::UniformType::Mat3:
-            return uniformBlock->setUniformMember(memberName, *(glm::mat3*)data);
+            return uniformBlock->setUniformMember(memberName, (glm::mat3*)data);
             break;
         case blink::UniformType::Mat4:
-            return uniformBlock->setUniformMember(memberName, *(glm::mat4*)data);
+            return uniformBlock->setUniformMember(memberName, (glm::mat4*)data);
+            break;
+        }
+
+        return false;
+    }
+
+    bool VulkanMaterial::getUniform(void* dataOut, const tstring& memberName, UniformType type)
+    {
+        auto uniformBlock = m_pipeline->getUniformBlock(UniformBinding::Material);
+        if (!uniformBlock->isReady()) return false;
+
+        switch (type)
+        {
+        case blink::UniformType::Int:
+            return uniformBlock->getUniformMember((int*)dataOut, memberName);
+            break;
+        case blink::UniformType::Float:
+            return uniformBlock->getUniformMember((float*)dataOut, memberName);
+            break;
+        case blink::UniformType::Vec2:
+            return uniformBlock->getUniformMember((glm::vec2*)dataOut, memberName);
+            break;
+        case blink::UniformType::Vec3:
+            return uniformBlock->getUniformMember((glm::vec3*)dataOut, memberName);
+            break;
+        case blink::UniformType::Vec4:
+            return uniformBlock->getUniformMember((glm::vec4*)dataOut, memberName);
+            break;
+        case blink::UniformType::Mat3:
+            return uniformBlock->getUniformMember((glm::mat3*)dataOut, memberName);
+            break;
+        case blink::UniformType::Mat4:
+            return uniformBlock->getUniformMember((glm::mat4*)dataOut, memberName);
             break;
         }
 

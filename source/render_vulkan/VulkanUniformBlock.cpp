@@ -25,6 +25,12 @@ namespace blink
         }
     }
 
+    bool VulkanUniformBlock::isReady()
+    {
+        //
+        return !m_bufferData.empty();
+    }
+
     bool VulkanUniformBlock::addUniformMember(const tstring& name, UniformType type, uint32 offset)
     {
         auto it = m_nameToIndexMap.find(name);

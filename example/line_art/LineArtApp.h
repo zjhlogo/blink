@@ -9,8 +9,9 @@
 #pragma once
 
 #include <blink/app.h>
+#include <guis/IGuiWindow.h>
 
-class LineArtApp : public blink::IApp
+class LineArtApp : public blink::IApp, public IGuiWindow
 {
 public:
     LineArtApp() = default;
@@ -18,5 +19,7 @@ public:
 
     virtual bool initialize() override;
     virtual void terminate() override;
+
+    virtual void renderUi() override;
 
 };

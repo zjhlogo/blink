@@ -43,6 +43,7 @@ bool LineArtEntityCreationSystem::initialize()
                             .orient(glm::angleAxis(glm::half_pi<float>(), glm::right()))
                             .build(false, false);
         m_material = resModule->createMaterial("resource/materials/sdf.mtl");
+        m_material->getUniform(m_fov, "fov");
         plane.set<blink::StaticModel>({geometry, m_material});
     }
 
@@ -67,20 +68,9 @@ void LineArtEntityCreationSystem::renderMaterialPropertyUi()
 {
     if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        auto roughness = m_material->get
-        if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
+        if (ImGui::SliderFloat("fov", &m_fov, 0.0f, glm::half_pi<float>(), "fov = %.3f"))
         {
-            material->setRoughness(roughness);
-        }
-        auto metallic = material->getMetallic();
-        if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
-        {
-            material->setMetallic(metallic);
-        }
-        glm::vec3 color = material->getColor();
-        if (ImGui::ColorEdit3("color2", (float*)&color))
-        {
-            material->setColor(color);
+            m_material->setUniform("fov", m_fov);
         }
     }
 }
