@@ -22,5 +22,5 @@ public:
 
 private:
     blink::IMaterial* m_material{};
-    float m_fov{glm::radians(45.0f)};
+    float m_fov{45.0f};
 };

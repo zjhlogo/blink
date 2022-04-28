@@ -12,79 +12,96 @@ layout(set = 0, binding = 3) uniform MaterialUniforms
 layout(location = 0) out vec4 outColor;
 
 const int MAX_STEPS = 20;
-const float MAX_DIST = 2.0;
+const float MAX_DEPTH = 100.0;
 const float EPSILON = 0.001;
 
-float sdf_sphere(vec3 p, float r)
+float sdfSphere(vec3 p, float r)
 {
     return length(p) - r;
 }
 
-float sdf_box(vec3 p, vec3 b)
+float sdfBox(vec3 p, vec3 b)
 {
     vec3 q = abs(p) - b;
     return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
 
-float sdf_torus(vec3 p, vec2 t)
+float sdfTorus(vec3 p, vec2 t)
 {
     vec2 q = vec2(length(p.xy) - t.x, p.z);
     return length(q) - t.y;
 }
 
-float get_dist(vec3 p)
+float sdfScene(vec3 p)
 {
-    float dist = sdf_sphere(p - vec3(0, 0, 0), 1.0);
+    float dist = sdfSphere(p - vec3(0, 0, 0), 1.0);
     return dist;
-    // float dist2 = sdf_torus(p - vec3(0.3, 0, 0), vec2(0.1, 0.02));
-    // float dist3 = sdf_box(p, vec3(0.1, 0.1, 0.1));
+    // float dist2 = sdfTorus(p - vec3(0.3, 0, 0), vec2(0.1, 0.02));
+    // float dist3 = sdfBox(p, vec3(0.1, 0.1, 0.1));
     // return min(min(dist, dist2), dist3);
 }
 
-vec3 get_normal(vec3 p)
+vec3 getNormal(vec3 p)
 {
     return normalize(vec3(
-      get_dist(vec3(p.x + EPSILON, p.y, p.z)) - get_dist(vec3(p.x - EPSILON, p.y, p.z)),
-      get_dist(vec3(p.x, p.y + EPSILON, p.z)) - get_dist(vec3(p.x, p.y - EPSILON, p.z)),
-      get_dist(vec3(p.x, p.y, p.z  + EPSILON)) - get_dist(vec3(p.x, p.y, p.z - EPSILON))
+      sdfScene(vec3(p.x + EPSILON, p.y, p.z)) - sdfScene(vec3(p.x - EPSILON, p.y, p.z)),
+      sdfScene(vec3(p.x, p.y + EPSILON, p.z)) - sdfScene(vec3(p.x, p.y - EPSILON, p.z)),
+      sdfScene(vec3(p.x, p.y, p.z  + EPSILON)) - sdfScene(vec3(p.x, p.y, p.z - EPSILON))
     ));
 }
 
-float ray_match(vec3 rayStart, vec3 rayDir)
+float rayMatching(vec3 rayStart, vec3 rayDir)
 {
     float depth = 0;
 
     for (int i = 0; i < MAX_STEPS; ++i)
     {
         vec3 p = rayStart + rayDir * depth;
-        float dist = get_dist(p);
+        float dist = sdfScene(p);
 
         depth += dist;
-        if (depth > MAX_DIST || dist < EPSILON) break;
+        if (depth > MAX_DEPTH || dist < EPSILON) break;
     }
 
     return depth;
 }
 
-vec3 calcRayDir(float halfFov)
+vec3 calcRayDir(float fov)
 {
     vec2 xy = gl_FragCoord.xy - fu.screenResolution * 0.5;
-    float z = gl_FragCoord.y / tan(halfFov);
-    return normalize(vec3(xy, -z));
+    float z = fu.screenResolution.y / tan(fov * 0.5);
+    return normalize(vec3(xy.x, -xy.y, -z));
 }
 
 void main()
 {
     vec3 dir = calcRayDir(mu.fov);
-    outColor = vec4(dir.x, dir.y, -dir.z, 1);
-    // vec3 eye = vec3(0.0, 0.0, 5.0);
-    
-    // float dist = ray_match(eye, dir);
-    // if (dist > MAX_DIST - EPSILON)
-    // {
-    //     outColor = vec4(0, 0, 0, 1);
-    //     return;
-    // }
+    vec3 eye = vec3(0.0, 0.0, 5.0);
+    float depth = rayMatching(eye, dir);
+    if (depth > MAX_DEPTH - EPSILON)
+    {
+        outColor = vec4(0, 0, 0, 1);
+        return;
+    }
 
-    // outColor = vec4(1, 0, 0, 1);
+    vec3 color = vec3(1, 0, 0);
+    vec3 light1Pos = vec3(4.0 * sin(fu.time),
+                          2.0,
+                          4.0 * cos(fu.time));
+    vec3 light1Intensity = vec3(0.4, 0.4, 0.4);
+
+    vec3 hitPoint = eye + dir * depth;
+
+    vec3 viewDir = -dir;
+    vec3 lightDir = normalize(light1Pos - hitPoint);
+    vec3 normalDir = getNormal(hitPoint);
+    vec3 halfDir = normalize(lightDir + normalDir);
+
+    float dotNL = clamp(dot(normalDir, lightDir), 0.0, 1.0);
+    float dotNH = clamp(dot(normalDir, halfDir), 0.0, 1.0);
+
+    vec3 diffuse = color * dotNL;
+    vec3 specular = light1Intensity * pow(dotNH, 10.0);
+
+    outColor = vec4(diffuse + specular, 1);
 }

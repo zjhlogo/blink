@@ -203,7 +203,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
     // collect light data
     FrameRenderData frd{};
     {
-        frd.time = std::fmodf(world.time(), 1.0f);
+        frd.time = std::fmodf(world.time(), 3600.0f);
         frd.screenResolution = surfaceSize;
         static auto lightDataQuery = world.query_builder<const blink::Position, const blink::LightData>().build();
         lightDataQuery.each(
