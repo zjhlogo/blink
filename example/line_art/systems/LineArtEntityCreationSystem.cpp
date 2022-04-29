@@ -44,6 +44,8 @@ bool LineArtEntityCreationSystem::initialize()
                             .build(false, false);
         m_material = resModule->createMaterial("resource/materials/sdf.mtl");
 
+        m_matViewToWorld = glm::inverse(glm::lookAt(m_eyePos, glm::zero<glm::vec3>(), glm::up()));
+        m_material->setUniform("matViewToWorld", m_matViewToWorld);
         m_material->setUniform("fov", glm::radians(m_fov));
         m_material->setUniform("eyePos", m_eyePos);
         m_material->setUniform("baseColor", m_baseColor);
@@ -76,9 +78,11 @@ void LineArtEntityCreationSystem::renderMaterialPropertyUi()
 {
     if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::DragFloat3("eyePos", &m_eyePos[0]))
+        if (ImGui::DragFloat3("eyePos", &m_eyePos[0], 0.1f))
         {
             m_material->setUniform("eyePos", m_eyePos);
+            m_matViewToWorld = glm::inverse(glm::lookAt(m_eyePos, glm::zero<glm::vec3>(), glm::up()));
+            m_material->setUniform("matViewToWorld", m_matViewToWorld);
         }
 
         if (ImGui::SliderFloat("fov", &m_fov, 0.0f, 180.0f))

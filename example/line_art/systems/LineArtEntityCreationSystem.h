@@ -22,7 +22,8 @@ public:
 
 private:
     blink::IMaterial* m_material{};
-    glm::vec3 m_eyePos{0.0f, 0.0f, 5.0f};
+    glm::mat3 m_matViewToWorld;
+    glm::vec3 m_eyePos{4.0f, 2.0f, 4.0f};
     float m_fov{45.0f};
     glm::vec3 m_baseColor{1.0f, 0.0f, 0.0f};
     glm::vec3 m_lightPos{4.0f, 2.0f, 0.0f};
