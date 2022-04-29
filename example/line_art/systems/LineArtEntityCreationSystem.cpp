@@ -43,7 +43,14 @@ bool LineArtEntityCreationSystem::initialize()
                             .orient(glm::angleAxis(glm::half_pi<float>(), glm::right()))
                             .build(false, false);
         m_material = resModule->createMaterial("resource/materials/sdf.mtl");
+
         m_material->setUniform("fov", glm::radians(m_fov));
+        m_material->setUniform("eyePos", m_eyePos);
+        m_material->setUniform("baseColor", m_baseColor);
+        m_material->setUniform("lightPos", m_lightPos);
+        m_material->setUniform("lightColor", m_lightColor);
+        m_material->setUniform("lightIntensity", m_lightIntensity);
+
         plane.set<blink::StaticModel>({geometry, m_material});
     }
 
@@ -60,17 +67,38 @@ void LineArtEntityCreationSystem::terminate()
 void LineArtEntityCreationSystem::framePostUpdate()
 {
     auto& world = m_ecsWorld->getWorld();
-    auto matRot4 = glm::rotate(glm::identity<glm::mat4>(), 1.0f * world.time(), glm::up());
-    m_material->setUniform("matRotate", glm::mat3(matRot4));
+    m_lightPos.x = 4.0f * glm::sin(world.time());
+    m_lightPos.z = 4.0f * glm::cos(world.time());
+    m_material->setUniform("lightPos", m_lightPos);
 }
 
 void LineArtEntityCreationSystem::renderMaterialPropertyUi()
 {
     if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
     {
+        if (ImGui::DragFloat3("eyePos", &m_eyePos[0]))
+        {
+            m_material->setUniform("eyePos", m_eyePos);
+        }
+
         if (ImGui::SliderFloat("fov", &m_fov, 0.0f, 180.0f))
         {
             m_material->setUniform("fov", glm::radians(m_fov));
+        }
+
+        if (ImGui::ColorEdit3("baseColor", &m_baseColor[0]))
+        {
+            m_material->setUniform("baseColor", m_baseColor);
+        }
+
+        if (ImGui::ColorEdit3("lightColor", &m_lightColor[0]))
+        {
+            m_material->setUniform("lightColor", m_lightColor);
+        }
+
+        if (ImGui::SliderFloat("lightIntensity", &m_lightIntensity, 1.0f, 100.0f))
+        {
+            m_material->setUniform("lightIntensity", m_lightIntensity);
         }
     }
 }

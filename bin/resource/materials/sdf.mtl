@@ -1,12 +1,4 @@
 {
     "vertex_shader" : "resource/shaders/sdf.vert.spv",
-    "fragment_shader" : "resource/shaders/sdf.frag.spv",
-
-    "uniforms" : [
-        {
-            "name" : "fov",
-            "type" : "float",
-            "value" : 0.8
-        }
-    ]
+    "fragment_shader" : "resource/shaders/sdf.frag.spv"
 }

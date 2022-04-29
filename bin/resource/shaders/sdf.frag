@@ -5,8 +5,14 @@
 
 layout(set = 0, binding = 3) uniform MaterialUniforms
 {
-    mat3 matRotate;
+    vec3 eyePos;
     float fov;
+
+    vec3 baseColor;
+    vec3 lightPos;
+    
+    vec3 lightColor;
+    float lightIntensity;
 } mu;
 
 layout(location = 0) out vec4 outColor;
@@ -73,35 +79,31 @@ vec3 calcRayDir(float fov)
     return normalize(vec3(xy.x, -xy.y, -z));
 }
 
+vec3 blinnPhong(vec3 baseColor, vec3 lightColor, float specularIntensity, vec3 viewDir, vec3 lightDir, vec3 normalDir)
+{
+    vec3 halfDir = normalize(lightDir + normalDir);
+    float dotNL = clamp(dot(normalDir, lightDir), 0.0, 1.0);
+    float dotNH = clamp(dot(normalDir, halfDir), 0.0, 1.0);
+
+    vec3 diffuse = baseColor * dotNL;
+    vec3 specular = lightColor * pow(dotNH, specularIntensity);
+    return diffuse + specular;
+}
+
 void main()
 {
-    vec3 dir = calcRayDir(mu.fov);
-    vec3 eye = vec3(0.0, 0.0, 5.0);
-    float depth = rayMatching(eye, dir);
+    vec3 viewRay = calcRayDir(mu.fov);
+    float depth = rayMatching(mu.eyePos, viewRay);
     if (depth > MAX_DEPTH - EPSILON)
     {
         outColor = vec4(0, 0, 0, 1);
         return;
     }
 
-    vec3 color = vec3(1, 0, 0);
-    vec3 light1Pos = vec3(4.0 * sin(fu.time),
-                          2.0,
-                          4.0 * cos(fu.time));
-    vec3 light1Intensity = vec3(0.4, 0.4, 0.4);
-
-    vec3 hitPoint = eye + dir * depth;
-
-    vec3 viewDir = -dir;
-    vec3 lightDir = normalize(light1Pos - hitPoint);
+    vec3 hitPoint = mu.eyePos + viewRay * depth;
+    vec3 lightDir = normalize(mu.lightPos - hitPoint);
     vec3 normalDir = getNormal(hitPoint);
-    vec3 halfDir = normalize(lightDir + normalDir);
 
-    float dotNL = clamp(dot(normalDir, lightDir), 0.0, 1.0);
-    float dotNH = clamp(dot(normalDir, halfDir), 0.0, 1.0);
-
-    vec3 diffuse = color * dotNL;
-    vec3 specular = light1Intensity * pow(dotNH, 10.0);
-
-    outColor = vec4(diffuse + specular, 1);
+    vec3 color = blinnPhong(mu.baseColor, mu.lightColor, mu.lightIntensity, -viewRay, lightDir, normalDir);
+    outColor = vec4(color, 1);
 }
