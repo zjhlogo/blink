@@ -11,6 +11,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "")
 
 set(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+set(BIN_ROOT "${PROJECT_ROOT}/bin")
+set(RESOURCE_ROOT "${BIN_ROOT}/resource")
 
 add_subdirectory(source/foundation)
 add_subdirectory(source/core)

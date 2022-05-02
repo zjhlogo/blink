@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
+include(${PROJECT_ROOT}/cmake/utils.cmake)
 
 project(librender_vulkan)
 

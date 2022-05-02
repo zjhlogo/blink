@@ -52,6 +52,7 @@ bool LineArtEntityCreationSystem::initialize()
         m_material->setUniform("lightPos", m_lightPos);
         m_material->setUniform("lightColor", m_lightColor);
         m_material->setUniform("lightIntensity", m_lightIntensity);
+        m_material->setUniform("twist", m_twist);
 
         plane.set<blink::StaticModel>({geometry, m_material});
     }
@@ -103,6 +104,11 @@ void LineArtEntityCreationSystem::renderMaterialPropertyUi()
         if (ImGui::SliderFloat("lightIntensity", &m_lightIntensity, 1.0f, 100.0f))
         {
             m_material->setUniform("lightIntensity", m_lightIntensity);
+        }
+
+        if (ImGui::SliderFloat("twist", &m_twist, -10.0f, 10.0f))
+        {
+            m_material->setUniform("twist", m_twist);
         }
     }
 }

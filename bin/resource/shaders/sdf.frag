@@ -10,6 +10,8 @@ layout(set = 0, binding = 3) uniform MaterialUniforms
     float fov;
 
     vec3 baseColor;
+    float twist;
+    
     vec3 lightPos;
     
     vec3 lightColor;
@@ -85,7 +87,7 @@ vec3 opTwist(vec3 p, float k)
 
 float sdScene(vec3 p)
 {
-    p = opTwist(p, 3);
+    p = opTwist(p, mu.twist);
     float sphereDist = sdSphere(p - vec3(0, 0, 0), 1.2);
     // return sdTorus(p - vec3(0, 0, 0), vec2(1, 0.5));
     float boxDist = sdBox(p - vec3(0, 0, 0), vec3(1, 1, 1));
