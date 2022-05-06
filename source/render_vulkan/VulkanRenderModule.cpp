@@ -19,7 +19,9 @@
 #include "utils/VulkanUtils.h"
 
 #include <core/modules/IResModule.h>
-#include <foundation/Log.h>
+
+#define GLFW_INCLUDE_VULKAN
+#include <glfw3/glfw3.h>
 
 namespace blink
 {
@@ -165,10 +167,7 @@ namespace blink
         VkCommandBuffer commandBuffer = *m_commandBuffer;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        if (vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
-        {
-            LOGE("failed to submit draw command buffer!");
-        }
+        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE));
 
         // present queue
         VkPresentInfoKHR presentInfo{};

@@ -9,8 +9,6 @@
 #include "VulkanFence.h"
 #include "VulkanLogicalDevice.h"
 
-#include <foundation/Log.h>
-
 namespace blink
 {
     VulkanFence::VulkanFence(VulkanLogicalDevice& logicalDevice)
@@ -31,12 +29,7 @@ namespace blink
         info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         if (signaled) info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        if (vkCreateFence(m_logicalDevice, &info, nullptr, &m_fence) != VK_SUCCESS)
-        {
-            LOGE("create fence failed");
-            return false;
-        }
-
+        VK_CHECK_RESULT(vkCreateFence(m_logicalDevice, &info, nullptr, &m_fence));
         return true;
     }
 

@@ -9,8 +9,6 @@
 #include "VulkanSemaphore.h"
 #include "VulkanLogicalDevice.h"
 
-#include <foundation/Log.h>
-
 namespace blink
 {
     VulkanSemaphore::VulkanSemaphore(VulkanLogicalDevice& logicalDevice)
@@ -30,12 +28,7 @@ namespace blink
         VkSemaphoreCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-        if (vkCreateSemaphore(m_logicalDevice, &info, nullptr, &m_semaphore) != VK_SUCCESS)
-        {
-            LOGE("create semaphore failed");
-            return false;
-        }
-
+        VK_CHECK_RESULT(vkCreateSemaphore(m_logicalDevice, &info, nullptr, &m_semaphore));
         return true;
     }
 

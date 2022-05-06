@@ -16,7 +16,6 @@
 #include "utils/VulkanUtils.h"
 
 #include <foundation/File.h>
-#include <foundation/Log.h>
 #include <spirv-cross/spirv_glsl.hpp>
 
 namespace blink
@@ -179,12 +178,7 @@ namespace blink
         layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
-        if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
-        {
-            LOGE("create descriptor set layout failed");
-            return nullptr;
-        }
-
+        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout));
         return m_descriptorSetLayout;
     }
 
@@ -212,11 +206,7 @@ namespace blink
         pipelineLayoutInfo.setLayoutCount = 1;
         pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
 
-        if (vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
-        {
-            LOGE("create pipeline layout failed");
-            return nullptr;
-        }
+        VK_CHECK_RESULT(vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout));
 
         VkShaderModule vertShaderModule = createShaderModule(vertexShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
@@ -323,15 +313,9 @@ namespace blink
         pipelineInfo.renderPass = m_swapchain.getRenderPass();
         pipelineInfo.subpass = 0;
 
-        auto result = vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
+        VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
         vkDestroyShaderModule(m_logicalDevice, fragShaderModule, nullptr);
         vkDestroyShaderModule(m_logicalDevice, vertShaderModule, nullptr);
-
-        if (result != VK_SUCCESS)
-        {
-            LOGE("create graphics pipeline failed");
-            return nullptr;
-        }
 
         return m_pipeline;
     }
@@ -359,12 +343,7 @@ namespace blink
         createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
         VkShaderModule shaderModule{};
-        if (vkCreateShaderModule(m_logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-        {
-            LOGE("create shader module failed");
-            return nullptr;
-        }
-
+        VK_CHECK_RESULT(vkCreateShaderModule(m_logicalDevice, &createInfo, nullptr, &shaderModule));
         return shaderModule;
     }
 

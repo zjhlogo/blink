@@ -7,10 +7,10 @@
  *
  */
 #pragma once
-#include <foundation/BaseTypes.h>
-#include <vulkan/vulkan.h>
+#include "VulkanBase.h"
 
 #include <vector>
+
 namespace blink
 {
     class VulkanWindow;
@@ -57,7 +57,7 @@ namespace blink
 
         VkSwapchainKHR m_swapChain{};
         VkFormat m_swapChainImageFormat;
-        VkExtent2D m_swapChainExtent;
+        VkExtent2D m_swapChainExtent{};
 
         std::vector<VulkanImage*> m_images;
         std::vector<VkFramebuffer> m_swapChainFramebuffers;

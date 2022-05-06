@@ -8,7 +8,6 @@
  */
 #include "VulkanContext.h"
 #include "VulkanWindow.h"
-#include "foundation/Log.h"
 #include "utils/VulkanUtils.h"
 
 #define GLFW_INCLUDE_VULKAN
@@ -111,14 +110,8 @@ namespace blink
             createInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
-        if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
-        {
-            LOGE("create instance failed");
-            return false;
-        }
-
+        VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &m_instance));
         VulkanUtils::enumeratePhysicalDevices(m_physicalDevices, m_instance);
-
         return true;
     }
 
@@ -141,11 +134,7 @@ namespace blink
                                  | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
 
-        if (VulkanUtils::createDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
-        {
-            LOGE("create debug messenger failed");
-        }
-
+        VK_CHECK_RESULT(VulkanUtils::createDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger));
         return true;
     }
 
@@ -157,12 +146,7 @@ namespace blink
 
     bool VulkanContext::createSurface()
     {
-        if (VK_SUCCESS != glfwCreateWindowSurface(m_instance, m_window->m_window, nullptr, &m_surface))
-        {
-            LOGE("create window surface failed");
-            return false;
-        }
-
+        VK_CHECK_RESULT(glfwCreateWindowSurface(m_instance, m_window->m_window, nullptr, &m_surface));
         return true;
     }
 

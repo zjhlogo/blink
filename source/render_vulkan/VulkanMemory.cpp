@@ -10,8 +10,6 @@
 #include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
 
-#include <foundation/Log.h>
-
 namespace blink
 {
     VulkanMemory::VulkanMemory(VulkanLogicalDevice& logicalDevice)
@@ -35,12 +33,7 @@ namespace blink
         allocInfo.allocationSize = requirement.size;
         allocInfo.memoryTypeIndex = m_logicalDevice.getContext()->findMemoryType(requirement.memoryTypeBits, memoryProperties);
 
-        if (vkAllocateMemory(m_logicalDevice, &allocInfo, nullptr, &m_memory) != VK_SUCCESS)
-        {
-            LOGE("allocate memory failed");
-            return false;
-        }
-
+        VK_CHECK_RESULT(vkAllocateMemory(m_logicalDevice, &allocInfo, nullptr, &m_memory));
         return true;
     }
 

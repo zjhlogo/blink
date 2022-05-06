@@ -12,8 +12,6 @@
 #include "VulkanLogicalDevice.h"
 #include "utils/VulkanUtils.h"
 
-#include <foundation/Log.h>
-
 #include <array>
 
 namespace blink
@@ -39,12 +37,7 @@ namespace blink
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
 
-        if (vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &m_commandBuffer) != VK_SUCCESS)
-        {
-            LOGE("create command buffer failed");
-            return false;
-        }
-
+        VK_CHECK_RESULT(vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &m_commandBuffer));
         return true;
     }
 
@@ -79,7 +72,7 @@ namespace blink
 
     void VulkanCommandBuffer::endCommand()
     {
-        // 
+        //
         vkEndCommandBuffer(m_commandBuffer);
     }
 

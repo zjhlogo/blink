@@ -7,11 +7,11 @@
  *
  */
 #pragma once
+#include "VulkanBase.h"
 #include "VulkanUniformBlock.h"
 
 #include <core/resources/IGeometry.h>
 #include <core/types/VertexAttrs.h>
-#include <vulkan/vulkan.h>
 
 namespace blink
 {

@@ -9,8 +9,6 @@
 #include "VulkanDescriptorPool.h"
 #include "VulkanLogicalDevice.h"
 
-#include <foundation/Log.h>
-
 #include <array>
 
 namespace blink
@@ -44,12 +42,7 @@ namespace blink
 
         poolInfo.maxSets = count;
 
-        if (vkCreateDescriptorPool(m_logicalDevice, &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS)
-        {
-            LOGE("create descriptor pool failed");
-            return false;
-        }
-
+        VK_CHECK_RESULT(vkCreateDescriptorPool(m_logicalDevice, &poolInfo, nullptr, &m_descriptorPool))
         return true;
     }
 
@@ -81,11 +74,7 @@ namespace blink
         allocInfo.pSetLayouts = &layout;
 
         VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-        if (vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, &descriptorSet) != VK_SUCCESS)
-        {
-            LOGE("allocate descriptor set failed");
-        }
-
+        VK_CHECK_RESULT(vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, &descriptorSet));
         return descriptorSet;
     }
 

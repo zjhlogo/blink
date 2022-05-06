@@ -14,8 +14,6 @@
 #include "resources/VulkanTexture.h"
 #include "utils/VulkanUtils.h"
 
-#include <foundation/Log.h>
-
 #define GLFW_INCLUDE_VULKAN
 #include <glfw3/glfw3.h>
 
@@ -182,11 +180,7 @@ namespace blink
         createInfo.presentMode = selPresentMode;
         createInfo.clipped = VK_TRUE;
 
-        if (vkCreateSwapchainKHR(m_logicalDevice, &createInfo, nullptr, &m_swapChain) != VK_SUCCESS)
-        {
-            LOGE("create swapchain failed");
-            return false;
-        }
+        VK_CHECK_RESULT(vkCreateSwapchainKHR(m_logicalDevice, &createInfo, nullptr, &m_swapChain));
 
         uint32_t swapchainImageCount = 0;
         vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &swapchainImageCount, nullptr);
@@ -297,13 +291,7 @@ namespace blink
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        auto result = vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass);
-        if (result != VK_SUCCESS)
-        {
-            LOGE("create render pass failed");
-            return nullptr;
-        }
-
+        VK_CHECK_RESULT(vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass));
         return m_renderPass;
     }
 
@@ -340,10 +328,7 @@ namespace blink
             frameBufferInfo.width = m_swapChainExtent.width;
             frameBufferInfo.height = m_swapChainExtent.height;
             frameBufferInfo.layers = 1;
-            if (vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
-            {
-                LOGE("create swapchain frame buffer failed");
-            }
+            VK_CHECK_RESULT(vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFramebuffers[i]));
         }
 
         return true;

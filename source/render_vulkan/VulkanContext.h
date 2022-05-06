@@ -7,9 +7,7 @@
  *
  */
 #pragma once
-#include <foundation/BaseTypes.h>
-#include <foundation/BaseTypesGlm.h>
-#include <vulkan/vulkan.h>
+#include "VulkanBase.h"
 
 #include <vector>
 

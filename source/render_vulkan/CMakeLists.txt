@@ -15,6 +15,7 @@ resources/VulkanTexture.cpp
 resources/VulkanTexture.h
 utils/VulkanUtils.cpp
 utils/VulkanUtils.h
+VulkanBase.h
 VulkanBuffer.cpp
 VulkanBuffer.h
 VulkanCommandBuffer.cpp

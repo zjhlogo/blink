@@ -13,8 +13,6 @@
 #include "VulkanDescriptorPool.h"
 #include "utils/VulkanUtils.h"
 
-#include <foundation/Log.h>
-
 #include <set>
 
 namespace blink
@@ -68,10 +66,7 @@ namespace blink
         }
     }
 
-    void VulkanLogicalDevice::resetDescriptorPool()
-    {
-        m_descriptorPool->reset();
-    }
+    void VulkanLogicalDevice::resetDescriptorPool() { m_descriptorPool->reset(); }
 
     void VulkanLogicalDevice::executeCommand(std::function<void(VulkanCommandBuffer& commandBuffer)>&& cb)
     {
@@ -125,25 +120,23 @@ namespace blink
         deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
         deviceCreateInfo.enabledExtensionCount = 0;
 
-        if (VulkanUtils::checkValidationLayerSupported(m_context->getLayerProperties(), VulkanUtils::getRequiredValidationLayers()))
+        if (VulkanUtils::checkValidationLayerSupported(m_context->getLayerProperties(),
+                                                       VulkanUtils::getRequiredValidationLayers()))
         {
             const auto& requiredLayers = VulkanUtils::getRequiredValidationLayers();
             deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
             deviceCreateInfo.ppEnabledLayerNames = requiredLayers.data();
         }
 
-        if (VulkanUtils::checkExtensionsSupported(m_context->getExtensionProperties(), VulkanUtils::getRequiredDeviceExtensions()))
+        if (VulkanUtils::checkExtensionsSupported(m_context->getExtensionProperties(),
+                                                  VulkanUtils::getRequiredDeviceExtensions()))
         {
             const auto& requiredExtensions = VulkanUtils::getRequiredDeviceExtensions();
             deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
             deviceCreateInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
-        if (vkCreateDevice(m_context->getPickedPhysicalDevice(), &deviceCreateInfo, nullptr, &m_logicalDevice) != VK_SUCCESS)
-        {
-            LOGE("create device failed");
-            return false;
-        }
+        VK_CHECK_RESULT(vkCreateDevice(m_context->getPickedPhysicalDevice(), &deviceCreateInfo, nullptr, &m_logicalDevice));
 
         // retriveing queue handles
         vkGetDeviceQueue(m_logicalDevice, m_graphicsFamilyIndex, 0, &m_graphicsQueue);

@@ -7,7 +7,6 @@
  *
  */
 #pragma once
-#include <foundation/BaseTypes.h>
 #include <foundation/BaseTypesGlm.h>
 
 struct GLFWwindow;
@@ -34,7 +33,7 @@ namespace blink
         void destroyWindow();
 
     private:
-        glm::ivec2 m_deviceSize;
+        glm::ivec2 m_deviceSize{};
         GLFWwindow* m_window{};
     };
 

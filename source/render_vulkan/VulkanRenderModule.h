@@ -7,12 +7,9 @@
  *
  */
 #pragma once
-#include <core/modules/IRenderModule.h>
-#include <foundation/BaseTypesGlm.h>
-#include <vulkan/vulkan.h>
+#include "VulkanBase.h"
 
-#define GLFW_INCLUDE_VULKAN
-#include <glfw3/glfw3.h>
+#include <core/modules/IRenderModule.h>
 
 #include <functional>
 #include <vector>

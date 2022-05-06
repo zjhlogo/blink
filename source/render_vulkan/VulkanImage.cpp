@@ -12,8 +12,6 @@
 #include "VulkanLogicalDevice.h"
 #include "VulkanMemory.h"
 
-#include <foundation/Log.h>
-
 namespace blink
 {
     VulkanImage::VulkanImage(VulkanLogicalDevice& logicalDevice)
@@ -54,12 +52,7 @@ namespace blink
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-        if (vkCreateImage(m_logicalDevice, &imageInfo, nullptr, &m_image) != VK_SUCCESS)
-        {
-            LOGE("create image failed");
-            return nullptr;
-        }
-
+        VK_CHECK_RESULT(vkCreateImage(m_logicalDevice, &imageInfo, nullptr, &m_image));
         return m_image;
     }
 
@@ -95,15 +88,10 @@ namespace blink
         viewInfo.subresourceRange.levelCount = 1;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
-        if (vkCreateImageView(m_logicalDevice, &viewInfo, nullptr, &m_imageView) != VK_SUCCESS)
-        {
-            LOGE("create image view failed");
-            return nullptr;
-        }
+        VK_CHECK_RESULT(vkCreateImageView(m_logicalDevice, &viewInfo, nullptr, &m_imageView));
 
         m_format = format;
         m_aspectFlags = aspectFlags;
-
         return m_imageView;
     }
 
@@ -132,12 +120,7 @@ namespace blink
         m_imageMemory = new VulkanMemory(m_logicalDevice);
         m_imageMemory->allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, memRequirements);
 
-        if (vkBindImageMemory(m_logicalDevice, m_image, *m_imageMemory, 0) != VK_SUCCESS)
-        {
-            LOGE("bind image memory failed");
-            return nullptr;
-        }
-
+        VK_CHECK_RESULT(vkBindImageMemory(m_logicalDevice, m_image, *m_imageMemory, 0));
         return m_imageMemory;
     }
 

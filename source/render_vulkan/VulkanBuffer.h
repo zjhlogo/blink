@@ -7,10 +7,10 @@
  *
  */
 #pragma once
+#include "VulkanBase.h"
 #include "VulkanMemory.h"
 
 #include <foundation/BaseTypes.h>
-#include <vulkan/vulkan.h>
 
 namespace blink
 {
