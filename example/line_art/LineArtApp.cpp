@@ -14,6 +14,7 @@
 #include <imgui/imgui.h>
 #include <render_systems/ImguiRenderSystem.h>
 #include <render_systems/SceneRenderSystem.h>
+#include <tracy-0.8.2/Tracy.hpp>
 
 bool LineArtApp::initialize()
 {
@@ -56,6 +57,8 @@ void LineArtApp::renderUi()
 
 int main(int argc, char** argv)
 {
+    TracyMessageL("Hello");
+
     LineArtApp app;
     return blink::run(app);
 }

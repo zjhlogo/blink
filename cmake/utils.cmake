@@ -10,6 +10,10 @@ macro(group_sources SOURCE_FILES)
 endmacro()
 
 macro(configure_library PROJ_NAME FOLDER_NAME)
+	target_compile_definitions(${PROJ_NAME} PUBLIC
+		$<$<CONFIG:Debug>:TRACY_ENABLE>
+		$<$<CONFIG:RelWithDebInfo>:TRACY_ENABLE>)
+
 	set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${PROJ_NAME}_D)
 	set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${PROJ_NAME})
 	if (NOT ${FOLDER_NAME} STREQUAL "")
@@ -29,8 +33,13 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 		$<BUILD_INTERFACE:${PROJECT_ROOT}/example/common>
 	)
 
+	target_compile_definitions(${PROJ_NAME} PUBLIC
+		$<$<CONFIG:Debug>:TRACY_ENABLE>
+		$<$<CONFIG:RelWithDebInfo>:TRACY_ENABLE>)
+
 	set(ALL_LIBRARIES
 	libcommon
+	Tracy::TracyClient
 	)
 
 	if (CMAKE_SYSTEM_NAME MATCHES "Windows")

@@ -66,7 +66,11 @@ namespace blink
         }
     }
 
-    void VulkanLogicalDevice::resetDescriptorPool() { m_descriptorPool->reset(); }
+    void VulkanLogicalDevice::resetDescriptorPool()
+    {
+        //
+        m_descriptorPool->reset();
+    }
 
     void VulkanLogicalDevice::executeCommand(std::function<void(VulkanCommandBuffer& commandBuffer)>&& cb)
     {

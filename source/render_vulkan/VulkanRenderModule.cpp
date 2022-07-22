@@ -19,6 +19,7 @@
 #include "utils/VulkanUtils.h"
 
 #include <core/modules/IResModule.h>
+#include <tracy-0.8.2/Tracy.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <glfw3/glfw3.h>
@@ -178,6 +179,7 @@ namespace blink
         presentInfo.pImageIndices = &imageIndex;
 
         result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
+        FrameMark;
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
