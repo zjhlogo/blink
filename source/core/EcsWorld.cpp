@@ -66,7 +66,7 @@ namespace blink
     {
         for (int i = (int)m_logicalSystems.size() - 1; i >= 0; --i)
         {
-            SAFE_DELETE(m_logicalSystems[i]);
+            SAFE_DELETE_AND_TERMINATE(m_logicalSystems[i]);
         }
 
         m_logicalSystems.clear();
