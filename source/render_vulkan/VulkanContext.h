@@ -57,7 +57,7 @@ namespace blink
         VulkanWindow* m_window{};
 
         VkInstance m_instance;
-        VkDebugUtilsMessengerEXT m_debugMessenger;
+        VkDebugUtilsMessengerEXT m_debugMessenger{};
         std::vector<VkPhysicalDevice> m_physicalDevices;
 
         VkSurfaceKHR m_surface;

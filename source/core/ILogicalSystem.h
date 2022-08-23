@@ -20,6 +20,7 @@ namespace blink
     class ILogicalSystem
     {
     public:
+        virtual ~ILogicalSystem() = default;
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
 

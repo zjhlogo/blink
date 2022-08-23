@@ -121,6 +121,11 @@ namespace blink
         {
             geometry = new VulkanGeometryLineList(*m_logicalDevice);
         }
+        else
+        {
+            LOGE("Unsupport topology of {}", topology);
+            return nullptr;
+        }
 
         geometry->setId(uniqueId);
         geometry->incRef();

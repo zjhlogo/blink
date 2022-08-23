@@ -20,9 +20,7 @@ namespace blink
         VulkanGeometryTriangleList(VulkanLogicalDevice& logicalDevice);
         virtual ~VulkanGeometryTriangleList();
 
-        virtual bool uploadData(const std::vector<uint16>& indices,
-                                const std::vector<glm::vec3>& positions,
-                                const std::vector<Color>& colors) override;
+        virtual bool uploadData(const std::vector<uint16>& indices, const std::vector<glm::vec3>& positions, const std::vector<Color>& colors) override;
 
         virtual bool uploadData(const std::vector<uint16>& indices,
                                 const std::vector<glm::vec3>& positions,

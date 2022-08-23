@@ -37,6 +37,8 @@ add_subdirectory(source/blink)
 add_subdirectory(example/common)
 add_subdirectory(example/hello_world)
 add_subdirectory(example/line_art)
+add_subdirectory(example/pbr)
+add_subdirectory(example/gltf_viewer)
 
 add_subdirectory(test/foundation_test)
 add_subdirectory(test/noise_test)

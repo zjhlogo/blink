@@ -33,10 +33,7 @@ namespace blink
         destroy();
     }
 
-    bool VulkanPipeline::create(const tstring& vertexShader,
-                                const tstring& fragmentShader,
-                                VkPolygonMode polygonMode,
-                                PrimitiveTopology topology)
+    bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology)
     {
         m_vertexShader = vertexShader;
         m_fragmentShader = fragmentShader;
@@ -80,12 +77,7 @@ namespace blink
         }
 
         if (VK_NULL_HANDLE
-            == createGraphicsPipeline(vertexShaderCode,
-                                      fragmentShaderCode,
-                                      vertexInputBindings,
-                                      vertexInputAttributes,
-                                      m_polygonMode,
-                                      m_topology))
+            == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology))
         {
             return false;
         }
@@ -105,8 +97,7 @@ namespace blink
         m_vertexAttrs = VertexAttrs::None;
     }
 
-    bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer,
-                                            const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList)
+    bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer, const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList)
     {
         assert(m_writeSets.size() == descriptorInfoList.size());
 
@@ -138,14 +129,7 @@ namespace blink
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
 
-        vkCmdBindDescriptorSets(commandBuffer,
-                                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                m_pipelineLayout,
-                                0,
-                                1,
-                                &descriptorSet,
-                                0,
-                                nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
         return true;
     }
@@ -166,8 +150,7 @@ namespace blink
         return it->second;
     }
 
-    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(
-        const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
+    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
     {
         destroyDescriptorSetLayout();
 
@@ -278,8 +261,7 @@ namespace blink
 
         // color blending state
         VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT
-                                              | VK_COLOR_COMPONENT_A_BIT;
+        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         colorBlendAttachment.blendEnable = VK_FALSE;
 
         VkPipelineColorBlendStateCreateInfo colorBlending{};
