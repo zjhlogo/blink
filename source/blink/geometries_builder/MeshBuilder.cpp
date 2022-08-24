@@ -10,16 +10,11 @@
 **/
 
 #include "MeshBuilder.h"
+#include "../utils/GltfUtil.h"
 
 #include <core/modules/IResModule.h>
 #include <foundation/File.h>
 #include <foundation/Log.h>
-
-#define TINYGLTF_IMPLEMENTATION
-#define STBI_MSC_SECURE_CRT
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
-#include <tinygltf/tiny_gltf.h>
 
 namespace blink
 {
@@ -45,25 +40,8 @@ namespace blink
         }
 
         tinygltf::Model model;
-        tinygltf::TinyGLTF loader;
-        tstring err;
-        tstring warn;
-
-        bool ret = loader.LoadASCIIFromString(&model, &err, &warn, fileContent.data(), static_cast<unsigned int>(fileContent.length()), EMPTY_STRING);
-        if (!warn.empty())
+        if (!GltfUtil::loadFromFile(model, m_filePath))
         {
-            LOGW(warn);
-        }
-
-        if (!err.empty())
-        {
-            LOGE(err);
-            return false;
-        }
-
-        if (!ret)
-        {
-            LOGE("Failed to parse glTF file {0}", m_filePath);
             return false;
         }
 

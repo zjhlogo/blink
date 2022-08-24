@@ -24,6 +24,8 @@ systems/DebugLineSystem.cpp
 systems/DebugLineSystem.h
 types/RenderLayers.h
 types/RenderOrders.h
+utils/GltfUtil.cpp
+utils/GltfUtil.h
 app.cpp
 app.h
 blink.cpp

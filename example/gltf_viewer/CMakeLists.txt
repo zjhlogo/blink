@@ -10,10 +10,3 @@ GltfViewerApp.h
 
 group_sources("${SOURCE_FILES}")
 configure_runtime(${PROJECT_NAME} ${BIN_ROOT} "example")
-
-add_custom_command(TARGET ${PROJECT_NAME}
-    PRE_BUILD
-    COMMAND compile.bat
-    WORKING_DIRECTORY ${RESOURCE_ROOT}/shaders
-    USES_TERMINAL
-    COMMENT "start compile shaders")

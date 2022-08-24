@@ -19,6 +19,8 @@ imgui_widgets.cpp
 imstb_rectpack.h
 imstb_textedit.h
 imstb_truetype.h
+imgui_stdlib.cpp
+imgui_stdlib.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
