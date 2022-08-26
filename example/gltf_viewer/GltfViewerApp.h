@@ -21,7 +21,8 @@ public:
         Scene,
         Node,
         Mesh,
-        Material
+        Material,
+        Texture,
     };
 
 public:
@@ -40,10 +41,12 @@ private:
     void DrawNode(const tinygltf::Model& model, int nodeIndex);
     void DrawMesh(const tinygltf::Model& model, int meshIndex);
     void DrawMaterial(const tinygltf::Model& model, int materialIndex);
+    void DrawTexture(const tinygltf::Model& model, int textureIndex);
     void DrawSceneProperty(const tinygltf::Model& model, int sceneIndex);
     void DrawNodeProperty(const tinygltf::Model& model, int nodeIndex);
     void DrawMeshProperty(const tinygltf::Model& model, int meshIndex);
     void DrawMaterialProperty(const tinygltf::Model& model, int materialIndex);
+    void DrawTextureProperty(const tinygltf::Model& model, int textureIndex);
 
 private:
     tinygltf::Model m_model;

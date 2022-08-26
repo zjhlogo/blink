@@ -21,5 +21,7 @@ namespace blink
     public:
         static bool loadFromFile(tinygltf::Model& outModel, const tstring& filePath);
 
+    private:
+        static tinygltf::FsCallbacks m_fsCallback;
     };
 } // namespace blink

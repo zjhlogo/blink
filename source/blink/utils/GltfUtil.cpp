@@ -15,20 +15,44 @@
 
 namespace blink
 {
-    bool GltfUtil::loadFromFile(tinygltf::Model& outModel, const tstring& filePath)
+    bool fileExistsFunction(const std::string& filePath, void* userData)
     {
-        tstring fileContent;
-        if (!File::readFileIntoString(fileContent, filePath))
+        File file;
+        return file.open(filePath, File::AM_READ);
+    }
+
+    std::string expandFilePathFunction(const std::string& filePath, void* userData)
+    {
+        return filePath;
+    }
+
+    bool readWholeFileFunction(std::vector<unsigned char>* outData, std::string* error, const std::string& filePath, void* userData)
+    {
+        if (!File::readFileIntoBuffer(*outData, filePath))
         {
-            LOGE("Open file failed {0}", filePath);
+            *error = fmt::format("read file into buffer failed. {}", filePath);
             return false;
         }
 
+        return true;
+    }
+
+    bool writeWholeFileFunction(std::string* error, const std::string& filePath, const std::vector<unsigned char>& contents, void* userData)
+    {
+        // not support yet
+        return false;
+    }
+
+    tinygltf::FsCallbacks GltfUtil::m_fsCallback{fileExistsFunction, expandFilePathFunction, readWholeFileFunction, writeWholeFileFunction, nullptr};
+
+    bool GltfUtil::loadFromFile(tinygltf::Model& outModel, const tstring& filePath)
+    {
         tstring err;
         tstring warn;
 
         tinygltf::TinyGLTF loader;
-        bool ret = loader.LoadASCIIFromString(&outModel, &err, &warn, fileContent.data(), static_cast<unsigned int>(fileContent.length()), EMPTY_STRING);
+        loader.SetFsCallbacks(m_fsCallback);
+        bool ret = loader.LoadASCIIFromFile(&outModel, &err, &warn, filePath);
         if (!warn.empty())
         {
             LOGW(warn);

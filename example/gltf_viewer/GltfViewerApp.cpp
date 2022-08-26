@@ -28,7 +28,7 @@ bool GltfViewerApp::initialize()
 
     guiRenderSystem->addWindow(this);
 
-    if (!blink::GltfUtil::loadFromFile(m_model, "resource/buggy.gltf")) return false;
+    if (!blink::GltfUtil::loadFromFile(m_model, "resource/models/damaged_helmet/DamagedHelmet.gltf")) return false;
 
     return true;
 }
@@ -83,6 +83,14 @@ void GltfViewerApp::DrawHierarchyWindow()
         }
     }
 
+    if (ImGui::CollapsingHeader("Texture List"))
+    {
+        for (int i = 0; i < m_model.textures.size(); ++i)
+        {
+            DrawTexture(m_model, i);
+        }
+    }
+
     ImGui::End();
 }
 
@@ -106,6 +114,9 @@ void GltfViewerApp::DrawPropertyWindow()
         break;
     case GltfViewerApp::Category::Material:
         DrawMaterialProperty(m_model, m_selIndex);
+        break;
+    case GltfViewerApp::Category::Texture:
+        DrawTextureProperty(m_model, m_selIndex);
         break;
     default:
         break;
@@ -238,6 +249,28 @@ void GltfViewerApp::DrawMaterial(const tinygltf::Model& model, int materialIndex
     }
 }
 
+void GltfViewerApp::DrawTexture(const tinygltf::Model& model, int textureIndex)
+{
+    const auto& texture = model.textures[textureIndex];
+
+    blink::tstring textureName;
+    if (!texture.name.empty())
+    {
+        textureName = fmt::format("{}##texture{}", texture.name, textureIndex);
+    }
+    else
+    {
+        textureName = fmt::format("texture {}##texture{}", textureIndex, textureIndex);
+    }
+
+    bool selected = (m_selCategory == Category::Texture && m_selIndex == textureIndex);
+    if (ImGui::Selectable(textureName.c_str(), selected))
+    {
+        m_selCategory = Category::Texture;
+        m_selIndex = textureIndex;
+    }
+}
+
 void GltfViewerApp::DrawSceneProperty(const tinygltf::Model& model, int sceneIndex)
 {
     const auto& scene = model.scenes[sceneIndex];
@@ -298,8 +331,18 @@ void GltfViewerApp::DrawMeshProperty(const tinygltf::Model& model, int meshIndex
     auto name = mesh.name;
     ImGui::InputText("name", &name);
 
-    int primitives = static_cast<int>(mesh.primitives.size());
-    ImGui::InputInt("primitives", &primitives);
+    for (int i = 0; i < mesh.primitives.size(); ++i)
+    {
+        const auto& primitive = mesh.primitives[i];
+        if (ImGui::CollapsingHeader(fmt::format("primitive {}", i).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            for (auto kvp : primitive.attributes)
+            {
+                auto attribute = kvp.first;
+                ImGui::InputText("attribute", &attribute);
+            }
+        }
+    }
 }
 
 void GltfViewerApp::DrawMaterialProperty(const tinygltf::Model& model, int materialIndex)
@@ -326,6 +369,58 @@ void GltfViewerApp::DrawMaterialProperty(const tinygltf::Model& model, int mater
         emissiveFactor[2] = static_cast<float>(material.emissiveFactor[2]);
         ImGui::InputFloat3("emissiveFactor", emissiveFactor);
     }
+
+    if (ImGui::CollapsingHeader("pbrMetallicRoughness", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        float baseColorFactor[4]{1.0f, 1.0f, 1.0f, 1.0f};
+        baseColorFactor[0] = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[0]);
+        baseColorFactor[1] = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[1]);
+        baseColorFactor[2] = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[2]);
+        baseColorFactor[3] = static_cast<float>(material.pbrMetallicRoughness.baseColorFactor[3]);
+        ImGui::InputFloat4("baseColorFactor", baseColorFactor);
+
+        double metallicFactor = material.pbrMetallicRoughness.metallicFactor;
+        ImGui::InputDouble("metallicFactor", &metallicFactor);
+
+        double roughnessFactor = material.pbrMetallicRoughness.roughnessFactor;
+        ImGui::InputDouble("roughnessFactor", &roughnessFactor);
+    }
+}
+
+void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textureIndex)
+{
+    const auto& texture = model.textures[textureIndex];
+
+    auto name = texture.name;
+    ImGui::InputText("name", &name);
+
+    int samplerIndex = texture.sampler;
+    if (samplerIndex == -1)
+    {
+        ImGui::InputInt("sampler", &samplerIndex);
+    }
+    else
+    {
+        if (ImGui::CollapsingHeader(fmt::format("sampler {}", samplerIndex).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            const auto& sampler = model.samplers[samplerIndex];
+
+            int minFilter = sampler.minFilter;
+            ImGui::InputInt("minFilter", &minFilter);
+
+            int magFilter = sampler.magFilter;
+            ImGui::InputInt("magFilter", &magFilter);
+
+            int wrapS = sampler.wrapS;
+            ImGui::InputInt("wrapS", &wrapS);
+
+            int wrapT = sampler.wrapT;
+            ImGui::InputInt("wrapT", &wrapT);
+        }
+    }
+
+    int source = texture.source;
+    ImGui::InputInt("source", &source);
 }
 
 int main(int argc, char** argv)
