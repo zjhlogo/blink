@@ -11,6 +11,7 @@
 #include <blink/app.h>
 #include <blink/utils/GltfUtil.h>
 #include <guis/IGuiWindow.h>
+#include <core/resources/ITexture2d.h>
 
 class GltfViewerApp : public blink::IApp, public IGuiWindow
 {
@@ -48,8 +49,15 @@ private:
     void DrawMaterialProperty(const tinygltf::Model& model, int materialIndex);
     void DrawTextureProperty(const tinygltf::Model& model, int textureIndex);
 
+
+    void DrawComponentType(const char* label, int componentType);
+
+
 private:
     tinygltf::Model m_model;
     Category m_selCategory{Category::Unknown};
     int m_selIndex{-1};
+
+    std::map<int, blink::ITexture2d> m_textureMap;
+
 };

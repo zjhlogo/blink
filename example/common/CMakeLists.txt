@@ -9,6 +9,8 @@ render_systems/ImguiRenderSystem.cpp
 render_systems/ImguiRenderSystem.h
 render_systems/SceneRenderSystem.cpp
 render_systems/SceneRenderSystem.h
+utils/ImguiExtension.cpp
+utils/ImguiExtension.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

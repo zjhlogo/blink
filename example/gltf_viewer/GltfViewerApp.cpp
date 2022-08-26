@@ -15,6 +15,7 @@
 #include <imgui/imgui_stdlib.h>
 #include <render_systems/ImguiRenderSystem.h>
 #include <render_systems/SceneRenderSystem.h>
+#include <utils/ImguiExtension.h>
 
 bool GltfViewerApp::initialize()
 {
@@ -53,10 +54,10 @@ void GltfViewerApp::DrawHierarchyWindow()
 
     if (ImGui::CollapsingHeader("Summory", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::LabelText("version", m_model.asset.version.c_str());
-        ImGui::LabelText("generator", m_model.asset.generator.c_str());
-        ImGui::LabelText("minVersion", m_model.asset.minVersion.c_str());
-        ImGui::LabelText("copyright", m_model.asset.copyright.c_str());
+        ImGui::ReadOnlyText("version", &m_model.asset.version);
+        ImGui::ReadOnlyText("generator", &m_model.asset.generator);
+        ImGui::ReadOnlyText("minVersion", &m_model.asset.minVersion);
+        ImGui::ReadOnlyText("copyright", &m_model.asset.copyright);
     }
 
     if (ImGui::CollapsingHeader("Scene List"))
@@ -99,7 +100,7 @@ void GltfViewerApp::DrawPropertyWindow()
     // draw property
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
     ImGui::Begin("Property", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::BeginDisabled();
+    // ImGui::BeginDisabled();
 
     switch (m_selCategory)
     {
@@ -122,7 +123,7 @@ void GltfViewerApp::DrawPropertyWindow()
         break;
     }
 
-    ImGui::EndDisabled();
+    // ImGui::EndDisabled();
     ImGui::End();
 }
 
@@ -274,20 +275,17 @@ void GltfViewerApp::DrawTexture(const tinygltf::Model& model, int textureIndex)
 void GltfViewerApp::DrawSceneProperty(const tinygltf::Model& model, int sceneIndex)
 {
     const auto& scene = model.scenes[sceneIndex];
-
-    auto name = scene.name;
-    ImGui::InputText("name", &name);
+    ImGui::ReadOnlyText("name##scene", &scene.name);
 }
 
 void GltfViewerApp::DrawNodeProperty(const tinygltf::Model& model, int nodeIndex)
 {
     const auto& node = model.nodes[nodeIndex];
 
-    auto name = node.name;
-    ImGui::InputText("name", &name);
+    ImGui::ReadOnlyText("name##node", &node.name, ImGuiInputTextFlags_ReadOnly);
 
     int camera = node.camera;
-    ImGui::InputInt("camera", &camera);
+    ImGui::InputInt("camera", &camera, ImGuiInputTextFlags_ReadOnly);
 
     int mesh = node.mesh;
     ImGui::InputInt("mesh", &mesh);
@@ -328,8 +326,7 @@ void GltfViewerApp::DrawMeshProperty(const tinygltf::Model& model, int meshIndex
 {
     const auto& mesh = model.meshes[meshIndex];
 
-    auto name = mesh.name;
-    ImGui::InputText("name", &name);
+    ImGui::ReadOnlyText("name##mesh", &mesh.name, ImGuiInputTextFlags_ReadOnly);
 
     for (int i = 0; i < mesh.primitives.size(); ++i)
     {
@@ -338,8 +335,7 @@ void GltfViewerApp::DrawMeshProperty(const tinygltf::Model& model, int meshIndex
         {
             for (auto kvp : primitive.attributes)
             {
-                auto attribute = kvp.first;
-                ImGui::InputText("attribute", &attribute);
+                ImGui::ReadOnlyText(fmt::format("attribute {}", kvp.second).c_str(), &kvp.first, ImGuiInputTextFlags_ReadOnly);
             }
         }
     }
@@ -349,11 +345,8 @@ void GltfViewerApp::DrawMaterialProperty(const tinygltf::Model& model, int mater
 {
     const auto& material = model.materials[materialIndex];
 
-    auto name = material.name;
-    ImGui::InputText("name", &name);
-
-    auto alphaMode = material.alphaMode;
-    ImGui::InputText("alphaMode", &alphaMode);
+    ImGui::ReadOnlyText("name##material", &material.name, ImGuiInputTextFlags_ReadOnly);
+    ImGui::ReadOnlyText("alphaMode", &material.alphaMode, ImGuiInputTextFlags_ReadOnly);
 
     double alphaCutoff = material.alphaCutoff;
     ImGui::InputDouble("alphaCutoff", &alphaCutoff);
@@ -391,8 +384,7 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
 {
     const auto& texture = model.textures[textureIndex];
 
-    auto name = texture.name;
-    ImGui::InputText("name", &name);
+    ImGui::ReadOnlyText("name##texture", &texture.name, ImGuiInputTextFlags_ReadOnly);
 
     int samplerIndex = texture.sampler;
     if (samplerIndex == -1)
@@ -419,8 +411,57 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
         }
     }
 
-    int source = texture.source;
-    ImGui::InputInt("source", &source);
+    if (texture.source != -1)
+    {
+        const auto image = model.images[texture.source];
+
+        if (ImGui::CollapsingHeader(fmt::format("image {}", texture.source).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::ReadOnlyText("name##image", &image.name, ImGuiInputTextFlags_ReadOnly);
+
+            auto width = image.width;
+            ImGui::InputInt("width", &width);
+
+            auto height = image.height;
+            ImGui::InputInt("height", &height);
+
+            auto component = image.component;
+            ImGui::InputInt("component", &component);
+
+            auto bits = image.bits;
+            ImGui::InputInt("bits", &bits);
+
+            DrawComponentType("pixel_type", image.pixel_type);
+
+            ImGui::ReadOnlyText("mineType", &image.mimeType, ImGuiInputTextFlags_ReadOnly);
+            ImGui::ReadOnlyText("uri", &image.uri, ImGuiInputTextFlags_ReadOnly);
+        }
+    }
+}
+
+void GltfViewerApp::DrawComponentType(const char* label, int componentType)
+{
+    static const std::map<int, const char*> s_itemValueTextMap = {{TINYGLTF_COMPONENT_TYPE_BYTE, "BYTE"},
+                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE, "UNSIGNED_BYTE"},
+                                                                  {TINYGLTF_COMPONENT_TYPE_SHORT, "SHORT"},
+                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT, "UNSIGNED_SHORT"},
+                                                                  {TINYGLTF_COMPONENT_TYPE_INT, "INT"},
+                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT, "UNSIGNED_INT"},
+                                                                  {TINYGLTF_COMPONENT_TYPE_FLOAT, "FLOAT"},
+                                                                  {TINYGLTF_COMPONENT_TYPE_DOUBLE, "DOUBLE"}};
+
+    auto it = s_itemValueTextMap.find(componentType);
+
+    if (ImGui::BeginCombo(label, it == s_itemValueTextMap.end() ? "UNKNOWN" : it->second))
+    {
+        for (auto kvp : s_itemValueTextMap)
+        {
+            bool isSelected = (kvp.first == componentType);
+            ImGui::Selectable(kvp.second, isSelected);
+            if (isSelected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
 }
 
 int main(int argc, char** argv)
