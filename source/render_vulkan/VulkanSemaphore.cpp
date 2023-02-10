@@ -28,7 +28,7 @@ namespace blink
         VkSemaphoreCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-        VK_CHECK_RESULT(vkCreateSemaphore(m_logicalDevice, &info, nullptr, &m_semaphore));
+        VK_CHECK_RESULT(vkCreateSemaphore(m_logicalDevice, &info, nullptr, &m_semaphore))
         return true;
     }
 
@@ -40,5 +40,4 @@ namespace blink
             m_semaphore = nullptr;
         }
     }
-
 } // namespace blink

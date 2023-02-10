@@ -13,13 +13,13 @@
 #include <blink/components/Components.h>
 #include <core/ILogicalSystem.h>
 
-class EntityCreationSystem : public blink::ILogicalSystem
+class EntityCreationSystem final : public blink::ILogicalSystem
 {
 public:
-    virtual bool initialize() override;
-    virtual void terminate() override;
+    bool initialize() override;
+    void terminate() override;
 
-    virtual void framePreUpdate() override;
+    void framePreUpdate() override;
 
     void renderLightPropertyUi();
     void renderMaterialPropertyUi();

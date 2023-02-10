@@ -7,12 +7,8 @@
  *
  */
 #pragma once
-#include "VulkanBase.h"
 
 #include <core/modules/IRenderModule.h>
-
-#include <functional>
-#include <vector>
 
 namespace blink
 {
@@ -28,16 +24,14 @@ namespace blink
     class VulkanRenderData : public IRenderData
     {
     public:
-        VulkanRenderData(VulkanCommandBuffer* _commandBuffer,
-                         VulkanUniformBuffer* _fub,
-                         VulkanUniformBuffer* _mub,
-                         VulkanUniformBuffer* _eub)
-            : commandBuffer(_commandBuffer)
-            , fub(_fub)
-            , mub(_mub)
-            , eub(_eub)
-        {
-        }
+        VulkanRenderData(VulkanCommandBuffer* commandBuffer,
+                         VulkanUniformBuffer* fub,
+                         VulkanUniformBuffer* mub,
+                         VulkanUniformBuffer* eub)
+            : commandBuffer(commandBuffer)
+            , fub(fub)
+            , mub(mub)
+            , eub(eub) { }
 
         VulkanCommandBuffer* commandBuffer;
         VulkanUniformBuffer* fub;
@@ -45,25 +39,22 @@ namespace blink
         VulkanUniformBuffer* eub;
     };
 
-    class VulkanRenderModule : public IRenderModule
+    class VulkanRenderModule final : public IRenderModule
     {
     public:
-        VulkanRenderModule() = default;
-        virtual ~VulkanRenderModule() = default;
+        bool createDevice(const glm::ivec2& deviceSize) override;
+        void destroyDevice() override;
 
-        virtual bool createDevice(const glm::ivec2& deviceSize) override;
-        virtual void destroyDevice() override;
+        bool processEvent() override;
+        RenderResult render(const RenderCb& cb) override;
 
-        virtual bool processEvent() override;
-        virtual RenderResult render(const RenderCb& cb) override;
+        void waitIdle() override;
 
-        virtual void waitIdle() override;
+        glm::vec2 getSurfaceSize() const override;
 
-        virtual glm::vec2 getSurfaceSize() const override;
-
-        VulkanContext& getContext() const { return *m_context; };
-        VulkanLogicalDevice& getLogicalDevice() const { return *m_logicalDevice; };
-        VulkanSwapchain& getSwapchain() const { return *m_swapchain; };
+        VulkanContext& getContext() const { return *m_context; }
+        VulkanLogicalDevice& getLogicalDevice() const { return *m_logicalDevice; }
+        VulkanSwapchain& getSwapchain() const { return *m_swapchain; }
 
     private:
         bool createSyncObjects();
@@ -82,5 +73,4 @@ namespace blink
         VulkanUniformBuffer* m_perMaterialUniformBuffer{};
         VulkanUniformBuffer* m_perInstanceUniformBuffer{};
     };
-
 } // namespace blink

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   LineListBuilder.h
  * \brief
@@ -21,7 +20,7 @@ namespace blink
     public:
         LineListBuilder();
 
-        virtual tstring getUniqueId() const override;
+        tstring getUniqueId() const override;
 
         void addLine(const glm::vec3& start, const glm::vec3& end, const Color& color);
         void reset();
@@ -30,7 +29,7 @@ namespace blink
 
     private:
         int m_uniqueId{};
-        std::vector<uint16> m_indices;
+        std::vector<uint16_t> m_indices;
         std::vector<glm::vec3> m_vertsPos;
         std::vector<Color> m_vertsColor;
     };

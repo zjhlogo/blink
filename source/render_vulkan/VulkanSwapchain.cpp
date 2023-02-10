@@ -20,8 +20,7 @@
 namespace blink
 {
     VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice)
-        : m_window(window)
-        , m_logicalDevice(logicalDevice)
+        : m_window(window), m_logicalDevice(logicalDevice)
     {
         //
     }
@@ -39,7 +38,7 @@ namespace blink
         if (!createRenderPass(m_swapChainImageFormat,
                               VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice())))
             return false;
-        if (!createFramebuffers(m_renderPass)) return false;
+        if (!createFrameBuffers(m_renderPass)) return false;
 
         return true;
     }
@@ -65,14 +64,14 @@ namespace blink
         if (!createRenderPass(m_swapChainImageFormat,
                               VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice())))
             return false;
-        if (!createFramebuffers(m_renderPass)) return false;
+        if (!createFrameBuffers(m_renderPass)) return false;
 
         return true;
     }
 
     void VulkanSwapchain::destroy()
     {
-        destroyFramebuffers();
+        destroyFrameBuffers();
         destroyRenderPass();
         destroySwapchainImageViews();
         destroySwapChain();
@@ -164,11 +163,13 @@ namespace blink
 
         if (graphicsFamilyIndex != presentFamilyIndex)
         {
-            uint32_t queueFamilyIndexs[2] = {static_cast<uint32_t>(graphicsFamilyIndex),
-                                             static_cast<uint32_t>(presentFamilyIndex)};
+            uint32_t queueFamilyIndies[2] = {
+                static_cast<uint32_t>(graphicsFamilyIndex),
+                static_cast<uint32_t>(presentFamilyIndex)
+            };
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
-            createInfo.pQueueFamilyIndices = queueFamilyIndexs;
+            createInfo.pQueueFamilyIndices = queueFamilyIndies;
         }
         else
         {
@@ -180,7 +181,7 @@ namespace blink
         createInfo.presentMode = selPresentMode;
         createInfo.clipped = VK_TRUE;
 
-        VK_CHECK_RESULT(vkCreateSwapchainKHR(m_logicalDevice, &createInfo, nullptr, &m_swapChain));
+        VK_CHECK_RESULT(vkCreateSwapchainKHR(m_logicalDevice, &createInfo, nullptr, &m_swapChain))
 
         uint32_t swapchainImageCount = 0;
         vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &swapchainImageCount, nullptr);
@@ -257,7 +258,7 @@ namespace blink
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        // subpass
+        // subPass
         VkAttachmentReference colorAttachmentRef{};
         colorAttachmentRef.attachment = 0;
         colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -266,20 +267,20 @@ namespace blink
         depthAttachmentRef.attachment = 1;
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        VkSubpassDescription subpass{};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+        VkSubpassDescription subPass{};
+        subPass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subPass.colorAttachmentCount = 1;
+        subPass.pColorAttachments = &colorAttachmentRef;
+        subPass.pDepthStencilAttachment = &depthAttachmentRef;
 
         // create render pass
-        VkAttachmentDescription attacments[2] = {colorAttachment, depthAttachment};
+        VkAttachmentDescription attachments[2] = {colorAttachment, depthAttachment};
         VkRenderPassCreateInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.attachmentCount = 2;
-        renderPassInfo.pAttachments = attacments;
+        renderPassInfo.pAttachments = attachments;
         renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.pSubpasses = &subPass;
 
         VkSubpassDependency dependency{};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -291,7 +292,7 @@ namespace blink
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        VK_CHECK_RESULT(vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass));
+        VK_CHECK_RESULT(vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass))
         return m_renderPass;
     }
 
@@ -304,7 +305,7 @@ namespace blink
         }
     }
 
-    bool VulkanSwapchain::createFramebuffers(VkRenderPass renderPass)
+    bool VulkanSwapchain::createFrameBuffers(VkRenderPass renderPass)
     {
         SAFE_DELETE(m_depthTexture);
 
@@ -312,37 +313,36 @@ namespace blink
         if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
 
         auto count = m_images.size();
-        m_swapChainFramebuffers.resize(count);
+        m_swapChainFrameBuffers.resize(count);
 
         for (size_t i = 0; i < count; ++i)
         {
             auto imageView = m_images[i]->getImageView();
 
-            VkImageView attacments[2] = {imageView, m_depthTexture->getTextureImage()->getImageView()};
+            VkImageView attachments[2] = {imageView, m_depthTexture->getTextureImage()->getImageView()};
 
             VkFramebufferCreateInfo frameBufferInfo{};
             frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             frameBufferInfo.renderPass = renderPass;
             frameBufferInfo.attachmentCount = 2;
-            frameBufferInfo.pAttachments = attacments;
+            frameBufferInfo.pAttachments = attachments;
             frameBufferInfo.width = m_swapChainExtent.width;
             frameBufferInfo.height = m_swapChainExtent.height;
             frameBufferInfo.layers = 1;
-            VK_CHECK_RESULT(vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFramebuffers[i]));
+            VK_CHECK_RESULT(vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFrameBuffers[i]))
         }
 
         return true;
     }
 
-    void VulkanSwapchain::destroyFramebuffers()
+    void VulkanSwapchain::destroyFrameBuffers()
     {
-        for (auto framebuffer : m_swapChainFramebuffers)
+        for (auto framebuffer : m_swapChainFrameBuffers)
         {
             vkDestroyFramebuffer(m_logicalDevice, framebuffer, nullptr);
         }
-        m_swapChainFramebuffers.clear();
+        m_swapChainFrameBuffers.clear();
 
         SAFE_DELETE(m_depthTexture);
     }
-
 } // namespace blink

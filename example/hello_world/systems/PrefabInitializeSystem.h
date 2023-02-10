@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   PrefabInitializeSystem.h
  * \brief
@@ -6,18 +5,16 @@
  * \author zjhlogo
  * \date   2/19 2022
  *********************************************************************/
+#pragma once
 
 #include <core/ILogicalSystem.h>
 
-class PrefabInitializeSystem : public blink::ILogicalSystem
+class PrefabInitializeSystem final : public blink::ILogicalSystem
 {
 public:
-    PrefabInitializeSystem();
-
-    virtual bool initialize() override;
-    virtual void terminate() override;
+    bool initialize() override;
+    void terminate() override;
 
 public:
     flecs::entity prefabRigidBody;
-
 };

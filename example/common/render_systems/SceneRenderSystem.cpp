@@ -12,10 +12,10 @@
 #include <core/components/Components.h>
 #include <foundation/Log.h>
 #include <glm/gtx/quaternion.hpp>
-#include <render_vulkan/VulkanCommandBuffer.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanUniformBuffer.h>
 #include <render_vulkan/resources/VulkanMaterial.h>
+#include <render_vulkan/VulkanCommandBuffer.h>
 
 #include <map>
 #include <unordered_map>
@@ -48,19 +48,19 @@ struct EntityRenderData
     glm::vec3 pos;
     glm::quat rot;
     blink::IGeometry* geometry;
-    blink::uint32 renderLayer;
+    uint32_t renderLayer;
     int cameraId;
     VkDescriptorBufferInfo eubi;
 };
 
 struct MaterialRenderData
 {
-    int cameraId;
-    VkDescriptorBufferInfo mubi;
-    std::vector<EntityRenderData> entityRenderDatas;
+    int cameraId{};
+    VkDescriptorBufferInfo mubi{};
+    std::vector<EntityRenderData> entityRenderData;
 };
 
-void uploadFrameUniforms(FrameRenderData& frd, blink::VulkanMaterial* vulkanMaterial, blink::VulkanRenderData* vulkanRenderData)
+void uploadFrameUniforms(FrameRenderData& frd, blink::VulkanMaterial* vulkanMaterial, const blink::VulkanRenderData* vulkanRenderData)
 {
     if (frd.uploaded)
     {
@@ -88,7 +88,7 @@ void uploadFrameUniforms(FrameRenderData& frd, blink::VulkanMaterial* vulkanMate
 void uploadCameraUniforms(CameraRenderData& crd,
                           int cameraId,
                           blink::VulkanMaterial* vulkanMaterial,
-                          blink::VulkanRenderData* vulkanRenderData)
+                          const blink::VulkanRenderData* vulkanRenderData)
 {
     if (crd.cameraId == cameraId)
     {
@@ -124,7 +124,7 @@ void uploadEntityUniforms(EntityRenderData& erd,
                           const CameraRenderData& pcu,
                           int cameraId,
                           blink::VulkanMaterial* vulkanMaterial,
-                          blink::VulkanRenderData* vulkanRenderData)
+                          const blink::VulkanRenderData* vulkanRenderData)
 {
     // bind per instance uniform
     if (erd.cameraId == cameraId)
@@ -154,7 +154,7 @@ void uploadEntityUniforms(EntityRenderData& erd,
 void uploadMaterialUniforms(MaterialRenderData& mrd,
                             int cameraId,
                             blink::VulkanMaterial* vulkanMaterial,
-                            blink::VulkanRenderData* vulkanRenderData)
+                            const blink::VulkanRenderData* vulkanRenderData)
 {
     // bind per material uniform
     if (mrd.cameraId == cameraId)
@@ -179,15 +179,7 @@ SceneRenderSystem::SceneRenderSystem(blink::IApp* app)
     //
 }
 
-SceneRenderSystem::~SceneRenderSystem()
-{
-    //
-}
-
-bool SceneRenderSystem::initialize()
-{
-    return true;
-}
+bool SceneRenderSystem::initialize() { return true; }
 
 void SceneRenderSystem::terminate()
 {
@@ -226,8 +218,8 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                             const blink::Rotation& rot,
                             const blink::CameraData& camera)
             {
-                // setup perframe uniforms
-                CameraRenderData pcu;
+                // setup perFrame uniforms
+                CameraRenderData pcu{};
 
                 pcu.cameraPos = pos.value;
                 pcu.cameraRot = rot.value;
@@ -242,11 +234,11 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
     std::unordered_map<blink::IMaterial*, MaterialRenderData> materialGroups;
     {
         static auto renderObjQuery = world
-                                         .query_builder<const blink::Position,
-                                                        const blink::Rotation,
-                                                        const blink::Renderable,
-                                                        const blink::StaticModel>()
-                                         .build();
+                                     .query_builder<const blink::Position,
+                                                    const blink::Rotation,
+                                                    const blink::Renderable,
+                                                    const blink::StaticModel>()
+                                     .build();
         renderObjQuery.each(
             [&](flecs::entity e,
                 const blink::Position& pos,
@@ -263,13 +255,13 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 auto findIt = materialGroups.find(material);
                 if (findIt != materialGroups.end())
                 {
-                    findIt->second.entityRenderDatas.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
+                    findIt->second.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
                 }
                 else
                 {
                     MaterialRenderData mrd;
                     mrd.cameraId = 0;
-                    mrd.entityRenderDatas.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
+                    mrd.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
                     materialGroups.emplace(material, mrd);
                 }
             });
@@ -283,18 +275,12 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
             [&](flecs::entity e, const blink::RenderFeature& renderFeature)
             {
                 auto findIt = featureGroups.find(renderFeature.order);
-                if (findIt != featureGroups.end())
-                {
-                    LOGE("duplicate render feature order {0}", renderFeature.order);
-                }
-                else
-                {
-                    featureGroups.emplace(renderFeature.order, renderFeature);
-                }
+                if (findIt != featureGroups.end()) { LOGE("duplicate render feature order {0}", renderFeature.order); }
+                else { featureGroups.emplace(renderFeature.order, renderFeature); }
             });
     }
 
-    auto vulkanRenderData = (blink::VulkanRenderData*)&renderData;
+    auto vulkanRenderData = static_cast<blink::VulkanRenderData*>(&renderData);
 
     // start rendering
 
@@ -323,15 +309,14 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                     uploadCameraUniforms(crd, cameraId, vulkanMaterial, vulkanRenderData);
                     uploadMaterialUniforms(mrd, cameraId, vulkanMaterial, vulkanRenderData);
 
-                    for (auto& erd : mrd.entityRenderDatas)
+                    for (auto& erd : mrd.entityRenderData)
                     {
                         if ((erd.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
                         uploadEntityUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
-                        vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,
-                                                          (blink::VulkanGeometry*)erd.geometry);
+                        vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer, static_cast<blink::VulkanGeometry*>(erd.geometry));
 
                         vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, erd.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
@@ -352,15 +337,14 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 // render mesh group by material
                 for (auto& kvpMaterial : materialGroups)
                 {
-                    for (auto& erd : kvpMaterial.second.entityRenderDatas)
+                    for (auto& erd : kvpMaterial.second.entityRenderData)
                     {
                         if ((erd.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
                         uploadEntityUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
-                        vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer,
-                                                          (blink::VulkanGeometry*)erd.geometry);
+                        vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer, static_cast<blink::VulkanGeometry*>(erd.geometry));
 
                         vkCmdDrawIndexed(*vulkanRenderData->commandBuffer, erd.geometry->getNumIndices(), 1, 0, 0, 0);
                     }

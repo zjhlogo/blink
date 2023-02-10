@@ -18,7 +18,7 @@ namespace blink
     {
     public:
         PlaneBuilder& size(float width, float height);
-        PlaneBuilder& segment(uint16 segmentH, uint16 segmentV);
+        PlaneBuilder& segment(uint16_t segmentH, uint16_t segmentV);
         PlaneBuilder& uvRange(const glm::vec2& uvMin, const glm::vec2& uvMax);
         PlaneBuilder& orient(const glm::quat& orientation);
         PlaneBuilder& translate(const glm::vec3& translation);
@@ -27,7 +27,7 @@ namespace blink
         IGeometry* build(bool buildNormal = true, bool buildUv = true, glm::mat3* inertiaTensorOut = nullptr) const;
 
         bool generateData(std::vector<glm::vec3>& positionsOut,
-                          std::vector<uint16>& indicesOut,
+                          std::vector<uint16_t>& indicesOut,
                           std::vector<glm::vec3>* normalsOut = nullptr,
                           std::vector<glm::vec2>* uvsOut = nullptr) const;
 

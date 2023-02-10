@@ -29,7 +29,7 @@ namespace blink
         info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         if (signaled) info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        VK_CHECK_RESULT(vkCreateFence(m_logicalDevice, &info, nullptr, &m_fence));
+        VK_CHECK_RESULT(vkCreateFence(m_logicalDevice, &info, nullptr, &m_fence))
         return true;
     }
 
@@ -53,5 +53,4 @@ namespace blink
         //
         vkResetFences(m_logicalDevice, 1, &m_fence);
     }
-
 } // namespace blink

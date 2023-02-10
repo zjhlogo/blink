@@ -10,5 +10,6 @@
 class IGuiWindow
 {
 public:
-	virtual void renderUi() = 0;
+    virtual ~IGuiWindow() = default;
+    virtual void renderUi() = 0;
 };

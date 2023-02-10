@@ -28,7 +28,7 @@ namespace blink
 
     void LineListBuilder::addLine(const glm::vec3& start, const glm::vec3& end, const Color& color)
     {
-        uint16 baseIndex = (uint16)m_vertsPos.size();
+        uint16_t baseIndex = (uint16_t)m_vertsPos.size();
 
         m_indices.push_back(baseIndex);
         m_indices.push_back(baseIndex + 1);

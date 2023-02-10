@@ -15,8 +15,7 @@
 
 namespace blink
 {
-    VulkanUniformBuffer::VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice)
-        : m_logicalDevice(logicalDevice)
+    VulkanUniformBuffer::VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice) : m_logicalDevice(logicalDevice)
     {
         //
     }
@@ -39,8 +38,7 @@ namespace blink
 
         m_gpuBuffer = new VulkanBuffer(m_logicalDevice);
         if (!m_gpuBuffer->createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_SHARING_MODE_EXCLUSIVE)) return false;
-        if (!m_gpuBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
-            return false;
+        if (!m_gpuBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) return false;
 
         m_memBuffer.resize(size);
         m_currentPos = 0;
@@ -95,5 +93,4 @@ namespace blink
         m_currentPos = newPos;
         return true;
     }
-
 } // namespace blink

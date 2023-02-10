@@ -18,9 +18,9 @@ namespace blink
     {
     public:
         BoxBuilder& size(float width, float height, float depth);
-        BoxBuilder& segment(uint16 widthSegment, uint16 heightSegment, uint16 depthSegment);
+        BoxBuilder& segment(uint16_t widthSegment, uint16_t heightSegment, uint16_t depthSegment);
 
-        virtual tstring getUniqueId() const override;
+        tstring getUniqueId() const override;
 
         IGeometry* build(bool buildNormal = true, bool buildUv = true, glm::mat3* inertiaTensorOut = nullptr) const;
 

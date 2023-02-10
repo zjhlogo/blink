@@ -15,10 +15,10 @@
 
 TEST(SpirvCrossTestCase, parseUniforms)
 {
-    std::vector<blink::uint8> buffer;
+    std::vector<uint8_t> buffer;
     blink::File::readFileIntoBuffer(buffer, "resource/shaders/pbr_lit.frag.spv");
 
-    spirv_cross::CompilerGLSL glsl((uint32_t*)buffer.data(), buffer.size() / sizeof(uint32_t));
+    spirv_cross::CompilerGLSL glsl(reinterpret_cast<uint32_t*>(buffer.data()), buffer.size() / sizeof(uint32_t));
     auto resources = glsl.get_shader_resources();
 
     // uniforms

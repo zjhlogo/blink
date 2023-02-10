@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   Color.h
  * \brief
@@ -7,34 +6,34 @@
  * \date   04/18/2022
  *********************************************************************/
 #pragma once
-#include <foundation/BaseTypes.h>
 #include <foundation/BaseTypesGlm.h>
 
 namespace blink
 {
     union Color
     {
-        uint32 value;
+        uint32_t value{};
+
         struct
         {
-            uint8 r;
-            uint8 g;
-            uint8 b;
-            uint8 a;
+            uint8_t r;
+            uint8_t g;
+            uint8_t b;
+            uint8_t a;
         };
 
-        Color(uint32 c)
+        Color(uint32_t c)
         {
             // 
             value = c;
         }
 
-        Color(uint8 _r, uint8 _g, uint8 _b, uint8 _a)
+        Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
         {
-            r = _r;
-            g = _g;
-            b = _b;
-            a = _a;
+            this->r = r;
+            this->g = g;
+            this->b = b;
+            this->a = a;
         }
 
         inline glm::vec4 operator()(const Color& color)
@@ -45,10 +44,11 @@ namespace blink
 
         inline Color operator()(const glm::vec4& color)
         {
-            r = (uint8)(color.x * 255);
-            g = (uint8)(color.y * 255);
-            b = (uint8)(color.z * 255);
-            a = (uint8)(color.w * 255);
+            r = static_cast<uint8_t>(color.x * 255);
+            g = static_cast<uint8_t>(color.y * 255);
+            b = static_cast<uint8_t>(color.z * 255);
+            a = static_cast<uint8_t>(color.w * 255);
+            return *this;
         }
 
         static const Color BLACK;

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   VulkanUniformBlock.cpp
  * \brief
@@ -19,10 +18,8 @@ namespace blink
 
     void VulkanUniformBlock::prepareBuffer()
     {
-        if (m_bufferData.size() < m_uniformStructSize)
-        {
-            m_bufferData.resize(m_uniformStructSize);
-        }
+        //
+        if (m_bufferData.size() < m_uniformStructSize) m_bufferData.resize(m_uniformStructSize);
     }
 
     bool VulkanUniformBlock::isReady()
@@ -31,7 +28,35 @@ namespace blink
         return !m_bufferData.empty();
     }
 
-    bool VulkanUniformBlock::addUniformMember(const tstring& name, UniformType type, uint32 offset)
+
+    template <> bool VulkanUniformBlock::setUniformMember(int memberIndex, const glm::mat3* value)
+    {
+        const auto& memberInfo = m_memberInfoList[memberIndex];
+        if (UniformType::Mat3 != memberInfo.type) return false;
+
+        auto pData1 = reinterpret_cast<glm::vec3*>(m_bufferData.data() + memberInfo.offset);
+        auto pData2 = reinterpret_cast<glm::vec3*>(m_bufferData.data() + memberInfo.offset + 16);
+        auto pData3 = reinterpret_cast<glm::vec3*>(m_bufferData.data() + memberInfo.offset + 32);
+
+        *pData1 = (*value)[0];
+        *pData2 = (*value)[1];
+        *pData3 = (*value)[2];
+        return true;
+    }
+
+    template <> bool VulkanUniformBlock::getUniformMember(glm::mat3* valueOut, int memberIndex)
+    {
+        const auto& memberInfo = m_memberInfoList[memberIndex];
+        if (UniformType::Mat3 != memberInfo.type) return false;
+
+        (*valueOut)[0] = *reinterpret_cast<glm::vec3*>(m_bufferData.data() + memberInfo.offset);
+        (*valueOut)[1] = *reinterpret_cast<glm::vec3*>(m_bufferData.data() + memberInfo.offset + 16);
+        (*valueOut)[2] = *reinterpret_cast<glm::vec3*>(m_bufferData.data() + memberInfo.offset + 32);
+
+        return true;
+    }
+
+    bool VulkanUniformBlock::addUniformMember(const tstring& name, UniformType type, uint32_t offset)
     {
         auto it = m_nameToIndexMap.find(name);
         if (it != m_nameToIndexMap.end())
@@ -61,36 +86,38 @@ namespace blink
         return m_memberInfoList[memberIndex].type;
     }
 
-    uint32 VulkanUniformBlock::calculateSize(UniformType type) const
+    uint32_t VulkanUniformBlock::calculateSize(UniformType type)
     {
-        static const uint32 s_sizeMap[static_cast<int>(UniformType::NumTypes)] = {
-            0,  // None
-            4,  // Int
-            4,  // Float
-            8,  // Vec2
-            16, // Vec3
-            16, // Vec4
-            48, // Mat3
-            64, // Mat4
+        static const uint32_t SIZE_MAP[static_cast<int>(UniformType::NumTypes)] =
+        {
+            0,            // None
+            4,            // Int
+            4,            // Float
+            8,            // Vec2
+            16,           // Vec3
+            16,           // Vec4
+            48,           // Mat3
+            64,           // Mat4
         };
 
-        return s_sizeMap[static_cast<int>(type)];
+        return SIZE_MAP[static_cast<int>(type)];
     }
 
-    uint32 VulkanUniformBlock::calculateOffset(UniformType type) const
+    uint32_t VulkanUniformBlock::calculateOffset(UniformType type) const
     {
-        static const uint32 s_offsetMap[static_cast<int>(UniformType::NumTypes)] = {
-            0,  // None
-            4,  // Int
-            4,  // Float
-            8,  // Vec2
-            16, // Vec3
-            16, // Vec4
-            16, // Mat3
-            16, // Mat4
+        static const uint32_t OFFSET_MAP[static_cast<int>(UniformType::NumTypes)] =
+        {
+            0,            // None
+            4,            // Int
+            4,            // Float
+            8,            // Vec2
+            16,           // Vec3
+            16,           // Vec4
+            16,           // Mat3
+            16,           // Mat4
         };
 
-        auto align = s_offsetMap[static_cast<int>(type)];
+        auto align = OFFSET_MAP[static_cast<int>(type)];
         auto alignedStructSize = (m_uniformStructSize + align - 1) / align * align;
         return alignedStructSize;
     }

@@ -33,7 +33,7 @@ namespace blink
         allocInfo.allocationSize = requirement.size;
         allocInfo.memoryTypeIndex = m_logicalDevice.getContext()->findMemoryType(requirement.memoryTypeBits, memoryProperties);
 
-        VK_CHECK_RESULT(vkAllocateMemory(m_logicalDevice, &allocInfo, nullptr, &m_memory));
+        VK_CHECK_RESULT(vkAllocateMemory(m_logicalDevice, &allocInfo, nullptr, &m_memory))
         return true;
     }
 
@@ -50,24 +50,23 @@ namespace blink
     {
         if (srcDataSize <= 0) return false;
 
-        void* mapedBuffer{};
-        vkMapMemory(m_logicalDevice, m_memory, destOffset, srcDataSize, 0, &mapedBuffer);
-        memcpy(mapedBuffer, srcData, static_cast<size_t>(srcDataSize));
+        void* mappedBuffer{};
+        vkMapMemory(m_logicalDevice, m_memory, destOffset, srcDataSize, 0, &mappedBuffer);
+        memcpy(mappedBuffer, srcData, srcDataSize);
         vkUnmapMemory(m_logicalDevice, m_memory);
 
         return true;
     }
 
-    bool VulkanMemory::uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, CustomCopyCb cb)
+    bool VulkanMemory::uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, const CustomCopyCb& cb)
     {
         if (destDataSize <= 0) return false;
 
-        void* mapedBuffer{};
-        vkMapMemory(m_logicalDevice, m_memory, destOffset, destDataSize, 0, &mapedBuffer);
-        cb(mapedBuffer, destDataSize);
+        void* mappedBuffer{};
+        vkMapMemory(m_logicalDevice, m_memory, destOffset, destDataSize, 0, &mappedBuffer);
+        cb(mappedBuffer, destDataSize);
         vkUnmapMemory(m_logicalDevice, m_memory);
 
         return true;
     }
-
 } // namespace blink

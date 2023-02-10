@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   BeginPhysicsSimulationSystem.cpp
  * \brief
@@ -7,9 +6,6 @@
  * \date   2/19 2022
  *********************************************************************/
 #include "BeginPhysicsSimulationSystem.h"
-#include "../components/Components.h"
-
-#include <core/components/Components.h>
 
 namespace blink
 {

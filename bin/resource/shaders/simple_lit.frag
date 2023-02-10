@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "builtin_uniforms.inc"
+#include "builtin_uniforms.hlsl"
 
 layout(set = 0, binding = 4) uniform sampler2D texSampler;
 

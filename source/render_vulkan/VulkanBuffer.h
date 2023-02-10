@@ -10,8 +10,6 @@
 #include "VulkanBase.h"
 #include "VulkanMemory.h"
 
-#include <foundation/BaseTypes.h>
-
 namespace blink
 {
     class VulkanLogicalDevice;
@@ -20,10 +18,15 @@ namespace blink
     class VulkanBuffer
     {
     public:
-        VulkanBuffer(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanBuffer(VulkanLogicalDevice& logicalDevice);
         ~VulkanBuffer();
 
-        operator VkBuffer() const { return m_buffer; };
+        VulkanBuffer(const VulkanBuffer& buffer) = delete;
+        VulkanBuffer(VulkanBuffer&& buffer) = delete;
+        VulkanBuffer& operator=(const VulkanBuffer& buffer) = delete;
+        VulkanBuffer& operator=(VulkanBuffer&& buffer) = delete;
+
+        operator VkBuffer() const { return m_buffer; }
 
         VkBuffer createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
         void destroyBuffer();
@@ -31,13 +34,13 @@ namespace blink
         VkBuffer createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
         void uploadBuffer(const void* data, VkDeviceSize bufferSize);
         void uploadBuffer(VulkanMemory::CustomCopyCb cb);
-        void copyBuffer(VulkanBuffer* src);
+        void copyBuffer(const VulkanBuffer* src) const;
 
         VulkanMemory* allocateBufferMemory(VkMemoryPropertyFlags memProperties);
         void destroyBufferMemory();
 
-        VulkanMemory* getBufferMemory() { return m_bufferMemory; };
-        VkDeviceSize getBufferSize() { return m_bufferSize; };
+        VulkanMemory* getBufferMemory() const { return m_bufferMemory; }
+        VkDeviceSize getBufferSize() const { return m_bufferSize; }
 
     protected:
         VulkanLogicalDevice& m_logicalDevice;
@@ -46,5 +49,4 @@ namespace blink
         VulkanMemory* m_bufferMemory{};
         VkDeviceSize m_bufferSize{};
     };
-
 } // namespace blink

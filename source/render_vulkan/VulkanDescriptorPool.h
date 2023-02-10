@@ -16,13 +16,18 @@ namespace blink
     class VulkanDescriptorPool
     {
     public:
-        static const uint32_t DEFAULT_DESCRIPTOR_COUNT = 1024;
+        static constexpr uint32_t DEFAULT_DESCRIPTOR_COUNT = 1024;
 
     public:
-        VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice);
         ~VulkanDescriptorPool();
 
-        operator VkDescriptorPool() const { return m_descriptorPool; };
+        VulkanDescriptorPool(const VulkanDescriptorPool& pool) = delete;
+        VulkanDescriptorPool(VulkanDescriptorPool&& pool) = delete;
+        VulkanDescriptorPool& operator=(const VulkanDescriptorPool& pool) = delete;
+        VulkanDescriptorPool& operator=(VulkanDescriptorPool&& pool) = delete;
+
+        operator VkDescriptorPool() const { return m_descriptorPool; }
 
         bool create(uint32_t count = DEFAULT_DESCRIPTOR_COUNT);
         void destroy();
@@ -34,5 +39,4 @@ namespace blink
         VulkanLogicalDevice& m_logicalDevice;
         VkDescriptorPool m_descriptorPool{};
     };
-
 } // namespace blink

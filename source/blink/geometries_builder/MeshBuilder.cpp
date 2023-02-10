@@ -94,8 +94,8 @@ namespace blink
         auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(buffer.data.data(),
                                   buffer.data.size(),
-                                  static_cast<uint32>(accessorPos.count),
-                                  static_cast<uint32>(accessorIndices.count),
+                                  static_cast<uint32_t>(accessorPos.count),
+                                  static_cast<uint32_t>(accessorIndices.count),
                                   buffViewPos.byteOffset,
                                   buffViewNormal.byteOffset,
                                   buffViewUv0.byteOffset,

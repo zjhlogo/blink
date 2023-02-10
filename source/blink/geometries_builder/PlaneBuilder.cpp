@@ -24,7 +24,7 @@ namespace blink
         return *this;
     }
 
-    PlaneBuilder& PlaneBuilder::segment(uint16 segmentH, uint16 segmentV)
+    PlaneBuilder& PlaneBuilder::segment(uint16_t segmentH, uint16_t segmentV)
     {
         m_segment.x = segmentH < 1 ? 1 : segmentH;
         m_segment.y = segmentV < 1 ? 1 : segmentV;
@@ -59,7 +59,7 @@ namespace blink
     IGeometry* PlaneBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
     {
         std::vector<glm::vec3> vertsPos;
-        std::vector<uint16> indices;
+        std::vector<uint16_t> indices;
         std::vector<glm::vec3> vertsNormal;
         std::vector<glm::vec2> vertsUv0;
 
@@ -77,16 +77,13 @@ namespace blink
             return nullptr;
         }
 
-        if (inertiaTensorOut)
-        {
-            *inertiaTensorOut = CalculateInertiaTensor(vertsPos.data(), vertsPos.size());
-        }
+        if (inertiaTensorOut) { *inertiaTensorOut = CalculateInertiaTensor(vertsPos.data(), vertsPos.size()); }
 
         return geometry;
     }
 
     bool PlaneBuilder::generateData(std::vector<glm::vec3>& positionsOut,
-                                    std::vector<uint16>& indicesOut,
+                                    std::vector<uint16_t>& indicesOut,
                                     std::vector<glm::vec3>* normalsOut,
                                     std::vector<glm::vec2>* uvsOut) const
     {
@@ -98,14 +95,14 @@ namespace blink
         glm::vec3 currPos(0.0f, 0.0f, 0.0f);
         glm::vec2 currUv = m_uvMin;
 
-        uint16 startIndex = static_cast<uint16>(positionsOut.size());
+        uint16_t startIndex = static_cast<uint16_t>(positionsOut.size());
 
-        for (uint16 y = 0; y < (m_segment.y + 1); ++y)
+        for (uint16_t y = 0; y < (m_segment.y + 1); ++y)
         {
             currPos.z = -(y * delta.y - 0.5f) * m_size.y;
             currUv.y = y * delta.y * uvRange.y + m_uvMin.y;
 
-            for (uint16 x = 0; x < (m_segment.x + 1); ++x)
+            for (uint16_t x = 0; x < (m_segment.x + 1); ++x)
             {
                 currPos.x = (x * delta.x - 0.5f) * m_size.x;
                 currUv.x = x * delta.x * uvRange.x + m_uvMin.x;
@@ -117,14 +114,14 @@ namespace blink
         }
 
         // build face list
-        for (uint16 y = 0; y < m_segment.y; ++y)
+        for (uint16_t y = 0; y < m_segment.y; ++y)
         {
-            for (uint16 x = 0; x < m_segment.x; ++x)
+            for (uint16_t x = 0; x < m_segment.x; ++x)
             {
-                uint16 i0 = y * (m_segment.x + 1) + x;
-                uint16 i1 = i0 + 1;
-                uint16 i2 = (y + 1) * (m_segment.x + 1) + x;
-                uint16 i3 = i2 + 1;
+                uint16_t i0 = y * (m_segment.x + 1) + x;
+                uint16_t i1 = i0 + 1;
+                uint16_t i2 = (y + 1) * (m_segment.x + 1) + x;
+                uint16_t i3 = i2 + 1;
 
                 indicesOut.push_back(startIndex + i0);
                 indicesOut.push_back(startIndex + i1);

@@ -12,8 +12,7 @@
 
 namespace blink
 {
-    void VulkanUtils::enumerateInstanceExtensionProperties(std::vector<VkExtensionProperties>& propertiesOut,
-                                                           const char* layerName /*= nullptr*/)
+    void VulkanUtils::enumerateInstanceExtensionProperties(std::vector<VkExtensionProperties>& propertiesOut, const char* layerName /*= nullptr*/)
     {
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, nullptr);
@@ -21,8 +20,7 @@ namespace blink
         vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, propertiesOut.data());
     }
 
-    bool VulkanUtils::checkExtensionsSupported(const std::vector<VkExtensionProperties>& properties,
-                                               const std::vector<const char*>& requiredExtensions)
+    bool VulkanUtils::checkExtensionsSupported(const std::vector<VkExtensionProperties>& properties, const std::vector<const char*>& requiredExtensions)
     {
         for (const auto& requiredExtension : requiredExtensions)
         {
@@ -49,8 +47,7 @@ namespace blink
         vkEnumerateInstanceLayerProperties(&propertyCount, propertiesOut.data());
     }
 
-    bool VulkanUtils::checkValidationLayerSupported(const std::vector<VkLayerProperties>& properties,
-                                                    const std::vector<const char*>& requiredLayers)
+    bool VulkanUtils::checkValidationLayerSupported(const std::vector<VkLayerProperties>& properties, const std::vector<const char*>& requiredLayers)
     {
         for (const auto& requireLayer : requiredLayers)
         {
@@ -77,8 +74,7 @@ namespace blink
         vkEnumeratePhysicalDevices(instance, &deviceCount, devicesOut.data());
     }
 
-    void VulkanUtils::getPhysicalDeviceQueueFamilyProperties(std::vector<VkQueueFamilyProperties>& propertiesOut,
-                                                             VkPhysicalDevice device)
+    void VulkanUtils::getPhysicalDeviceQueueFamilyProperties(std::vector<VkQueueFamilyProperties>& propertiesOut, VkPhysicalDevice device)
     {
         uint32_t propertyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &propertyCount, nullptr);
@@ -86,19 +82,15 @@ namespace blink
         vkGetPhysicalDeviceQueueFamilyProperties(device, &propertyCount, propertiesOut.data());
     }
 
-    void VulkanUtils::getSurfaceFormats(std::vector<VkSurfaceFormatKHR>& formatsOut,
-                                        VkPhysicalDevice device,
-                                        VkSurfaceKHR surface)
+    void VulkanUtils::getSurfaceFormats(std::vector<VkSurfaceFormatKHR>& formatsOut, VkPhysicalDevice device, VkSurfaceKHR surface)
     {
-        uint32 formatCount = 0;
+        uint32_t formatCount = 0;
         vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
         formatsOut.resize(formatCount);
         vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, formatsOut.data());
     }
 
-    void VulkanUtils::getSurfacePresentModes(std::vector<VkPresentModeKHR>& presentModesOut,
-                                             VkPhysicalDevice device,
-                                             VkSurfaceKHR surface)
+    void VulkanUtils::getSurfacePresentModes(std::vector<VkPresentModeKHR>& presentModesOut, VkPhysicalDevice device, VkSurfaceKHR surface)
     {
         uint32_t presentCount = 0;
         vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentCount, nullptr);
@@ -124,31 +116,22 @@ namespace blink
         vkEnumerateDeviceLayerProperties(device, &propertyCount, propertiesOut.data());
     }
 
-    VkResult VulkanUtils::createDebugUtilsMessengerEXT(VkInstance instance,
+    VkResult VulkanUtils::createDebugUtilsMessengerExt(VkInstance instance,
                                                        const VkDebugUtilsMessengerCreateInfoEXT* createInfo,
                                                        const VkAllocationCallbacks* allocator,
                                                        VkDebugUtilsMessengerEXT* debugMessenger)
     {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-        if (func != nullptr)
-        {
-            return func(instance, createInfo, allocator, debugMessenger);
-        }
-        else
-        {
-            return VK_ERROR_EXTENSION_NOT_PRESENT;
-        }
+        auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
+        if (func != nullptr) { return func(instance, createInfo, allocator, debugMessenger); }
+        else { return VK_ERROR_EXTENSION_NOT_PRESENT; }
     }
 
-    void VulkanUtils::destroyDebugUtilsMessengerEXT(VkInstance instance,
+    void VulkanUtils::destroyDebugUtilsMessengerExt(VkInstance instance,
                                                     VkDebugUtilsMessengerEXT debugMessenger,
                                                     const VkAllocationCallbacks* allocator)
     {
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-        if (func != nullptr)
-        {
-            func(instance, debugMessenger, allocator);
-        }
+        auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
+        if (func != nullptr) { func(instance, debugMessenger, allocator); }
     }
 
     const std::vector<const char*>& VulkanUtils::getRequiredValidationLayers()
@@ -159,7 +142,8 @@ namespace blink
 
     const std::vector<const char*>& VulkanUtils::getRequiredInstanceExtensions()
     {
-        static const std::vector<const char*> REQUIRED_EXTENSIONS = {
+        static const std::vector<const char*> REQUIRED_EXTENSIONS =
+        {
             "VK_KHR_surface",
             "VK_KHR_win32_surface",
             "VK_EXT_debug_utils",
@@ -169,7 +153,8 @@ namespace blink
 
     const std::vector<const char*>& VulkanUtils::getRequiredDeviceExtensions()
     {
-        static const std::vector<const char*> REQUIRED_EXTENSIONS = {
+        static const std::vector<const char*> REQUIRED_EXTENSIONS =
+        {
             "VK_KHR_swapchain",
             "VK_KHR_maintenance1",
         };
@@ -186,26 +171,18 @@ namespace blink
         graphicsFamily = -1;
         presentFamily = -1;
 
-        uint32_t i = 0;
-        for (const auto& queueFamily : queueFamilyProperties)
+        int size = static_cast<int>(queueFamilyProperties.size());
+        for (int i = 0; i < size; ++i)
         {
-            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            {
-                graphicsFamily = i;
-            }
+            const auto& queueFamily = queueFamilyProperties[i];
+            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) graphicsFamily = i;
 
             VkBool32 support = VK_FALSE;
             vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &support);
 
-            if (queueFamily.queueCount > 0 && support)
-            {
-                presentFamily = i;
-            }
+            if (queueFamily.queueCount > 0 && support) presentFamily = i;
 
-            if (graphicsFamily != -1 && presentFamily != -1)
-            {
-                return true;
-            }
+            if (graphicsFamily != -1 && presentFamily != -1) return true;
         }
 
         return false;
@@ -247,14 +224,8 @@ namespace blink
             VkFormatProperties props{};
             vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
 
-            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
-            {
-                return format;
-            }
-            else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
-            {
-                return format;
-            }
+            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) return format;
+            if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) return format;
         }
 
         return VK_FORMAT_D24_UNORM_S8_UINT;
@@ -267,5 +238,4 @@ namespace blink
                                    VK_IMAGE_TILING_OPTIMAL,
                                    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
     }
-
 } // namespace blink

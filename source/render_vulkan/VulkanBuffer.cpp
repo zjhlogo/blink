@@ -7,6 +7,8 @@
  *
  */
 #include "VulkanBuffer.h"
+
+#include <utility>
 #include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
@@ -35,7 +37,7 @@ namespace blink
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = mode;
 
-        VK_CHECK_RESULT(vkCreateBuffer(m_logicalDevice, &bufferInfo, nullptr, &m_buffer));
+        VK_CHECK_RESULT(vkCreateBuffer(m_logicalDevice, &bufferInfo, nullptr, &m_buffer))
         m_bufferSize = bufferSize;
         return m_buffer;
     }
@@ -57,7 +59,7 @@ namespace blink
         stagingBuffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
 
         auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                                                             | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         stagingMem->uploadData(data, bufferSize, 0);
 
         allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -70,24 +72,23 @@ namespace blink
         stagingBuffer.createBuffer(m_bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
 
         auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                                                             | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        stagingMem->uploadData(0, m_bufferSize, cb);
+            | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        stagingMem->uploadData(0, m_bufferSize, std::move(cb));
 
         allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         copyBuffer(&stagingBuffer);
     }
 
-    void VulkanBuffer::copyBuffer(VulkanBuffer* src)
+    void VulkanBuffer::copyBuffer(const VulkanBuffer* src) const
     {
-        m_logicalDevice.executeCommand(
-            [&](VulkanCommandBuffer& commandBuffer)
-            {
-                VkBufferCopy copyRegion{};
-                copyRegion.srcOffset = 0;
-                copyRegion.dstOffset = 0;
-                copyRegion.size = src->m_bufferSize;
-                vkCmdCopyBuffer(commandBuffer, *src, m_buffer, 1, &copyRegion);
-            });
+        m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer)
+        {
+            VkBufferCopy copyRegion;
+            copyRegion.srcOffset = 0;
+            copyRegion.dstOffset = 0;
+            copyRegion.size = src->m_bufferSize;
+            vkCmdCopyBuffer(commandBuffer, *src, m_buffer, 1, &copyRegion);
+        });
     }
 
     VulkanMemory* VulkanBuffer::allocateBufferMemory(VkMemoryPropertyFlags memProperties)
@@ -103,7 +104,7 @@ namespace blink
         m_bufferMemory = new VulkanMemory(m_logicalDevice);
         m_bufferMemory->allocateMemory(memProperties, memRequirements);
 
-        VK_CHECK_RESULT(vkBindBufferMemory(m_logicalDevice, m_buffer, *m_bufferMemory, 0));
+        VK_CHECK_RESULT(vkBindBufferMemory(m_logicalDevice, m_buffer, *m_bufferMemory, 0))
         return m_bufferMemory;
     }
 
@@ -123,5 +124,4 @@ namespace blink
             m_buffer = nullptr;
         }
     }
-
 } // namespace blink

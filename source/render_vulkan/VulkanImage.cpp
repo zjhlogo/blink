@@ -8,7 +8,6 @@
  */
 #include "VulkanImage.h"
 #include "VulkanCommandBuffer.h"
-#include "VulkanCommandPool.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanMemory.h"
 
@@ -21,8 +20,7 @@ namespace blink
     }
 
     VulkanImage::VulkanImage(VulkanLogicalDevice& logicalDevice, VkImage image)
-        : m_logicalDevice(logicalDevice)
-        , m_image(image)
+        : m_logicalDevice(logicalDevice), m_image(image)
     {
         //
     }
@@ -52,7 +50,7 @@ namespace blink
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-        VK_CHECK_RESULT(vkCreateImage(m_logicalDevice, &imageInfo, nullptr, &m_image));
+        VK_CHECK_RESULT(vkCreateImage(m_logicalDevice, &imageInfo, nullptr, &m_image))
         return m_image;
     }
 
@@ -88,7 +86,7 @@ namespace blink
         viewInfo.subresourceRange.levelCount = 1;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
-        VK_CHECK_RESULT(vkCreateImageView(m_logicalDevice, &viewInfo, nullptr, &m_imageView));
+        VK_CHECK_RESULT(vkCreateImageView(m_logicalDevice, &viewInfo, nullptr, &m_imageView))
 
         m_format = format;
         m_aspectFlags = aspectFlags;
@@ -120,7 +118,7 @@ namespace blink
         m_imageMemory = new VulkanMemory(m_logicalDevice);
         m_imageMemory->allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, memRequirements);
 
-        VK_CHECK_RESULT(vkBindImageMemory(m_logicalDevice, m_image, *m_imageMemory, 0));
+        VK_CHECK_RESULT(vkBindImageMemory(m_logicalDevice, m_image, *m_imageMemory, 0))
         return m_imageMemory;
     }
 
@@ -132,66 +130,64 @@ namespace blink
 
     void VulkanImage::transitionImageLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
     {
-        m_logicalDevice.executeCommand(
-            [&](VulkanCommandBuffer& commandBuffer)
+        m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer)
+        {
+            VkImageMemoryBarrier barrier{};
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            barrier.oldLayout = oldLayout;
+            barrier.newLayout = newLayout;
+            barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.image = m_image;
+
+            if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
             {
-                VkImageMemoryBarrier barrier{};
-                barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-                barrier.oldLayout = oldLayout;
-                barrier.newLayout = newLayout;
-                barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                barrier.image = m_image;
+                barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-                if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+                if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT)
                 {
-                    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-                    if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT)
-                    {
-                        barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-                    }
+                    barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
                 }
-                else
-                {
-                    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                }
+            }
+            else
+            {
+                barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            }
 
-                barrier.subresourceRange.baseMipLevel = 0;
-                barrier.subresourceRange.levelCount = 1;
-                barrier.subresourceRange.baseArrayLayer = 0;
-                barrier.subresourceRange.layerCount = 1;
+            barrier.subresourceRange.baseMipLevel = 0;
+            barrier.subresourceRange.levelCount = 1;
+            barrier.subresourceRange.baseArrayLayer = 0;
+            barrier.subresourceRange.layerCount = 1;
 
-                VkPipelineStageFlags sourceStage{};
-                VkPipelineStageFlags destinationStage{};
+            VkPipelineStageFlags sourceStage{};
+            VkPipelineStageFlags destinationStage{};
 
-                if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-                {
-                    barrier.srcAccessMask = {};
-                    barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+            {
+                barrier.srcAccessMask = {};
+                barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
-                    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-                    destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-                }
-                else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-                {
-                    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            }
+            else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+            {
+                barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-                    sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-                    destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-                }
-                else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
-                {
-                    barrier.srcAccessMask = {};
-                    barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+                destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+            }
+            else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+            {
+                barrier.srcAccessMask = {};
+                barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-                    sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-                    destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-                }
+                sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+            }
 
-                vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, {}, 0, nullptr, 0, nullptr, 1, &barrier);
-            });
+            vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, {}, 0, nullptr, 0, nullptr, 1, &barrier);
+        });
     }
-
 } // namespace blink

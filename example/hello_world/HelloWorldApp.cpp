@@ -15,13 +15,9 @@
 #include "systems/UserCommandSystem.h"
 
 #include <blink/blink.h>
-#include <blink/components/Components.h>
 #include <blink/systems/DebugLineSystem.h>
 #include <flecs/flecs_os_api_stdcpp.h>
 #include <imgui/imgui.h>
-#include <physics/systems/BeginPhysicsSimulationSystem.h>
-#include <physics/systems/DynamicIntegrateSystem.h>
-#include <physics/systems/EndPhysicsSimulationSystem.h>
 #include <render_systems/ImguiRenderSystem.h>
 #include <render_systems/SceneRenderSystem.h>
 #include <render_vulkan/VulkanRenderModule.h>

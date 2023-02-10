@@ -21,29 +21,35 @@ namespace blink
     class VulkanLogicalDevice
     {
     public:
-        VulkanLogicalDevice(VulkanContext* context);
+        explicit VulkanLogicalDevice(VulkanContext* context);
         ~VulkanLogicalDevice();
+
+        VulkanLogicalDevice(const VulkanLogicalDevice& device) = delete;
+        VulkanLogicalDevice(VulkanLogicalDevice&& device) = delete;
+        VulkanLogicalDevice& operator=(const VulkanLogicalDevice& device) = delete;
+        VulkanLogicalDevice& operator=(VulkanLogicalDevice&& device) = delete;
+
+        operator VkDevice() const { return m_logicalDevice; }
 
         bool create();
         void destroy();
 
-        operator VkDevice() const { return m_logicalDevice; };
         void waitDeviceIdle();
         void waitGraphicsQueueIdle();
 
         void resetDescriptorPool();
         void executeCommand(std::function<void(VulkanCommandBuffer& commandBuffer)>&& cb);
 
-        int getGraphicsFamilyIndex() const { return m_graphicsFamilyIndex; };
-        int getPresentFamilyIndex() const { return m_presentFamilyIndex; };
+        int getGraphicsFamilyIndex() const { return m_graphicsFamilyIndex; }
+        int getPresentFamilyIndex() const { return m_presentFamilyIndex; }
 
-        VulkanContext* getContext() const { return m_context; };
-        VkQueue getGraphicsQueue() const { return m_graphicsQueue; };
-        VkQueue getPresentQueue() const { return m_presentQueue; };
-        VulkanCommandPool& getCommandPool() const { return *m_commandPool; };
-        VulkanDescriptorPool& getDescriptorPool() const { return *m_descriptorPool; };
+        VulkanContext* getContext() const { return m_context; }
+        VkQueue getGraphicsQueue() const { return m_graphicsQueue; }
+        VkQueue getPresentQueue() const { return m_presentQueue; }
+        VulkanCommandPool& getCommandPool() const { return *m_commandPool; }
+        VulkanDescriptorPool& getDescriptorPool() const { return *m_descriptorPool; }
 
-        VkDeviceSize getMinUniformBufferOffsetAlignment() const { return m_minUniformBufferOffsetAlignment; };
+        VkDeviceSize getMinUniformBufferOffsetAlignment() const { return m_minUniformBufferOffsetAlignment; }
 
     private:
         bool createLogicalDevice();
@@ -63,5 +69,4 @@ namespace blink
 
         VkDeviceSize m_minUniformBufferOffsetAlignment{};
     };
-
 } // namespace blink

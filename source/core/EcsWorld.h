@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   EcsWorld.h
  * \brief
@@ -32,24 +31,26 @@ namespace blink
         void terminate();
 
         bool addSystem(ILogicalSystem* sys);
+
         template <typename T, typename = std::enable_if_t<std::is_base_of<ILogicalSystem, T>::value>> T* findSystem() const
         {
-            auto it = m_logicalSytemsTypeMap.find(typeid(T));
-            if (it == m_logicalSytemsTypeMap.end()) return nullptr;
+            auto it = m_logicalSystemsTypeMap.find(typeid(T));
+            if (it == m_logicalSystemsTypeMap.end()) return nullptr;
 
             return dynamic_cast<T*>(it->second);
         }
+
         void destroyAllSystems();
 
         void step();
 
         flecs::world& getWorld() { return m_world; };
-        uint32 getFrameTick() const { return m_frameTick; }
+        uint32_t getFrameTick() const { return m_frameTick; }
 
     private:
         flecs::world m_world;
-        uint32 m_frameTick{};
+        uint32_t m_frameTick{};
         std::vector<ILogicalSystem*> m_logicalSystems;
-        std::unordered_map<std::type_index, ILogicalSystem*> m_logicalSytemsTypeMap;
+        std::unordered_map<std::type_index, ILogicalSystem*> m_logicalSystemsTypeMap;
     };
 } // namespace blink

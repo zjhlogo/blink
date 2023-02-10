@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   SinglePendulumSystem.h
  * \brief  
@@ -10,14 +9,13 @@
 
 #include <core/ILogicalSystem.h>
 
-class SinglePendulumSystem : public blink::ILogicalSystem
+class SinglePendulumSystem final : public blink::ILogicalSystem
 {
 public:
     SinglePendulumSystem() = default;
 
-    virtual bool initialize() override;
-    virtual void terminate() override;
+    bool initialize() override;
+    void terminate() override;
 
-    virtual void framePostUpdate() override;
-
+    void framePostUpdate() override;
 };

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   DynamicIntegrateSystem.h
  * \brief  
@@ -12,11 +11,10 @@
 
 namespace blink
 {
-	class DynamicIntegrateSystem : public ILogicalSystem
-	{
-	public:
-		virtual bool initialize() override;
-		virtual void terminate() override;
-
-	};
+    class DynamicIntegrateSystem final : public ILogicalSystem
+    {
+    public:
+        bool initialize() override;
+        void terminate() override;
+    };
 }

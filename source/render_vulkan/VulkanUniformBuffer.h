@@ -18,11 +18,16 @@ namespace blink
     class VulkanUniformBuffer
     {
     public:
-        static const VkDeviceSize DEFAULT_UBO_SIZE = 1024 * 1024;
+        static constexpr VkDeviceSize DEFAULT_UBO_SIZE = 1024ull * 1024ull;
 
     public:
-        VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice);
         ~VulkanUniformBuffer();
+
+        VulkanUniformBuffer(const VulkanUniformBuffer& buffer) = delete;
+        VulkanUniformBuffer(VulkanUniformBuffer&& buffer) = delete;
+        VulkanUniformBuffer& operator=(const VulkanUniformBuffer& buffer) = delete;
+        VulkanUniformBuffer& operator=(VulkanUniformBuffer&& buffer) = delete;
 
         operator VkBuffer() const;
 
@@ -31,7 +36,7 @@ namespace blink
         void reset();
         void flushBuffer();
 
-        size_t getCurrentPos() const { return m_currentPos; };
+        size_t getCurrentPos() const { return m_currentPos; }
         bool appendData(const void* data, VkDeviceSize size, VkDescriptorBufferInfo* bufferInfoOut = nullptr);
 
     private:
@@ -45,5 +50,4 @@ namespace blink
         std::vector<uint8_t> m_memBuffer;
         size_t m_currentPos{};
     };
-
 } // namespace blink

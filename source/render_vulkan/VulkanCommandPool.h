@@ -9,8 +9,6 @@
 #pragma once
 #include "VulkanBase.h"
 
-#include <vector>
-
 namespace blink
 {
     class VulkanLogicalDevice;
@@ -18,10 +16,15 @@ namespace blink
     class VulkanCommandPool
     {
     public:
-        VulkanCommandPool(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanCommandPool(VulkanLogicalDevice& logicalDevice);
         ~VulkanCommandPool();
 
-        operator VkCommandPool() { return m_commandPool; };
+        VulkanCommandPool(const VulkanCommandPool& pool) = delete;
+        VulkanCommandPool(VulkanCommandPool&& pool) = delete;
+        VulkanCommandPool& operator=(const VulkanCommandPool& pool) = delete;
+        VulkanCommandPool& operator=(VulkanCommandPool&& pool) = delete;
+
+        operator VkCommandPool() { return m_commandPool; }
 
         bool create();
         void destroy();
@@ -30,5 +33,4 @@ namespace blink
         VulkanLogicalDevice& m_logicalDevice;
         VkCommandPool m_commandPool{};
     };
-
 } // namespace blink

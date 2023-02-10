@@ -14,18 +14,23 @@
 
 #include <vector>
 
-class ImguiRenderSystem : public blink::IRenderSystem
+class ImguiRenderSystem final : public blink::IRenderSystem
 {
 public:
-    ImguiRenderSystem();
-    virtual ~ImguiRenderSystem();
+    ImguiRenderSystem() = default;
+    ~ImguiRenderSystem() override;
 
-    virtual bool initialize() override;
-    virtual void terminate() override;
-    virtual void render(blink::IRenderData& renderData) override;
+    ImguiRenderSystem(const ImguiRenderSystem& system) = delete;
+    ImguiRenderSystem(ImguiRenderSystem&& system) = delete;
+    ImguiRenderSystem& operator=(const ImguiRenderSystem& system) = delete;
+    ImguiRenderSystem& operator=(ImguiRenderSystem&& system) = delete;
+
+    bool initialize() override;
+    void terminate() override;
+    void render(blink::IRenderData& renderData) override;
 
     void addWindow(IGuiWindow* window);
-    void removeWindow(IGuiWindow* window);
+    void removeWindow(const IGuiWindow* window);
 
 private:
     VkDescriptorPool m_imguiPool{};

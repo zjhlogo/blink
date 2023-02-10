@@ -13,11 +13,8 @@ namespace blink
 {
     size_t getFileSize(const tstring& filePath)
     {
-        struct stat sb;
-        if (stat(filePath.c_str(), &sb) == 0)
-        {
-            return sb.st_size;
-        }
+        struct stat sb{};
+        if (stat(filePath.c_str(), &sb) == 0) { return sb.st_size; }
 
         return 0;
     }
@@ -38,7 +35,7 @@ namespace blink
 
         m_mode = flag;
         m_fileHandler = pFile;
-        m_fileSize = getFileSize(filePath);
+        m_fileSize = static_cast<int64_t>(getFileSize(filePath));
 
         return true;
     }
@@ -47,65 +44,62 @@ namespace blink
     {
         if (m_fileHandler)
         {
-            fclose((FILE*)m_fileHandler);
+            fclose(static_cast<FILE*>(m_fileHandler));
             m_fileHandler = nullptr;
         }
     }
 
-    int64 File::seek(int64 offset, SeekType seekType /* = SeekType::Current */)
+    int64_t File::seek(int64_t offset, SeekType seekType /* = SeekType::Current */)
     {
         if (!m_fileHandler) return 0;
 
         int seekFrom = SEEK_CUR;
-        if (seekType == SeekType::Begin)
-            seekFrom = SEEK_SET;
-        else if (seekType == SeekType::End)
-            seekFrom = SEEK_END;
+        if (seekType == SeekType::Begin) seekFrom = SEEK_SET;
+        else if (seekType == SeekType::End) seekFrom = SEEK_END;
 
-        return fseek((FILE*)m_fileHandler, static_cast<long>(offset), seekFrom);
+        return fseek(static_cast<FILE*>(m_fileHandler), static_cast<long>(offset), seekFrom);
     }
 
-    int64 File::tell()
+    int64_t File::tell()
     {
         if (!m_fileHandler) return 0;
 
-        return ftell((FILE*)m_fileHandler);
+        return ftell(static_cast<FILE*>(m_fileHandler));
     }
 
-    int64 File::read(void* dataOut, int64 size)
+    int64_t File::read(void* dataOut, int64_t size)
     {
         if (!m_fileHandler) return 0;
         if ((m_mode & AM_READ) == 0) return 0;
         if (size <= 0) return 0;
 
-        return fread(dataOut, 1, static_cast<size_t>(size), (FILE*)m_fileHandler);
+        return fread(dataOut, 1, static_cast<size_t>(size), static_cast<FILE*>(m_fileHandler));
     }
 
-    int64 File::read(std::vector<uint8>& dataOut, int64 size)
+    int64_t File::read(std::vector<uint8_t>& dataOut, int64_t size)
     {
         if (!m_fileHandler) return 0;
         if ((m_mode & AM_READ) == 0) return 0;
         if (size <= 0) return 0;
 
         dataOut.resize(static_cast<size_t>(size));
-        return fread(dataOut.data(), 1, static_cast<size_t>(size), (FILE*)m_fileHandler);
+        return fread(dataOut.data(), 1, static_cast<size_t>(size), static_cast<FILE*>(m_fileHandler));
     }
 
-    int64 File::write(const void* data, int64 size)
+    int64_t File::write(const void* data, int64_t size)
     {
         if (!m_fileHandler) return 0;
         if ((m_mode & AM_WRITE) == 0) return 0;
         if (size <= 0) return 0;
 
-        return fwrite(data, 1, static_cast<size_t>(size), (FILE*)m_fileHandler);
+        return fwrite(data, 1, static_cast<size_t>(size), static_cast<FILE*>(m_fileHandler));
     }
 
-    int64 File::write(const std::vector<uint8>& data)
+    int64_t File::write(const std::vector<uint8_t>& data)
     {
         if (!m_fileHandler) return 0;
         if ((m_mode & AM_WRITE) == 0) return 0;
 
-        return fwrite(data.data(), 1, data.size(), (FILE*)m_fileHandler);
+        return fwrite(data.data(), 1, data.size(), static_cast<FILE*>(m_fileHandler));
     }
-
 } // namespace blink

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   VulkanGeometryTriangleList.h
  * \brief
@@ -14,31 +13,36 @@ namespace blink
 {
     class VulkanLogicalDevice;
 
-    class VulkanGeometryTriangleList : public VulkanGeometry
+    class VulkanGeometryTriangleList final : public VulkanGeometry
     {
     public:
-        VulkanGeometryTriangleList(VulkanLogicalDevice& logicalDevice);
-        virtual ~VulkanGeometryTriangleList();
+        explicit VulkanGeometryTriangleList(VulkanLogicalDevice& logicalDevice);
+        ~VulkanGeometryTriangleList() override;
 
-        virtual bool uploadData(const std::vector<uint16>& indices, const std::vector<glm::vec3>& positions, const std::vector<Color>& colors) override;
+        VulkanGeometryTriangleList(const VulkanGeometryTriangleList& triangleList) = delete;
+        VulkanGeometryTriangleList(VulkanGeometryTriangleList&& triangleList) = delete;
+        VulkanGeometryTriangleList& operator=(const VulkanGeometryTriangleList& triangleList) = delete;
+        VulkanGeometryTriangleList& operator=(VulkanGeometryTriangleList&& triangleList) = delete;
 
-        virtual bool uploadData(const std::vector<uint16>& indices,
-                                const std::vector<glm::vec3>& positions,
-                                const std::vector<glm::vec3>& normals,
-                                const std::vector<glm::vec2>& uv0s) override;
+        bool uploadData(const std::vector<uint16_t>& indices, const std::vector<glm::vec3>& positions, const std::vector<Color>& colors) override;
 
-        virtual bool uploadData(const void* data,
-                                std::size_t dataSize,
-                                uint32 numVertices,
-                                uint32 numIndices,
-                                std::size_t offsetPosition,
-                                std::size_t offsetNormal,
-                                std::size_t offsetUv0,
-                                std::size_t offsetIndices) override;
+        bool uploadData(const std::vector<uint16_t>& indices,
+                        const std::vector<glm::vec3>& positions,
+                        const std::vector<glm::vec3>& normals,
+                        const std::vector<glm::vec2>& uv0s) override;
 
-        virtual VulkanBuffer* getVulkanBuffer() const override { return m_buffer; }
-        virtual VkDeviceSize getVertexInputOffset(VertexAttrs vertexAttrs) const override;
-        virtual VkDeviceSize getIndicesOffset() const override { return m_offsetIndices; }
+        bool uploadData(const void* data,
+                        std::size_t dataSize,
+                        uint32_t numVertices,
+                        uint32_t numIndices,
+                        std::size_t offsetPosition,
+                        std::size_t offsetNormal,
+                        std::size_t offsetUv0,
+                        std::size_t offsetIndices) override;
+
+        VulkanBuffer* getVulkanBuffer() const override { return m_buffer; }
+        VkDeviceSize getVertexInputOffset(VertexAttrs vertexAttrs) const override;
+        VkDeviceSize getIndicesOffset() const override { return m_offsetIndices; }
 
     protected:
         void destroy();
@@ -49,7 +53,7 @@ namespace blink
 
         VkDeviceSize m_offsetPositions{};
         VkDeviceSize m_offsetNormals{};
-        VkDeviceSize m_offsetUv0s{};
+        VkDeviceSize m_offsetUvs{};
         VkDeviceSize m_offsetIndices{};
     };
 } // namespace blink

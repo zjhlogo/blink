@@ -27,7 +27,7 @@ namespace blink
 
     bool VulkanDescriptorPool::create(uint32_t count)
     {
-        std::array<VkDescriptorPoolSize, 2> poolSizes;
+        std::array<VkDescriptorPoolSize, 2> poolSizes{};
         poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         poolSizes[0].descriptorCount = count * 2;
         poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -73,9 +73,8 @@ namespace blink
         allocInfo.descriptorSetCount = 1;
         allocInfo.pSetLayouts = &layout;
 
-        VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, &descriptorSet));
+        VkDescriptorSet descriptorSet = nullptr;
+        VK_CHECK_RESULT(vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, &descriptorSet))
         return descriptorSet;
     }
-
 } // namespace blink

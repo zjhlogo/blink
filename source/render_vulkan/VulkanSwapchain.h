@@ -24,19 +24,24 @@ namespace blink
         VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice);
         ~VulkanSwapchain();
 
+        VulkanSwapchain(const VulkanSwapchain& swapchain) = delete;
+        VulkanSwapchain(VulkanSwapchain&& swapchain) = delete;
+        VulkanSwapchain& operator=(const VulkanSwapchain& swapchain) = delete;
+        VulkanSwapchain& operator=(VulkanSwapchain&& swapchain) = delete;
+
         bool create();
         bool recreate();
         void destroy();
 
-        operator VkSwapchainKHR() const { return m_swapChain; };
-        VkFormat getImageFormat() const { return m_swapChainImageFormat; };
-        const VkExtent2D& getImageExtent() const { return m_swapChainExtent; };
-        std::size_t getImageCount() const { return m_images.size(); };
-        VkFramebuffer getFramebuffers(size_t index) { return m_swapChainFramebuffers[index]; };
-        VkRenderPass getRenderPass() const { return m_renderPass; };
+        operator VkSwapchainKHR() const { return m_swapChain; }
+        VkFormat getImageFormat() const { return m_swapChainImageFormat; }
+        const VkExtent2D& getImageExtent() const { return m_swapChainExtent; }
+        std::size_t getImageCount() const { return m_images.size(); }
+        VkFramebuffer getFrameBuffers(size_t index) { return m_swapChainFrameBuffers[index]; }
+        VkRenderPass getRenderPass() const { return m_renderPass; }
 
-        void setCurrentActivedImageIndex(uint32_t imageIndex) { m_activedImageIndex = imageIndex; };
-        uint32_t getCurrentActivedImageIndex() { return m_activedImageIndex; };
+        void setCurrentActiveImageIndex(uint32_t imageIndex) { m_activeImageIndex = imageIndex; }
+        uint32_t getCurrentActiveImageIndex() { return m_activeImageIndex; }
 
     private:
         bool createSwapChain();
@@ -48,25 +53,24 @@ namespace blink
         VkRenderPass createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
         void destroyRenderPass();
 
-        bool createFramebuffers(VkRenderPass renderPass);
-        void destroyFramebuffers();
+        bool createFrameBuffers(VkRenderPass renderPass);
+        void destroyFrameBuffers();
 
     private:
         VulkanWindow& m_window;
         VulkanLogicalDevice& m_logicalDevice;
 
         VkSwapchainKHR m_swapChain{};
-        VkFormat m_swapChainImageFormat;
+        VkFormat m_swapChainImageFormat{};
         VkExtent2D m_swapChainExtent{};
 
         std::vector<VulkanImage*> m_images;
-        std::vector<VkFramebuffer> m_swapChainFramebuffers;
+        std::vector<VkFramebuffer> m_swapChainFrameBuffers;
 
         VulkanTexture* m_depthTexture{};
 
         VkRenderPass m_renderPass{};
 
-        uint32_t m_activedImageIndex{};
+        uint32_t m_activeImageIndex{};
     };
-
 } // namespace blink

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   RenderOrders.h
  * \brief
@@ -15,8 +14,8 @@ namespace blink
     class RenderOrders
     {
     public:
-        static const uint32 STATIC_OPAQUE = 1000;
-        static const uint32 DYNAMIC_OPAQUE = 2000;
-        static const uint32 TRANSPARENT = 3000;
+        static constexpr uint32_t STATIC_OPAQUE = 1000;
+        static constexpr uint32_t DYNAMIC_OPAQUE = 2000;
+        static constexpr uint32_t TRANSPARENT = 3000;
     };
 } // namespace blink

@@ -16,10 +16,15 @@ namespace blink
     class VulkanFence
     {
     public:
-        VulkanFence(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanFence(VulkanLogicalDevice& logicalDevice);
         ~VulkanFence();
 
-        operator VkFence() { return m_fence; };
+        VulkanFence(const VulkanFence& fence) = delete;
+        VulkanFence(VulkanFence&& fence) = delete;
+        VulkanFence& operator=(const VulkanFence& fence) = delete;
+        VulkanFence& operator=(VulkanFence&& fence) = delete;
+
+        operator VkFence() { return m_fence; }
 
         bool create(bool signaled = false);
         void destroy();

@@ -10,12 +10,6 @@
 
 namespace blink
 {
-    File::File()
-    {
-        //
-        //
-    }
-
     File::File(const tstring& filePath, int flag /*= AM_READ*/)
     {
         //
@@ -35,12 +29,12 @@ namespace blink
 
         auto fileSize = file.fileSize();
         strOut.resize(fileSize);
-        file.read((void*)strOut.data(), fileSize);
+        file.read(&strOut[0], fileSize);
 
         return true;
     }
 
-    bool File::readFileIntoBuffer(std::vector<uint8>& dataOut, const tstring& filePath)
+    bool File::readFileIntoBuffer(std::vector<uint8_t>& dataOut, const tstring& filePath)
     {
         File file;
         if (!file.open(filePath)) return false;
@@ -51,5 +45,4 @@ namespace blink
 
         return true;
     }
-
 } // namespace blink

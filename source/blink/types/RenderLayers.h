@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   RenderLayers.h
  * \brief
@@ -15,10 +14,10 @@ namespace blink
     class RenderLayers
     {
     public:
-        static const uint32 NONE = 0;
-        static const uint32 DEBUG = 1 << 0;
-        static const uint32 STATIC = 1 << 1;
-        static const uint32 NORMAL = 1 << 2;
-        static const uint32 ALL = STATIC | NORMAL;
+        static constexpr uint32_t NONE = 0;
+        static constexpr uint32_t DEBUG = 1 << 0;
+        static constexpr uint32_t STATIC = 1 << 1;
+        static constexpr uint32_t NORMAL = 1 << 2;
+        static constexpr uint32_t ALL = STATIC | NORMAL;
     };
 } // namespace blink

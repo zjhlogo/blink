@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   PbrEntityCreationSystem.h
  * \brief
@@ -15,9 +14,9 @@
 class PbrEntityCreationSystem : public blink::ILogicalSystem
 {
 public:
-    virtual bool initialize() override;
-    virtual void terminate() override;
-    virtual void framePostUpdate() override;
+    bool initialize() override;
+    void terminate() override;
+    void framePostUpdate() override;
 
     void renderMaterialPropertyUi();
 

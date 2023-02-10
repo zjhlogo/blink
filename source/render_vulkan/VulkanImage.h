@@ -18,11 +18,16 @@ namespace blink
     class VulkanImage
     {
     public:
-        VulkanImage(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanImage(VulkanLogicalDevice& logicalDevice);
         VulkanImage(VulkanLogicalDevice& logicalDevice, VkImage image);
         ~VulkanImage();
 
-        operator VkImage() { return m_image; };
+        VulkanImage(const VulkanImage& image) = delete;
+        VulkanImage(VulkanImage&& image) = delete;
+        VulkanImage& operator=(const VulkanImage& image) = delete;
+        VulkanImage& operator=(VulkanImage&& image) = delete;
+
+        operator VkImage() { return m_image; }
 
         VkImage createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
         void destroyImage(bool destroyImageHandle = true);
@@ -35,7 +40,7 @@ namespace blink
 
         void transitionImageLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
-        VkImageView getImageView() const { return m_imageView; };
+        VkImageView getImageView() const { return m_imageView; }
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
@@ -47,5 +52,4 @@ namespace blink
         VkImageView m_imageView{};
         VulkanMemory* m_imageMemory{};
     };
-
 } // namespace blink

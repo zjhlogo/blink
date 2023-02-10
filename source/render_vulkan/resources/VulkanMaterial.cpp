@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   VulkanMaterial.cpp
  * \brief
@@ -27,6 +26,7 @@ namespace blink
         : m_logicalDevice(logicalDevice)
         , m_swapchain(swapchain)
     {
+        // 
     }
 
     VulkanMaterial::~VulkanMaterial()
@@ -35,24 +35,21 @@ namespace blink
         destroy();
     }
 
-    void VulkanMaterial::bindPipeline(VulkanCommandBuffer& commandBuffer)
+    void VulkanMaterial::bindPipeline(const VulkanCommandBuffer& commandBuffer)
     {
         //
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
     }
 
-    bool VulkanMaterial::updateBufferInfos(VulkanCommandBuffer& commandBuffer, VulkanGeometry* geometry)
+    bool VulkanMaterial::updateBufferInfos(const VulkanCommandBuffer& commandBuffer, const VulkanGeometry* geometry)
     {
         // check validation
         auto pipelineVertexAttrs = m_pipeline->getVertexAttrFlags();
         if (!geometry->hasVertexAttrs(pipelineVertexAttrs)) return false;
         if (m_topology != geometry->getTopology()) return false;
 
-        // set line width when nessary
-        if (m_topology == PrimitiveTopology::LineList)
-        {
-            vkCmdSetLineWidth(commandBuffer, 1.0f);
-        }
+        // set line width when necessary
+        if (m_topology == PrimitiveTopology::LineList) { vkCmdSetLineWidth(commandBuffer, 1.0f); }
 
         // setup vertex buffer
         VkBuffer buffer = *geometry->getVulkanBuffer();
@@ -103,131 +100,115 @@ namespace blink
 
         // wireframe
         {
-            auto jwireframe = j["wireframe"];
-            if (!jwireframe.is_null())
-            {
-                if (jwireframe.get<bool>())
-                {
-                    m_polygonMode = VK_POLYGON_MODE_LINE;
-                }
-            }
+            auto jWireframe = j["wireframe"];
+            if (!jWireframe.is_null()) { if (jWireframe.get<bool>()) { m_polygonMode = VK_POLYGON_MODE_LINE; } }
         }
 
-        // linelist
+        // line-list
         {
-            auto jlinelist = j["line_list"];
-            if (!jlinelist.is_null())
-            {
-                if (jlinelist.get<bool>())
-                {
-                    m_topology = PrimitiveTopology::LineList;
-                }
-            }
+            auto jLineList = j["line_list"];
+            if (!jLineList.is_null()) { if (jLineList.get<bool>()) { m_topology = PrimitiveTopology::LineList; } }
         }
 
         m_filePath = filePath;
 
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
-        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_polygonMode, m_topology))
-        {
-            return false;
-        }
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_polygonMode, m_topology)) { return false; }
 
         m_descriptorInfoList.resize(m_pipeline->getWriteSetCount());
 
         // uniforms
         {
-            auto juniforms = j["uniforms"];
-            if (juniforms.is_array())
+            auto jUniforms = j["uniforms"];
+            if (jUniforms.is_array())
             {
                 auto uniformBlock = m_pipeline->getUniformBlock(UniformBinding::Material);
                 if (uniformBlock)
                 {
                     uniformBlock->prepareBuffer();
 
-                    for (int i = 0; i < juniforms.size(); ++i)
+                    for (auto jUniform : jUniforms)
                     {
-                        auto juniform = juniforms[i];
-                        auto type = juniform["type"].get<tstring>();
+                        auto type = jUniform["type"].get<tstring>();
                         if (type == "int")
                         {
-                            auto value = juniform["value"].get<int>();
-                            uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
+                            auto value = jUniform["value"].get<int>();
+                            uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                         }
                         else if (type == "float")
                         {
-                            auto value = juniform["value"].get<float>();
-                            uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
+                            auto value = jUniform["value"].get<float>();
+                            uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                         }
                         else if (type == "vec2")
                         {
-                            auto jvec2 = juniform["value"];
-                            if (jvec2.is_array() && jvec2.size() == 2)
+                            auto jVec2 = jUniform["value"];
+                            if (jVec2.is_array() && jVec2.size() == 2)
                             {
-                                auto value = glm::vec2(jvec2[0].get<float>(), jvec2[1].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
+                                auto value = glm::vec2(jVec2[0].get<float>(), jVec2[1].get<float>());
+                                uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "vec3")
                         {
-                            auto jvec3 = juniform["value"];
-                            if (jvec3.is_array() && jvec3.size() == 3)
+                            auto jVec3 = jUniform["value"];
+                            if (jVec3.is_array() && jVec3.size() == 3)
                             {
-                                auto value = glm::vec3(jvec3[0].get<float>(), jvec3[1].get<float>(), jvec3[2].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
+                                auto value = glm::vec3(jVec3[0].get<float>(), jVec3[1].get<float>(), jVec3[2].get<float>());
+                                uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "vec4")
                         {
-                            auto jvec4 = juniform["value"];
-                            if (jvec4.is_array() && jvec4.size() == 4)
+                            auto jVec4 = jUniform["value"];
+                            if (jVec4.is_array() && jVec4.size() == 4)
                             {
-                                auto value = glm::vec4(jvec4[0].get<float>(),
-                                                       jvec4[1].get<float>(),
-                                                       jvec4[2].get<float>(),
-                                                       jvec4[3].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
+                                auto value = glm::vec4(jVec4[0].get<float>(),
+                                                       jVec4[1].get<float>(),
+                                                       jVec4[2].get<float>(),
+                                                       jVec4[3].get<float>());
+                                uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "mat3")
                         {
-                            auto jmat3 = juniform["value"];
-                            if (jmat3.is_array() && jmat3.size() == 9)
+                            auto jMat3 = jUniform["value"];
+                            if (jMat3.is_array() && jMat3.size() == 9)
                             {
-                                auto value = glm::mat3(jmat3[0].get<float>(),
-                                                       jmat3[1].get<float>(),
-                                                       jmat3[2].get<float>(),
-                                                       jmat3[3].get<float>(),
-                                                       jmat3[4].get<float>(),
-                                                       jmat3[5].get<float>(),
-                                                       jmat3[6].get<float>(),
-                                                       jmat3[7].get<float>(),
-                                                       jmat3[8].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
+                                auto value = glm::mat3(jMat3[0].get<float>(),
+                                                       jMat3[1].get<float>(),
+                                                       jMat3[2].get<float>(),
+                                                       jMat3[3].get<float>(),
+                                                       jMat3[4].get<float>(),
+                                                       jMat3[5].get<float>(),
+                                                       jMat3[6].get<float>(),
+                                                       jMat3[7].get<float>(),
+                                                       jMat3[8].get<float>());
+                                uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                             }
                         }
                         else if (type == "mat4")
                         {
-                            auto jmat4 = juniform["value"];
-                            if (jmat4.is_array() && jmat4.size() == 16)
+                            auto jMat4 = jUniform["value"];
+                            if (jMat4.is_array() && jMat4.size() == 16)
                             {
-                                auto value = glm::mat4(jmat4[0].get<float>(),
-                                                       jmat4[1].get<float>(),
-                                                       jmat4[2].get<float>(),
-                                                       jmat4[3].get<float>(),
-                                                       jmat4[4].get<float>(),
-                                                       jmat4[5].get<float>(),
-                                                       jmat4[6].get<float>(),
-                                                       jmat4[7].get<float>(),
-                                                       jmat4[8].get<float>(),
-                                                       jmat4[9].get<float>(),
-                                                       jmat4[10].get<float>(),
-                                                       jmat4[11].get<float>(),
-                                                       jmat4[12].get<float>(),
-                                                       jmat4[13].get<float>(),
-                                                       jmat4[14].get<float>(),
-                                                       jmat4[15].get<float>());
-                                uniformBlock->setUniformMember(juniform["name"].get<tstring>(), &value);
+                                auto value = glm::mat4(jMat4[0].get<float>(),
+                                                       jMat4[1].get<float>(),
+                                                       jMat4[2].get<float>(),
+                                                       jMat4[3].get<float>(),
+                                                       jMat4[4].get<float>(),
+                                                       jMat4[5].get<float>(),
+                                                       jMat4[6].get<float>(),
+                                                       jMat4[7].get<float>(),
+                                                       jMat4[8].get<float>(),
+                                                       jMat4[9].get<float>(),
+                                                       jMat4[10].get<float>(),
+                                                       jMat4[11].get<float>(),
+                                                       jMat4[12].get<float>(),
+                                                       jMat4[13].get<float>(),
+                                                       jMat4[14].get<float>(),
+                                                       jMat4[15].get<float>());
+                                uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                             }
                         }
                     }
@@ -237,15 +218,14 @@ namespace blink
 
         // textures
         {
-            auto jtextures = j["textures"];
-            if (jtextures.is_array())
+            auto jTextures = j["textures"];
+            if (jTextures.is_array())
             {
-                for (int i = 0; i < jtextures.size(); ++i)
+                for (auto jTexture : jTextures)
                 {
-                    auto jtexture = jtextures[i];
                     TextureInfo texInfo{};
-                    texInfo.name = jtexture["name"].get<tstring>();
-                    texInfo.path = jtexture["path"].get<tstring>();
+                    texInfo.name = jTexture["name"].get<tstring>();
+                    texInfo.path = jTexture["path"].get<tstring>();
                     m_textureInfoMap.insert({texInfo.name, texInfo});
                 }
             }
@@ -258,10 +238,7 @@ namespace blink
 
     bool VulkanMaterial::recreate()
     {
-        if (m_pipeline)
-        {
-            return m_pipeline->recreate();
-        }
+        if (m_pipeline) { return m_pipeline->recreate(); }
 
         return true;
     }
@@ -273,27 +250,15 @@ namespace blink
 
         switch (type)
         {
-        case blink::UniformType::Int:
-            return uniformBlock->setUniformMember(memberName, (int*)data);
-            break;
-        case blink::UniformType::Float:
-            return uniformBlock->setUniformMember(memberName, (float*)data);
-            break;
-        case blink::UniformType::Vec2:
-            return uniformBlock->setUniformMember(memberName, (glm::vec2*)data);
-            break;
-        case blink::UniformType::Vec3:
-            return uniformBlock->setUniformMember(memberName, (glm::vec3*)data);
-            break;
-        case blink::UniformType::Vec4:
-            return uniformBlock->setUniformMember(memberName, (glm::vec4*)data);
-            break;
-        case blink::UniformType::Mat3:
-            return uniformBlock->setUniformMember(memberName, (glm::mat3*)data);
-            break;
-        case blink::UniformType::Mat4:
-            return uniformBlock->setUniformMember(memberName, (glm::mat4*)data);
-            break;
+        case blink::UniformType::Int: return uniformBlock->setUniformMember(memberName, static_cast<const int*>(data));
+        case blink::UniformType::Float: return uniformBlock->setUniformMember(memberName, static_cast<const float*>(data));
+        case blink::UniformType::Vec2: return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec2*>(data));
+        case blink::UniformType::Vec3: return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec3*>(data));
+        case blink::UniformType::Vec4: return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec4*>(data));
+        case blink::UniformType::Mat3: return uniformBlock->setUniformMember(memberName, static_cast<const glm::mat3*>(data));
+        case blink::UniformType::Mat4: return uniformBlock->setUniformMember(memberName, static_cast<const glm::mat4*>(data));
+        case UniformType::None:
+        case UniformType::NumTypes: break;
         }
 
         return false;
@@ -306,27 +271,15 @@ namespace blink
 
         switch (type)
         {
-        case blink::UniformType::Int:
-            return uniformBlock->getUniformMember((int*)dataOut, memberName);
-            break;
-        case blink::UniformType::Float:
-            return uniformBlock->getUniformMember((float*)dataOut, memberName);
-            break;
-        case blink::UniformType::Vec2:
-            return uniformBlock->getUniformMember((glm::vec2*)dataOut, memberName);
-            break;
-        case blink::UniformType::Vec3:
-            return uniformBlock->getUniformMember((glm::vec3*)dataOut, memberName);
-            break;
-        case blink::UniformType::Vec4:
-            return uniformBlock->getUniformMember((glm::vec4*)dataOut, memberName);
-            break;
-        case blink::UniformType::Mat3:
-            return uniformBlock->getUniformMember((glm::mat3*)dataOut, memberName);
-            break;
-        case blink::UniformType::Mat4:
-            return uniformBlock->getUniformMember((glm::mat4*)dataOut, memberName);
-            break;
+        case UniformType::Int: return uniformBlock->getUniformMember(static_cast<int*>(dataOut), memberName);
+        case UniformType::Float: return uniformBlock->getUniformMember(static_cast<float*>(dataOut), memberName);
+        case UniformType::Vec2: return uniformBlock->getUniformMember(static_cast<glm::vec2*>(dataOut), memberName);
+        case UniformType::Vec3: return uniformBlock->getUniformMember(static_cast<glm::vec3*>(dataOut), memberName);
+        case UniformType::Vec4: return uniformBlock->getUniformMember(static_cast<glm::vec4*>(dataOut), memberName);
+        case UniformType::Mat3: return uniformBlock->getUniformMember(static_cast<glm::mat3*>(dataOut), memberName);
+        case UniformType::Mat4: return uniformBlock->getUniformMember(static_cast<glm::mat4*>(dataOut), memberName);
+        case UniformType::None:
+        case UniformType::NumTypes: break;
         }
 
         return false;
@@ -357,7 +310,7 @@ namespace blink
 
         // create texture and setup descriptor
         const auto& textureWriteSetIndexMap = m_pipeline->getTextureWriteSetIndexMap();
-        for (auto kvp : textureWriteSetIndexMap)
+        for (const auto& kvp : textureWriteSetIndexMap)
         {
             auto it = m_textureInfoMap.find(kvp.first);
             if (it == m_textureInfoMap.end()) continue;
@@ -379,5 +332,4 @@ namespace blink
 
         return true;
     }
-
 } // namespace blink

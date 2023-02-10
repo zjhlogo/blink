@@ -37,13 +37,13 @@ namespace blink
 
     struct Renderable
     {
-        uint32 renderLayer; // see RenderLayers
+        uint32_t renderLayer; // see RenderLayers
     };
 
     struct RenderFeature
     {
         int order;
-        uint32 renderLayer; // see RenderLayers
+        uint32_t renderLayer; // see RenderLayers
         IMaterial* overrideMaterial;
     };
 } // namespace blink

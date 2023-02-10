@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   VulkanUniformBlock.h
  * \brief
@@ -22,18 +21,15 @@ namespace blink
         {
             tstring name;
             UniformType type;
-            uint32 offset;
+            uint32_t offset;
         };
 
     public:
-        VulkanUniformBlock() = default;
-        ~VulkanUniformBlock() = default;
-
         void reset();
         void prepareBuffer();
         bool isReady();
 
-        bool addUniformMember(const tstring& name, UniformType type, uint32 offset);
+        bool addUniformMember(const tstring& name, UniformType type, uint32_t offset);
 
         template <typename T> bool setUniformMember(const tstring& memberName, const T* value)
         {
@@ -48,23 +44,8 @@ namespace blink
             const auto& memberInfo = m_memberInfoList[memberIndex];
             if (getUniformType<T>() != memberInfo.type) return false;
 
-            T* pData = (T*)(m_bufferData.data() + memberInfo.offset);
+            T* pData = reinterpret_cast<T*>(m_bufferData.data() + memberInfo.offset);
             *pData = *value;
-            return true;
-        }
-
-        template <> bool setUniformMember(int memberIndex, const glm::mat3* value)
-        {
-            const auto& memberInfo = m_memberInfoList[memberIndex];
-            if (UniformType::Mat3 != memberInfo.type) return false;
-
-            glm::vec3* pData1 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset);
-            glm::vec3* pData2 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset + 16);
-            glm::vec3* pData3 = (glm::vec3*)(m_bufferData.data() + memberInfo.offset + 32);
-
-            *pData1 = (*value)[0];
-            *pData2 = (*value)[1];
-            *pData3 = (*value)[2];
             return true;
         }
 
@@ -81,39 +62,30 @@ namespace blink
             const auto& memberInfo = m_memberInfoList[memberIndex];
             if (getUniformType<T>() != memberInfo.type) return false;
 
-            *valueOut = *(T*)(m_bufferData.data() + memberInfo.offset);
-            return true;
-        }
-
-        template <> bool getUniformMember(glm::mat3* valueOut, int memberIndex)
-        {
-            const auto& memberInfo = m_memberInfoList[memberIndex];
-            if (UniformType::Mat3 != memberInfo.type) return false;
-
-            (*valueOut)[0] = *(glm::vec3*)(m_bufferData.data() + memberInfo.offset);
-            (*valueOut)[1] = *(glm::vec3*)(m_bufferData.data() + memberInfo.offset + 16);
-            (*valueOut)[2] = *(glm::vec3*)(m_bufferData.data() + memberInfo.offset + 32);
-
+            *valueOut = *reinterpret_cast<T*>(m_bufferData.data() + memberInfo.offset);
             return true;
         }
 
         const tstring& getMemberName(int memberIndex) const;
         UniformType getMemberType(int memberIndex) const;
-        int getMemberCount() const { return static_cast<int>(m_memberInfoList.size()); };
-        const void* getBufferData() const { return m_bufferData.data(); };
-        uint32 getBufferSize() const { return m_uniformStructSize; };
+        int getMemberCount() const { return static_cast<int>(m_memberInfoList.size()); }
+        const void* getBufferData() const { return m_bufferData.data(); }
+        uint32_t getBufferSize() const { return m_uniformStructSize; }
 
     private:
-        uint32 calculateSize(UniformType type) const;
-        uint32 calculateOffset(UniformType type) const;
+        static uint32_t calculateSize(UniformType type);
+        uint32_t calculateOffset(UniformType type) const;
 
     private:
-        uint32 m_uniformStructSize{};
+        uint32_t m_uniformStructSize{};
 
         std::vector<UniformMemberInfo> m_memberInfoList;
         std::unordered_map<tstring, int> m_nameToIndexMap;
 
-        std::vector<uint8> m_bufferData;
+        std::vector<uint8_t> m_bufferData;
     };
 
+    template <> bool VulkanUniformBlock::setUniformMember(int memberIndex, const glm::mat3* value);
+
+    template <> bool VulkanUniformBlock::getUniformMember(glm::mat3* valueOut, int memberIndex);
 } // namespace blink

@@ -15,7 +15,7 @@ namespace blink
     static const tstring CURRENT_DIR = ".";
     static const tstring PARENT_DIR = "..";
 
-    void Directory::enumlateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive)
+    void Directory::enumerateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive)
     {
         DIR* pDir = opendir(rootDir.c_str());
         if (pDir)
@@ -31,7 +31,7 @@ namespace blink
                         tstring currDir = PathParser::combinePath(rootDir, pEnt->d_name);
                         if (recursive)
                         {
-                            enumlateFiles(filesOut, currDir, recursive);
+                            enumerateFiles(filesOut, currDir, recursive);
                         }
                         else
                         {

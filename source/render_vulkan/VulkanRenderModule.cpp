@@ -12,7 +12,6 @@
 #include "VulkanContext.h"
 #include "VulkanFence.h"
 #include "VulkanLogicalDevice.h"
-#include "VulkanSemaphore.h"
 #include "VulkanSwapchain.h"
 #include "VulkanUniformBuffer.h"
 #include "VulkanWindow.h"
@@ -28,8 +27,8 @@ namespace blink
 {
     IRenderModule* getRenderModule()
     {
-        static VulkanRenderModule s_vulkanRenderModule;
-        return &s_vulkanRenderModule;
+        static VulkanRenderModule vulkanRenderModule;
+        return &vulkanRenderModule;
     }
 
     bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
@@ -87,10 +86,7 @@ namespace blink
     bool VulkanRenderModule::processEvent()
     {
         /* Loop until the user closes the window */
-        if (glfwWindowShouldClose(*m_window))
-        {
-            return false;
-        }
+        if (glfwWindowShouldClose(*m_window)) { return false; }
 
         /* Poll for and process events */
         glfwPollEvents();
@@ -105,7 +101,7 @@ namespace blink
         auto result = vkAcquireNextImageKHR(*m_logicalDevice,
                                             *m_swapchain,
                                             UINT64_MAX,
-                                            VK_NULL_HANDLE,
+                                            nullptr,
                                             *m_acquireImageFence,
                                             &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
@@ -118,7 +114,7 @@ namespace blink
         m_acquireImageFence->wait();
         m_acquireImageFence->reset();
 
-        m_swapchain->setCurrentActivedImageIndex(imageIndex);
+        m_swapchain->setCurrentActiveImageIndex(imageIndex);
 
         // wait graphics queue idle
         m_logicalDevice->waitGraphicsQueueIdle();
@@ -134,18 +130,20 @@ namespace blink
 
             // using negative height to flip the y axis
             const auto& extent = m_swapchain->getImageExtent();
-            VkViewport viewport{0.0f, (float)extent.height, (float)extent.width, -(float)extent.height, 0.0f, 1.0f};
+            VkViewport viewport{0.0f, static_cast<float>(extent.height), static_cast<float>(extent.width), -static_cast<float>(extent.height), 0.0f, 1.0f};
             vkCmdSetViewport(*m_commandBuffer, 0, 1, &viewport);
 
             {
                 VkRect2D rect{{0, 0}, extent};
-                m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFramebuffers(imageIndex), rect);
+                m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFrameBuffers(imageIndex), rect);
 
                 // record commands
-                VulkanRenderData renderData{m_commandBuffer,
-                                            m_perFrameUniformBuffer,
-                                            m_perMaterialUniformBuffer,
-                                            m_perInstanceUniformBuffer};
+                VulkanRenderData renderData{
+                    m_commandBuffer,
+                    m_perFrameUniformBuffer,
+                    m_perMaterialUniformBuffer,
+                    m_perInstanceUniformBuffer
+                };
                 cb(renderData);
 
                 m_commandBuffer->endRenderPass();
@@ -168,7 +166,7 @@ namespace blink
         VkCommandBuffer commandBuffer = *m_commandBuffer;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE));
+        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE))
 
         // present queue
         VkPresentInfoKHR presentInfo{};
@@ -179,7 +177,8 @@ namespace blink
         presentInfo.pImageIndices = &imageIndex;
 
         result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
-        FrameMark;
+
+        FrameMark
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
@@ -203,7 +202,7 @@ namespace blink
     glm::vec2 VulkanRenderModule::getSurfaceSize() const
     {
         const auto& ext = m_swapchain->getImageExtent();
-        return glm::vec2(ext.width, ext.height);
+        return {ext.width, ext.height};
     }
 
     bool VulkanRenderModule::createSyncObjects()
@@ -219,5 +218,4 @@ namespace blink
         //
         SAFE_DELETE(m_acquireImageFence);
     }
-
 } // namespace blink

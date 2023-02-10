@@ -17,11 +17,11 @@ namespace blink
     static void frameBufferResizeCallback(GLFWwindow* window, int width, int height)
     {
         //
-        VulkanRenderModule* renderModule = reinterpret_cast<VulkanRenderModule*>(glfwGetWindowUserPointer(window));
+        // auto renderModule = static_cast<VulkanRenderModule*>(glfwGetWindowUserPointer(window));
         // renderModule->setFrameBufferResized(true);
     }
 
-    static void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
+    static void mousePositionCallback(GLFWwindow* window, double xPos, double yPos)
     {
         //
     }
@@ -31,17 +31,12 @@ namespace blink
         //
     }
 
-    static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+    static void mouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
     {
         //
     }
 
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-    {
-        //
-    }
-
-    VulkanWindow::VulkanWindow()
     {
         //
     }
@@ -99,5 +94,4 @@ namespace blink
             m_window = nullptr;
         }
     }
-
 } // namespace blink

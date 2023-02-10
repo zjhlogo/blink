@@ -110,7 +110,7 @@ namespace blink
             createInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
-        VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &m_instance));
+        VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &m_instance))
         VulkanUtils::enumeratePhysicalDevices(m_physicalDevices, m_instance);
         return true;
     }
@@ -129,24 +129,24 @@ namespace blink
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
-                                     | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+            | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
-                                 | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+            | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
 
-        VK_CHECK_RESULT(VulkanUtils::createDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger));
+        VK_CHECK_RESULT(VulkanUtils::createDebugUtilsMessengerExt(m_instance, &createInfo, nullptr, &m_debugMessenger))
         return true;
     }
 
     void VulkanContext::destroyDebugMessenger()
     {
         //
-        VulkanUtils::destroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
+        VulkanUtils::destroyDebugUtilsMessengerExt(m_instance, m_debugMessenger, nullptr);
     }
 
     bool VulkanContext::createSurface()
     {
-        VK_CHECK_RESULT(glfwCreateWindowSurface(m_instance, m_window->m_window, nullptr, &m_surface));
+        VK_CHECK_RESULT(glfwCreateWindowSurface(m_instance, m_window->m_window, nullptr, &m_surface))
         return true;
     }
 
@@ -225,5 +225,4 @@ namespace blink
 
         return -1;
     }
-
 } // namespace blink

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   LineArtEntityCreationSystem.h
  * \brief
@@ -11,18 +10,18 @@
 #include <blink/components/Components.h>
 #include <core/ILogicalSystem.h>
 
-class LineArtEntityCreationSystem : public blink::ILogicalSystem
+class LineArtEntityCreationSystem final : public blink::ILogicalSystem
 {
 public:
-    virtual bool initialize() override;
-    virtual void terminate() override;
-    virtual void framePostUpdate() override;
+    bool initialize() override;
+    void terminate() override;
+    void framePostUpdate() override;
 
     void renderMaterialPropertyUi();
 
 private:
     blink::IMaterial* m_material{};
-    glm::mat3 m_matViewToWorld;
+    glm::mat3 m_matViewToWorld{};
     glm::vec3 m_eyePos{4.0f, 2.0f, 4.0f};
     float m_fov{45.0f};
     glm::vec3 m_baseColor{1.0f, 0.0f, 0.0f};

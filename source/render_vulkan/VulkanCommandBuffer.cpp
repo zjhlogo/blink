@@ -8,7 +8,6 @@
  */
 #include "VulkanCommandBuffer.h"
 #include "VulkanCommandPool.h"
-#include "VulkanContext.h"
 #include "VulkanLogicalDevice.h"
 #include "utils/VulkanUtils.h"
 
@@ -37,7 +36,7 @@ namespace blink
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
 
-        VK_CHECK_RESULT(vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &m_commandBuffer));
+        VK_CHECK_RESULT(vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &m_commandBuffer))
         return true;
     }
 
@@ -58,7 +57,7 @@ namespace blink
         submitInfo.pCommandBuffers = &m_commandBuffer;
 
         auto graphicsQueue = m_logicalDevice.getGraphicsQueue();
-        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, nullptr);
     }
 
     void VulkanCommandBuffer::beginCommand()
@@ -84,7 +83,7 @@ namespace blink
         beginInfo.framebuffer = frameBuffer;
         beginInfo.renderArea = renderArea;
 
-        std::array<VkClearValue, 2> clearValues;
+        std::array<VkClearValue, 2> clearValues{};
         clearValues[0].color.float32[0] = 0.5f;
         clearValues[0].color.float32[1] = 0.5f;
         clearValues[0].color.float32[2] = 0.5f;
@@ -101,5 +100,4 @@ namespace blink
         //
         vkCmdEndRenderPass(m_commandBuffer);
     }
-
 } // namespace blink

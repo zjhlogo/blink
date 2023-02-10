@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   IRenderModule.h
  * \brief
@@ -8,7 +7,7 @@
  *********************************************************************/
 #pragma once
 #include "../IRenderSystem.h"
-
+#include <glm/glm.hpp>
 #include <functional>
 
 namespace blink
@@ -23,9 +22,17 @@ namespace blink
             Recreate
         };
 
-        typedef std::function<void(IRenderData& renderData)> RenderCb;
+        using RenderCb = std::function<void(IRenderData& renderData)>;
 
     public:
+        IRenderModule() = default;
+        virtual ~IRenderModule() = default;
+
+        IRenderModule(const IRenderModule& renderModule) = delete;
+        IRenderModule(IRenderModule&& renderModule) = delete;
+        IRenderModule& operator=(const IRenderModule& renderModule) = delete;
+        IRenderModule& operator=(IRenderModule&& renderModule) = delete;
+
         virtual bool createDevice(const glm::ivec2& deviceSize) = 0;
         virtual void destroyDevice() = 0;
 

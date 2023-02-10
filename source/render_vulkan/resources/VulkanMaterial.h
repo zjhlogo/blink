@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   VulkanMaterial.h
  * \brief
@@ -12,7 +11,6 @@
 #include "VulkanGeometry.h"
 
 #include <core/resources/IMaterial.h>
-#include <core/resources/ITexture2d.h>
 
 #include <vector>
 
@@ -23,7 +21,7 @@ namespace blink
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
 
-    class VulkanMaterial : public IMaterial
+    class VulkanMaterial final : public IMaterial
     {
     private:
         struct TextureInfo
@@ -35,22 +33,27 @@ namespace blink
 
     public:
         VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
-        ~VulkanMaterial();
+        ~VulkanMaterial() override;
+
+        VulkanMaterial(const VulkanMaterial& material) = delete;
+        VulkanMaterial(VulkanMaterial&& material) = delete;
+        VulkanMaterial& operator=(const VulkanMaterial& material) = delete;
+        VulkanMaterial& operator=(VulkanMaterial&& material) = delete;
 
         bool create(const tstring& filePath);
         void destroy();
 
-        virtual bool recreate() override;
+        bool recreate() override;
 
-        void bindPipeline(VulkanCommandBuffer& commandBuffer);
+        void bindPipeline(const VulkanCommandBuffer& commandBuffer);
         bool uploadUniformDescriptorBufferInfo(UniformBinding binding, const VkDescriptorBufferInfo& bufferInfo);
-        bool updateBufferInfos(VulkanCommandBuffer& commandBuffer, VulkanGeometry* geometry);
+        bool updateBufferInfos(const VulkanCommandBuffer& commandBuffer, const VulkanGeometry* geometry);
 
-        VulkanPipeline& getPipeline() const { return *m_pipeline; };
+        VulkanPipeline& getPipeline() const { return *m_pipeline; }
 
     protected:
-        virtual bool setUniform(const tstring& memberName, UniformType type, const void* data) override;
-        virtual bool getUniform(void* dataOut, const tstring& memberName, UniformType type) override;
+        bool setUniform(const tstring& memberName, UniformType type, const void* data) override;
+        bool getUniform(void* dataOut, const tstring& memberName, UniformType type) override;
 
     private:
         bool loadTextures();
@@ -70,5 +73,4 @@ namespace blink
 
         VulkanPipeline* m_pipeline{};
     };
-
 } // namespace blink

@@ -39,7 +39,7 @@ namespace blink
     IGeometry* TetrahedronBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
     {
         std::vector<glm::vec3> vertsPos;
-        std::vector<uint16> indices;
+        std::vector<uint16_t> indices;
         std::vector<glm::vec3> vertsNormal;
         std::vector<glm::vec2> vertsUv0;
 
@@ -54,7 +54,7 @@ namespace blink
         glm::vec3 p1(0.0f, -m_radius, m_radius / sqrtf(2.0f));
         glm::vec3 p3(0.0f, m_radius, m_radius / sqrtf(2.0f));
 
-        uint16 startIndex = static_cast<uint16>(vertsPos.size());
+        uint16_t startIndex = static_cast<uint16_t>(vertsPos.size());
         vertsPos.push_back(p0 + m_center);
         vertsPos.push_back(p1 + m_center);
         vertsPos.push_back(p2 + m_center);

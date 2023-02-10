@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   IResModule.h
  * \brief
@@ -17,6 +16,14 @@ namespace blink
     class IResModule
     {
     public:
+        IResModule() = default;
+        virtual ~IResModule() = default;
+
+        IResModule(const IResModule& res) = delete;
+        IResModule(IResModule&& res) = delete;
+        IResModule& operator=(const IResModule& res) = delete;
+        IResModule& operator=(IResModule&& res) = delete;
+
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
 

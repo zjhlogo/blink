@@ -16,10 +16,15 @@ namespace blink
     class VulkanSemaphore
     {
     public:
-        VulkanSemaphore(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanSemaphore(VulkanLogicalDevice& logicalDevice);
         ~VulkanSemaphore();
 
-        operator VkSemaphore() { return m_semaphore; };
+        VulkanSemaphore(const VulkanSemaphore& semaphore) = delete;
+        VulkanSemaphore(VulkanSemaphore&& semaphore) = delete;
+        VulkanSemaphore& operator=(const VulkanSemaphore& semaphore) = delete;
+        VulkanSemaphore& operator=(VulkanSemaphore&& semaphore) = delete;
+
+        operator VkSemaphore() { return m_semaphore; }
 
         bool create();
         void destroy();
@@ -29,5 +34,4 @@ namespace blink
 
         VkSemaphore m_semaphore{};
     };
-
 } // namespace blink

@@ -25,7 +25,7 @@ namespace blink
         return *this;
     }
 
-    BoxBuilder& BoxBuilder::segment(uint16 widthSegment, uint16 heightSegment, uint16 depthSegment)
+    BoxBuilder& BoxBuilder::segment(uint16_t widthSegment, uint16_t heightSegment, uint16_t depthSegment)
     {
         m_segment.x = widthSegment < 1 ? 1 : widthSegment;
         m_segment.y = heightSegment < 1 ? 1 : heightSegment;
@@ -42,7 +42,7 @@ namespace blink
     IGeometry* BoxBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
     {
         std::vector<glm::vec3> vertsPos;
-        std::vector<uint16> indices;
+        std::vector<uint16_t> indices;
         std::vector<glm::vec3> vertsNormal;
         std::vector<glm::vec2> vertsUv0;
 

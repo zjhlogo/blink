@@ -13,15 +13,11 @@
 #include <blink/app.h>
 #include <guis/IGuiWindow.h>
 
-class HelloWorldApp : public blink::IApp, public IGuiWindow
+class HelloWorldApp final : public blink::IApp, public IGuiWindow
 {
 public:
-    HelloWorldApp() = default;
-    virtual ~HelloWorldApp() = default;
+    bool initialize() override;
+    void terminate() override;
 
-    virtual bool initialize() override;
-    virtual void terminate() override;
-
-    virtual void renderUi() override;
-
+    void renderUi() override;
 };

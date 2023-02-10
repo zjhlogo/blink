@@ -38,5 +38,4 @@ namespace blink
         tstring filename;
         tstring extension;
     };
-
 } // namespace blink

@@ -13,7 +13,6 @@ namespace blink
     void Directory::listAllFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive)
     {
         //
-        enumlateFiles(filesOut, rootDir, recursive);
+        enumerateFiles(filesOut, rootDir, recursive);
     }
-
 } // namespace blink

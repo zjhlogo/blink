@@ -9,7 +9,6 @@
 #include "VulkanTexture.h"
 #include "../VulkanBuffer.h"
 #include "../VulkanCommandBuffer.h"
-#include "../VulkanCommandPool.h"
 #include "../VulkanContext.h"
 #include "../VulkanImage.h"
 #include "../VulkanLogicalDevice.h"
@@ -48,28 +47,27 @@ namespace blink
         return success;
     }
 
-    bool VulkanTexture::createTexture2D(void* pixels, int width, int height, int channels)
+    bool VulkanTexture::createTexture2D(const void* pixels, uint32_t width, uint32_t height, int channels)
     {
         if (!createTextureImage(pixels, width, height, channels)) return false;
 
-        if (m_textureImage->createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT) == nullptr)
-        {
-            return false;
-        }
+        if (m_textureImage->createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT) == nullptr) { return false; }
 
         if (!createTextureSampler()) return false;
 
         return true;
     }
 
-    bool VulkanTexture::createDepthTexture(int width, int height)
+    bool VulkanTexture::createDepthTexture(uint32_t width, uint32_t height)
     {
         destroyTextureImage();
 
         VkFormat depthFormat = VulkanUtils::findSupportedFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice(),
-                                                                {VK_FORMAT_D32_SFLOAT,
-                                                                 VK_FORMAT_D32_SFLOAT_S8_UINT,
-                                                                 VK_FORMAT_D24_UNORM_S8_UINT},
+                                                                {
+                                                                    VK_FORMAT_D32_SFLOAT,
+                                                                    VK_FORMAT_D32_SFLOAT_S8_UINT,
+                                                                    VK_FORMAT_D24_UNORM_S8_UINT
+                                                                },
                                                                 VK_IMAGE_TILING_OPTIMAL,
                                                                 VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
@@ -91,17 +89,16 @@ namespace blink
         destroyTextureImage();
     }
 
-    VulkanImage* VulkanTexture::createTextureImage(void* pixels, int width, int height, int channels)
+    VulkanImage* VulkanTexture::createTextureImage(const void* pixels, uint32_t width, uint32_t height, int channels)
     {
         destroyTextureImage();
 
-        VkDeviceSize imageSize = width * height * 4;
+        VkDeviceSize imageSize = 4ull * width * height;
 
         // create staging buffer
-        VulkanBuffer* stagingBuffer = new VulkanBuffer(m_logicalDevice);
+        auto stagingBuffer = new VulkanBuffer(m_logicalDevice);
         stagingBuffer->createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
-        VulkanMemory* bufferMemory = stagingBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                                                                         | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        VulkanMemory* bufferMemory = stagingBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         // copy buffer into staging buffer memory
         bufferMemory->uploadData(pixels, imageSize, 0);
 
@@ -120,29 +117,28 @@ namespace blink
 
         // copy buffer to image
         {
-            m_logicalDevice.executeCommand(
-                [&](VulkanCommandBuffer& commandBuffer)
-                {
-                    VkBufferImageCopy region;
-                    region.bufferOffset = 0;
-                    region.bufferRowLength = 0;
-                    region.bufferImageHeight = 0;
+            m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer)
+            {
+                VkBufferImageCopy region;
+                region.bufferOffset = 0;
+                region.bufferRowLength = 0;
+                region.bufferImageHeight = 0;
 
-                    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                    region.imageSubresource.mipLevel = 0;
-                    region.imageSubresource.baseArrayLayer = 0;
-                    region.imageSubresource.layerCount = 1;
+                region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                region.imageSubresource.mipLevel = 0;
+                region.imageSubresource.baseArrayLayer = 0;
+                region.imageSubresource.layerCount = 1;
 
-                    region.imageOffset = {0, 0, 0};
-                    region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
+                region.imageOffset = {0, 0, 0};
+                region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
 
-                    vkCmdCopyBufferToImage(commandBuffer,
-                                           *stagingBuffer,
-                                           *m_textureImage,
-                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                           1,
-                                           &region);
-                });
+                vkCmdCopyBufferToImage(commandBuffer,
+                                       *stagingBuffer,
+                                       *m_textureImage,
+                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                       1,
+                                       &region);
+            });
         }
 
         m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM,
@@ -195,5 +191,4 @@ namespace blink
             m_textureSampler = nullptr;
         }
     }
-
 } // namespace blink

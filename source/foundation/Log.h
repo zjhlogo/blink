@@ -27,9 +27,8 @@ namespace blink
         };
 
     public:
-        static void print(const char* location, int line, LogPriority prio, const tstring& strMsg);
+        static void print(const char* location, int line, LogPriority prior, const tstring& strMsg);
     };
-
 } // namespace blink
 
 #define LOGI(...) (blink::Log::print(__FILE__, __LINE__, blink::Log::LogPriority::Info, fmt::format(__VA_ARGS__)))

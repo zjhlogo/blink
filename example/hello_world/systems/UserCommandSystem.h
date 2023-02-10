@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   UserCommandSystem.h
  * \brief  
@@ -10,20 +9,17 @@
 
 #include <core/ILogicalSystem.h>
 
-class UserCommandSystem : public blink::ILogicalSystem
+class UserCommandSystem final : public blink::ILogicalSystem
 {
 public:
-    UserCommandSystem();
+    bool initialize() override;
+    void terminate() override;
 
-    virtual bool initialize() override;
-    virtual void terminate() override;
-
-    virtual void framePreUpdate() override;
-    virtual void framePostUpdate() override;
+    void framePreUpdate() override;
+    void framePostUpdate() override;
 
     void renderUi();
 
 private:
     bool m_pushMeClicked{};
-
 };

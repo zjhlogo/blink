@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   EndPhysicsSimulationSystem.h
  * \brief  
@@ -12,11 +11,10 @@
 
 namespace blink
 {
-	class EndPhysicsSimulationSystem : public ILogicalSystem
-	{
-	public:
-		virtual bool initialize() override;
-		virtual void terminate() override;
-
-	};
+    class EndPhysicsSimulationSystem final : public ILogicalSystem
+    {
+    public:
+        bool initialize() override;
+        void terminate() override;
+    };
 }

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   UserCommandSystem.cpp
  * \brief
@@ -12,10 +11,6 @@
 #include <core/EcsWorld.h>
 #include <imgui/imgui.h>
 #include <physics/components/Components.h>
-
-UserCommandSystem::UserCommandSystem()
-{
-}
 
 bool UserCommandSystem::initialize()
 {
@@ -40,15 +35,6 @@ void UserCommandSystem::framePreUpdate()
     //
 }
 
-void UserCommandSystem::framePostUpdate()
-{
-    m_pushMeClicked = false;
-}
+void UserCommandSystem::framePostUpdate() { m_pushMeClicked = false; }
 
-void UserCommandSystem::renderUi()
-{
-    if (ImGui::Button("Push Me", ImVec2(-1.0f, 0.0f)))
-    {
-        m_pushMeClicked = true;
-    }
-}
+void UserCommandSystem::renderUi() { if (ImGui::Button("Push Me", ImVec2(-1.0f, 0.0f))) { m_pushMeClicked = true; } }

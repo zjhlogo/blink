@@ -38,5 +38,5 @@ bool ImGui::ReadOnlyText(const char* label, const std::string* str, ImGuiInputTe
     cb_user_data.str = str;
     cb_user_data.chainCallback = callback;
     cb_user_data.chainCallbackUserData = userData;
-    return InputText(label, (char*)str->c_str(), str->capacity() + 1, flags, InputTextCallback, &cb_user_data);
+    return InputText(label, const_cast<char*>(str->c_str()), str->capacity() + 1, flags, InputTextCallback, &cb_user_data);
 }

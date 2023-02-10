@@ -16,7 +16,7 @@
 
 template <> struct fmt::formatter<glm::vec2>
 {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin())
     {
         //
         return ctx.end();
@@ -31,7 +31,7 @@ template <> struct fmt::formatter<glm::vec2>
 
 template <> struct fmt::formatter<glm::vec3>
 {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin())
     {
         //
         return ctx.end();
@@ -46,7 +46,7 @@ template <> struct fmt::formatter<glm::vec3>
 
 template <> struct fmt::formatter<glm::vec4>
 {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin())
     {
         //
         return ctx.end();
@@ -61,7 +61,7 @@ template <> struct fmt::formatter<glm::vec4>
 
 template <> struct fmt::formatter<glm::quat>
 {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin())
     {
         //
         return ctx.end();
@@ -76,7 +76,7 @@ template <> struct fmt::formatter<glm::quat>
 
 template <> struct fmt::formatter<glm::u16vec2>
 {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin())
     {
         //
         return ctx.end();
@@ -91,7 +91,7 @@ template <> struct fmt::formatter<glm::u16vec2>
 
 template <> struct fmt::formatter<glm::u16vec3>
 {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    static constexpr auto parse(const format_parse_context& ctx) -> decltype(ctx.begin())
     {
         //
         return ctx.end();

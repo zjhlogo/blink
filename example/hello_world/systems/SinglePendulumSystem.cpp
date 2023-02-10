@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   SinglePendulumSystem.cpp
  * \brief
@@ -18,44 +17,44 @@
 bool SinglePendulumSystem::initialize()
 {
     m_ecsWorld->getWorld()
-        .system<blink::PhysicsVelocity,
-                blink::Position,
-                const blink::PhysicsMass,
-                const blink::PhysicsDamping,
-                const SinglePendulum>()
-        .each(
-            [](flecs::entity e,
-               blink::PhysicsVelocity& pv,
-               blink::Position& pos,
-               const blink::PhysicsMass& pm,
-               const blink::PhysicsDamping& pd,
-               const SinglePendulum& sp)
-            {
-                auto dt = e.delta_time();
+              .system<blink::PhysicsVelocity,
+                      blink::Position,
+                      const blink::PhysicsMass,
+                      const blink::PhysicsDamping,
+                      const SinglePendulum>()
+              .each(
+                  [](flecs::entity e,
+                     blink::PhysicsVelocity& pv,
+                     blink::Position& pos,
+                     const blink::PhysicsMass& pm,
+                     const blink::PhysicsDamping& pd,
+                     const SinglePendulum& sp)
+                  {
+                      auto dt = e.delta_time();
 
-                // calculate new applied velocity
-                glm::vec3 addVelocity = dt * pm.inverseMass * sp.gravity;
-                glm::vec3 velocity = pv.linearVelocity + addVelocity;
+                      // calculate new applied velocity
+                      glm::vec3 addVelocity = dt * pm.inverseMass * sp.gravity;
+                      glm::vec3 velocity = pv.linearVelocity + addVelocity;
 
-                // split velocity
-                glm::vec3 normal = glm::normalize(pos.value - sp.anchorPoint);
-                glm::vec3 velocityNormal = glm::dot(velocity, normal) * normal;
-                glm::vec3 velocityTangent = velocity - velocityNormal;
+                      // split velocity
+                      glm::vec3 normal = glm::normalize(pos.value - sp.anchorPoint);
+                      glm::vec3 velocityNormal = glm::dot(velocity, normal) * normal;
+                      glm::vec3 velocityTangent = velocity - velocityNormal;
 
-                // update position
-                pos.value += velocityTangent * dt;
+                      // update position
+                      pos.value += velocityTangent * dt;
 
-                // correct position
-                pos.value = sp.anchorPoint + glm::normalize(pos.value - sp.anchorPoint) * sp.length;
+                      // correct position
+                      pos.value = sp.anchorPoint + glm::normalize(pos.value - sp.anchorPoint) * sp.length;
 
-                // correct velocity
-                auto dh = glm::dot(pos.value - sp.startPos, glm::normalize(sp.gravity));
-                auto strength = glm::sqrt(glm::length2(sp.startVelocity) + 2.0f * glm::length(sp.gravity) * dh);
-                pv.linearVelocity = glm::normalize(velocityTangent) * strength;
+                      // correct velocity
+                      auto dh = glm::dot(pos.value - sp.startPos, glm::normalize(sp.gravity));
+                      auto strength = glm::sqrt(glm::length2(sp.startVelocity) + 2.0f * glm::length(sp.gravity) * dh);
+                      pv.linearVelocity = glm::normalize(velocityTangent) * strength;
 
-                //// update velocity
-                // pv.linearVelocity = velocityTangent * glm::pow(pd.linearDamping, dt);
-            });
+                      //// update velocity
+                      // pv.linearVelocity = velocityTangent * glm::pow(pd.linearDamping, dt);
+                  });
 
     return true;
 }

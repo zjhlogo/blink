@@ -30,7 +30,7 @@ namespace blink
         return *this;
     }
 
-    SphereUvBuilder& SphereUvBuilder::ringAndSection(uint16 rings, uint16 sections)
+    SphereUvBuilder& SphereUvBuilder::ringAndSection(uint16_t rings, uint16_t sections)
     {
         m_rings = rings < 3 ? 3 : rings;
         m_sections = sections < 3 ? 3 : sections;
@@ -46,7 +46,7 @@ namespace blink
     IGeometry* SphereUvBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
     {
         std::vector<glm::vec3> vertsPos;
-        std::vector<uint16> indices;
+        std::vector<uint16_t> indices;
         std::vector<glm::vec3> vertsNormal;
         std::vector<glm::vec2> vertsUv0;
 
@@ -59,11 +59,11 @@ namespace blink
         float const S = 1.0f / m_sections;
 
         // calculate the vertex position
-        uint16 startIndex = static_cast<uint16>(vertsPos.size());
-        for (uint16 r = 0; r < m_rings; ++r)
+        uint16_t startIndex = static_cast<uint16_t>(vertsPos.size());
+        for (uint16_t r = 0; r < m_rings; ++r)
         {
             float const y = sin(-glm::half_pi<float>() + glm::pi<float>() * r * R);
-            for (uint16 s = 0; s <= m_sections; ++s)
+            for (uint16_t s = 0; s <= m_sections; ++s)
             {
                 float const x = sin(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
                 float const z = cos(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
@@ -75,12 +75,12 @@ namespace blink
         }
 
         // setup face index
-        for (uint16 r = 0; r < m_rings; ++r)
+        for (uint16_t r = 0; r < m_rings; ++r)
         {
             int prevRingIndex = r * (m_rings + 1);
             int currRingIndex = prevRingIndex + m_sections + 1;
 
-            for (uint16 s = 0; s < m_sections; ++s)
+            for (uint16_t s = 0; s < m_sections; ++s)
             {
                 indices.push_back(currRingIndex + s);
                 indices.push_back(prevRingIndex + s);

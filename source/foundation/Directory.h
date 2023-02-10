@@ -19,7 +19,6 @@ namespace blink
         static void listAllFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive);
 
     private:
-        static void enumlateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive);
+        static void enumerateFiles(std::set<tstring>& filesOut, const tstring& rootDir, bool recursive);
     };
-
 } // namespace blink

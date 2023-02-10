@@ -76,7 +76,7 @@ namespace blink
         {
             tstring strOut;
 
-            int nLength = int(arrIn.size());
+            int nLength = static_cast<int>(arrIn.size());
             if (nLength <= 0) return strOut;
 
             if (reverse)
@@ -107,5 +107,4 @@ namespace blink
     };
 
     template <> int StringBuilder::split<std::vector<tstring>>(std::vector<tstring>& arrOut, const tstring& strIn, const tstring& strSplit);
-
 } // namespace blink

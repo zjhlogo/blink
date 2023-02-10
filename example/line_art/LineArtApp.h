@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   LineArtApp.h
  * \brief  
@@ -11,15 +10,14 @@
 #include <blink/app.h>
 #include <guis/IGuiWindow.h>
 
-class LineArtApp : public blink::IApp, public IGuiWindow
+class LineArtApp final : public blink::IApp, public IGuiWindow
 {
 public:
     LineArtApp() = default;
-    virtual ~LineArtApp() = default;
+    ~LineArtApp() override = default;
 
-    virtual bool initialize() override;
-    virtual void terminate() override;
+    bool initialize() override;
+    void terminate() override;
 
-    virtual void renderUi() override;
-
+    void renderUi() override;
 };

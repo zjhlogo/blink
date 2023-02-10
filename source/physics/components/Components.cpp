@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   Components.cpp
  * \brief
@@ -28,14 +27,8 @@ namespace blink
     {
         if (m < 0.0f) return false;
 
-        if (m == 0.0f)
-        {
-            inverseMass = std::numeric_limits<float>().max();
-        }
-        else
-        {
-            inverseMass = 1.0f / m;
-        }
+        if (m == 0.0f) { inverseMass = std::numeric_limits<float>::max(); }
+        else { inverseMass = 1.0f / m; }
 
         return true;
     }

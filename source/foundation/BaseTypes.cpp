@@ -11,5 +11,4 @@
 namespace blink
 {
     const tstring EMPTY_STRING = {};
-
 }

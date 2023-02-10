@@ -52,7 +52,7 @@ namespace blink
 
     void VulkanLogicalDevice::waitDeviceIdle()
     {
-        if (m_logicalDevice != VK_NULL_HANDLE)
+        if (m_logicalDevice != nullptr)
         {
             vkDeviceWaitIdle(m_logicalDevice);
         }
@@ -60,7 +60,7 @@ namespace blink
 
     void VulkanLogicalDevice::waitGraphicsQueueIdle()
     {
-        if (m_graphicsQueue != VK_NULL_HANDLE)
+        if (m_graphicsQueue != nullptr)
         {
             vkQueueWaitIdle(m_graphicsQueue);
         }
@@ -140,9 +140,9 @@ namespace blink
             deviceCreateInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
-        VK_CHECK_RESULT(vkCreateDevice(m_context->getPickedPhysicalDevice(), &deviceCreateInfo, nullptr, &m_logicalDevice));
+        VK_CHECK_RESULT(vkCreateDevice(m_context->getPickedPhysicalDevice(), &deviceCreateInfo, nullptr, &m_logicalDevice))
 
-        // retriveing queue handles
+        // retrieving queue handles
         vkGetDeviceQueue(m_logicalDevice, m_graphicsFamilyIndex, 0, &m_graphicsQueue);
         vkGetDeviceQueue(m_logicalDevice, m_presentFamilyIndex, 0, &m_presentQueue);
 
@@ -162,5 +162,4 @@ namespace blink
             m_logicalDevice = nullptr;
         }
     }
-
 } // namespace blink

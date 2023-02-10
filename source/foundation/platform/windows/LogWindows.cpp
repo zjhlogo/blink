@@ -14,7 +14,7 @@
 
 namespace blink
 {
-    void Log::print(const char* location, int line, LogPriority prio, const tstring& strMsg)
+    void Log::print(const char* location, int line, LogPriority prior, const tstring& strMsg)
     {
         static const char* PRIORITY_MAP[static_cast<int>(LogPriority::NumPriority)] = {
             "Info",
@@ -24,7 +24,7 @@ namespace blink
         };
 
         std::ostringstream oss;
-        oss << location << "(" << line << "): " << PRIORITY_MAP[static_cast<int>(prio)] << ": " << strMsg << std::endl;
+        oss << location << "(" << line << "): " << PRIORITY_MAP[static_cast<int>(prior)] << ": " << strMsg << std::endl;
         OutputDebugString(oss.str().c_str());
     }
 

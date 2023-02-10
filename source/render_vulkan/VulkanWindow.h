@@ -20,13 +20,18 @@ namespace blink
         friend class VulkanContext;
 
     public:
-        VulkanWindow();
+        VulkanWindow() = default;
         ~VulkanWindow();
+
+        VulkanWindow(const VulkanWindow& window) = delete;
+        VulkanWindow(VulkanWindow&& window) = delete;
+        VulkanWindow& operator=(const VulkanWindow& window) = delete;
+        VulkanWindow& operator=(VulkanWindow&& window) = delete;
 
         bool create(const glm::ivec2& windowSize);
         void destroy();
 
-        operator GLFWwindow*() { return m_window; };
+        operator GLFWwindow*() { return m_window; }
 
     private:
         bool createWindow(const glm::ivec2& windowSize);
@@ -36,5 +41,4 @@ namespace blink
         glm::ivec2 m_deviceSize{};
         GLFWwindow* m_window{};
     };
-
 } // namespace blink

@@ -10,15 +10,20 @@
 #include <blink/app.h>
 #include <core/IRenderSystem.h>
 
-class SceneRenderSystem : public blink::IRenderSystem
+class SceneRenderSystem final : public blink::IRenderSystem
 {
 public:
-    SceneRenderSystem(blink::IApp* app);
-    ~SceneRenderSystem();
+    explicit SceneRenderSystem(blink::IApp* app);
+    ~SceneRenderSystem() override = default;
 
-    virtual bool initialize() override;
-    virtual void terminate() override;
-    virtual void render(blink::IRenderData& renderData) override;
+    SceneRenderSystem(const SceneRenderSystem& system) = delete;
+    SceneRenderSystem(SceneRenderSystem&& system) = delete;
+    SceneRenderSystem& operator=(const SceneRenderSystem& system) = delete;
+    SceneRenderSystem& operator=(SceneRenderSystem&& system) = delete;
+
+    bool initialize() override;
+    void terminate() override;
+    void render(blink::IRenderData& renderData) override;
 
 private:
     blink::IApp* m_app{};

@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   VulkanResModule.cpp
  * \brief
@@ -13,7 +12,6 @@
 #include "resources/VulkanTexture.h"
 
 #include <render_vulkan/VulkanCommandPool.h>
-#include <render_vulkan/VulkanDescriptorPool.h>
 #include <render_vulkan/VulkanLogicalDevice.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanSwapchain.h>
@@ -22,8 +20,8 @@ namespace blink
 {
     IResModule* getResModule()
     {
-        static VulkanResModule s_vulkanResModule;
-        return &s_vulkanResModule;
+        static VulkanResModule vulkanResModule;
+        return &vulkanResModule;
     }
 
     const tstring VulkanResModule::DEFAULT_TEXTURE = "resource/pink.png";
@@ -63,7 +61,7 @@ namespace blink
 
     void VulkanResModule::recreate()
     {
-        for (auto kvp : m_materialMap)
+        for (const auto& kvp : m_materialMap)
         {
             auto material = kvp.second;
             material->recreate();

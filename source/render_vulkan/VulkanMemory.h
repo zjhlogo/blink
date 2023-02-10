@@ -18,24 +18,28 @@ namespace blink
     class VulkanMemory
     {
     public:
-        typedef std::function<void(void* destBuffer, VkDeviceSize destBufferSize)> CustomCopyCb;
+        using CustomCopyCb = std::function<void(void* destBuffer, VkDeviceSize destBufferSize)>;
 
     public:
-        VulkanMemory(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanMemory(VulkanLogicalDevice& logicalDevice);
         ~VulkanMemory();
+
+        VulkanMemory(const VulkanMemory& memory) = delete;
+        VulkanMemory(VulkanMemory&& memory) = delete;
+        VulkanMemory& operator=(const VulkanMemory& memory) = delete;
+        VulkanMemory& operator=(VulkanMemory&& memory) = delete;
+
+        operator VkDeviceMemory() { return m_memory; }
 
         bool allocateMemory(VkMemoryPropertyFlags memoryProperties, const VkMemoryRequirements& requirement);
         void freeMemory();
 
         bool uploadData(const void* srcData, VkDeviceSize srcDataSize, VkDeviceSize destOffset);
-        bool uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, CustomCopyCb cb);
-
-        operator VkDeviceMemory() { return m_memory; };
+        bool uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, const CustomCopyCb& cb);
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
 
         VkDeviceMemory m_memory{};
     };
-
 } // namespace blink

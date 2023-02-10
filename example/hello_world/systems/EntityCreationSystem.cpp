@@ -14,10 +14,7 @@
 #include "PrefabInitializeSystem.h"
 
 #include <blink/components/Components.h>
-#include <blink/geometries_builder/BoxBuilder.h>
-#include <blink/geometries_builder/PlaneBuilder.h>
 #include <blink/geometries_builder/SphereUvBuilder.h>
-#include <blink/geometries_builder/TetrahedronBuilder.h>
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
 #include <core/modules/IRenderModule.h>
@@ -140,14 +137,8 @@ void EntityCreationSystem::renderLightPropertyUi()
 {
     if (ImGui::CollapsingHeader("light property", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::ColorEdit3("color1", (float*)&m_lightData.color))
-        {
-            m_lightDataDirty = true;
-        }
-        if (ImGui::SliderFloat("intensity", &m_lightData.intensity, 0.0f, 1000.0f, "intensity = %.3f"))
-        {
-            m_lightDataDirty = true;
-        }
+        if (ImGui::ColorEdit3("color1", reinterpret_cast<float*>(&m_lightData.color))) { m_lightDataDirty = true; }
+        if (ImGui::SliderFloat("intensity", &m_lightData.intensity, 0.0f, 1000.0f, "intensity = %.3f")) { m_lightDataDirty = true; }
     }
 }
 

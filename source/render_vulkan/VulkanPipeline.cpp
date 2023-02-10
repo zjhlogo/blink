@@ -10,7 +10,6 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
 #include "VulkanDescriptorPool.h"
-#include "VulkanImage.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanSwapchain.h"
 #include "utils/VulkanUtils.h"
@@ -39,14 +38,8 @@ namespace blink
         m_fragmentShader = fragmentShader;
         m_polygonMode = polygonMode;
 
-        if (topology == PrimitiveTopology::LineList)
-        {
-            m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-        }
-        else if (topology == PrimitiveTopology::TriangleList)
-        {
-            m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        }
+        if (topology == PrimitiveTopology::LineList) { m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST; }
+        else if (topology == PrimitiveTopology::TriangleList) { m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST; }
 
         return recreate();
     }
@@ -55,10 +48,10 @@ namespace blink
     {
         destroy();
 
-        std::vector<uint8> vertexShaderCode;
+        std::vector<uint8_t> vertexShaderCode;
         if (!File::readFileIntoBuffer(vertexShaderCode, m_vertexShader)) return false;
 
-        std::vector<uint8> fragmentShaderCode;
+        std::vector<uint8_t> fragmentShaderCode;
         if (!File::readFileIntoBuffer(fragmentShaderCode, m_fragmentShader)) return false;
 
         // generate vertex input desc
@@ -71,13 +64,9 @@ namespace blink
         generateDescriptorSetLayout(layoutBindings, vertexShaderCode, VK_SHADER_STAGE_VERTEX_BIT);
         generateDescriptorSetLayout(layoutBindings, fragmentShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        if (VK_NULL_HANDLE == createDescriptorSetLayout(layoutBindings))
-        {
-            return false;
-        }
+        if (nullptr == createDescriptorSetLayout(layoutBindings)) { return false; }
 
-        if (VK_NULL_HANDLE
-            == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology))
+        if (nullptr == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology))
         {
             return false;
         }
@@ -97,7 +86,7 @@ namespace blink
         m_vertexAttrs = VertexAttrs::None;
     }
 
-    bool VulkanPipeline::bindDescriptorSets(VulkanCommandBuffer& commandBuffer, const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList)
+    bool VulkanPipeline::bindDescriptorSets(const VulkanCommandBuffer& commandBuffer, const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList)
     {
         assert(m_writeSets.size() == descriptorInfoList.size());
 
@@ -108,23 +97,11 @@ namespace blink
             auto& writeSet = m_writeSets[i];
             writeSet.dstSet = descriptorSet;
 
-            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-            {
-                writeSet.pBufferInfo = &descriptorInfoList[i].bufferInfo;
-            }
-            else
-            {
-                writeSet.pBufferInfo = nullptr;
-            }
+            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) { writeSet.pBufferInfo = &descriptorInfoList[i].bufferInfo; }
+            else { writeSet.pBufferInfo = nullptr; }
 
-            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-            {
-                writeSet.pImageInfo = &descriptorInfoList[i].imageInfo;
-            }
-            else
-            {
-                writeSet.pImageInfo = nullptr;
-            }
+            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) { writeSet.pImageInfo = &descriptorInfoList[i].imageInfo; }
+            else { writeSet.pImageInfo = nullptr; }
         }
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
@@ -136,7 +113,7 @@ namespace blink
 
     VulkanUniformBlock* VulkanPipeline::getUniformBlock(UniformBinding binding)
     {
-        auto it = m_uniformBlocks.find(static_cast<uint32>(binding));
+        auto it = m_uniformBlocks.find(static_cast<uint32_t>(binding));
         if (it == m_uniformBlocks.end()) return nullptr;
 
         return &it->second;
@@ -144,7 +121,7 @@ namespace blink
 
     int VulkanPipeline::getUniformWriteSetIndexFromBinding(UniformBinding binding)
     {
-        auto it = m_uniformWriteSetIndexMap.find(static_cast<uint32>(binding));
+        auto it = m_uniformWriteSetIndexMap.find(static_cast<uint32_t>(binding));
         if (it == m_uniformWriteSetIndexMap.end()) return -1;
 
         return it->second;
@@ -154,14 +131,14 @@ namespace blink
     {
         destroyDescriptorSetLayout();
 
-        if (layoutBindings.size() <= 0) return VK_NULL_HANDLE;
+        if (layoutBindings.empty()) return nullptr;
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
-        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout));
+        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout))
         return m_descriptorSetLayout;
     }
 
@@ -174,8 +151,8 @@ namespace blink
         }
     }
 
-    VkPipeline VulkanPipeline::createGraphicsPipeline(const std::vector<uint8>& vertexShaderCode,
-                                                      const std::vector<uint8>& fragmentShaderCode,
+    VkPipeline VulkanPipeline::createGraphicsPipeline(const std::vector<uint8_t>& vertexShaderCode,
+                                                      const std::vector<uint8_t>& fragmentShaderCode,
                                                       const std::vector<VkVertexInputBindingDescription>& bindings,
                                                       const std::vector<VkVertexInputAttributeDescription>& attributes,
                                                       VkPolygonMode polygonMode,
@@ -189,7 +166,7 @@ namespace blink
         pipelineLayoutInfo.setLayoutCount = 1;
         pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout));
+        VK_CHECK_RESULT(vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
 
         VkShaderModule vertShaderModule = createShaderModule(vertexShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
@@ -224,14 +201,14 @@ namespace blink
 
         // viewport state
         const auto& extent = m_swapchain.getImageExtent();
-        VkViewport viewport{0.0f, 0.0f, extent.width * 1.0f, extent.height * 1.0f, 0.0f, 1.0f};
-        VkRect2D sissor{{0, 0}, extent};
+        VkViewport viewport{0.0f, 0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, 1.0f};
+        VkRect2D scissor{{0, 0}, extent};
         VkPipelineViewportStateCreateInfo viewportState{};
         viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportState.viewportCount = 1;
         viewportState.pViewports = &viewport;
         viewportState.scissorCount = 1;
-        viewportState.pScissors = &sissor;
+        viewportState.pScissors = &scissor;
 
         // rasterizer state
         VkPipelineRasterizationStateCreateInfo rasterizer{};
@@ -295,7 +272,7 @@ namespace blink
         pipelineInfo.renderPass = m_swapchain.getRenderPass();
         pipelineInfo.subpass = 0;
 
-        VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
+        VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline))
         vkDestroyShaderModule(m_logicalDevice, fragShaderModule, nullptr);
         vkDestroyShaderModule(m_logicalDevice, vertShaderModule, nullptr);
 
@@ -317,7 +294,7 @@ namespace blink
         }
     }
 
-    VkShaderModule VulkanPipeline::createShaderModule(const std::vector<uint8>& shaderCode)
+    VkShaderModule VulkanPipeline::createShaderModule(const std::vector<uint8_t>& shaderCode)
     {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -325,35 +302,20 @@ namespace blink
         createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
         VkShaderModule shaderModule{};
-        VK_CHECK_RESULT(vkCreateShaderModule(m_logicalDevice, &createInfo, nullptr, &shaderModule));
+        VK_CHECK_RESULT(vkCreateShaderModule(m_logicalDevice, &createInfo, nullptr, &shaderModule))
         return shaderModule;
     }
 
     static VkFormat getVertexInputFormat(const spirv_cross::SPIRType& type, const tstring& name)
     {
         // TODO: find a better way to check the color input
-        if (name == "inColor")
-        {
-            return VK_FORMAT_R8G8B8A8_UNORM;
-        }
+        if (name == "inColor") { return VK_FORMAT_R8G8B8A8_UNORM; }
         else if (type.basetype == spirv_cross::SPIRType::BaseType::Float && type.width == 32)
         {
-            if (type.vecsize == 1)
-            {
-                return VK_FORMAT_R32_SFLOAT;
-            }
-            else if (type.vecsize == 2)
-            {
-                return VK_FORMAT_R32G32_SFLOAT;
-            }
-            else if (type.vecsize == 3)
-            {
-                return VK_FORMAT_R32G32B32_SFLOAT;
-            }
-            else if (type.vecsize == 4)
-            {
-                return VK_FORMAT_R32G32B32A32_SFLOAT;
-            }
+            if (type.vecsize == 1) { return VK_FORMAT_R32_SFLOAT; }
+            else if (type.vecsize == 2) { return VK_FORMAT_R32G32_SFLOAT; }
+            else if (type.vecsize == 3) { return VK_FORMAT_R32G32B32_SFLOAT; }
+            else if (type.vecsize == 4) { return VK_FORMAT_R32G32B32A32_SFLOAT; }
         }
 
         return VK_FORMAT_UNDEFINED;
@@ -361,9 +323,9 @@ namespace blink
 
     VertexAttrs VulkanPipeline::generateVertexInputDesc(std::vector<VkVertexInputBindingDescription>& bindingDesc,
                                                         std::vector<VkVertexInputAttributeDescription>& attributeDesc,
-                                                        const std::vector<uint8>& vertexShaderCode)
+                                                        const std::vector<uint8_t>& vertexShaderCode)
     {
-        spirv_cross::CompilerGLSL glsl((uint32_t*)vertexShaderCode.data(), vertexShaderCode.size() / sizeof(uint32_t));
+        spirv_cross::CompilerGLSL glsl(reinterpret_cast<const uint32_t*>(vertexShaderCode.data()), vertexShaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
         bindingDesc.resize(resources.stage_inputs.size());
@@ -371,7 +333,7 @@ namespace blink
         VertexAttrs vertexAttrs{};
 
         // vertex inputs
-        for (int i = 0; i < resources.stage_inputs.size(); ++i)
+        for (int i = 0; i < static_cast<int>(resources.stage_inputs.size()); ++i)
         {
             const auto& input = resources.stage_inputs[i];
 
@@ -388,14 +350,8 @@ namespace blink
             attributeDesc[i].offset = 0;
 
             bindingDesc[i].binding = location;
-            if (attributeDesc[i].format == VK_FORMAT_R8G8B8A8_UNORM)
-            {
-                bindingDesc[i].stride = 4;
-            }
-            else
-            {
-                bindingDesc[i].stride = (type.vecsize * type.width) >> 3;
-            }
+            if (attributeDesc[i].format == VK_FORMAT_R8G8B8A8_UNORM) { bindingDesc[i].stride = 4; }
+            else { bindingDesc[i].stride = (type.vecsize * type.width) >> 3; }
             bindingDesc[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
             vertexAttrs.set(1 << location);
@@ -405,21 +361,21 @@ namespace blink
     }
 
     void VulkanPipeline::generateDescriptorSetLayout(std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
-                                                     const std::vector<uint8>& shaderCode,
-                                                     uint32 shaderStageBits)
+                                                     const std::vector<uint8_t>& shaderCode,
+                                                     uint32_t shaderStageBits)
     {
-        spirv_cross::CompilerGLSL glsl((uint32_t*)shaderCode.data(), shaderCode.size() / sizeof(uint32_t));
+        spirv_cross::CompilerGLSL glsl(reinterpret_cast<const uint32_t*>(shaderCode.data()), shaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
         // uniform buffers
-        for (int i = 0; i < resources.uniform_buffers.size(); ++i)
+        for (int i = 0; i < static_cast<int>(resources.uniform_buffers.size()); ++i)
         {
             const auto& uniform = resources.uniform_buffers[i];
 
-            auto type = glsl.get_type(uniform.type_id);
+            // auto type = glsl.get_type(uniform.type_id);
             auto baseType = glsl.get_type(uniform.base_type_id);
 
-            auto set = glsl.get_decoration(uniform.id, spv::DecorationDescriptorSet);
+            // auto set = glsl.get_decoration(uniform.id, spv::DecorationDescriptorSet);
             auto binding = glsl.get_decoration(uniform.id, spv::DecorationBinding);
 
             auto indexIt = m_uniformWriteSetIndexMap.find(binding);
@@ -447,16 +403,16 @@ namespace blink
 
             auto pair = m_uniformBlocks.insert({binding, {}});
             auto& uniformBlock = pair.first->second;
-            auto structSize = glsl.get_declared_struct_size(baseType);
-            for (int i = 0; i < baseType.member_types.size(); ++i)
+            // auto structSize = glsl.get_declared_struct_size(baseType);
+            for (int j = 0; j < static_cast<int>(baseType.member_types.size()); ++j)
             {
-                auto memberTypeId = baseType.member_types[i];
+                auto memberTypeId = baseType.member_types[j];
                 auto memberType = glsl.get_type(memberTypeId);
-                auto memberName = glsl.get_member_name(uniform.base_type_id, i);
-                auto memberOffset = glsl.get_member_decoration(uniform.base_type_id, i, spv::DecorationOffset);
+                const auto& memberName = glsl.get_member_name(uniform.base_type_id, j);
+                auto memberOffset = glsl.get_member_decoration(uniform.base_type_id, j, spv::DecorationOffset);
                 auto memberBaseType = memberType.basetype; // float, int ...
-                auto rowSize = memberType.vecsize;         // row
-                auto colSize = memberType.columns;         // col
+                auto rowSize = memberType.vecsize; // row
+                auto colSize = memberType.columns; // col
 
                 if (memberBaseType == spirv_cross::SPIRType::BaseType::Int && rowSize == 1 && colSize == 1)
                 {
@@ -490,11 +446,11 @@ namespace blink
         }
 
         // uniform samples
-        for (int i = 0; i < resources.sampled_images.size(); ++i)
+        for (int i = 0; i < static_cast<int>(resources.sampled_images.size()); ++i)
         {
             const auto& sample = resources.sampled_images[i];
 
-            auto type = glsl.get_type(sample.type_id);
+            // auto type = glsl.get_type(sample.type_id);
             // auto baseType = glsl.get_type(sample.base_type_id);
 
             auto binding = glsl.get_decoration(sample.id, spv::DecorationBinding);

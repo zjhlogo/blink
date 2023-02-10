@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   VulkanGeometryTriangleList.cpp
  * \brief
@@ -25,7 +24,7 @@ namespace blink
         destroy();
     }
 
-    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16>& indices,
+    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16_t>& indices,
                                                 const std::vector<glm::vec3>& positions,
                                                 const std::vector<Color>& colors)
     {
@@ -33,7 +32,7 @@ namespace blink
         return false;
     }
 
-    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16>& indices,
+    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16_t>& indices,
                                                 const std::vector<glm::vec3>& positions,
                                                 const std::vector<glm::vec3>& normals,
                                                 const std::vector<glm::vec2>& uv0s)
@@ -41,9 +40,9 @@ namespace blink
         destroy();
 
         m_offsetIndices = 0;
-        m_numVertices = static_cast<uint32>(positions.size());
-        m_numIndices = static_cast<uint32>(indices.size());
-        VkDeviceSize sizeIndices = sizeof(uint16) * m_numIndices;
+        m_numVertices = static_cast<uint32_t>(positions.size());
+        m_numIndices = static_cast<uint32_t>(indices.size());
+        VkDeviceSize sizeIndices = sizeof(uint16_t) * m_numIndices;
 
         m_offsetPositions = ALIGN_BYTES_4(m_offsetIndices + sizeIndices);
         VkDeviceSize sizePositions = sizeof(glm::vec3) * positions.size();
@@ -51,22 +50,22 @@ namespace blink
         m_offsetNormals = ALIGN_BYTES_4(m_offsetPositions + sizePositions);
         VkDeviceSize sizeNormals = sizeof(glm::vec3) * normals.size();
 
-        m_offsetUv0s = ALIGN_BYTES_4(m_offsetNormals + sizeNormals);
+        m_offsetUvs = ALIGN_BYTES_4(m_offsetNormals + sizeNormals);
         VkDeviceSize sizeUv0s = sizeof(glm::vec2) * uv0s.size();
 
         m_buffer = new VulkanBuffer(m_logicalDevice);
-        m_buffer->createBuffer(m_offsetUv0s + sizeUv0s,
+        m_buffer->createBuffer(m_offsetUvs + sizeUv0s,
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
-                                   | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                               | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(
             [&](void* destBuffer, VkDeviceSize destBufferSize)
             {
-                memcpy(((uint8*)destBuffer + m_offsetIndices), indices.data(), sizeIndices);
-                memcpy(((uint8*)destBuffer + m_offsetPositions), positions.data(), sizePositions);
-                memcpy(((uint8*)destBuffer + m_offsetNormals), normals.data(), sizeNormals);
-                memcpy(((uint8*)destBuffer + m_offsetUv0s), uv0s.data(), sizeUv0s);
+                memcpy((static_cast<uint8_t*>(destBuffer) + m_offsetIndices), indices.data(), sizeIndices);
+                memcpy((static_cast<uint8_t*>(destBuffer) + m_offsetPositions), positions.data(), sizePositions);
+                memcpy((static_cast<uint8_t*>(destBuffer) + m_offsetNormals), normals.data(), sizeNormals);
+                memcpy((static_cast<uint8_t*>(destBuffer) + m_offsetUvs), uv0s.data(), sizeUv0s);
             });
 
         m_vertexAttrs = VertexAttrs::Position | VertexAttrs::Normal | VertexAttrs::Uv0;
@@ -78,8 +77,8 @@ namespace blink
 
     bool VulkanGeometryTriangleList::uploadData(const void* data,
                                                 std::size_t dataSize,
-                                                uint32 numVertices,
-                                                uint32 numIndices,
+                                                uint32_t numVertices,
+                                                uint32_t numIndices,
                                                 std::size_t offsetPosition,
                                                 std::size_t offsetNormal,
                                                 std::size_t offsetUv0,
@@ -92,13 +91,13 @@ namespace blink
 
         m_offsetPositions = offsetPosition;
         m_offsetNormals = offsetNormal;
-        m_offsetUv0s = offsetUv0;
+        m_offsetUvs = offsetUv0;
         m_offsetIndices = offsetIndices;
 
         m_buffer = new VulkanBuffer(m_logicalDevice);
         m_buffer->createBuffer(dataSize,
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
-                                   | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                               | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(data, dataSize);
@@ -110,18 +109,9 @@ namespace blink
 
     VkDeviceSize VulkanGeometryTriangleList::getVertexInputOffset(VertexAttrs vertexAttrs) const
     {
-        if (vertexAttrs == VertexAttrs::Position)
-        {
-            return m_offsetPositions;
-        }
-        else if (vertexAttrs == VertexAttrs::Normal)
-        {
-            return m_offsetNormals;
-        }
-        else if (vertexAttrs == VertexAttrs::Uv0)
-        {
-            return m_offsetUv0s;
-        }
+        if (vertexAttrs == VertexAttrs::Position) { return m_offsetPositions; }
+        else if (vertexAttrs == VertexAttrs::Normal) { return m_offsetNormals; }
+        else if (vertexAttrs == VertexAttrs::Uv0) { return m_offsetUvs; }
 
         return 0;
     }
@@ -132,7 +122,7 @@ namespace blink
 
         m_offsetPositions = 0;
         m_offsetNormals = 0;
-        m_offsetUv0s = 0;
+        m_offsetUvs = 0;
         m_offsetIndices = 0;
     }
 } // namespace blink

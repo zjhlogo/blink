@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   LineArtEntityCreationSystem.cpp
  * \brief
@@ -40,8 +39,8 @@ bool LineArtEntityCreationSystem::initialize()
 
         blink::PlaneBuilder builder;
         auto geometry = builder.size(surfaceSize.x, surfaceSize.y)
-                            .orient(glm::angleAxis(glm::half_pi<float>(), glm::right()))
-                            .build(false, false);
+                               .orient(glm::angleAxis(glm::half_pi<float>(), glm::right()))
+                               .build(false, false);
         m_material = resModule->createMaterial("resource/materials/sdf.mtl");
 
         m_matViewToWorld = glm::inverse(glm::lookAt(m_eyePos, glm::zero<glm::vec3>(), glm::up()));
@@ -86,29 +85,14 @@ void LineArtEntityCreationSystem::renderMaterialPropertyUi()
             m_material->setUniform("matViewToWorld", m_matViewToWorld);
         }
 
-        if (ImGui::SliderFloat("fov", &m_fov, 0.0f, 180.0f))
-        {
-            m_material->setUniform("fov", glm::radians(m_fov));
-        }
+        if (ImGui::SliderFloat("fov", &m_fov, 0.0f, 180.0f)) { m_material->setUniform("fov", glm::radians(m_fov)); }
 
-        if (ImGui::ColorEdit3("baseColor", &m_baseColor[0]))
-        {
-            m_material->setUniform("baseColor", m_baseColor);
-        }
+        if (ImGui::ColorEdit3("baseColor", &m_baseColor[0])) { m_material->setUniform("baseColor", m_baseColor); }
 
-        if (ImGui::ColorEdit3("lightColor", &m_lightColor[0]))
-        {
-            m_material->setUniform("lightColor", m_lightColor);
-        }
+        if (ImGui::ColorEdit3("lightColor", &m_lightColor[0])) { m_material->setUniform("lightColor", m_lightColor); }
 
-        if (ImGui::SliderFloat("lightIntensity", &m_lightIntensity, 1.0f, 100.0f))
-        {
-            m_material->setUniform("lightIntensity", m_lightIntensity);
-        }
+        if (ImGui::SliderFloat("lightIntensity", &m_lightIntensity, 1.0f, 100.0f)) { m_material->setUniform("lightIntensity", m_lightIntensity); }
 
-        if (ImGui::SliderFloat("twist", &m_twist, -10.0f, 10.0f))
-        {
-            m_material->setUniform("twist", m_twist);
-        }
+        if (ImGui::SliderFloat("twist", &m_twist, -10.0f, 10.0f)) { m_material->setUniform("twist", m_twist); }
     }
 }
