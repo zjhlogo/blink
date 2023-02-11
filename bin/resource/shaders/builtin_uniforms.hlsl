@@ -17,9 +17,8 @@ layout(set = 0, binding = 1) uniform CameraUniforms
     vec3 cameraDir;
 } cu;
 
-layout(set = 0, binding = 2) uniform EntityUniforms
+layout(push_constant) uniform PushConstantData
 {
     mat4 matLocalToWorld;
-    mat4 matLocalToProjection;
     mat3 matLocalToWorldInvT;
-} eu;
+} pushData;

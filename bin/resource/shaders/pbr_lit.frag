@@ -3,7 +3,7 @@
 
 #include "builtin_uniforms.hlsl"
 
-layout(set = 0, binding = 3) uniform MaterialUniforms
+layout(set = 0, binding = 2) uniform MaterialUniforms
 {
     vec3 color;
     float roughness;

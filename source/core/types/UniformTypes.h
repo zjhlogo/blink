@@ -28,7 +28,6 @@ namespace blink
     {
         Frame = 0,
         Camera,
-        Entity,
         Material,
     };
 

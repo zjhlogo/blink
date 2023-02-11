@@ -57,9 +57,6 @@ namespace blink
         m_perMaterialUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
         if (!m_perMaterialUniformBuffer->create()) return false;
 
-        m_perInstanceUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
-        if (!m_perInstanceUniformBuffer->create()) return false;
-
         if (!createSyncObjects()) return false;
 
         return true;
@@ -71,7 +68,6 @@ namespace blink
 
         destroySyncObjects();
 
-        SAFE_DELETE(m_perInstanceUniformBuffer);
         SAFE_DELETE(m_perMaterialUniformBuffer);
         SAFE_DELETE(m_perFrameUniformBuffer);
         SAFE_DELETE(m_commandBuffer);
@@ -122,7 +118,6 @@ namespace blink
         m_logicalDevice->resetDescriptorPool();
         m_perFrameUniformBuffer->reset();
         m_perMaterialUniformBuffer->reset();
-        m_perInstanceUniformBuffer->reset();
 
         // record command buffer
         {
@@ -141,8 +136,7 @@ namespace blink
                 VulkanRenderData renderData{
                     m_commandBuffer,
                     m_perFrameUniformBuffer,
-                    m_perMaterialUniformBuffer,
-                    m_perInstanceUniformBuffer
+                    m_perMaterialUniformBuffer
                 };
                 cb(renderData);
 
@@ -154,7 +148,6 @@ namespace blink
 
         m_perFrameUniformBuffer->flushBuffer();
         m_perMaterialUniformBuffer->flushBuffer();
-        m_perInstanceUniformBuffer->flushBuffer();
 
         // submit command
         VkSubmitInfo submitInfo{};

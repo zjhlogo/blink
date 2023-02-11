@@ -70,10 +70,9 @@ void SinglePendulumSystem::framePostUpdate()
 
     auto debugLineSystem = m_ecsWorld->findSystem<blink::DebugLineSystem>();
 
-    pendulumQuery.each(
-        [&](flecs::entity e, const blink::Position& pos, const SinglePendulum& pendulum)
-        {
-            // add debug line
-            debugLineSystem->addLine(pendulum.anchorPoint, pos.value, blink::Color::RED);
-        });
+    pendulumQuery.each([&](flecs::entity e, const blink::Position& pos, const SinglePendulum& pendulum)
+    {
+        // add debug line
+        debugLineSystem->addLine(pendulum.anchorPoint, pos.value, blink::Color::RED);
+    });
 }

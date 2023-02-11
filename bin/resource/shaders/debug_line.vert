@@ -10,6 +10,6 @@ layout(location = 0) out vec4 fragColor;
 
 void main()
 {
-    gl_Position = eu.matLocalToProjection * vec4(inPosition, 1.0);
+    gl_Position = cu.matWorldToProjection * pushData.matLocalToWorld * vec4(inPosition, 1.0);
     fragColor = inColor;
 }

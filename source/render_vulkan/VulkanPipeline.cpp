@@ -17,6 +17,8 @@
 #include <foundation/File.h>
 #include <spirv-cross/spirv_glsl.hpp>
 
+#include <core/types/PushConstantData.h>
+
 namespace blink
 {
     VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
@@ -160,11 +162,18 @@ namespace blink
     {
         destroyGraphicsPipeline();
 
+        VkPushConstantRange pushConstantRange{};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(PushConstantData);
+
         // layout state
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 1;
         pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
         VK_CHECK_RESULT(vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
 
@@ -310,12 +319,12 @@ namespace blink
     {
         // TODO: find a better way to check the color input
         if (name == "inColor") { return VK_FORMAT_R8G8B8A8_UNORM; }
-        else if (type.basetype == spirv_cross::SPIRType::BaseType::Float && type.width == 32)
+        if (type.basetype == spirv_cross::SPIRType::BaseType::Float && type.width == 32)
         {
             if (type.vecsize == 1) { return VK_FORMAT_R32_SFLOAT; }
-            else if (type.vecsize == 2) { return VK_FORMAT_R32G32_SFLOAT; }
-            else if (type.vecsize == 3) { return VK_FORMAT_R32G32B32_SFLOAT; }
-            else if (type.vecsize == 4) { return VK_FORMAT_R32G32B32A32_SFLOAT; }
+            if (type.vecsize == 2) { return VK_FORMAT_R32G32_SFLOAT; }
+            if (type.vecsize == 3) { return VK_FORMAT_R32G32B32_SFLOAT; }
+            if (type.vecsize == 4) { return VK_FORMAT_R32G32B32A32_SFLOAT; }
         }
 
         return VK_FORMAT_UNDEFINED;

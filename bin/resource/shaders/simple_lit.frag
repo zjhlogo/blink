@@ -3,7 +3,7 @@
 
 #include "builtin_uniforms.hlsl"
 
-layout(set = 0, binding = 4) uniform sampler2D texSampler;
+layout(set = 0, binding = 3) uniform sampler2D texSampler;
 
 layout(location = 0) in vec3 fragNormal;
 layout(location = 1) in vec2 fragTexCoord;

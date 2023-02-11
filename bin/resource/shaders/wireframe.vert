@@ -7,5 +7,5 @@ layout(location = 0) in vec3 inPosition;
 
 void main()
 {
-    gl_Position = eu.matLocalToProjection * vec4(inPosition, 1.0);
+    gl_Position = cu.matWorldToProjection * pushData.matLocalToWorld * vec4(inPosition, 1.0);
 }

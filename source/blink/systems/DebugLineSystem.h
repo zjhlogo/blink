@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   DebugLineSystem.h
  * \brief
@@ -22,9 +21,9 @@ namespace blink
     public:
         DebugLineSystem() = default;
 
-        virtual bool initialize() override;
-        virtual void terminate() override;
-        virtual void framePostUpdate() override;
+        bool initialize() override;
+        void terminate() override;
+        void framePostUpdate() override;
 
         void addLine(const glm::vec3& p1, const glm::vec3& p2, const Color& color);
 
@@ -35,5 +34,4 @@ namespace blink
         IMaterial* m_debugMaterial{};
         IGeometry* m_debugGeometry{};
     };
-
 } // namespace blink

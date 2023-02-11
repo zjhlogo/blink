@@ -20,6 +20,8 @@
 #include <map>
 #include <unordered_map>
 
+#include "core/types/PushConstantData.h"
+
 struct FrameRenderData
 {
     glm::vec3 lightPos;
@@ -50,7 +52,6 @@ struct EntityRenderData
     blink::IGeometry* geometry;
     uint32_t renderLayer;
     int cameraId;
-    VkDescriptorBufferInfo eubi;
 };
 
 struct MaterialRenderData
@@ -120,33 +121,27 @@ void uploadCameraUniforms(CameraRenderData& crd,
     crd.cameraId = cameraId;
 }
 
-void uploadEntityUniforms(EntityRenderData& erd,
-                          const CameraRenderData& pcu,
-                          int cameraId,
-                          blink::VulkanMaterial* vulkanMaterial,
-                          const blink::VulkanRenderData* vulkanRenderData)
+void uploadEntityPushConstant(EntityRenderData& erd,
+                              const CameraRenderData& pcu,
+                              int cameraId,
+                              blink::VulkanMaterial* vulkanMaterial,
+                              const blink::VulkanRenderData* vulkanRenderData)
 {
     // bind per instance uniform
-    if (erd.cameraId == cameraId)
-    {
-        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Entity, erd.eubi);
-        return;
-    }
+    if (erd.cameraId == cameraId) { return; }
 
     auto& pipeline = vulkanMaterial->getPipeline();
-    auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Entity);
-    if (!uniformBlock) return;
 
-    auto matLocalToWorld = glm::translate(glm::identity<glm::mat4>(), erd.pos) * glm::mat4_cast(erd.rot);
-    auto matLocalToWorldInvT = glm::transpose(glm::inverse(glm::mat3(matLocalToWorld)));
-    auto matLocalToProjection = pcu.matWorldToProjection * matLocalToWorld;
+    blink::PushConstantData pushConstantData;
+    pushConstantData.localToWorld = glm::translate(glm::identity<glm::mat4>(), erd.pos) * glm::mat4_cast(erd.rot);
+    pushConstantData.localToWorldInvT = glm::transpose(glm::inverse(glm::mat3(pushConstantData.localToWorld)));
 
-    uniformBlock->prepareBuffer();
-    uniformBlock->setUniformMember("matLocalToWorld", &matLocalToWorld);
-    uniformBlock->setUniformMember("matLocalToWorldInvT", &matLocalToWorldInvT);
-    uniformBlock->setUniformMember("matLocalToProjection", &matLocalToProjection);
-    vulkanRenderData->eub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &erd.eubi);
-    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Entity, erd.eubi);
+    vkCmdPushConstants(*vulkanRenderData->commandBuffer,
+                       pipeline.getPipelineLayout(),
+                       VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                       0,
+                       sizeof(pushConstantData),
+                       &pushConstantData);
 
     erd.cameraId = cameraId;
 }
@@ -167,8 +162,11 @@ void uploadMaterialUniforms(MaterialRenderData& mrd,
     auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Material);
     if (!uniformBlock) return;
 
-    vulkanRenderData->mub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &mrd.mubi);
-    vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Material, mrd.mubi);
+    if (uniformBlock->getBufferData() != nullptr)
+    {
+        vulkanRenderData->mub->appendData(uniformBlock->getBufferData(), uniformBlock->getBufferSize(), &mrd.mubi);
+        vulkanMaterial->uploadUniformDescriptorBufferInfo(blink::UniformBinding::Material, mrd.mubi);
+    }
 
     mrd.cameraId = cameraId;
 }
@@ -253,15 +251,12 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                 if (!geometry) return;
 
                 auto findIt = materialGroups.find(material);
-                if (findIt != materialGroups.end())
-                {
-                    findIt->second.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
-                }
+                if (findIt != materialGroups.end()) { findIt->second.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0}); }
                 else
                 {
                     MaterialRenderData mrd;
                     mrd.cameraId = 0;
-                    mrd.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0, {}});
+                    mrd.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0});
                     materialGroups.emplace(material, mrd);
                 }
             });
@@ -313,7 +308,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                     {
                         if ((erd.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
-                        uploadEntityUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
+                        uploadEntityPushConstant(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
                         vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer, static_cast<blink::VulkanGeometry*>(erd.geometry));
@@ -341,7 +336,7 @@ void SceneRenderSystem::render(blink::IRenderData& renderData)
                     {
                         if ((erd.renderLayer & renderFeatureData.renderLayer) == 0) continue;
 
-                        uploadEntityUniforms(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
+                        uploadEntityPushConstant(erd, crd, cameraId, vulkanMaterial, vulkanRenderData);
 
                         // update vertex input and uniform buffers
                         vulkanMaterial->updateBufferInfos(*vulkanRenderData->commandBuffer, static_cast<blink::VulkanGeometry*>(erd.geometry));
