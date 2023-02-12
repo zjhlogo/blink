@@ -14,7 +14,7 @@
 class PbrApp : public blink::IApp, public IGuiWindow
 {
 public:
-    virtual void renderUi() override;
+    virtual void onGui() override;
 
 protected:
     bool initializeLogicalSystems() override;

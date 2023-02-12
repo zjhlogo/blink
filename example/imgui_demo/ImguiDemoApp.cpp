@@ -6,9 +6,11 @@
  * \date   February 2023
  *********************************************************************/
 #include "ImguiDemoApp.h"
+#include "panels/ControlPanel.h"
+#include "panels/DetailPanel.h"
+#include "panels/MainMenuBar.h"
 
 #include <blink/blink.h>
-#include <imgui/imgui.h>
 #include <render_systems/ImguiRenderSystem.h>
 
 bool ImguiDemoApp::initializeLogicalSystems()
@@ -19,17 +21,11 @@ bool ImguiDemoApp::initializeLogicalSystems()
 bool ImguiDemoApp::initializeRenderSystems()
 {
     auto guiRenderSystem = addRenderSystem(new ImguiRenderSystem());
-    guiRenderSystem->addWindow(this);
+    guiRenderSystem->addWindow(new MainMenuBar());
+    guiRenderSystem->addWindow(new ControlPanel());
+    guiRenderSystem->addWindow(new DetailPanel());
 
     return true;
-}
-
-void ImguiDemoApp::renderUi()
-{
-    if (ImGui::Begin("ControlPanel"))
-    {
-        ImGui::End();
-    }
 }
 
 int main(int argc, char** argv)

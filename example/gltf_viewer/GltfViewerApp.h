@@ -27,7 +27,7 @@ public:
     };
 
 public:
-    virtual void renderUi() override;
+    virtual void onGui() override;
 
 protected:
     bool initializeLogicalSystems() override;

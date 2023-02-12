@@ -21,12 +21,12 @@
 
 #include <algorithm>
 
-// static void imguiCheckVkResult(VkResult err)
-// {
-//     if (err == 0) return;
-//     LOGE("[vulkan] Error: VkResult = {0}", err);
-//     if (err < 0) abort();
-// }
+static void imguiCheckVkResult(VkResult err)
+{
+    if (err == 0) return;
+    LOGE("[vulkan] Error: VkResult = {0}", err);
+    if (err < 0) abort();
+}
 
 ImguiRenderSystem::~ImguiRenderSystem()
 {
@@ -41,30 +41,28 @@ bool ImguiRenderSystem::initialize()
     auto& logicalDevice = renderModule->getLogicalDevice();
     auto& swapchain = renderModule->getSwapchain();
 
-    // 1: create descriptor pool for IMGUI
-    // the size of the pool is very oversize, but it's copied from imgui demo itself.
-    VkDescriptorPoolSize poolSizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-                                        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-                                        {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-                                        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-                                        {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-                                        {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-                                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-                                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-                                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-                                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-                                        {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+    // Create Descriptor Pool
+    {
+        VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+                                             {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+        VkDescriptorPoolCreateInfo pool_info = {};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+        pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+        pool_info.pPoolSizes = pool_sizes;
+        vkCreateDescriptorPool(logicalDevice, &pool_info, nullptr, &m_imguiPool);
+    }
 
-    VkDescriptorPoolCreateInfo pool_info = {};
-    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-    pool_info.maxSets = 1000;
-    pool_info.poolSizeCount = static_cast<uint32_t>(std::size(poolSizes));
-    pool_info.pPoolSizes = poolSizes;
-
-    vkCreateDescriptorPool(logicalDevice, &pool_info, nullptr, &m_imguiPool);
-
-    // 2: initialize imgui library
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -73,15 +71,23 @@ bool ImguiRenderSystem::initialize()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
-    io.ConfigFlags |= ImGuiCol_DockingEmptyBg;          // 
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+    io.ConfigFlags |= ImGuiCol_DockingEmptyBg;          //
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
     // io.ConfigViewportsNoAutoMerge = true;
     // io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
-    // this initializes imgui for SDL
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+
+    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForVulkan(*context.getWindow(), true);
 
     // this initializes imgui for Vulkan
@@ -91,11 +97,14 @@ bool ImguiRenderSystem::initialize()
     init_info.Device = logicalDevice;
     init_info.QueueFamily = logicalDevice.getGraphicsFamilyIndex();
     init_info.Queue = logicalDevice.getGraphicsQueue();
+    init_info.PipelineCache = VK_NULL_HANDLE;
     init_info.DescriptorPool = m_imguiPool;
+    init_info.Subpass = 0;
     init_info.MinImageCount = static_cast<uint32_t>(swapchain.getImageCount());
     init_info.ImageCount = static_cast<uint32_t>(swapchain.getImageCount());
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-
+    init_info.Allocator = VK_NULL_HANDLE;
+    init_info.CheckVkResultFn = imguiCheckVkResult;
     ImGui_ImplVulkan_Init(&init_info, swapchain.getRenderPass());
 
     // Upload Fonts
@@ -118,8 +127,11 @@ void ImguiRenderSystem::terminate()
     auto renderModule = dynamic_cast<blink::VulkanRenderModule*>(blink::getRenderModule());
     auto& logicalDevice = renderModule->getLogicalDevice();
 
-    vkDestroyDescriptorPool(logicalDevice, m_imguiPool, nullptr);
     ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    vkDestroyDescriptorPool(logicalDevice, m_imguiPool, nullptr);
 }
 
 void ImguiRenderSystem::render()
@@ -136,7 +148,7 @@ void ImguiRenderSystem::render()
 
     for (auto window : m_allWindows)
     {
-        window->renderUi();
+        window->onGui();
     }
 
     // Rendering
@@ -157,11 +169,6 @@ void ImguiRenderSystem::render()
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }
-}
-
-void ImguiRenderSystem::addWindow(IGuiWindow* window)
-{
-    m_allWindows.push_back(window);
 }
 
 void ImguiRenderSystem::removeWindow(const IGuiWindow* window)

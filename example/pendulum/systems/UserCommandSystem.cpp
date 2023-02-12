@@ -37,4 +37,4 @@ void UserCommandSystem::framePreUpdate()
 
 void UserCommandSystem::framePostUpdate() { m_pushMeClicked = false; }
 
-void UserCommandSystem::renderUi() { if (ImGui::Button("Push Me", ImVec2(-1.0f, 0.0f))) { m_pushMeClicked = true; } }
+void UserCommandSystem::onGui() { if (ImGui::Button("Push Me", ImVec2(-1.0f, 0.0f))) { m_pushMeClicked = true; } }

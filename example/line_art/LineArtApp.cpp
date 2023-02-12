@@ -27,7 +27,7 @@ bool LineArtApp::initializeRenderSystems()
     return true;
 }
 
-void LineArtApp::renderUi()
+void LineArtApp::onGui()
 {
     const auto& ecsWorld = getEcsWorld();
     auto* entityCreation = ecsWorld.findSystem<LineArtEntityCreationSystem>();

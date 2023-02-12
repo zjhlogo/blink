@@ -24,10 +24,10 @@ namespace blink
         VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice);
         ~VulkanSwapchain();
 
-        VulkanSwapchain(const VulkanSwapchain& swapchain) = delete;
-        VulkanSwapchain(VulkanSwapchain&& swapchain) = delete;
-        VulkanSwapchain& operator=(const VulkanSwapchain& swapchain) = delete;
-        VulkanSwapchain& operator=(VulkanSwapchain&& swapchain) = delete;
+        VulkanSwapchain(const VulkanSwapchain&) = delete;
+        VulkanSwapchain(VulkanSwapchain&&) = delete;
+        VulkanSwapchain& operator=(const VulkanSwapchain&) = delete;
+        VulkanSwapchain& operator=(VulkanSwapchain&&) = delete;
 
         bool create();
         bool recreate();

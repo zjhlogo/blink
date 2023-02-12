@@ -18,7 +18,7 @@ public:
     void framePreUpdate() override;
     void framePostUpdate() override;
 
-    void renderUi();
+    void onGui();
 
 private:
     bool m_pushMeClicked{};

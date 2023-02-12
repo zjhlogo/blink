@@ -16,7 +16,7 @@
 class PendulumApp final : public blink::IApp, public IGuiWindow
 {
 public:
-    void renderUi() override;
+    void onGui() override;
 
 protected:
     bool initializeLogicalSystems() override;

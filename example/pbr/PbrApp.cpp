@@ -25,7 +25,7 @@ bool PbrApp::initializeRenderSystems()
     return true;
 }
 
-void PbrApp::renderUi()
+void PbrApp::onGui()
 {
     const auto& ecsWorld = getEcsWorld();
     auto* entityCreation = ecsWorld.findSystem<PbrEntityCreationSystem>();

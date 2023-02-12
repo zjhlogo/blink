@@ -29,7 +29,12 @@ public:
     void terminate() override;
     void render() override;
 
-    void addWindow(IGuiWindow* window);
+    template <typename T> T* addWindow(T* window)
+    {
+        m_allWindows.push_back(window);
+        return window;
+    }
+
     void removeWindow(const IGuiWindow* window);
 
 private:

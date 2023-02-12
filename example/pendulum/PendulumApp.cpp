@@ -36,7 +36,7 @@ bool PendulumApp::initializeRenderSystems()
     return true;
 }
 
-void PendulumApp::renderUi()
+void PendulumApp::onGui()
 {
     const auto& ecsWorld = getEcsWorld();
     auto* entityCreation = ecsWorld.findSystem<EntityCreationSystem>();
@@ -52,7 +52,7 @@ void PendulumApp::renderUi()
     entityCreation->renderMaterialPropertyUi();
 
     // user input
-    userCommand->renderUi();
+    userCommand->onGui();
 
     ImGui::End();
 }

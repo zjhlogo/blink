@@ -1,15 +1,16 @@
 /*********************************************************************
- * \file   IGuiWindow.h
+ * \file   ControlPanel.h
  * \brief  
  * 
  * \author zjhlogo
- * \date   02/07/2022
+ * \date   February 2023
  *********************************************************************/
 #pragma once
 
-class IGuiWindow
+#include <guis/IGuiWindow.h>
+
+class ControlPanel final : public IGuiWindow
 {
 public:
-    virtual ~IGuiWindow() = default;
-    virtual void onGui() = 0;
+    void onGui() override;
 };

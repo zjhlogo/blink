@@ -40,10 +40,10 @@ namespace blink
         VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~VulkanPipeline();
 
-        VulkanPipeline(const VulkanPipeline& pipeline) = delete;
-        VulkanPipeline(VulkanPipeline&& pipeline) = delete;
-        VulkanPipeline& operator=(const VulkanPipeline& pipeline) = delete;
-        VulkanPipeline& operator=(VulkanPipeline&& pipeline) = delete;
+        VulkanPipeline(const VulkanPipeline&) = delete;
+        VulkanPipeline(VulkanPipeline&&) = delete;
+        VulkanPipeline& operator=(const VulkanPipeline&) = delete;
+        VulkanPipeline& operator=(VulkanPipeline&&) = delete;
 
         operator VkPipeline() const { return m_pipeline; }
 

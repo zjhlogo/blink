@@ -29,7 +29,7 @@ bool GltfViewerApp::initializeRenderSystems()
     return true;
 }
 
-void GltfViewerApp::renderUi()
+void GltfViewerApp::onGui()
 {
     DrawHierarchyWindow();
     DrawPropertyWindow();
