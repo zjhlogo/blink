@@ -52,7 +52,7 @@ namespace blink
 
     void VulkanLogicalDevice::waitDeviceIdle()
     {
-        if (m_logicalDevice != nullptr)
+        if (m_logicalDevice != VK_NULL_HANDLE)
         {
             vkDeviceWaitIdle(m_logicalDevice);
         }
@@ -60,7 +60,7 @@ namespace blink
 
     void VulkanLogicalDevice::waitGraphicsQueueIdle()
     {
-        if (m_graphicsQueue != nullptr)
+        if (m_graphicsQueue != VK_NULL_HANDLE)
         {
             vkQueueWaitIdle(m_graphicsQueue);
         }

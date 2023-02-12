@@ -12,21 +12,19 @@
 
 namespace blink
 {
-    class IRenderData { };
-
     class IRenderSystem
     {
     public:
         IRenderSystem() = default;
         virtual ~IRenderSystem() = default;
 
-        IRenderSystem(const IRenderSystem& system) = delete;
-        IRenderSystem(IRenderSystem&& system) = delete;
-        IRenderSystem& operator=(const IRenderSystem& system) = delete;
-        IRenderSystem& operator=(IRenderSystem&& system) = delete;
+        IRenderSystem(const IRenderSystem&) = delete;
+        IRenderSystem(IRenderSystem&&) = delete;
+        IRenderSystem& operator=(const IRenderSystem&) = delete;
+        IRenderSystem& operator=(IRenderSystem&&) = delete;
 
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
-        virtual void render(IRenderData& renderData) = 0;
+        virtual void render() = 0;
     };
 } // namespace blink

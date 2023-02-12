@@ -57,7 +57,7 @@ namespace blink
         submitInfo.pCommandBuffers = &m_commandBuffer;
 
         auto graphicsQueue = m_logicalDevice.getGraphicsQueue();
-        vkQueueSubmit(graphicsQueue, 1, &submitInfo, nullptr);
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
     }
 
     void VulkanCommandBuffer::beginCommand()

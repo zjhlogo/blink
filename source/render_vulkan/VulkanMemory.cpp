@@ -39,10 +39,10 @@ namespace blink
 
     void VulkanMemory::freeMemory()
     {
-        if (m_memory != nullptr)
+        if (m_memory != VK_NULL_HANDLE)
         {
             vkFreeMemory(m_logicalDevice, m_memory, nullptr);
-            m_memory = nullptr;
+            m_memory = VK_NULL_HANDLE;
         }
     }
 

@@ -118,10 +118,10 @@ namespace blink
     {
         destroyBufferMemory();
 
-        if (m_buffer != nullptr)
+        if (m_buffer != VK_NULL_HANDLE)
         {
             vkDestroyBuffer(m_logicalDevice, m_buffer, nullptr);
-            m_buffer = nullptr;
+            m_buffer = VK_NULL_HANDLE;
         }
     }
 } // namespace blink

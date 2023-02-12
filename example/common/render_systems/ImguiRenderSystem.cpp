@@ -43,20 +43,17 @@ bool ImguiRenderSystem::initialize()
 
     // 1: create descriptor pool for IMGUI
     // the size of the pool is very oversize, but it's copied from imgui demo itself.
-    VkDescriptorPoolSize poolSizes[] =
-    {
-        {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-        {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-        {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-        {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-        {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
-    };
+    VkDescriptorPoolSize poolSizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+                                        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                                        {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+                                        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+                                        {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+                                        {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+                                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+                                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+                                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+                                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+                                        {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
 
     VkDescriptorPoolCreateInfo pool_info = {};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -95,11 +92,12 @@ bool ImguiRenderSystem::initialize()
     // Upload Fonts
     {
         // Use any command queue
-        logicalDevice.executeCommand([](const blink::VulkanCommandBuffer& commandBuffer)
-        {
-            //
-            ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
-        });
+        logicalDevice.executeCommand(
+            [](const blink::VulkanCommandBuffer& commandBuffer)
+            {
+                //
+                ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
+            });
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
@@ -115,27 +113,38 @@ void ImguiRenderSystem::terminate()
     ImGui_ImplVulkan_Shutdown();
 }
 
-void ImguiRenderSystem::render(blink::IRenderData& renderData)
+void ImguiRenderSystem::render()
 {
     if (m_allWindows.empty()) return;
+
+    auto renderModule = dynamic_cast<blink::VulkanRenderModule*>(blink::getRenderModule());
 
     // Start the Dear ImGui frame
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    for (auto window : m_allWindows) { window->renderUi(); }
+    for (auto window : m_allWindows)
+    {
+        window->renderUi();
+    }
 
     // Rendering
     ImGui::Render();
-    auto vulkanRenderData = static_cast<blink::VulkanRenderData*>(&renderData);
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *vulkanRenderData->commandBuffer);
+
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), renderModule->getCommandBuffer());
 }
 
-void ImguiRenderSystem::addWindow(IGuiWindow* window) { m_allWindows.push_back(window); }
+void ImguiRenderSystem::addWindow(IGuiWindow* window)
+{
+    m_allWindows.push_back(window);
+}
 
 void ImguiRenderSystem::removeWindow(const IGuiWindow* window)
 {
     auto it = std::find(m_allWindows.begin(), m_allWindows.end(), window);
-    if (it != m_allWindows.end()) { m_allWindows.erase(it); }
+    if (it != m_allWindows.end())
+    {
+        m_allWindows.erase(it);
+    }
 }

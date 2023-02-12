@@ -28,32 +28,22 @@ bool HelloWorldApp::initialize()
     stdcpp_set_os_api();
 
     // add logical systems
-
     // physics systems
     // m_ecsWorld.addSystem(new blink::BeginPhysicsSimulationSystem());
     // m_ecsWorld.addSystem(new blink::DynamicIntegrateSystem());
     // m_ecsWorld.addSystem(new blink::EndPhysicsSimulationSystem());
+
     m_ecsWorld.addSystem(new SinglePendulumSystem());
-
-    // prefab system
     m_ecsWorld.addSystem(new PrefabInitializeSystem());
-
-    // entity creation system
     m_ecsWorld.addSystem(new EntityCreationSystem());
-
-    // add user command system
     m_ecsWorld.addSystem(new UserCommandSystem());
-
     m_ecsWorld.addSystem(new blink::DebugLineSystem());
-
     if (!m_ecsWorld.initialize()) return false;
 
     // add render systems
-    addRenderSystem(new SceneRenderSystem(this));
-    auto guiRenderSystem = new ImguiRenderSystem();
-    addRenderSystem(guiRenderSystem);
-    if (!initializeRenderSystems()) return false;
-
+    auto renderModule = blink::getRenderModule();
+    renderModule->addRenderSystem(new SceneRenderSystem(this));
+    auto guiRenderSystem = dynamic_cast<ImguiRenderSystem*>(renderModule->addRenderSystem(new ImguiRenderSystem()));
     guiRenderSystem->addWindow(this);
 
     return true;
@@ -61,7 +51,6 @@ bool HelloWorldApp::initialize()
 
 void HelloWorldApp::terminate()
 {
-    terminateRenderSystems();
     m_ecsWorld.terminate();
 }
 
@@ -71,9 +60,7 @@ void HelloWorldApp::renderUi()
     auto* userCommand = m_ecsWorld.findSystem<UserCommandSystem>();
 
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
-    ImGui::Begin("Properties",
-                 nullptr,
-                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Properties", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
 
     // light property
     entityCreation->renderLightPropertyUi();

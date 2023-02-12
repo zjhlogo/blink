@@ -17,8 +17,6 @@
 #include <foundation/File.h>
 #include <spirv-cross/spirv_glsl.hpp>
 
-#include <core/types/PushConstantData.h>
-
 namespace blink
 {
     VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
@@ -40,8 +38,14 @@ namespace blink
         m_fragmentShader = fragmentShader;
         m_polygonMode = polygonMode;
 
-        if (topology == PrimitiveTopology::LineList) { m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST; }
-        else if (topology == PrimitiveTopology::TriangleList) { m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST; }
+        if (topology == PrimitiveTopology::LineList)
+        {
+            m_topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        }
+        else if (topology == PrimitiveTopology::TriangleList)
+        {
+            m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        }
 
         return recreate();
     }
@@ -66,9 +70,13 @@ namespace blink
         generateDescriptorSetLayout(layoutBindings, vertexShaderCode, VK_SHADER_STAGE_VERTEX_BIT);
         generateDescriptorSetLayout(layoutBindings, fragmentShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        if (nullptr == createDescriptorSetLayout(layoutBindings)) { return false; }
+        if (VK_NULL_HANDLE == createDescriptorSetLayout(layoutBindings))
+        {
+            return false;
+        }
 
-        if (nullptr == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology))
+        if (VK_NULL_HANDLE
+            == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology))
         {
             return false;
         }
@@ -99,11 +107,23 @@ namespace blink
             auto& writeSet = m_writeSets[i];
             writeSet.dstSet = descriptorSet;
 
-            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) { writeSet.pBufferInfo = &descriptorInfoList[i].bufferInfo; }
-            else { writeSet.pBufferInfo = nullptr; }
+            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+            {
+                writeSet.pBufferInfo = &descriptorInfoList[i].bufferInfo;
+            }
+            else
+            {
+                writeSet.pBufferInfo = nullptr;
+            }
 
-            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) { writeSet.pImageInfo = &descriptorInfoList[i].imageInfo; }
-            else { writeSet.pImageInfo = nullptr; }
+            if (writeSet.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+            {
+                writeSet.pImageInfo = &descriptorInfoList[i].imageInfo;
+            }
+            else
+            {
+                writeSet.pImageInfo = nullptr;
+            }
         }
 
         vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
@@ -133,7 +153,7 @@ namespace blink
     {
         destroyDescriptorSetLayout();
 
-        if (layoutBindings.empty()) return nullptr;
+        if (layoutBindings.empty()) return VK_NULL_HANDLE;
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -146,10 +166,10 @@ namespace blink
 
     void VulkanPipeline::destroyDescriptorSetLayout()
     {
-        if (m_descriptorSetLayout != nullptr)
+        if (m_descriptorSetLayout != VK_NULL_HANDLE)
         {
             vkDestroyDescriptorSetLayout(m_logicalDevice, m_descriptorSetLayout, nullptr);
-            m_descriptorSetLayout = nullptr;
+            m_descriptorSetLayout = VK_NULL_HANDLE;
         }
     }
 
@@ -290,16 +310,16 @@ namespace blink
 
     void VulkanPipeline::destroyGraphicsPipeline()
     {
-        if (m_pipeline != nullptr)
+        if (m_pipeline != VK_NULL_HANDLE)
         {
             vkDestroyPipeline(m_logicalDevice, m_pipeline, nullptr);
-            m_pipeline = nullptr;
+            m_pipeline = VK_NULL_HANDLE;
         }
 
-        if (m_pipelineLayout != nullptr)
+        if (m_pipelineLayout != VK_NULL_HANDLE)
         {
             vkDestroyPipelineLayout(m_logicalDevice, m_pipelineLayout, nullptr);
-            m_pipelineLayout = nullptr;
+            m_pipelineLayout = VK_NULL_HANDLE;
         }
     }
 
@@ -318,13 +338,28 @@ namespace blink
     static VkFormat getVertexInputFormat(const spirv_cross::SPIRType& type, const tstring& name)
     {
         // TODO: find a better way to check the color input
-        if (name == "inColor") { return VK_FORMAT_R8G8B8A8_UNORM; }
+        if (name == "inColor")
+        {
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        }
         if (type.basetype == spirv_cross::SPIRType::BaseType::Float && type.width == 32)
         {
-            if (type.vecsize == 1) { return VK_FORMAT_R32_SFLOAT; }
-            if (type.vecsize == 2) { return VK_FORMAT_R32G32_SFLOAT; }
-            if (type.vecsize == 3) { return VK_FORMAT_R32G32B32_SFLOAT; }
-            if (type.vecsize == 4) { return VK_FORMAT_R32G32B32A32_SFLOAT; }
+            if (type.vecsize == 1)
+            {
+                return VK_FORMAT_R32_SFLOAT;
+            }
+            if (type.vecsize == 2)
+            {
+                return VK_FORMAT_R32G32_SFLOAT;
+            }
+            if (type.vecsize == 3)
+            {
+                return VK_FORMAT_R32G32B32_SFLOAT;
+            }
+            if (type.vecsize == 4)
+            {
+                return VK_FORMAT_R32G32B32A32_SFLOAT;
+            }
         }
 
         return VK_FORMAT_UNDEFINED;
@@ -359,8 +394,14 @@ namespace blink
             attributeDesc[i].offset = 0;
 
             bindingDesc[i].binding = location;
-            if (attributeDesc[i].format == VK_FORMAT_R8G8B8A8_UNORM) { bindingDesc[i].stride = 4; }
-            else { bindingDesc[i].stride = (type.vecsize * type.width) >> 3; }
+            if (attributeDesc[i].format == VK_FORMAT_R8G8B8A8_UNORM)
+            {
+                bindingDesc[i].stride = 4;
+            }
+            else
+            {
+                bindingDesc[i].stride = (type.vecsize * type.width) >> 3;
+            }
             bindingDesc[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
             vertexAttrs.set(1 << location);
@@ -420,8 +461,8 @@ namespace blink
                 const auto& memberName = glsl.get_member_name(uniform.base_type_id, j);
                 auto memberOffset = glsl.get_member_decoration(uniform.base_type_id, j, spv::DecorationOffset);
                 auto memberBaseType = memberType.basetype; // float, int ...
-                auto rowSize = memberType.vecsize; // row
-                auto colSize = memberType.columns; // col
+                auto rowSize = memberType.vecsize;         // row
+                auto colSize = memberType.columns;         // col
 
                 if (memberBaseType == spirv_cross::SPIRType::BaseType::Int && rowSize == 1 && colSize == 1)
                 {

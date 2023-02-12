@@ -38,10 +38,10 @@ namespace blink
 
     void VulkanCommandPool::destroy()
     {
-        if (m_commandPool != nullptr)
+        if (m_commandPool != VK_NULL_HANDLE)
         {
             vkDestroyCommandPool(m_logicalDevice, m_commandPool, nullptr);
-            m_commandPool = nullptr;
+            m_commandPool = VK_NULL_HANDLE;
         }
     }
 } // namespace blink

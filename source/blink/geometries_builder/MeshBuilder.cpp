@@ -36,41 +36,41 @@ namespace blink
         if (!File::readFileIntoString(fileContent, m_filePath))
         {
             LOGE("Open file failed {0}", m_filePath);
-            return false;
+            return nullptr;
         }
 
         tinygltf::Model model;
         if (!GltfUtil::loadFromFile(model, m_filePath))
         {
-            return false;
+            return nullptr;
         }
 
         if (model.meshes.empty())
         {
             LOGE("Empty mesh {0}", m_filePath);
-            return false;
+            return nullptr;
         }
         const auto& mesh = model.meshes[0];
 
         if (mesh.primitives.empty())
         {
             LOGE("Empty primitive {0}", m_filePath);
-            return false;
+            return nullptr;
         }
         const auto& primitive = mesh.primitives[0];
 
         if (primitive.attributes.size() != 3)
         {
-            LOGE("Unsupport primitive attributes, size must be 3. {0}", m_filePath);
-            return false;
+            LOGE("Unsupported primitive attributes, size must be 3. {0}", m_filePath);
+            return nullptr;
         }
         auto itPos = primitive.attributes.find("POSITION");
         auto itNormal = primitive.attributes.find("NORMAL");
         auto itUv0 = primitive.attributes.find("TEXCOORD_0");
         if (itPos == primitive.attributes.end() || itNormal == primitive.attributes.end() || itUv0 == primitive.attributes.end())
         {
-            LOGE("Unsupport primitive attributes, must be POSITION, NORMAL and TEXCOORD_0. {0}", m_filePath);
-            return false;
+            LOGE("Unsupported primitive attributes, must be POSITION, NORMAL and TEXCOORD_0. {0}", m_filePath);
+            return nullptr;
         }
 
         const auto& accessorPos = model.accessors[itPos->second];
@@ -86,7 +86,7 @@ namespace blink
         if (buffViewPos.buffer != buffViewNormal.buffer || buffViewPos.buffer != buffViewUv0.buffer || buffViewPos.buffer != buffViewIndices.buffer)
         {
             LOGE("Only single buffer currently supported. {0}", m_filePath);
-            return false;
+            return nullptr;
         }
 
         const auto& buffer = model.buffers[buffViewPos.buffer];

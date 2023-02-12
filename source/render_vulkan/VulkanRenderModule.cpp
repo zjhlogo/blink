@@ -68,6 +68,8 @@ namespace blink
 
         destroySyncObjects();
 
+        destroyRenderSystems();
+
         SAFE_DELETE(m_perMaterialUniformBuffer);
         SAFE_DELETE(m_perFrameUniformBuffer);
         SAFE_DELETE(m_commandBuffer);
@@ -82,7 +84,10 @@ namespace blink
     bool VulkanRenderModule::processEvent()
     {
         /* Loop until the user closes the window */
-        if (glfwWindowShouldClose(*m_window)) { return false; }
+        if (glfwWindowShouldClose(*m_window))
+        {
+            return false;
+        }
 
         /* Poll for and process events */
         glfwPollEvents();
@@ -90,22 +95,17 @@ namespace blink
         return true;
     }
 
-    VulkanRenderModule::RenderResult VulkanRenderModule::render(const RenderCb& cb)
+    bool VulkanRenderModule::beginRender()
     {
         // acquire an image and wait for it became ready to use
         uint32_t imageIndex{};
-        auto result = vkAcquireNextImageKHR(*m_logicalDevice,
-                                            *m_swapchain,
-                                            UINT64_MAX,
-                                            nullptr,
-                                            *m_acquireImageFence,
-                                            &imageIndex);
+        auto result = vkAcquireNextImageKHR(*m_logicalDevice, *m_swapchain, UINT64_MAX, VK_NULL_HANDLE, *m_acquireImageFence, &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
             getSwapchain().recreate();
             getResModule()->recreate();
-            return RenderResult::Recreate;
+            return false;
         }
         m_acquireImageFence->wait();
         m_acquireImageFence->reset();
@@ -119,35 +119,19 @@ namespace blink
         m_perFrameUniformBuffer->reset();
         m_perMaterialUniformBuffer->reset();
 
-        // record command buffer
-        {
-            m_commandBuffer->beginCommand();
+        // start record command buffer
+        m_commandBuffer->beginCommand();
 
-            // using negative height to flip the y axis
-            const auto& extent = m_swapchain->getImageExtent();
-            VkViewport viewport{0.0f, static_cast<float>(extent.height), static_cast<float>(extent.width), -static_cast<float>(extent.height), 0.0f, 1.0f};
-            vkCmdSetViewport(*m_commandBuffer, 0, 1, &viewport);
+        return true;
+    }
 
-            {
-                VkRect2D rect{{0, 0}, extent};
-                m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getFrameBuffers(imageIndex), rect);
+    void VulkanRenderModule::endRender()
+    {
+        // end record command buffer
+        m_commandBuffer->endCommand();
 
-                // record commands
-                VulkanRenderData renderData{
-                    m_commandBuffer,
-                    m_perFrameUniformBuffer,
-                    m_perMaterialUniformBuffer
-                };
-                cb(renderData);
-
-                m_commandBuffer->endRenderPass();
-            }
-
-            m_commandBuffer->endCommand();
-        }
-
-        m_perFrameUniformBuffer->flushBuffer();
         m_perMaterialUniformBuffer->flushBuffer();
+        m_perFrameUniformBuffer->flushBuffer();
 
         // submit command
         VkSubmitInfo submitInfo{};
@@ -159,7 +143,9 @@ namespace blink
         VkCommandBuffer commandBuffer = *m_commandBuffer;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE))
+        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE));
+
+        auto imageIndex = m_swapchain->getCurrentActiveImageIndex();
 
         // present queue
         VkPresentInfoKHR presentInfo{};
@@ -169,18 +155,52 @@ namespace blink
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &imageIndex;
 
-        result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
+        auto result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
 
-        FrameMark
+        FrameMark;
+
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
             getSwapchain().recreate();
             getResModule()->recreate();
-            return RenderResult::Recreate;
         }
+    }
 
-        return RenderResult::Success;
+    bool VulkanRenderModule::beginRenderPass()
+    {
+        // using negative height to flip the y axis
+        const auto& extent = m_swapchain->getImageExtent();
+        VkViewport viewport{0.0f, static_cast<float>(extent.height), static_cast<float>(extent.width), -static_cast<float>(extent.height), 0.0f, 1.0f};
+        vkCmdSetViewport(*m_commandBuffer, 0, 1, &viewport);
+
+        VkRect2D rect{{0, 0}, extent};
+        m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getCurrentActiveFrameBuffer(), rect);
+
+        return true;
+    }
+
+    void VulkanRenderModule::endRenderPass()
+    {
+        m_commandBuffer->endRenderPass();
+    }
+
+    void VulkanRenderModule::render()
+    {
+        if (beginRender())
+        {
+            if (beginRenderPass())
+            {
+                for (auto sys : m_renderSystems)
+                {
+                    sys->render();
+                }
+
+                endRenderPass();
+            }
+
+            endRender();
+        }
     }
 
     void VulkanRenderModule::waitIdle()

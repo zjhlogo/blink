@@ -7,23 +7,16 @@
  *********************************************************************/
 #pragma once
 #include "../IRenderSystem.h"
+
 #include <glm/glm.hpp>
+
 #include <functional>
+#include <vector>
 
 namespace blink
 {
     class IRenderModule
     {
-    public:
-        enum RenderResult
-        {
-            Success,
-            Failed,
-            Recreate
-        };
-
-        using RenderCb = std::function<void(IRenderData& renderData)>;
-
     public:
         IRenderModule() = default;
         virtual ~IRenderModule() = default;
@@ -37,11 +30,21 @@ namespace blink
         virtual void destroyDevice() = 0;
 
         virtual bool processEvent() = 0;
-        virtual RenderResult render(const RenderCb& cb) = 0;
+        virtual void render() = 0;
 
         virtual glm::vec2 getSurfaceSize() const = 0;
 
         virtual void waitIdle() = 0;
+
+        IRenderSystem* addRenderSystem(IRenderSystem* sys);
+        bool initializeRenderSystems();
+        void terminateRenderSystems();
+
+    protected:
+        void destroyRenderSystems();
+
+    protected:
+        std::vector<IRenderSystem*> m_renderSystems;
     };
 
     IRenderModule* getRenderModule();

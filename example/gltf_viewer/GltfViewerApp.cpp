@@ -9,6 +9,7 @@
 #include "GltfViewerApp.h"
 
 #include <blink/blink.h>
+#include <core/modules/IRenderModule.h>
 #include <flecs/flecs_os_api_stdcpp.h>
 #include <fmt/format.h>
 #include <imgui/imgui.h>
@@ -22,11 +23,9 @@ bool GltfViewerApp::initialize()
     stdcpp_set_os_api();
 
     // add render systems
-    addRenderSystem(new SceneRenderSystem(this));
-    auto guiRenderSystem = new ImguiRenderSystem();
-    addRenderSystem(guiRenderSystem);
-    if (!initializeRenderSystems()) return false;
-
+    auto renderModule = blink::getRenderModule();
+    renderModule->addRenderSystem(new SceneRenderSystem(this));
+    auto guiRenderSystem = dynamic_cast<ImguiRenderSystem*>(renderModule->addRenderSystem(new ImguiRenderSystem()));
     guiRenderSystem->addWindow(this);
 
     if (!blink::GltfUtil::loadFromFile(m_model, "resource/models/damaged_helmet/DamagedHelmet.gltf")) return false;
@@ -36,7 +35,6 @@ bool GltfViewerApp::initialize()
 
 void GltfViewerApp::terminate()
 {
-    terminateRenderSystems();
     m_ecsWorld.terminate();
 }
 

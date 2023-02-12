@@ -9,6 +9,7 @@
 #include "systems/LineArtEntityCreationSystem.h"
 
 #include <blink/blink.h>
+#include <core/modules/IRenderModule.h>
 #include <flecs/flecs_os_api_stdcpp.h>
 #include <imgui/imgui.h>
 #include <render_systems/ImguiRenderSystem.h>
@@ -23,11 +24,9 @@ bool LineArtApp::initialize()
     if (!m_ecsWorld.initialize()) return false;
 
     // add render systems
-    addRenderSystem(new SceneRenderSystem(this));
-    auto guiRenderSystem = new ImguiRenderSystem();
-    addRenderSystem(guiRenderSystem);
-    if (!initializeRenderSystems()) return false;
-
+    auto renderModule = blink::getRenderModule();
+    renderModule->addRenderSystem(new SceneRenderSystem(this));
+    auto guiRenderSystem = dynamic_cast<ImguiRenderSystem*>(renderModule->addRenderSystem(new ImguiRenderSystem()));
     guiRenderSystem->addWindow(this);
 
     return true;
@@ -35,7 +34,6 @@ bool LineArtApp::initialize()
 
 void LineArtApp::terminate()
 {
-    terminateRenderSystems();
     m_ecsWorld.terminate();
 }
 
@@ -44,9 +42,7 @@ void LineArtApp::renderUi()
     auto* entityCreation = m_ecsWorld.findSystem<LineArtEntityCreationSystem>();
 
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
-    ImGui::Begin("Properties",
-                 nullptr,
-                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Properties", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
 
     // material property
     entityCreation->renderMaterialPropertyUi();

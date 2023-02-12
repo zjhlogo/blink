@@ -30,6 +30,12 @@ namespace blink
             VkDescriptorBufferInfo bufferInfo;
         };
 
+        struct PushConstantData
+        {
+            glm::mat4 localToWorld;
+            glm::mat3x4 localToWorldInvT;
+        };
+
     public:
         VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
         ~VulkanPipeline();

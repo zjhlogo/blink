@@ -16,14 +16,14 @@ public:
     explicit SceneRenderSystem(blink::IApp* app);
     ~SceneRenderSystem() override = default;
 
-    SceneRenderSystem(const SceneRenderSystem& system) = delete;
-    SceneRenderSystem(SceneRenderSystem&& system) = delete;
-    SceneRenderSystem& operator=(const SceneRenderSystem& system) = delete;
-    SceneRenderSystem& operator=(SceneRenderSystem&& system) = delete;
+    SceneRenderSystem(const SceneRenderSystem&) = delete;
+    SceneRenderSystem(SceneRenderSystem&&) = delete;
+    SceneRenderSystem& operator=(const SceneRenderSystem&) = delete;
+    SceneRenderSystem& operator=(SceneRenderSystem&&) = delete;
 
     bool initialize() override;
     void terminate() override;
-    void render(blink::IRenderData& renderData) override;
+    void render() override;
 
 private:
     blink::IApp* m_app{};

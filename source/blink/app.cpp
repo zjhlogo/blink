@@ -21,7 +21,6 @@ namespace blink
 
     IApp::~IApp()
     {
-        destroyRenderSystems();
         m_ecsWorld.destroyAllSystems();
     }
 
@@ -38,48 +37,4 @@ namespace blink
             m_ecsWorld.step();
         }
     }
-
-    void IApp::render(IRenderData& renderData)
-    {
-        for (auto sys : m_renderSystems)
-        {
-            sys->render(renderData);
-        }
-    }
-
-    bool IApp::addRenderSystem(IRenderSystem* sys)
-    {
-        m_renderSystems.push_back(sys);
-
-        return true;
-    }
-
-    bool IApp::initializeRenderSystems()
-    {
-        for (auto sys : m_renderSystems)
-        {
-            if (!sys->initialize()) return false;
-        }
-
-        return true;
-    }
-
-    void IApp::terminateRenderSystems()
-    {
-        for (int i = (int)m_renderSystems.size() - 1; i >= 0; --i)
-        {
-            m_renderSystems[i]->terminate();
-        }
-    }
-
-    void IApp::destroyRenderSystems()
-    {
-        for (int i = (int)m_renderSystems.size() - 1; i >= 0; --i)
-        {
-            SAFE_DELETE(m_renderSystems[i]);
-        }
-
-        m_renderSystems.clear();
-    }
-
 } // namespace blink

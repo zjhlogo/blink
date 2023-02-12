@@ -152,10 +152,10 @@ namespace blink
 
     void VulkanContext::destroySurface()
     {
-        if (m_surface != nullptr)
+        if (m_surface != VK_NULL_HANDLE)
         {
             vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
-            m_surface = nullptr;
+            m_surface = VK_NULL_HANDLE;
         }
     }
 

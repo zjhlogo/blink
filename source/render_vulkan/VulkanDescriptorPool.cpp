@@ -50,16 +50,16 @@ namespace blink
     {
         reset();
 
-        if (m_descriptorPool != nullptr)
+        if (m_descriptorPool != VK_NULL_HANDLE)
         {
             vkDestroyDescriptorPool(m_logicalDevice, m_descriptorPool, nullptr);
-            m_descriptorPool = nullptr;
+            m_descriptorPool = VK_NULL_HANDLE;
         }
     }
 
     void VulkanDescriptorPool::reset()
     {
-        if (m_descriptorPool != nullptr)
+        if (m_descriptorPool != VK_NULL_HANDLE)
         {
             vkResetDescriptorPool(m_logicalDevice, m_descriptorPool, 0);
         }
@@ -73,7 +73,7 @@ namespace blink
         allocInfo.descriptorSetCount = 1;
         allocInfo.pSetLayouts = &layout;
 
-        VkDescriptorSet descriptorSet = nullptr;
+        VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
         VK_CHECK_RESULT(vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, &descriptorSet))
         return descriptorSet;
     }

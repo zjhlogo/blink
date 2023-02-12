@@ -35,10 +35,10 @@ namespace blink
 
     void VulkanFence::destroy()
     {
-        if (m_fence != nullptr)
+        if (m_fence != VK_NULL_HANDLE)
         {
             vkDestroyFence(m_logicalDevice, m_fence, nullptr);
-            m_fence = nullptr;
+            m_fence = VK_NULL_HANDLE;
         }
     }
 

@@ -34,10 +34,10 @@ namespace blink
 
     void VulkanSemaphore::destroy()
     {
-        if (m_semaphore != nullptr)
+        if (m_semaphore != VK_NULL_HANDLE)
         {
             vkDestroySemaphore(m_logicalDevice, m_semaphore, nullptr);
-            m_semaphore = nullptr;
+            m_semaphore = VK_NULL_HANDLE;
         }
     }
 } // namespace blink

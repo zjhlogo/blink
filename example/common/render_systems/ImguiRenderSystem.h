@@ -20,14 +20,14 @@ public:
     ImguiRenderSystem() = default;
     ~ImguiRenderSystem() override;
 
-    ImguiRenderSystem(const ImguiRenderSystem& system) = delete;
-    ImguiRenderSystem(ImguiRenderSystem&& system) = delete;
-    ImguiRenderSystem& operator=(const ImguiRenderSystem& system) = delete;
-    ImguiRenderSystem& operator=(ImguiRenderSystem&& system) = delete;
+    ImguiRenderSystem(const ImguiRenderSystem&) = delete;
+    ImguiRenderSystem(ImguiRenderSystem&&) = delete;
+    ImguiRenderSystem& operator=(const ImguiRenderSystem&) = delete;
+    ImguiRenderSystem& operator=(ImguiRenderSystem&&) = delete;
 
     bool initialize() override;
     void terminate() override;
-    void render(blink::IRenderData& renderData) override;
+    void render() override;
 
     void addWindow(IGuiWindow* window);
     void removeWindow(const IGuiWindow* window);

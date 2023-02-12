@@ -28,23 +28,13 @@ namespace blink
         virtual void terminate() = 0;
 
         void stepEcsWorld();
-        void render(IRenderData& renderData);
-
         EcsWorld& getEcsWorld() { return m_ecsWorld; };
-
-    protected:
-        bool addRenderSystem(IRenderSystem* sys);
-        bool initializeRenderSystems();
-        void terminateRenderSystems();
-        void destroyRenderSystems();
 
     protected:
         EcsWorld m_ecsWorld;
         std::chrono::steady_clock::time_point m_lastTime;
         float m_deltaTime{};
         float m_elapseTime{};
-
-        std::vector<IRenderSystem*> m_renderSystems;
     };
 
 } // namespace blink

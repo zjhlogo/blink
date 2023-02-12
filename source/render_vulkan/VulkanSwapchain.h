@@ -37,7 +37,7 @@ namespace blink
         VkFormat getImageFormat() const { return m_swapChainImageFormat; }
         const VkExtent2D& getImageExtent() const { return m_swapChainExtent; }
         std::size_t getImageCount() const { return m_images.size(); }
-        VkFramebuffer getFrameBuffers(size_t index) { return m_swapChainFrameBuffers[index]; }
+        VkFramebuffer getCurrentActiveFrameBuffer() { return m_swapChainFrameBuffers[m_activeImageIndex]; }
         VkRenderPass getRenderPass() const { return m_renderPass; }
 
         void setCurrentActiveImageIndex(uint32_t imageIndex) { m_activeImageIndex = imageIndex; }

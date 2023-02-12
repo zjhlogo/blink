@@ -21,21 +21,6 @@ namespace blink
     class VulkanSemaphore;
     class VulkanFence;
 
-    class VulkanRenderData : public IRenderData
-    {
-    public:
-        VulkanRenderData(VulkanCommandBuffer* commandBuffer,
-                         VulkanUniformBuffer* fub,
-                         VulkanUniformBuffer* mub)
-            : commandBuffer(commandBuffer)
-            , fub(fub)
-            , mub(mub) { }
-
-        VulkanCommandBuffer* commandBuffer;
-        VulkanUniformBuffer* fub;
-        VulkanUniformBuffer* mub;
-    };
-
     class VulkanRenderModule final : public IRenderModule
     {
     public:
@@ -43,7 +28,7 @@ namespace blink
         void destroyDevice() override;
 
         bool processEvent() override;
-        RenderResult render(const RenderCb& cb) override;
+        void render() override;
 
         void waitIdle() override;
 
@@ -53,19 +38,28 @@ namespace blink
         VulkanLogicalDevice& getLogicalDevice() const { return *m_logicalDevice; }
         VulkanSwapchain& getSwapchain() const { return *m_swapchain; }
 
+        VulkanCommandBuffer& getCommandBuffer() const { return *m_commandBuffer; }
+        VulkanUniformBuffer& getPerFrameUniformBuffer() const { return *m_perFrameUniformBuffer; }
+        VulkanUniformBuffer& getPerMaterialUniformBuffer() const { return *m_perMaterialUniformBuffer; }
+
     private:
         bool createSyncObjects();
         void destroySyncObjects();
 
-    private:
-        VulkanFence* m_acquireImageFence{};
+        bool beginRender();
+        void endRender();
 
+        bool beginRenderPass();
+        void endRenderPass();
+
+    private:
         VulkanWindow* m_window{};
         VulkanContext* m_context{};
         VulkanLogicalDevice* m_logicalDevice{};
+        VulkanFence* m_acquireImageFence{};
         VulkanSwapchain* m_swapchain{};
-        VulkanCommandBuffer* m_commandBuffer{};
 
+        VulkanCommandBuffer* m_commandBuffer{};
         VulkanUniformBuffer* m_perFrameUniformBuffer{};
         VulkanUniformBuffer* m_perMaterialUniformBuffer{};
     };

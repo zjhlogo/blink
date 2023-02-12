@@ -12,7 +12,6 @@
 #include "../VulkanContext.h"
 #include "../VulkanImage.h"
 #include "../VulkanLogicalDevice.h"
-#include "../VulkanMemory.h"
 #include "../utils/VulkanUtils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -39,7 +38,7 @@ namespace blink
         int texChannels = 0;
 
         stbi_uc* pixels = stbi_load(texFile.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        if (!pixels) return nullptr;
+        if (!pixels) return false;
 
         bool success = createTexture2D(pixels, texWidth, texHeight, texChannels);
         stbi_image_free(pixels);
@@ -51,7 +50,10 @@ namespace blink
     {
         if (!createTextureImage(pixels, width, height, channels)) return false;
 
-        if (m_textureImage->createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT) == nullptr) { return false; }
+        if (m_textureImage->createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT) == VK_NULL_HANDLE)
+        {
+            return false;
+        }
 
         if (!createTextureSampler()) return false;
 
@@ -63,11 +65,7 @@ namespace blink
         destroyTextureImage();
 
         VkFormat depthFormat = VulkanUtils::findSupportedFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice(),
-                                                                {
-                                                                    VK_FORMAT_D32_SFLOAT,
-                                                                    VK_FORMAT_D32_SFLOAT_S8_UINT,
-                                                                    VK_FORMAT_D24_UNORM_S8_UINT
-                                                                },
+                                                                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
                                                                 VK_IMAGE_TILING_OPTIMAL,
                                                                 VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
@@ -76,9 +74,7 @@ namespace blink
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         m_textureImage->allocateImageMemory();
         m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-        m_textureImage->transitionImageLayout(depthFormat,
-                                              VK_IMAGE_LAYOUT_UNDEFINED,
-                                              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        m_textureImage->transitionImageLayout(depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
         return true;
     }
@@ -104,46 +100,34 @@ namespace blink
 
         // create image
         m_textureImage = new VulkanImage(m_logicalDevice);
-        m_textureImage->createImage(VK_IMAGE_TYPE_2D,
-                                    width,
-                                    height,
-                                    VK_FORMAT_R8G8B8A8_UNORM,
-                                    VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
         m_textureImage->allocateImageMemory();
 
-        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM,
-                                              VK_IMAGE_LAYOUT_UNDEFINED,
-                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         // copy buffer to image
         {
-            m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer)
-            {
-                VkBufferImageCopy region;
-                region.bufferOffset = 0;
-                region.bufferRowLength = 0;
-                region.bufferImageHeight = 0;
+            m_logicalDevice.executeCommand(
+                [&](const VulkanCommandBuffer& commandBuffer)
+                {
+                    VkBufferImageCopy region;
+                    region.bufferOffset = 0;
+                    region.bufferRowLength = 0;
+                    region.bufferImageHeight = 0;
 
-                region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                region.imageSubresource.mipLevel = 0;
-                region.imageSubresource.baseArrayLayer = 0;
-                region.imageSubresource.layerCount = 1;
+                    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    region.imageSubresource.mipLevel = 0;
+                    region.imageSubresource.baseArrayLayer = 0;
+                    region.imageSubresource.layerCount = 1;
 
-                region.imageOffset = {0, 0, 0};
-                region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
+                    region.imageOffset = {0, 0, 0};
+                    region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
 
-                vkCmdCopyBufferToImage(commandBuffer,
-                                       *stagingBuffer,
-                                       *m_textureImage,
-                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                       1,
-                                       &region);
-            });
+                    vkCmdCopyBufferToImage(commandBuffer, *stagingBuffer, *m_textureImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                });
         }
 
-        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM,
-                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         // destroy staging buffer
         SAFE_DELETE(stagingBuffer);
@@ -185,10 +169,10 @@ namespace blink
 
     void VulkanTexture::destroyTextureSampler()
     {
-        if (m_textureSampler != nullptr)
+        if (m_textureSampler != VK_NULL_HANDLE)
         {
             vkDestroySampler(m_logicalDevice, m_textureSampler, nullptr);
-            m_textureSampler = nullptr;
+            m_textureSampler = VK_NULL_HANDLE;
         }
     }
 } // namespace blink

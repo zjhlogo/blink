@@ -60,16 +60,16 @@ namespace blink
 
         destroyImageView();
 
-        if (destroyImageHandle && m_image != nullptr)
+        if (destroyImageHandle && m_image != VK_NULL_HANDLE)
         {
             vkDestroyImage(m_logicalDevice, m_image, nullptr);
         }
-        m_image = nullptr;
+        m_image = VK_NULL_HANDLE;
     }
 
     VkImageView VulkanImage::createImageView(VkFormat format, VkImageAspectFlags aspectFlags)
     {
-        if (m_imageView != nullptr && m_format == format && m_aspectFlags == aspectFlags)
+        if (m_imageView != VK_NULL_HANDLE && m_format == format && m_aspectFlags == aspectFlags)
         {
             return m_imageView;
         }
@@ -95,10 +95,10 @@ namespace blink
 
     void VulkanImage::destroyImageView()
     {
-        if (m_imageView != nullptr)
+        if (m_imageView != VK_NULL_HANDLE)
         {
             vkDestroyImageView(m_logicalDevice, m_imageView, nullptr);
-            m_imageView = nullptr;
+            m_imageView = VK_NULL_HANDLE;
         }
 
         m_format = VkFormat::VK_FORMAT_UNDEFINED;

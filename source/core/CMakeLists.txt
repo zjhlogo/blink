@@ -5,6 +5,7 @@ project(libcore)
 
 set(SOURCE_FILES
 components/Components.h
+modules/IRenderModule.cpp
 modules/IRenderModule.h
 modules/IResModule.h
 resources/IGeometry.cpp
