@@ -69,6 +69,15 @@ bool ImguiRenderSystem::initialize()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
+    io.ConfigFlags |= ImGuiCol_DockingEmptyBg;          // 
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+    // io.ConfigViewportsNoAutoMerge = true;
+    // io.ConfigViewportsNoTaskBarIcon = true;
+
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
@@ -123,6 +132,7 @@ void ImguiRenderSystem::render()
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGui::DockSpaceOverViewport();
 
     for (auto window : m_allWindows)
     {
@@ -132,7 +142,21 @@ void ImguiRenderSystem::render()
     // Rendering
     ImGui::Render();
 
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), renderModule->getCommandBuffer());
+    ImDrawData* main_draw_data = ImGui::GetDrawData();
+    const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
+
+    if (!main_is_minimized)
+    {
+        ImGui_ImplVulkan_RenderDrawData(main_draw_data, renderModule->getCommandBuffer());
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    // Update and Render additional Platform Windows
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
 }
 
 void ImguiRenderSystem::addWindow(IGuiWindow* window)
