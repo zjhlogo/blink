@@ -1,7 +1,7 @@
 /*********************************************************************
  * \file   LineArtApp.h
- * \brief  
- * 
+ * \brief
+ *
  * \author zjhlogo
  * \date   04/24/2022
  *********************************************************************/
@@ -13,11 +13,9 @@
 class LineArtApp final : public blink::IApp, public IGuiWindow
 {
 public:
-    LineArtApp() = default;
-    ~LineArtApp() override = default;
-
-    bool initialize() override;
-    void terminate() override;
-
     void renderUi() override;
+
+protected:
+    bool initializeLogicalSystems() override;
+    bool initializeRenderSystems() override;
 };

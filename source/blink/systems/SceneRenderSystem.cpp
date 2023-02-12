@@ -7,9 +7,9 @@
  *********************************************************************/
 
 #include "SceneRenderSystem.h"
+#include "../components/Components.h"
 #include "../utils/RenderDataUploader.h"
 
-#include <blink/components/Components.h>
 #include <core/components/Components.h>
 #include <foundation/Log.h>
 #include <glm/gtx/quaternion.hpp>

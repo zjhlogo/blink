@@ -27,17 +27,13 @@ namespace blink
             {
                 if (app.initialize())
                 {
-                    if (renderModule->initializeRenderSystems())
+                    while (renderModule->processEvent())
                     {
-                        while (renderModule->processEvent())
-                        {
-                            app.stepEcsWorld();
-                            renderModule->render();
-                        }
-
-                        renderModule->waitIdle();
-                        renderModule->terminateRenderSystems();
+                        app.stepEcsWorld();
+                        renderModule->render();
                     }
+
+                    renderModule->waitIdle();
                 }
 
                 app.terminate();

@@ -22,10 +22,14 @@ geometries_builder/TetrahedronBuilder.cpp
 geometries_builder/TetrahedronBuilder.h
 systems/DebugLineSystem.cpp
 systems/DebugLineSystem.h
+systems/SceneRenderSystem.cpp
+systems/SceneRenderSystem.h
 types/RenderLayers.h
 types/RenderOrders.h
 utils/GltfUtil.cpp
 utils/GltfUtil.h
+utils/RenderDataUploader.cpp
+utils/RenderDataUploader.h
 app.cpp
 app.h
 blink.cpp

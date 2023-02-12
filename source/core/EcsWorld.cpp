@@ -9,6 +9,8 @@
 #include "EcsWorld.h"
 #include "ILogicalSystem.h"
 
+#include <flecs/flecs_os_api_stdcpp.h>
+
 namespace blink
 {
     constexpr float EcsWorld::FIXED_FPS = 60.0f;
@@ -16,20 +18,27 @@ namespace blink
 
     static int myRunAction(ecs_world_t* world, ecs_app_desc_t* desc)
     {
-        if (desc->init) { desc->init(world); }
+        if (desc->init)
+        {
+            desc->init(world);
+        }
 
         return 0;
     }
 
     EcsWorld::EcsWorld()
     {
+        stdcpp_set_os_api();
         ecs_app_set_run_action(myRunAction);
         m_world.app().threads(4).target_fps(FIXED_FPS).enable_rest().run();
     }
 
     bool EcsWorld::initialize()
     {
-        for (auto sys : m_logicalSystems) { if (!sys->initialize()) return false; }
+        for (auto sys : m_logicalSystems)
+        {
+            if (!sys->initialize()) return false;
+        }
 
         return true;
     }
@@ -70,12 +79,18 @@ namespace blink
     {
         // LOGI("frame tick: {0}", m_frameTick);
 
-        for (auto sys : m_logicalSystems) { sys->framePreUpdate(); }
+        for (auto sys : m_logicalSystems)
+        {
+            sys->framePreUpdate();
+        }
 
         //
         m_world.progress(FIXED_DT);
 
-        for (auto sys : m_logicalSystems) { sys->framePostUpdate(); }
+        for (auto sys : m_logicalSystems)
+        {
+            sys->framePostUpdate();
+        }
 
         ++m_frameTick;
     }

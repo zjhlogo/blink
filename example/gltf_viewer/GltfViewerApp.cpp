@@ -9,33 +9,24 @@
 #include "GltfViewerApp.h"
 
 #include <blink/blink.h>
-#include <core/modules/IRenderModule.h>
-#include <flecs/flecs_os_api_stdcpp.h>
 #include <fmt/format.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_stdlib.h>
 #include <render_systems/ImguiRenderSystem.h>
-#include <render_systems/SceneRenderSystem.h>
 #include <utils/ImguiExtension.h>
 
-bool GltfViewerApp::initialize()
+bool GltfViewerApp::initializeLogicalSystems()
 {
-    stdcpp_set_os_api();
-
-    // add render systems
-    auto renderModule = blink::getRenderModule();
-    renderModule->addRenderSystem(new SceneRenderSystem(this));
-    auto guiRenderSystem = dynamic_cast<ImguiRenderSystem*>(renderModule->addRenderSystem(new ImguiRenderSystem()));
-    guiRenderSystem->addWindow(this);
-
     if (!blink::GltfUtil::loadFromFile(m_model, "resource/models/damaged_helmet/DamagedHelmet.gltf")) return false;
 
     return true;
 }
 
-void GltfViewerApp::terminate()
+bool GltfViewerApp::initializeRenderSystems()
 {
-    m_ecsWorld.terminate();
+    auto guiRenderSystem = addRenderSystem(new ImguiRenderSystem());
+    guiRenderSystem->addWindow(this);
+    return true;
 }
 
 void GltfViewerApp::renderUi()

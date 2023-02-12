@@ -11,13 +11,7 @@
 #pragma once
 
 #include <blink/app.h>
-#include <guis/IGuiWindow.h>
 
-class HelloWorldApp final : public blink::IApp, public IGuiWindow
+class HelloWorldApp final : public blink::IApp
 {
-public:
-    bool initialize() override;
-    void terminate() override;
-
-    void renderUi() override;
 };

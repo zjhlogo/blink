@@ -10,6 +10,8 @@
 **/
 
 #include "app.h"
+#include "systems/DebugLineSystem.h"
+#include "systems/SceneRenderSystem.h"
 
 namespace blink
 {
@@ -22,6 +24,30 @@ namespace blink
     IApp::~IApp()
     {
         m_ecsWorld.destroyAllSystems();
+    }
+
+    bool IApp::initialize()
+    {
+        // initialize logical systems
+        if (!initializeLogicalSystems()) return false;
+        addLogicSystem(new DebugLineSystem());
+        if (!m_ecsWorld.initialize()) return false;
+
+        // initialize render systems
+        m_renderModule = getRenderModule();
+        if (!m_renderModule) return false;
+        addRenderSystem(new SceneRenderSystem(this));
+        if (!initializeRenderSystems()) return false;
+        if (!m_renderModule->initializeRenderSystems()) return false;
+
+
+        return true;
+    }
+
+    void IApp::terminate()
+    {
+        m_renderModule->terminateRenderSystems();
+        m_ecsWorld.terminate();
     }
 
     void IApp::stepEcsWorld()

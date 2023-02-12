@@ -1,8 +1,8 @@
 
 /*********************************************************************
  * \file   PbrApp.h
- * \brief  
- * 
+ * \brief
+ *
  * \author zjhlogo
  * \date   04/24/2022
  *********************************************************************/
@@ -14,12 +14,9 @@
 class PbrApp : public blink::IApp, public IGuiWindow
 {
 public:
-    PbrApp() = default;
-    virtual ~PbrApp() = default;
-
-    virtual bool initialize() override;
-    virtual void terminate() override;
-
     virtual void renderUi() override;
 
+protected:
+    bool initializeLogicalSystems() override;
+    bool initializeRenderSystems() override;
 };

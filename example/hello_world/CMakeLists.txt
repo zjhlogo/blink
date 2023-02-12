@@ -4,16 +4,6 @@ include(${PROJECT_ROOT}/cmake/utils.cmake)
 project(hello_world)
 
 set(SOURCE_FILES
-components/PendulumComponents.h
-components/UserCommandComponents.h
-systems/EntityCreationSystem.cpp
-systems/EntityCreationSystem.h
-systems/PrefabInitializeSystem.cpp
-systems/PrefabInitializeSystem.h
-systems/SinglePendulumSystem.cpp
-systems/SinglePendulumSystem.h
-systems/UserCommandSystem.cpp
-systems/UserCommandSystem.h
 HelloWorldApp.cpp
 HelloWorldApp.h
 )

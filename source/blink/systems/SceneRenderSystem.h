@@ -7,7 +7,8 @@
  *********************************************************************/
 #pragma once
 
-#include <blink/app.h>
+#include "../app.h"
+
 #include <core/IRenderSystem.h>
 
 class SceneRenderSystem final : public blink::IRenderSystem

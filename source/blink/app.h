@@ -11,7 +11,7 @@
 #pragma once
 
 #include <core/EcsWorld.h>
-#include <core/IRenderSystem.h>
+#include <core/modules/IRenderModule.h>
 
 #include <chrono>
 #include <vector>
@@ -24,14 +24,32 @@ namespace blink
         IApp();
         virtual ~IApp();
 
-        virtual bool initialize() = 0;
-        virtual void terminate() = 0;
+        virtual bool initialize();
+        virtual void terminate();
 
         void stepEcsWorld();
-        EcsWorld& getEcsWorld() { return m_ecsWorld; };
+        EcsWorld& getEcsWorld() { return m_ecsWorld; }
+
+        template <typename T> T* addLogicSystem(T* system)
+        {
+            m_ecsWorld.addSystem(system);
+            return system;
+        }
+
+        template <typename T> T* addRenderSystem(T* system)
+        {
+            m_renderModule->addRenderSystem(system);
+            return system;
+        }
 
     protected:
+        virtual bool initializeLogicalSystems() { return true; }
+        virtual bool initializeRenderSystems() { return true; }
+
+    private:
         EcsWorld m_ecsWorld;
+        IRenderModule* m_renderModule{};
+
         std::chrono::steady_clock::time_point m_lastTime;
         float m_deltaTime{};
         float m_elapseTime{};
