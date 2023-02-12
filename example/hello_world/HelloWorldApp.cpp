@@ -1,16 +1,23 @@
-/**
-
-    @file      HelloWorldApp.cpp
-    @brief
-    @details   ~
-    @author    zjhlogo
-    @date      1.11.2021
-    @copyright Copyright zjhlogo, 2021. All right reserved.
-
-**/
+/*********************************************************************
+ * \file   HelloWorldApp.cpp
+ * \brief  
+ * 
+ * \author zjhlogo
+ * \date   February 2023
+ *********************************************************************/
 #include "HelloWorldApp.h"
 
 #include <blink/blink.h>
+
+bool HelloWorldApp::initializeLogicalSystems()
+{
+    return true;
+}
+
+bool HelloWorldApp::initializeRenderSystems()
+{
+    return true;
+}
 
 int main(int argc, char** argv)
 {

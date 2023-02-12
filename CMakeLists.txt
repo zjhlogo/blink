@@ -40,6 +40,7 @@ add_subdirectory(example/pendulum)
 add_subdirectory(example/line_art)
 add_subdirectory(example/pbr)
 add_subdirectory(example/gltf_viewer)
+add_subdirectory(example/imgui_demo)
 
 add_subdirectory(test/foundation_test)
 add_subdirectory(test/noise_test)

@@ -43,8 +43,8 @@ namespace blink
         }
 
     protected:
-        virtual bool initializeLogicalSystems() { return true; }
-        virtual bool initializeRenderSystems() { return true; }
+        virtual bool initializeLogicalSystems() = 0;
+        virtual bool initializeRenderSystems() = 0;
 
     private:
         EcsWorld m_ecsWorld;
