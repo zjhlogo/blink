@@ -12,6 +12,7 @@
 #include "VulkanContext.h"
 #include "VulkanFence.h"
 #include "VulkanLogicalDevice.h"
+#include "VulkanRenderPass.h"
 #include "VulkanSwapchain.h"
 #include "VulkanUniformBuffer.h"
 #include "VulkanWindow.h"
@@ -45,7 +46,10 @@ namespace blink
         m_logicalDevice = new VulkanLogicalDevice(m_context);
         if (!m_logicalDevice->create()) return false;
 
-        m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice);
+        m_renderPass = new VulkanRenderPass(*m_logicalDevice);
+        if (!m_renderPass->create()) return false;
+
+        m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice, *m_renderPass);
         if (!m_swapchain->create()) return false;
 
         m_commandBuffer = new VulkanCommandBuffer(*m_logicalDevice, m_logicalDevice->getCommandPool());
@@ -103,7 +107,9 @@ namespace blink
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
-            getSwapchain().recreate();
+            m_window->updateFrameBufferSize();
+            m_renderPass->recreate();
+            m_swapchain->recreate();
             getResModule()->recreate();
             return false;
         }
@@ -162,7 +168,9 @@ namespace blink
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
-            getSwapchain().recreate();
+            m_window->updateFrameBufferSize();
+            m_renderPass->recreate();
+            m_swapchain->recreate();
             getResModule()->recreate();
         }
     }
@@ -175,7 +183,7 @@ namespace blink
         vkCmdSetViewport(*m_commandBuffer, 0, 1, &viewport);
 
         VkRect2D rect{{0, 0}, extent};
-        m_commandBuffer->beginRenderPass(m_swapchain->getRenderPass(), m_swapchain->getCurrentActiveFrameBuffer(), rect);
+        m_commandBuffer->beginRenderPass(*m_renderPass, m_swapchain->getCurrentActiveFrameBuffer(), rect);
 
         return true;
     }

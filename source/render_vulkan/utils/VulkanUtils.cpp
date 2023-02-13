@@ -122,16 +122,23 @@ namespace blink
                                                        VkDebugUtilsMessengerEXT* debugMessenger)
     {
         auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
-        if (func != nullptr) { return func(instance, createInfo, allocator, debugMessenger); }
-        else { return VK_ERROR_EXTENSION_NOT_PRESENT; }
+        if (func != nullptr)
+        {
+            return func(instance, createInfo, allocator, debugMessenger);
+        }
+        else
+        {
+            return VK_ERROR_EXTENSION_NOT_PRESENT;
+        }
     }
 
-    void VulkanUtils::destroyDebugUtilsMessengerExt(VkInstance instance,
-                                                    VkDebugUtilsMessengerEXT debugMessenger,
-                                                    const VkAllocationCallbacks* allocator)
+    void VulkanUtils::destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* allocator)
     {
         auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
-        if (func != nullptr) { func(instance, debugMessenger, allocator); }
+        if (func != nullptr)
+        {
+            func(instance, debugMessenger, allocator);
+        }
     }
 
     const std::vector<const char*>& VulkanUtils::getRequiredValidationLayers()
@@ -142,8 +149,7 @@ namespace blink
 
     const std::vector<const char*>& VulkanUtils::getRequiredInstanceExtensions()
     {
-        static const std::vector<const char*> REQUIRED_EXTENSIONS =
-        {
+        static const std::vector<const char*> REQUIRED_EXTENSIONS = {
             "VK_KHR_surface",
             "VK_KHR_win32_surface",
             "VK_EXT_debug_utils",
@@ -153,8 +159,7 @@ namespace blink
 
     const std::vector<const char*>& VulkanUtils::getRequiredDeviceExtensions()
     {
-        static const std::vector<const char*> REQUIRED_EXTENSIONS =
-        {
+        static const std::vector<const char*> REQUIRED_EXTENSIONS = {
             "VK_KHR_swapchain",
             "VK_KHR_maintenance1",
         };
@@ -188,9 +193,7 @@ namespace blink
         return false;
     }
 
-    uint32_t VulkanUtils::findMemoryType(const VkPhysicalDeviceMemoryProperties& memProperties,
-                                         uint32_t typeFilter,
-                                         VkMemoryPropertyFlags properties)
+    uint32_t VulkanUtils::findMemoryType(const VkPhysicalDeviceMemoryProperties& memProperties, uint32_t typeFilter, VkMemoryPropertyFlags properties)
     {
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
         {
@@ -229,6 +232,25 @@ namespace blink
         }
 
         return VK_FORMAT_D24_UNORM_S8_UINT;
+    }
+
+    VkSurfaceFormatKHR VulkanUtils::findSurfaceFormat(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
+    {
+        // select format
+        std::vector<VkSurfaceFormatKHR> formats;
+        VulkanUtils::getSurfaceFormats(formats, physicalDevice, surface);
+
+        VkSurfaceFormatKHR selFormat = formats[0];
+        for (const auto& format : formats)
+        {
+            if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            {
+                selFormat = format;
+                break;
+            }
+        }
+
+        return selFormat;
     }
 
     VkFormat VulkanUtils::findDepthFormat(VkPhysicalDevice physicalDevice)

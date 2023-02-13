@@ -14,7 +14,6 @@
 #include <render_vulkan/VulkanCommandPool.h>
 #include <render_vulkan/VulkanLogicalDevice.h>
 #include <render_vulkan/VulkanRenderModule.h>
-#include <render_vulkan/VulkanSwapchain.h>
 
 namespace blink
 {
@@ -30,7 +29,7 @@ namespace blink
     {
         auto vulkanRenderModule = dynamic_cast<VulkanRenderModule*>(getRenderModule());
         m_logicalDevice = &vulkanRenderModule->getLogicalDevice();
-        m_swapchain = &vulkanRenderModule->getSwapchain();
+        m_renderPass = &vulkanRenderModule->getRenderPass();
 
         return true;
     }
@@ -56,7 +55,6 @@ namespace blink
         m_texture2dMap.clear();
 
         m_logicalDevice = nullptr;
-        m_swapchain = nullptr;
     }
 
     void VulkanResModule::recreate()
@@ -152,7 +150,7 @@ namespace blink
         }
 
         // create new
-        auto material = new VulkanMaterial(*m_logicalDevice, *m_swapchain);
+        auto material = new VulkanMaterial(*m_logicalDevice, *m_renderPass);
         if (!material->create(filePath))
         {
             SAFE_DELETE(material);

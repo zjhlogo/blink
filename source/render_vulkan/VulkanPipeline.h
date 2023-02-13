@@ -16,7 +16,7 @@
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanSwapchain;
+    class VulkanRenderPass;
     class VulkanTexture;
     class VulkanCommandBuffer;
     class ITexture2d;
@@ -37,7 +37,7 @@ namespace blink
         };
 
     public:
-        VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
+        VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass);
         ~VulkanPipeline();
 
         VulkanPipeline(const VulkanPipeline&) = delete;
@@ -72,7 +72,8 @@ namespace blink
                                           const std::vector<VkVertexInputBindingDescription>& bindings,
                                           const std::vector<VkVertexInputAttributeDescription>& attributes,
                                           VkPolygonMode polygonMode,
-                                          VkPrimitiveTopology topology);
+                                          VkPrimitiveTopology topology,
+                                          const glm::ivec2& surfaceSize);
         void destroyGraphicsPipeline();
 
         VkShaderModule createShaderModule(const std::vector<uint8_t>& shaderCode);
@@ -87,7 +88,7 @@ namespace blink
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
-        VulkanSwapchain& m_swapchain;
+        VulkanRenderPass& m_renderPass;
 
         VkDescriptorSetLayout m_descriptorSetLayout{};
         VkPipelineLayout m_pipelineLayout{};

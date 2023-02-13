@@ -9,8 +9,8 @@
 #include "../VulkanCommandBuffer.h"
 #include "../VulkanImage.h"
 #include "../VulkanLogicalDevice.h"
+#include "../VulkanRenderPass.h"
 #include "../VulkanResModule.h"
-#include "../VulkanSwapchain.h"
 #include "../VulkanUniformBuffer.h"
 #include "VulkanTexture.h"
 
@@ -22,11 +22,11 @@
 
 namespace blink
 {
-    VulkanMaterial::VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
+    VulkanMaterial::VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass)
         : m_logicalDevice(logicalDevice)
-        , m_swapchain(swapchain)
+        , m_renderPass(renderPass)
     {
-        // 
+        //
     }
 
     VulkanMaterial::~VulkanMaterial()
@@ -49,7 +49,10 @@ namespace blink
         if (m_topology != geometry->getTopology()) return false;
 
         // set line width when necessary
-        if (m_topology == PrimitiveTopology::LineList) { vkCmdSetLineWidth(commandBuffer, 1.0f); }
+        if (m_topology == PrimitiveTopology::LineList)
+        {
+            vkCmdSetLineWidth(commandBuffer, 1.0f);
+        }
 
         // setup vertex buffer
         VkBuffer buffer = *geometry->getVulkanBuffer();
@@ -101,19 +104,34 @@ namespace blink
         // wireframe
         {
             auto jWireframe = j["wireframe"];
-            if (!jWireframe.is_null()) { if (jWireframe.get<bool>()) { m_polygonMode = VK_POLYGON_MODE_LINE; } }
+            if (!jWireframe.is_null())
+            {
+                if (jWireframe.get<bool>())
+                {
+                    m_polygonMode = VK_POLYGON_MODE_LINE;
+                }
+            }
         }
 
         // line-list
         {
             auto jLineList = j["line_list"];
-            if (!jLineList.is_null()) { if (jLineList.get<bool>()) { m_topology = PrimitiveTopology::LineList; } }
+            if (!jLineList.is_null())
+            {
+                if (jLineList.get<bool>())
+                {
+                    m_topology = PrimitiveTopology::LineList;
+                }
+            }
         }
 
         m_filePath = filePath;
 
-        m_pipeline = new VulkanPipeline(m_logicalDevice, m_swapchain);
-        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_polygonMode, m_topology)) { return false; }
+        m_pipeline = new VulkanPipeline(m_logicalDevice, m_renderPass);
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_polygonMode, m_topology))
+        {
+            return false;
+        }
 
         m_descriptorInfoList.resize(m_pipeline->getWriteSetCount());
 
@@ -163,10 +181,7 @@ namespace blink
                             auto jVec4 = jUniform["value"];
                             if (jVec4.is_array() && jVec4.size() == 4)
                             {
-                                auto value = glm::vec4(jVec4[0].get<float>(),
-                                                       jVec4[1].get<float>(),
-                                                       jVec4[2].get<float>(),
-                                                       jVec4[3].get<float>());
+                                auto value = glm::vec4(jVec4[0].get<float>(), jVec4[1].get<float>(), jVec4[2].get<float>(), jVec4[3].get<float>());
                                 uniformBlock->setUniformMember(jUniform["name"].get<tstring>(), &value);
                             }
                         }
@@ -238,7 +253,10 @@ namespace blink
 
     bool VulkanMaterial::recreate()
     {
-        if (m_pipeline) { return m_pipeline->recreate(); }
+        if (m_pipeline)
+        {
+            return m_pipeline->recreate();
+        }
 
         return true;
     }
@@ -250,15 +268,23 @@ namespace blink
 
         switch (type)
         {
-        case blink::UniformType::Int: return uniformBlock->setUniformMember(memberName, static_cast<const int*>(data));
-        case blink::UniformType::Float: return uniformBlock->setUniformMember(memberName, static_cast<const float*>(data));
-        case blink::UniformType::Vec2: return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec2*>(data));
-        case blink::UniformType::Vec3: return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec3*>(data));
-        case blink::UniformType::Vec4: return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec4*>(data));
-        case blink::UniformType::Mat3: return uniformBlock->setUniformMember(memberName, static_cast<const glm::mat3*>(data));
-        case blink::UniformType::Mat4: return uniformBlock->setUniformMember(memberName, static_cast<const glm::mat4*>(data));
+        case blink::UniformType::Int:
+            return uniformBlock->setUniformMember(memberName, static_cast<const int*>(data));
+        case blink::UniformType::Float:
+            return uniformBlock->setUniformMember(memberName, static_cast<const float*>(data));
+        case blink::UniformType::Vec2:
+            return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec2*>(data));
+        case blink::UniformType::Vec3:
+            return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec3*>(data));
+        case blink::UniformType::Vec4:
+            return uniformBlock->setUniformMember(memberName, static_cast<const glm::vec4*>(data));
+        case blink::UniformType::Mat3:
+            return uniformBlock->setUniformMember(memberName, static_cast<const glm::mat3*>(data));
+        case blink::UniformType::Mat4:
+            return uniformBlock->setUniformMember(memberName, static_cast<const glm::mat4*>(data));
         case UniformType::None:
-        case UniformType::NumTypes: break;
+        case UniformType::NumTypes:
+            break;
         }
 
         return false;
@@ -271,15 +297,23 @@ namespace blink
 
         switch (type)
         {
-        case UniformType::Int: return uniformBlock->getUniformMember(static_cast<int*>(dataOut), memberName);
-        case UniformType::Float: return uniformBlock->getUniformMember(static_cast<float*>(dataOut), memberName);
-        case UniformType::Vec2: return uniformBlock->getUniformMember(static_cast<glm::vec2*>(dataOut), memberName);
-        case UniformType::Vec3: return uniformBlock->getUniformMember(static_cast<glm::vec3*>(dataOut), memberName);
-        case UniformType::Vec4: return uniformBlock->getUniformMember(static_cast<glm::vec4*>(dataOut), memberName);
-        case UniformType::Mat3: return uniformBlock->getUniformMember(static_cast<glm::mat3*>(dataOut), memberName);
-        case UniformType::Mat4: return uniformBlock->getUniformMember(static_cast<glm::mat4*>(dataOut), memberName);
+        case UniformType::Int:
+            return uniformBlock->getUniformMember(static_cast<int*>(dataOut), memberName);
+        case UniformType::Float:
+            return uniformBlock->getUniformMember(static_cast<float*>(dataOut), memberName);
+        case UniformType::Vec2:
+            return uniformBlock->getUniformMember(static_cast<glm::vec2*>(dataOut), memberName);
+        case UniformType::Vec3:
+            return uniformBlock->getUniformMember(static_cast<glm::vec3*>(dataOut), memberName);
+        case UniformType::Vec4:
+            return uniformBlock->getUniformMember(static_cast<glm::vec4*>(dataOut), memberName);
+        case UniformType::Mat3:
+            return uniformBlock->getUniformMember(static_cast<glm::mat3*>(dataOut), memberName);
+        case UniformType::Mat4:
+            return uniformBlock->getUniformMember(static_cast<glm::mat4*>(dataOut), memberName);
         case UniformType::None:
-        case UniformType::NumTypes: break;
+        case UniformType::NumTypes:
+            break;
         }
 
         return false;

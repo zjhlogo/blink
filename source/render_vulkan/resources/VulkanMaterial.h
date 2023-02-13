@@ -17,7 +17,7 @@
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanSwapchain;
+    class VulkanRenderPass;
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
 
@@ -32,7 +32,7 @@ namespace blink
         };
 
     public:
-        VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain);
+        VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass);
         ~VulkanMaterial() override;
 
         VulkanMaterial(const VulkanMaterial& material) = delete;
@@ -60,7 +60,7 @@ namespace blink
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
-        VulkanSwapchain& m_swapchain;
+        VulkanRenderPass& m_renderPass;
 
         tstring m_filePath;
         tstring m_vertexShader;

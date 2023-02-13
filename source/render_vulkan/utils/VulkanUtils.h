@@ -57,6 +57,7 @@ namespace blink
                                             VkImageTiling tiling,
                                             VkFormatFeatureFlags features);
 
+        static VkSurfaceFormatKHR findSurfaceFormat(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
         static VkFormat findDepthFormat(VkPhysicalDevice physicalDevice);
     };
 } // namespace blink

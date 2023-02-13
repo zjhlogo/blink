@@ -21,10 +21,10 @@ namespace blink
         explicit VulkanContext(VulkanWindow* window);
         ~VulkanContext();
 
-        VulkanContext(const VulkanContext& context) = delete;
-        VulkanContext(VulkanContext&& context) = delete;
-        VulkanContext& operator=(const VulkanContext& context) = delete;
-        VulkanContext& operator=(VulkanContext&& context) = delete;
+        VulkanContext(const VulkanContext&) = delete;
+        VulkanContext(VulkanContext&&) = delete;
+        VulkanContext& operator=(const VulkanContext&) = delete;
+        VulkanContext& operator=(VulkanContext&&) = delete;
 
         bool create();
         void destroy();

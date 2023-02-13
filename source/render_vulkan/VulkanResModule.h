@@ -14,7 +14,7 @@
 namespace blink
 {
     class VulkanLogicalDevice;
-    class VulkanSwapchain;
+    class VulkanRenderPass;
 
     class VulkanResModule final : public IResModule
     {
@@ -40,7 +40,7 @@ namespace blink
 
     private:
         VulkanLogicalDevice* m_logicalDevice{};
-        VulkanSwapchain* m_swapchain{};
+        VulkanRenderPass* m_renderPass{};
 
         std::unordered_map<tstring, ITexture2d*> m_texture2dMap;
         std::unordered_map<tstring, IGeometry*> m_geometryMap;

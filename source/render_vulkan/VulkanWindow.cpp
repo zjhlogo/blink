@@ -50,7 +50,6 @@ namespace blink
     bool VulkanWindow::create(const glm::ivec2& windowSize)
     {
         if (!createWindow(windowSize)) return false;
-
         return true;
     }
 
@@ -58,6 +57,19 @@ namespace blink
     {
         //
         destroyWindow();
+    }
+
+    void VulkanWindow::updateFrameBufferSize()
+    {
+        m_frameBufferSize.x = 0;
+        m_frameBufferSize.y = 0;
+        glfwGetFramebufferSize(m_window, &m_frameBufferSize.x, &m_frameBufferSize.y);
+
+        while (m_frameBufferSize.x == 0 || m_frameBufferSize.y == 0)
+        {
+            glfwGetFramebufferSize(m_window, &m_frameBufferSize.x, &m_frameBufferSize.y);
+            glfwWaitEvents();
+        }
     }
 
     bool VulkanWindow::createWindow(const glm::ivec2& windowSize)

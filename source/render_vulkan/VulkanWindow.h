@@ -23,22 +23,25 @@ namespace blink
         VulkanWindow() = default;
         ~VulkanWindow();
 
-        VulkanWindow(const VulkanWindow& window) = delete;
-        VulkanWindow(VulkanWindow&& window) = delete;
-        VulkanWindow& operator=(const VulkanWindow& window) = delete;
-        VulkanWindow& operator=(VulkanWindow&& window) = delete;
+        VulkanWindow(const VulkanWindow&) = delete;
+        VulkanWindow(VulkanWindow&&) = delete;
+        VulkanWindow& operator=(const VulkanWindow&) = delete;
+        VulkanWindow& operator=(VulkanWindow&&) = delete;
+
+        operator GLFWwindow*() { return m_window; }
+        const glm::ivec2& getFrameBufferSize() const { return m_frameBufferSize; }
 
         bool create(const glm::ivec2& windowSize);
         void destroy();
-
-        operator GLFWwindow*() { return m_window; }
+        void updateFrameBufferSize();
 
     private:
         bool createWindow(const glm::ivec2& windowSize);
         void destroyWindow();
 
     private:
-        glm::ivec2 m_deviceSize{};
         GLFWwindow* m_window{};
+        glm::ivec2 m_deviceSize{};
+        glm::ivec2 m_frameBufferSize{};
     };
 } // namespace blink

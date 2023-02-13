@@ -11,7 +11,8 @@
 #include "VulkanContext.h"
 #include "VulkanDescriptorPool.h"
 #include "VulkanLogicalDevice.h"
-#include "VulkanSwapchain.h"
+#include "VulkanRenderModule.h"
+#include "VulkanRenderPass.h"
 #include "utils/VulkanUtils.h"
 
 #include <foundation/File.h>
@@ -19,9 +20,9 @@
 
 namespace blink
 {
-    VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanSwapchain& swapchain)
+    VulkanPipeline::VulkanPipeline(VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass)
         : m_logicalDevice(logicalDevice)
-        , m_swapchain(swapchain)
+        , m_renderPass(renderPass)
     {
         //
     }
@@ -75,8 +76,11 @@ namespace blink
             return false;
         }
 
+        auto renderModule = getRenderModule();
+        const auto& surfaceSize = renderModule->getSurfaceSize();
+
         if (VK_NULL_HANDLE
-            == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology))
+            == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology, surfaceSize))
         {
             return false;
         }
@@ -178,7 +182,8 @@ namespace blink
                                                       const std::vector<VkVertexInputBindingDescription>& bindings,
                                                       const std::vector<VkVertexInputAttributeDescription>& attributes,
                                                       VkPolygonMode polygonMode,
-                                                      VkPrimitiveTopology topology)
+                                                      VkPrimitiveTopology topology,
+                                                      const glm::ivec2& surfaceSize)
     {
         destroyGraphicsPipeline();
 
@@ -229,9 +234,8 @@ namespace blink
         inputAssembly.topology = topology;
 
         // viewport state
-        const auto& extent = m_swapchain.getImageExtent();
-        VkViewport viewport{0.0f, 0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, 1.0f};
-        VkRect2D scissor{{0, 0}, extent};
+        VkViewport viewport{0.0f, 0.0f, static_cast<float>(surfaceSize.x), static_cast<float>(surfaceSize.y), 0.0f, 1.0f};
+        VkRect2D scissor{{0, 0}, {static_cast<uint32_t>(surfaceSize.x), static_cast<uint32_t>(surfaceSize.y)}};
         VkPipelineViewportStateCreateInfo viewportState{};
         viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportState.viewportCount = 1;
@@ -298,7 +302,7 @@ namespace blink
         pipelineInfo.pColorBlendState = &colorBlending;
         pipelineInfo.pDynamicState = &dynamicState;
         pipelineInfo.layout = m_pipelineLayout;
-        pipelineInfo.renderPass = m_swapchain.getRenderPass();
+        pipelineInfo.renderPass = m_renderPass;
         pipelineInfo.subpass = 0;
 
         VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline))

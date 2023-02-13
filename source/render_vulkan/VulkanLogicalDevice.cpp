@@ -124,16 +124,14 @@ namespace blink
         deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
         deviceCreateInfo.enabledExtensionCount = 0;
 
-        if (VulkanUtils::checkValidationLayerSupported(m_context->getLayerProperties(),
-                                                       VulkanUtils::getRequiredValidationLayers()))
+        if (VulkanUtils::checkValidationLayerSupported(m_context->getLayerProperties(), VulkanUtils::getRequiredValidationLayers()))
         {
             const auto& requiredLayers = VulkanUtils::getRequiredValidationLayers();
             deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
             deviceCreateInfo.ppEnabledLayerNames = requiredLayers.data();
         }
 
-        if (VulkanUtils::checkExtensionsSupported(m_context->getExtensionProperties(),
-                                                  VulkanUtils::getRequiredDeviceExtensions()))
+        if (VulkanUtils::checkExtensionsSupported(m_context->getExtensionProperties(), VulkanUtils::getRequiredDeviceExtensions()))
         {
             const auto& requiredExtensions = VulkanUtils::getRequiredDeviceExtensions();
             deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());

@@ -24,10 +24,10 @@ namespace blink
         explicit VulkanLogicalDevice(VulkanContext* context);
         ~VulkanLogicalDevice();
 
-        VulkanLogicalDevice(const VulkanLogicalDevice& device) = delete;
-        VulkanLogicalDevice(VulkanLogicalDevice&& device) = delete;
-        VulkanLogicalDevice& operator=(const VulkanLogicalDevice& device) = delete;
-        VulkanLogicalDevice& operator=(VulkanLogicalDevice&& device) = delete;
+        VulkanLogicalDevice(const VulkanLogicalDevice&) = delete;
+        VulkanLogicalDevice(VulkanLogicalDevice&&) = delete;
+        VulkanLogicalDevice& operator=(const VulkanLogicalDevice&) = delete;
+        VulkanLogicalDevice& operator=(VulkanLogicalDevice&&) = delete;
 
         operator VkDevice() const { return m_logicalDevice; }
 

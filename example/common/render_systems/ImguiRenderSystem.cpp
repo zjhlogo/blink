@@ -16,6 +16,7 @@
 #include <render_vulkan/VulkanContext.h>
 #include <render_vulkan/VulkanLogicalDevice.h>
 #include <render_vulkan/VulkanRenderModule.h>
+#include <render_vulkan/VulkanRenderPass.h>
 #include <render_vulkan/VulkanSwapchain.h>
 #include <render_vulkan/VulkanWindow.h>
 
@@ -39,6 +40,7 @@ bool ImguiRenderSystem::initialize()
     auto renderModule = dynamic_cast<blink::VulkanRenderModule*>(blink::getRenderModule());
     auto& context = renderModule->getContext();
     auto& logicalDevice = renderModule->getLogicalDevice();
+    auto& renderPass = renderModule->getRenderPass();
     auto& swapchain = renderModule->getSwapchain();
 
     // Create Descriptor Pool
@@ -70,11 +72,11 @@ bool ImguiRenderSystem::initialize()
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
-    io.ConfigFlags |= ImGuiCol_DockingEmptyBg;          //
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-    // io.ConfigViewportsNoAutoMerge = true;
-    // io.ConfigViewportsNoTaskBarIcon = true;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    io.ConfigFlags |= ImGuiCol_DockingEmptyBg;        //
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+    //  io.ConfigViewportsNoAutoMerge = true;
+    //  io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -105,7 +107,7 @@ bool ImguiRenderSystem::initialize()
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.Allocator = VK_NULL_HANDLE;
     init_info.CheckVkResultFn = imguiCheckVkResult;
-    ImGui_ImplVulkan_Init(&init_info, swapchain.getRenderPass());
+    ImGui_ImplVulkan_Init(&init_info, renderPass);
 
     // Upload Fonts
     {

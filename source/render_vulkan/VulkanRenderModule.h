@@ -15,6 +15,7 @@ namespace blink
     class VulkanWindow;
     class VulkanContext;
     class VulkanLogicalDevice;
+    class VulkanRenderPass;
     class VulkanSwapchain;
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
@@ -36,6 +37,7 @@ namespace blink
 
         VulkanContext& getContext() const { return *m_context; }
         VulkanLogicalDevice& getLogicalDevice() const { return *m_logicalDevice; }
+        VulkanRenderPass& getRenderPass() const { return *m_renderPass; }
         VulkanSwapchain& getSwapchain() const { return *m_swapchain; }
 
         VulkanCommandBuffer& getCommandBuffer() const { return *m_commandBuffer; }
@@ -57,6 +59,7 @@ namespace blink
         VulkanContext* m_context{};
         VulkanLogicalDevice* m_logicalDevice{};
         VulkanFence* m_acquireImageFence{};
+        VulkanRenderPass* m_renderPass{};
         VulkanSwapchain* m_swapchain{};
 
         VulkanCommandBuffer* m_commandBuffer{};

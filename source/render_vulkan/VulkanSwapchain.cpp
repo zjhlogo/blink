@@ -10,6 +10,7 @@
 #include "VulkanContext.h"
 #include "VulkanImage.h"
 #include "VulkanLogicalDevice.h"
+#include "VulkanRenderPass.h"
 #include "VulkanWindow.h"
 #include "resources/VulkanTexture.h"
 #include "utils/VulkanUtils.h"
@@ -19,9 +20,10 @@
 
 namespace blink
 {
-    VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice)
+    VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass)
         : m_window(window)
         , m_logicalDevice(logicalDevice)
+        , m_renderPass(renderPass)
     {
         //
     }
@@ -35,33 +37,21 @@ namespace blink
     bool VulkanSwapchain::create()
     {
         if (!createSwapChain()) return false;
-        if (!createSwapchainImageViews()) return false;
-        if (!createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
-        if (!createFrameBuffers(m_renderPass)) return false;
+        if (!createSwapChainImageViews()) return false;
+        if (!createFrameBuffers()) return false;
 
         return true;
     }
 
     bool VulkanSwapchain::recreate()
     {
-        int width = 0;
-        int height = 0;
-        glfwGetFramebufferSize(m_window, &width, &height);
-
-        while (width == 0 || height == 0)
-        {
-            glfwGetFramebufferSize(m_window, &width, &height);
-            glfwWaitEvents();
-        }
-
         m_logicalDevice.waitDeviceIdle();
 
         destroy();
 
         if (!createSwapChain()) return false;
-        if (!createSwapchainImageViews()) return false;
-        if (!createRenderPass(m_swapChainImageFormat, VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice()))) return false;
-        if (!createFrameBuffers(m_renderPass)) return false;
+        if (!createSwapChainImageViews()) return false;
+        if (!createFrameBuffers()) return false;
 
         return true;
     }
@@ -69,8 +59,7 @@ namespace blink
     void VulkanSwapchain::destroy()
     {
         destroyFrameBuffers();
-        destroyRenderPass();
-        destroySwapchainImageViews();
+        destroySwapChainImageViews();
         destroySwapChain();
     }
 
@@ -81,18 +70,7 @@ namespace blink
         auto surface = context->getVkSurface();
 
         // select format
-        std::vector<VkSurfaceFormatKHR> formats;
-        VulkanUtils::getSurfaceFormats(formats, physicalDevice, surface);
-
-        VkSurfaceFormatKHR selFormat = formats[0];
-        for (const auto& format : formats)
-        {
-            if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-            {
-                selFormat = format;
-                break;
-            }
-        }
+        VkSurfaceFormatKHR selFormat = VulkanUtils::findSurfaceFormat(physicalDevice, surface);
 
         // select present mode
         std::vector<VkPresentModeKHR> presentModes;
@@ -123,10 +101,9 @@ namespace blink
         }
         else
         {
-            int width, height;
-            glfwGetFramebufferSize(*context->getWindow(), &width, &height);
-            selExtent.width = width;
-            selExtent.height = height;
+            const auto& frameBufferSize = m_window.getFrameBufferSize();
+            selExtent.width = frameBufferSize.x;
+            selExtent.height = frameBufferSize.y;
         }
 
         // select image count
@@ -204,7 +181,7 @@ namespace blink
         vkDestroySwapchainKHR(m_logicalDevice, m_swapChain, nullptr);
     }
 
-    bool VulkanSwapchain::createSwapchainImageViews()
+    bool VulkanSwapchain::createSwapChainImageViews()
     {
         for (auto vulkanImage : m_images)
         {
@@ -214,7 +191,7 @@ namespace blink
         return true;
     }
 
-    void VulkanSwapchain::destroySwapchainImageViews()
+    void VulkanSwapchain::destroySwapChainImageViews()
     {
         for (auto vulkanImage : m_images)
         {
@@ -222,79 +199,7 @@ namespace blink
         }
     }
 
-    VkRenderPass VulkanSwapchain::createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
-    {
-        destroyRenderPass();
-
-        // color attachment
-        VkAttachmentDescription colorAttachment{};
-        colorAttachment.format = colorAttachmentFormat;
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        // depth attachment
-        VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = depthAttachmentFormat;
-        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        // subPass
-        VkAttachmentReference colorAttachmentRef{};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = 1;
-        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subPass{};
-        subPass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subPass.colorAttachmentCount = 1;
-        subPass.pColorAttachments = &colorAttachmentRef;
-        subPass.pDepthStencilAttachment = &depthAttachmentRef;
-
-        VkSubpassDependency dependency{};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        // create render pass
-        VkAttachmentDescription attachments[2] = {colorAttachment, depthAttachment};
-        VkRenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = 2;
-        renderPassInfo.pAttachments = attachments;
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subPass;
-        renderPassInfo.dependencyCount = 1;
-        renderPassInfo.pDependencies = &dependency;
-
-        VK_CHECK_RESULT(vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass))
-        return m_renderPass;
-    }
-
-    void VulkanSwapchain::destroyRenderPass()
-    {
-        if (m_renderPass != VK_NULL_HANDLE)
-        {
-            vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
-            m_renderPass = VK_NULL_HANDLE;
-        }
-    }
-
-    bool VulkanSwapchain::createFrameBuffers(VkRenderPass renderPass)
+    bool VulkanSwapchain::createFrameBuffers()
     {
         SAFE_DELETE(m_depthTexture);
 
@@ -312,7 +217,7 @@ namespace blink
 
             VkFramebufferCreateInfo frameBufferInfo{};
             frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            frameBufferInfo.renderPass = renderPass;
+            frameBufferInfo.renderPass = m_renderPass;
             frameBufferInfo.attachmentCount = 2;
             frameBufferInfo.pAttachments = attachments;
             frameBufferInfo.width = m_swapChainExtent.width;

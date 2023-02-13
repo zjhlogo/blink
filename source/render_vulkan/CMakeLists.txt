@@ -38,6 +38,8 @@ VulkanPipeline.cpp
 VulkanPipeline.h
 VulkanRenderModule.cpp
 VulkanRenderModule.h
+VulkanRenderPass.cpp
+VulkanRenderPass.h
 VulkanResModule.cpp
 VulkanResModule.h
 VulkanSemaphore.cpp
