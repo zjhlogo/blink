@@ -98,7 +98,7 @@ void SceneRenderSystem::render()
                 }
                 else
                 {
-                    RenderDataUploader::MaterialRenderData materialRenderData;
+                    RenderDataUploader::MaterialRenderData materialRenderData{};
                     materialRenderData.cameraId = 0;
                     materialRenderData.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0});
                     materialGroups.emplace(material, materialRenderData);

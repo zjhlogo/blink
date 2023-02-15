@@ -78,6 +78,7 @@ namespace blink
         SAFE_DELETE(m_perFrameUniformBuffer);
         SAFE_DELETE(m_commandBuffer);
         SAFE_DELETE(m_swapchain);
+        SAFE_DELETE(m_renderPass);
         SAFE_DELETE(m_logicalDevice);
         SAFE_DELETE(m_context);
         SAFE_DELETE(m_window);

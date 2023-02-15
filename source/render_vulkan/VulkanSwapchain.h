@@ -47,9 +47,6 @@ namespace blink
         bool createSwapChain();
         void destroySwapChain();
 
-        bool createSwapChainImageViews();
-        void destroySwapChainImageViews();
-
         bool createFrameBuffers();
         void destroyFrameBuffers();
 

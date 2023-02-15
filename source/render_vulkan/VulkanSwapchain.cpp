@@ -37,7 +37,6 @@ namespace blink
     bool VulkanSwapchain::create()
     {
         if (!createSwapChain()) return false;
-        if (!createSwapChainImageViews()) return false;
         if (!createFrameBuffers()) return false;
 
         return true;
@@ -50,7 +49,6 @@ namespace blink
         destroy();
 
         if (!createSwapChain()) return false;
-        if (!createSwapChainImageViews()) return false;
         if (!createFrameBuffers()) return false;
 
         return true;
@@ -59,7 +57,6 @@ namespace blink
     void VulkanSwapchain::destroy()
     {
         destroyFrameBuffers();
-        destroySwapChainImageViews();
         destroySwapChain();
     }
 
@@ -160,9 +157,10 @@ namespace blink
         m_swapChainExtent = selExtent;
 
         m_images.clear();
-        for (auto image : swapChainImages)
+        for (auto vkImage : swapChainImages)
         {
-            auto vulkanImage = new VulkanImage(m_logicalDevice, image);
+            auto vulkanImage = new VulkanImage(m_logicalDevice, vkImage);
+            vulkanImage->createImageView(m_swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
             m_images.push_back(vulkanImage);
         }
 
@@ -171,32 +169,14 @@ namespace blink
 
     void VulkanSwapchain::destroySwapChain()
     {
-        for (auto image : m_images)
+        for (auto vulkanImage : m_images)
         {
-            image->destroyImage(false);
-            SAFE_DELETE(image);
+            vulkanImage->destroyImage(false);
+            SAFE_DELETE(vulkanImage);
         }
         m_images.clear();
 
         vkDestroySwapchainKHR(m_logicalDevice, m_swapChain, nullptr);
-    }
-
-    bool VulkanSwapchain::createSwapChainImageViews()
-    {
-        for (auto vulkanImage : m_images)
-        {
-            vulkanImage->createImageView(m_swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
-        }
-
-        return true;
-    }
-
-    void VulkanSwapchain::destroySwapChainImageViews()
-    {
-        for (auto vulkanImage : m_images)
-        {
-            vulkanImage->destroyImageView();
-        }
     }
 
     bool VulkanSwapchain::createFrameBuffers()
