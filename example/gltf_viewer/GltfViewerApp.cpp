@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   GltfViewerApp.cpp
  * \brief
@@ -38,8 +37,7 @@ void GltfViewerApp::onGui()
 void GltfViewerApp::DrawHierarchyWindow()
 {
     // draw hierarchy
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), 0, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("Hierarchy", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Hierarchy");
 
     if (ImGui::CollapsingHeader("Summory", ImGuiTreeNodeFlags_DefaultOpen))
     {
@@ -87,9 +85,7 @@ void GltfViewerApp::DrawHierarchyWindow()
 void GltfViewerApp::DrawPropertyWindow()
 {
     // draw property
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
-    ImGui::Begin("Property", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
-    // ImGui::BeginDisabled();
+    ImGui::Begin("Property");
 
     switch (m_selCategory)
     {
@@ -112,7 +108,6 @@ void GltfViewerApp::DrawPropertyWindow()
         break;
     }
 
-    // ImGui::EndDisabled();
     ImGui::End();
 }
 

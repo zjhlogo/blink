@@ -22,15 +22,15 @@ namespace blink
         VulkanImage(VulkanLogicalDevice& logicalDevice, VkImage image);
         ~VulkanImage();
 
-        VulkanImage(const VulkanImage& image) = delete;
-        VulkanImage(VulkanImage&& image) = delete;
-        VulkanImage& operator=(const VulkanImage& image) = delete;
-        VulkanImage& operator=(VulkanImage&& image) = delete;
+        VulkanImage(const VulkanImage&) = delete;
+        VulkanImage(VulkanImage&&) = delete;
+        VulkanImage& operator=(const VulkanImage&) = delete;
+        VulkanImage& operator=(VulkanImage&&) = delete;
 
         operator VkImage() { return m_image; }
 
         VkImage createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
-        void destroyImage(bool destroyImageHandle = true);
+        void destroyImage();
 
         VkImageView createImageView(VkFormat format, VkImageAspectFlags aspectFlags);
         void destroyImageView();
@@ -51,5 +51,8 @@ namespace blink
 
         VkImageView m_imageView{};
         VulkanMemory* m_imageMemory{};
+
+        bool m_ownedImage{};
+
     };
 } // namespace blink

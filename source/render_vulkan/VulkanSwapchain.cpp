@@ -8,6 +8,7 @@
  */
 #include "VulkanSwapchain.h"
 #include "VulkanContext.h"
+#include "VulkanFrameBuffer.h"
 #include "VulkanImage.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanRenderPass.h"
@@ -30,12 +31,14 @@ namespace blink
 
     VulkanSwapchain::~VulkanSwapchain()
     {
-        //
-        destroy();
+        destroyFrameBuffers();
+        destroySwapChain();
     }
 
     bool VulkanSwapchain::create()
     {
+        if (m_swapChain != VK_NULL_HANDLE) return true;
+
         if (!createSwapChain()) return false;
         if (!createFrameBuffers()) return false;
 
@@ -44,20 +47,13 @@ namespace blink
 
     bool VulkanSwapchain::recreate()
     {
-        m_logicalDevice.waitDeviceIdle();
-
-        destroy();
+        destroyFrameBuffers();
+        destroySwapChain();
 
         if (!createSwapChain()) return false;
         if (!createFrameBuffers()) return false;
 
         return true;
-    }
-
-    void VulkanSwapchain::destroy()
-    {
-        destroyFrameBuffers();
-        destroySwapChain();
     }
 
     bool VulkanSwapchain::createSwapChain()
@@ -104,7 +100,7 @@ namespace blink
         }
 
         // select image count
-        uint32_t imageCount = capabilities.minImageCount;
+        uint32_t imageCount = capabilities.minImageCount + 1;
         if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
         {
             imageCount = capabilities.maxImageCount;
@@ -147,19 +143,19 @@ namespace blink
 
         VK_CHECK_RESULT(vkCreateSwapchainKHR(m_logicalDevice, &createInfo, nullptr, &m_swapChain))
 
+        std::vector<VkImage> swapChainImages;
         uint32_t swapchainImageCount = 0;
         vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &swapchainImageCount, nullptr);
 
-        std::vector<VkImage> swapChainImages;
         swapChainImages.resize(swapchainImageCount);
         vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &swapchainImageCount, swapChainImages.data());
         m_swapChainImageFormat = selFormat.format;
         m_swapChainExtent = selExtent;
 
         m_images.clear();
-        for (auto vkImage : swapChainImages)
+        for (auto image : swapChainImages)
         {
-            auto vulkanImage = new VulkanImage(m_logicalDevice, vkImage);
+            auto vulkanImage = new VulkanImage(m_logicalDevice, image);
             vulkanImage->createImageView(m_swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
             m_images.push_back(vulkanImage);
         }
@@ -169,10 +165,10 @@ namespace blink
 
     void VulkanSwapchain::destroySwapChain()
     {
-        for (auto vulkanImage : m_images)
+        for (auto image : m_images)
         {
-            vulkanImage->destroyImage(false);
-            SAFE_DELETE(vulkanImage);
+            image->destroyImageView();
+            SAFE_DELETE(image);
         }
         m_images.clear();
 
@@ -181,29 +177,25 @@ namespace blink
 
     bool VulkanSwapchain::createFrameBuffers()
     {
-        SAFE_DELETE(m_depthTexture);
-
         m_depthTexture = new VulkanTexture(m_logicalDevice);
         if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
 
+        std::vector<VulkanImage*> attachments;
         auto count = m_images.size();
-        m_swapChainFrameBuffers.resize(count);
-
         for (size_t i = 0; i < count; ++i)
         {
-            auto imageView = m_images[i]->getImageView();
+            attachments.clear();
+            attachments.push_back(m_images[i]);
+            attachments.push_back(m_depthTexture->getTextureImage());
 
-            VkImageView attachments[2] = {imageView, m_depthTexture->getTextureImage()->getImageView()};
+            auto frameBuffer = new VulkanFrameBuffer(m_logicalDevice, m_renderPass, attachments, {m_swapChainExtent.width, m_swapChainExtent.height});
+            if (!frameBuffer->create())
+            {
+                SAFE_DELETE(frameBuffer);
+                return false;
+            }
 
-            VkFramebufferCreateInfo frameBufferInfo{};
-            frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            frameBufferInfo.renderPass = m_renderPass;
-            frameBufferInfo.attachmentCount = 2;
-            frameBufferInfo.pAttachments = attachments;
-            frameBufferInfo.width = m_swapChainExtent.width;
-            frameBufferInfo.height = m_swapChainExtent.height;
-            frameBufferInfo.layers = 1;
-            VK_CHECK_RESULT(vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_swapChainFrameBuffers[i]))
+            m_swapChainFrameBuffers.push_back(frameBuffer);
         }
 
         return true;
@@ -213,7 +205,7 @@ namespace blink
     {
         for (auto framebuffer : m_swapChainFrameBuffers)
         {
-            vkDestroyFramebuffer(m_logicalDevice, framebuffer, nullptr);
+            SAFE_DELETE(framebuffer);
         }
         m_swapChainFrameBuffers.clear();
 

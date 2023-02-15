@@ -29,7 +29,6 @@ namespace blink
 
         bool create();
         bool recreate();
-        void destroy();
 
     private:
         VkRenderPass createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);

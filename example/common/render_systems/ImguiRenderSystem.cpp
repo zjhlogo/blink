@@ -146,7 +146,7 @@ void ImguiRenderSystem::render()
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    ImGui::DockSpaceOverViewport();
+    ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
     for (auto window : m_allWindows)
     {

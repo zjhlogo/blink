@@ -11,6 +11,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
 #include "VulkanFence.h"
+#include "VulkanFrameBuffer.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanRenderPass.h"
 #include "VulkanSwapchain.h"
@@ -109,6 +110,7 @@ namespace blink
         {
             // rebuild swap chain
             m_window->updateFrameBufferSize();
+            m_logicalDevice->waitDeviceIdle();
             m_renderPass->recreate();
             m_swapchain->recreate();
             getResModule()->recreate();
@@ -170,6 +172,7 @@ namespace blink
         {
             // rebuild swap chain
             m_window->updateFrameBufferSize();
+            m_logicalDevice->waitDeviceIdle();
             m_renderPass->recreate();
             m_swapchain->recreate();
             getResModule()->recreate();

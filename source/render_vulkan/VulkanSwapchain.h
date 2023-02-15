@@ -18,6 +18,7 @@ namespace blink
     class VulkanImage;
     class VulkanTexture;
     class VulkanRenderPass;
+    class VulkanFrameBuffer;
 
     class VulkanSwapchain
     {
@@ -32,13 +33,12 @@ namespace blink
 
         bool create();
         bool recreate();
-        void destroy();
 
         operator VkSwapchainKHR() const { return m_swapChain; }
         VkFormat getImageFormat() const { return m_swapChainImageFormat; }
         const VkExtent2D& getImageExtent() const { return m_swapChainExtent; }
         std::size_t getImageCount() const { return m_images.size(); }
-        VkFramebuffer getCurrentActiveFrameBuffer() { return m_swapChainFrameBuffers[m_activeImageIndex]; }
+        VulkanFrameBuffer& getCurrentActiveFrameBuffer() { return *m_swapChainFrameBuffers[m_activeImageIndex]; }
 
         void setCurrentActiveImageIndex(uint32_t imageIndex) { m_activeImageIndex = imageIndex; }
         uint32_t getCurrentActiveImageIndex() { return m_activeImageIndex; }
@@ -60,9 +60,8 @@ namespace blink
         VkExtent2D m_swapChainExtent{};
 
         std::vector<VulkanImage*> m_images;
-        std::vector<VkFramebuffer> m_swapChainFrameBuffers;
-
         VulkanTexture* m_depthTexture{};
+        std::vector<VulkanFrameBuffer*> m_swapChainFrameBuffers;
 
         uint32_t m_activeImageIndex{};
     };
