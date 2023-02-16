@@ -9,8 +9,14 @@
 
 #include <blink/app.h>
 #include <blink/utils/GltfUtil.h>
-#include <core/resources/ITexture2d.h>
+#include <foundation/PathParser.h>
 #include <guis/IGuiWindow.h>
+#include <render_vulkan/VulkanBase.h>
+
+namespace blink
+{
+    class VulkanTexture;
+}
 
 class GltfViewerApp : public blink::IApp, public IGuiWindow
 {
@@ -25,8 +31,18 @@ public:
         Texture,
     };
 
+    struct ImGuiTextureInfo
+    {
+        blink::tstring path;
+        blink::VulkanTexture* vulkanTexture;
+        VkDescriptorSet ds;
+    };
+
 public:
     virtual void onGui() override;
+
+    bool loadModel(const blink::tstring& modelFilePath);
+    void unloadModel();
 
 protected:
     bool initializeLogicalSystems() override;
@@ -48,10 +64,14 @@ private:
 
     void DrawComponentType(const char* label, int componentType);
 
+    const ImGuiTextureInfo* GetOrLoadTextureFromFile(const blink::tstring& path);
+
 private:
     tinygltf::Model m_model;
+    blink::PathParser m_modelPath;
+
     Category m_selCategory{Category::Unknown};
     int m_selIndex{-1};
 
-    std::map<int, blink::ITexture2d> m_textureMap;
+    std::map<blink::tstring, ImGuiTextureInfo*> m_textureMap;
 };

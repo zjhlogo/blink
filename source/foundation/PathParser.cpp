@@ -13,23 +13,23 @@
 
 namespace blink
 {
-    PathParser::PathParser()
+    bool PathParser::isValid()
     {
-        //
+        return !root.empty() || !subDirectories.empty() || !filename.empty() || !extension.empty();
     }
 
-    PathParser::~PathParser()
-    {
-        // 
-    }
-
-    void PathParser::parse(const tstring& path)
+    void PathParser::reset()
     {
         // clear all informations
         root.clear();
         subDirectories.clear();
         filename.clear();
         extension.clear();
+    }
+
+    void PathParser::parse(const tstring& path)
+    {
+        reset();
 
         // check if the path start with '/' or '\\', if so mark root flag
         if (path.length() > 0 && (path[0] == '/' || path[0] == '\\')) root = "/";
@@ -81,7 +81,7 @@ namespace blink
         subDir.clear();
     }
 
-    tstring PathParser::getDirectory()
+    tstring PathParser::getDirectory() const
     {
         tstring directory = root;
         for (const auto& it : subDirectories)
@@ -93,7 +93,20 @@ namespace blink
         return directory;
     }
 
-    tstring PathParser::getFullPath()
+    tstring PathParser::replaceFileName(const tstring& fileName) const
+    {
+        tstring directory = root;
+        for (const auto& it : subDirectories)
+        {
+            directory.append(it);
+            directory.push_back('/');
+        }
+
+        directory.append(fileName);
+        return directory;
+    }
+
+    tstring PathParser::getFullPath() const
     {
         tstring fullPath = getDirectory();
 

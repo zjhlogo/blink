@@ -24,10 +24,10 @@ namespace blink
         explicit VulkanTexture(VulkanLogicalDevice& logicalDevice);
         ~VulkanTexture() override;
 
-        VulkanTexture(const VulkanTexture& texture) = delete;
-        VulkanTexture(VulkanTexture&& texture) = delete;
-        VulkanTexture& operator=(const VulkanTexture& texture) = delete;
-        VulkanTexture& operator=(VulkanTexture&& texture) = delete;
+        VulkanTexture(const VulkanTexture&) = delete;
+        VulkanTexture(VulkanTexture&&) = delete;
+        VulkanTexture& operator=(const VulkanTexture&) = delete;
+        VulkanTexture& operator=(VulkanTexture&&) = delete;
 
         bool createTexture2D(const tstring& texFile);
         bool createTexture2D(const void* pixels, uint32_t width, uint32_t height, int channels);

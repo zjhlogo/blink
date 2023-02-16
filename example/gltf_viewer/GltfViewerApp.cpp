@@ -8,15 +8,20 @@
 #include "GltfViewerApp.h"
 
 #include <blink/blink.h>
+#include <core/modules/IResModule.h>
 #include <fmt/format.h>
+#include <foundation/PathParser.h>
+#include <imgui/backends/imgui_impl_vulkan.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_stdlib.h>
 #include <render_systems/ImguiRenderSystem.h>
+#include <render_vulkan/VulkanImage.h>
+#include <render_vulkan/resources/VulkanTexture.h>
 #include <utils/ImguiExtension.h>
 
 bool GltfViewerApp::initializeLogicalSystems()
 {
-    if (!blink::GltfUtil::loadFromFile(m_model, "resource/models/damaged_helmet/DamagedHelmet.gltf")) return false;
+    loadModel("resource/models/damaged_helmet/DamagedHelmet.gltf");
 
     return true;
 }
@@ -32,6 +37,33 @@ void GltfViewerApp::onGui()
 {
     DrawHierarchyWindow();
     DrawPropertyWindow();
+}
+
+bool GltfViewerApp::loadModel(const blink::tstring& modelFilePath)
+{
+    if (m_modelPath.isValid()) return false;
+
+    if (!blink::GltfUtil::loadFromFile(m_model, modelFilePath)) return false;
+    m_modelPath.parse(modelFilePath);
+
+    return true;
+}
+
+void GltfViewerApp::unloadModel()
+{
+    for (const auto& kvp : m_textureMap)
+    {
+        auto texInfo = kvp.second;
+        ImGui_ImplVulkan_RemoveTexture(texInfo->ds);
+        SAFE_RELEASE(texInfo->vulkanTexture);
+        SAFE_DELETE(texInfo);
+    }
+    m_textureMap.clear();
+
+    m_selCategory = Category::Unknown;
+    m_selIndex = -1;
+    m_modelPath.reset();
+    m_model = {};
 }
 
 void GltfViewerApp::DrawHierarchyWindow()
@@ -419,6 +451,13 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
 
             ImGui::ReadOnlyText("mineType", &image.mimeType, ImGuiInputTextFlags_ReadOnly);
             ImGui::ReadOnlyText("uri", &image.uri, ImGuiInputTextFlags_ReadOnly);
+
+            auto texturePath = m_modelPath.replaceFileName(image.uri);
+            auto texInfo = GetOrLoadTextureFromFile(texturePath);
+            if (texInfo)
+            {
+                ImGui::Image(texInfo->ds, {256, 256});
+            }
         }
     }
 }
@@ -446,6 +485,25 @@ void GltfViewerApp::DrawComponentType(const char* label, int componentType)
         }
         ImGui::EndCombo();
     }
+}
+
+const GltfViewerApp::ImGuiTextureInfo* GltfViewerApp::GetOrLoadTextureFromFile(const blink::tstring& path)
+{
+    auto it = m_textureMap.find(path);
+    if (it != m_textureMap.end()) return it->second;
+
+    // load texture
+    auto resModule = blink::getResModule();
+    auto texture = resModule->createTexture2d(path);
+    if (!texture) return nullptr;
+
+    auto vulkanTexture = dynamic_cast<blink::VulkanTexture*>(texture);
+    auto ds = ImGui_ImplVulkan_AddTexture(vulkanTexture->getTextureSampler(),
+                                          vulkanTexture->getTextureImage()->getImageView(),
+                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    auto texInfo = new ImGuiTextureInfo{path, vulkanTexture, ds};
+    m_textureMap.emplace(path, texInfo);
+    return texInfo;
 }
 
 int main(int argc, char** argv)

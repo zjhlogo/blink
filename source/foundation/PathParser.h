@@ -17,12 +17,13 @@ namespace blink
     class PathParser
     {
     public:
-        PathParser();
-        ~PathParser();
+        bool isValid();
+        void reset();
 
         void parse(const tstring& path);
-        tstring getDirectory();
-        tstring getFullPath();
+        tstring getDirectory() const;
+        tstring replaceFileName(const tstring& fileName) const;
+        tstring getFullPath() const;
 
         static void filterFilesByExtension(std::set<tstring>& filesInOut, const std::set<tstring>& includeExts);
         static bool matchFileExtensions(const tstring& filePath, const std::set<tstring>& exts, bool caseSensitive = false);
