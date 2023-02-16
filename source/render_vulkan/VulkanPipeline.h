@@ -48,7 +48,6 @@ namespace blink
         operator VkPipeline() const { return m_pipeline; }
 
         bool create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology);
-        bool recreate();
         void destroy();
 
         bool bindDescriptorSets(const VulkanCommandBuffer& commandBuffer, const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList);

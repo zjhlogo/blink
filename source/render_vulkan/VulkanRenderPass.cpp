@@ -38,12 +38,6 @@ namespace blink
         return createRenderPass(selFormat.format, depthFormat);
     }
 
-    bool VulkanRenderPass::recreate()
-    {
-        destroyRenderPass();
-        return create();
-    }
-
     VkRenderPass VulkanRenderPass::createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
     {
         if (m_renderPass != VK_NULL_HANDLE) return m_renderPass;

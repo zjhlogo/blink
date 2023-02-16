@@ -28,7 +28,6 @@ namespace blink
         ~VulkanFrameBuffer();
 
         bool create();
-        bool recreate();
         void destroy();
 
         operator VkFramebuffer() const { return m_frameBuffer; }

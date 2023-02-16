@@ -36,8 +36,6 @@ namespace blink
         IMaterial* createMaterial(const tstring& filePath) override;
         void releaseMaterial(IMaterial* material) override;
 
-        void recreate() override;
-
     private:
         VulkanLogicalDevice* m_logicalDevice{};
         VulkanRenderPass* m_renderPass{};

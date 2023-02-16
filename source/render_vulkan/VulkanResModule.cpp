@@ -57,15 +57,6 @@ namespace blink
         m_logicalDevice = nullptr;
     }
 
-    void VulkanResModule::recreate()
-    {
-        for (const auto& kvp : m_materialMap)
-        {
-            auto material = kvp.second;
-            material->recreate();
-        }
-    }
-
     ITexture2d* VulkanResModule::createTexture2d(const tstring& filePath)
     {
         auto it = m_texture2dMap.find(filePath);

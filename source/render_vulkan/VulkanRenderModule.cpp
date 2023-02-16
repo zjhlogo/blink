@@ -111,9 +111,7 @@ namespace blink
             // rebuild swap chain
             m_window->updateFrameBufferSize();
             m_logicalDevice->waitDeviceIdle();
-            m_renderPass->recreate();
             m_swapchain->recreate();
-            getResModule()->recreate();
             return false;
         }
         m_acquireImageFence->wait();
@@ -173,9 +171,7 @@ namespace blink
             // rebuild swap chain
             m_window->updateFrameBufferSize();
             m_logicalDevice->waitDeviceIdle();
-            m_renderPass->recreate();
             m_swapchain->recreate();
-            getResModule()->recreate();
         }
     }
 

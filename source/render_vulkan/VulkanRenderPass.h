@@ -28,7 +28,6 @@ namespace blink
         operator VkRenderPass() const { return m_renderPass; }
 
         bool create();
-        bool recreate();
 
     private:
         VkRenderPass createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);

@@ -35,6 +35,8 @@ namespace blink
 
     bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology)
     {
+        if (m_pipeline != VK_NULL_HANDLE) return true;
+
         m_vertexShader = vertexShader;
         m_fragmentShader = fragmentShader;
         m_polygonMode = polygonMode;
@@ -47,13 +49,6 @@ namespace blink
         {
             m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         }
-
-        return recreate();
-    }
-
-    bool VulkanPipeline::recreate()
-    {
-        destroy();
 
         std::vector<uint8_t> vertexShaderCode;
         if (!File::readFileIntoBuffer(vertexShaderCode, m_vertexShader)) return false;

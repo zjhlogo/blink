@@ -18,7 +18,6 @@ namespace blink
     {
     public:
         virtual void release() override;
-        virtual bool recreate() = 0;
 
         template <typename T> bool setUniform(const tstring& memberName, const T& value)
         {

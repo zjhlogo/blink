@@ -43,8 +43,6 @@ namespace blink
         bool create(const tstring& filePath);
         void destroy();
 
-        bool recreate() override;
-
         void bindPipeline(const VulkanCommandBuffer& commandBuffer);
         bool uploadUniformDescriptorBufferInfo(UniformBinding binding, const VkDescriptorBufferInfo& bufferInfo);
         bool updateBufferInfos(const VulkanCommandBuffer& commandBuffer, const VulkanGeometry* geometry);

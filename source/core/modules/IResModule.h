@@ -19,10 +19,10 @@ namespace blink
         IResModule() = default;
         virtual ~IResModule() = default;
 
-        IResModule(const IResModule& res) = delete;
-        IResModule(IResModule&& res) = delete;
-        IResModule& operator=(const IResModule& res) = delete;
-        IResModule& operator=(IResModule&& res) = delete;
+        IResModule(const IResModule&) = delete;
+        IResModule(IResModule&&) = delete;
+        IResModule& operator=(const IResModule&) = delete;
+        IResModule& operator=(IResModule&&) = delete;
 
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
@@ -35,8 +35,6 @@ namespace blink
 
         virtual IMaterial* createMaterial(const tstring& filePath) = 0;
         virtual void releaseMaterial(IMaterial* material) = 0;
-
-        virtual void recreate() = 0;
     };
 
     IResModule* getResModule();

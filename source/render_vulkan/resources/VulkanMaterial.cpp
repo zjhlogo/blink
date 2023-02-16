@@ -251,16 +251,6 @@ namespace blink
         return true;
     }
 
-    bool VulkanMaterial::recreate()
-    {
-        if (m_pipeline)
-        {
-            return m_pipeline->recreate();
-        }
-
-        return true;
-    }
-
     bool VulkanMaterial::setUniform(const tstring& memberName, UniformType type, const void* data)
     {
         auto uniformBlock = m_pipeline->getUniformBlock(UniformBinding::Material);

@@ -30,6 +30,8 @@ namespace blink
 
     bool VulkanFrameBuffer::create()
     {
+        if (m_frameBuffer != VK_NULL_HANDLE) return true;
+
         if (m_attachmentImages.empty()) return false;
 
         std::vector<VkImageView> attachments;
@@ -49,13 +51,6 @@ namespace blink
         VK_CHECK_RESULT(vkCreateFramebuffer(m_logicalDevice, &frameBufferInfo, nullptr, &m_frameBuffer));
 
         return true;
-    }
-
-    bool VulkanFrameBuffer::recreate()
-    {
-        destroy();
-
-        return create();
     }
 
     void VulkanFrameBuffer::destroy()
