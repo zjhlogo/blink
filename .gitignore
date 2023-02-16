@@ -10,3 +10,4 @@ CTestTestfile.cmake
 /build
 /bin/*
 !/bin/resource
+bin/resource/shaders/compiled

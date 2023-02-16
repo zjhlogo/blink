@@ -1,6 +1,6 @@
 {
-    "vertex_shader" : "resource/shaders/unlit.vert.spv",
-    "fragment_shader" : "resource/shaders/unlit.frag.spv",
+    "vertex_shader" : "resource/shaders/compiled/unlit.vert.spv",
+    "fragment_shader" : "resource/shaders/compiled/unlit.frag.spv",
     
     "textures" : [
         {

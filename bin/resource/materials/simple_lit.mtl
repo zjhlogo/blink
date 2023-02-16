@@ -1,6 +1,6 @@
 {
-    "vertex_shader" : "resource/shaders/simple_lit.vert.spv",
-    "fragment_shader" : "resource/shaders/simple_lit.frag.spv",
+    "vertex_shader" : "resource/shaders/compiled/simple_lit.vert.spv",
+    "fragment_shader" : "resource/shaders/compiled/simple_lit.frag.spv",
 
     "uniforms" : [
         {
