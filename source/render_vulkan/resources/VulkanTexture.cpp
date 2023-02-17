@@ -70,7 +70,7 @@ namespace blink
                                                                 VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
         // create depth image
-        m_textureImage = new VulkanImage(m_logicalDevice);
+        m_textureImage = new VulkanImage(m_logicalDevice, false);
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         m_textureImage->allocateImageMemory();
         m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
@@ -100,7 +100,11 @@ namespace blink
 
         // create image
         m_textureImage = new VulkanImage(m_logicalDevice);
-        m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        m_textureImage->createImage(VK_IMAGE_TYPE_2D,
+                                    width,
+                                    height,
+                                    VK_FORMAT_R8G8B8A8_UNORM,
+                                    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
         m_textureImage->allocateImageMemory();
 
         m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);

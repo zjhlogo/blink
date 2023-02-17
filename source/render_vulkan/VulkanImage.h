@@ -18,7 +18,7 @@ namespace blink
     class VulkanImage
     {
     public:
-        explicit VulkanImage(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanImage(VulkanLogicalDevice& logicalDevice, bool generateMipmap = true);
         VulkanImage(VulkanLogicalDevice& logicalDevice, VkImage image);
         ~VulkanImage();
 
@@ -44,10 +44,12 @@ namespace blink
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
+        bool m_generateMipmap{};
 
         VkImage m_image{};
         VkFormat m_format{VkFormat::VK_FORMAT_UNDEFINED};
         VkImageAspectFlags m_aspectFlags{};
+        int m_mipLevels{1};
 
         VkImageView m_imageView{};
         VulkanMemory* m_imageMemory{};

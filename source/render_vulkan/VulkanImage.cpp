@@ -13,8 +13,9 @@
 
 namespace blink
 {
-    VulkanImage::VulkanImage(VulkanLogicalDevice& logicalDevice)
+    VulkanImage::VulkanImage(VulkanLogicalDevice& logicalDevice, bool generateMipmap)
         : m_logicalDevice(logicalDevice)
+        , m_generateMipmap(generateMipmap)
     {
         //
     }
@@ -36,13 +37,22 @@ namespace blink
     {
         if (m_image != VK_NULL_HANDLE) return m_image;
 
+        if (m_generateMipmap)
+        {
+            m_mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+        }
+        else
+        {
+            m_mipLevels = 1;
+        }
+
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = type;
         imageInfo.extent.width = width;
         imageInfo.extent.height = height;
         imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
+        imageInfo.mipLevels = m_mipLevels;
         imageInfo.arrayLayers = 1;
         imageInfo.format = format;
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -85,7 +95,7 @@ namespace blink
         viewInfo.format = format;
         viewInfo.subresourceRange.aspectMask = aspectFlags;
         viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
+        viewInfo.subresourceRange.levelCount = m_mipLevels;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
         VK_CHECK_RESULT(vkCreateImageView(m_logicalDevice, &viewInfo, nullptr, &m_imageView))
@@ -158,7 +168,7 @@ namespace blink
                 }
 
                 barrier.subresourceRange.baseMipLevel = 0;
-                barrier.subresourceRange.levelCount = 1;
+                barrier.subresourceRange.levelCount = m_mipLevels;
                 barrier.subresourceRange.baseArrayLayer = 0;
                 barrier.subresourceRange.layerCount = 1;
 
