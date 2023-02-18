@@ -40,15 +40,15 @@ namespace blink
         stbi_uc* pixels = stbi_load(texFile.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         if (!pixels) return false;
 
-        bool success = createTexture2D(pixels, texWidth, texHeight, texChannels);
+        bool success = createTexture2D(pixels, texWidth, texHeight, true);
         stbi_image_free(pixels);
 
         return success;
     }
 
-    bool VulkanTexture::createTexture2D(const void* pixels, uint32_t width, uint32_t height, int channels)
+    bool VulkanTexture::createTexture2D(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap)
     {
-        if (!createTextureImage(pixels, width, height, channels)) return false;
+        if (!createTextureImage(pixels, width, height, generateMipMap)) return false;
 
         if (m_textureImage->createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT) == VK_NULL_HANDLE)
         {
@@ -73,18 +73,22 @@ namespace blink
         m_textureImage = new VulkanImage(m_logicalDevice, false);
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         m_textureImage->allocateImageMemory();
-        m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-
         m_logicalDevice.executeCommand(
             [&](const VulkanCommandBuffer& commandBuffer)
             {
-                //
+                // transition to depth stencil attachment layout
                 m_textureImage->transitionImageLayout(commandBuffer,
                                                       depthFormat,
                                                       VK_IMAGE_LAYOUT_UNDEFINED,
                                                       VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                                                      0,
+                                                      VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                                                      VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                                      VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
                                                       0);
             });
+
+        m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 
         return true;
     }
@@ -95,7 +99,7 @@ namespace blink
         destroyTextureImage();
     }
 
-    VulkanImage* VulkanTexture::createTextureImage(const void* pixels, uint32_t width, uint32_t height, int channels)
+    VulkanImage* VulkanTexture::createTextureImage(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap)
     {
         destroyTextureImage();
 
@@ -109,7 +113,7 @@ namespace blink
         bufferMemory->uploadData(pixels, imageSize, 0);
 
         // create image
-        m_textureImage = new VulkanImage(m_logicalDevice, true);
+        m_textureImage = new VulkanImage(m_logicalDevice, generateMipMap);
         m_textureImage->createImage(VK_IMAGE_TYPE_2D,
                                     width,
                                     height,
@@ -126,6 +130,10 @@ namespace blink
                                                       VK_FORMAT_R8G8B8A8_UNORM,
                                                       VK_IMAGE_LAYOUT_UNDEFINED,
                                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                      0,
+                                                      VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                      VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                                      VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                       0);
                 // copy buffer to image
                 m_textureImage->copyBufferToImage(commandBuffer, *stagingBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -136,6 +144,10 @@ namespace blink
                                                           VK_FORMAT_R8G8B8A8_UNORM,
                                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                          VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                          VK_ACCESS_SHADER_READ_BIT,
+                                                          VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                                                           0);
                 }
                 else
@@ -144,6 +156,10 @@ namespace blink
                                                           VK_FORMAT_UNDEFINED,
                                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                           VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                          VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                          VK_ACCESS_TRANSFER_READ_BIT,
+                                                          VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                          VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                           0);
                 }
             });
@@ -181,8 +197,12 @@ namespace blink
                                                               VK_FORMAT_UNDEFINED,
                                                               VK_IMAGE_LAYOUT_UNDEFINED,
                                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                              0,
+                                                              VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                               i);
-
+                        // blit image
                         vkCmdBlitImage(commandBuffer,
                                        *m_textureImage,
                                        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -197,6 +217,10 @@ namespace blink
                                                               VK_FORMAT_UNDEFINED,
                                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                              VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                              VK_ACCESS_TRANSFER_READ_BIT,
+                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                               i);
                     }
 
@@ -204,6 +228,10 @@ namespace blink
                                                           VK_FORMAT_R8G8B8A8_UNORM,
                                                           VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                          VK_ACCESS_TRANSFER_READ_BIT,
+                                                          VK_ACCESS_SHADER_READ_BIT,
+                                                          VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                                                           0,
                                                           mipCount);
                 });

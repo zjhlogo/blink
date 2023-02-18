@@ -44,7 +44,11 @@ namespace blink
                                    VkFormat format,
                                    VkImageLayout oldLayout,
                                    VkImageLayout newLayout,
-                                   uint32_t baseMipLevel,
+                                   VkAccessFlags srcAccessMask,
+                                   VkAccessFlags dstAccessMask,
+                                   VkPipelineStageFlags srcStage,
+                                   VkPipelineStageFlags dstStage,
+                                   uint32_t mipIndex,
                                    uint32_t levelCount = 1);
         void copyBufferToImage(const VulkanCommandBuffer& commandBuffer, const VulkanBuffer& stagingBuffer, VkImageLayout mipIndex);
 

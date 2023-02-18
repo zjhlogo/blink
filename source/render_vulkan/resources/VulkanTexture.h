@@ -30,7 +30,7 @@ namespace blink
         VulkanTexture& operator=(VulkanTexture&&) = delete;
 
         bool createTexture2D(const tstring& texFile);
-        bool createTexture2D(const void* pixels, uint32_t width, uint32_t height, int channels);
+        bool createTexture2D(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap);
         bool createDepthTexture(uint32_t width, uint32_t height);
 
         void destroy();
@@ -39,7 +39,7 @@ namespace blink
         VkSampler getTextureSampler() { return m_textureSampler; }
 
     private:
-        VulkanImage* createTextureImage(const void* pixels, uint32_t width, uint32_t height, int channels);
+        VulkanImage* createTextureImage(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap);
         void destroyTextureImage();
 
         VkSampler createTextureSampler();
