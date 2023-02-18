@@ -13,12 +13,14 @@ namespace blink
 {
     class VulkanLogicalDevice;
     class VulkanMemory;
+    class VulkanBuffer;
     class VulkanCommandPool;
+    class VulkanCommandBuffer;
 
     class VulkanImage
     {
     public:
-        explicit VulkanImage(VulkanLogicalDevice& logicalDevice, bool generateMipmap = true);
+        explicit VulkanImage(VulkanLogicalDevice& logicalDevice, bool generateMipmap);
         VulkanImage(VulkanLogicalDevice& logicalDevice, VkImage image);
         ~VulkanImage();
 
@@ -38,9 +40,16 @@ namespace blink
         VulkanMemory* allocateImageMemory();
         void freeImageMemory();
 
-        void transitionImageLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void transitionImageLayout(const VulkanCommandBuffer& commandBuffer,
+                                   VkFormat format,
+                                   VkImageLayout oldLayout,
+                                   VkImageLayout newLayout,
+                                   uint32_t baseMipLevel,
+                                   uint32_t levelCount = 1);
+        void copyBufferToImage(const VulkanCommandBuffer& commandBuffer, const VulkanBuffer& stagingBuffer, VkImageLayout mipIndex);
 
         VkImageView getImageView() const { return m_imageView; }
+        uint32_t getMipCount() const { return m_mipCount; }
 
     private:
         VulkanLogicalDevice& m_logicalDevice;
@@ -49,12 +58,12 @@ namespace blink
         VkImage m_image{};
         VkFormat m_format{VkFormat::VK_FORMAT_UNDEFINED};
         VkImageAspectFlags m_aspectFlags{};
-        int m_mipLevels{1};
+        uint32_t m_mipCount{1};
+        VkExtent3D m_imageExtent{};
 
         VkImageView m_imageView{};
         VulkanMemory* m_imageMemory{};
 
         bool m_ownedImage{};
-
     };
 } // namespace blink

@@ -74,7 +74,17 @@ namespace blink
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         m_textureImage->allocateImageMemory();
         m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-        m_textureImage->transitionImageLayout(depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
+        m_logicalDevice.executeCommand(
+            [&](const VulkanCommandBuffer& commandBuffer)
+            {
+                //
+                m_textureImage->transitionImageLayout(commandBuffer,
+                                                      depthFormat,
+                                                      VK_IMAGE_LAYOUT_UNDEFINED,
+                                                      VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                                                      0);
+            });
 
         return true;
     }
@@ -99,42 +109,105 @@ namespace blink
         bufferMemory->uploadData(pixels, imageSize, 0);
 
         // create image
-        m_textureImage = new VulkanImage(m_logicalDevice);
+        m_textureImage = new VulkanImage(m_logicalDevice, true);
         m_textureImage->createImage(VK_IMAGE_TYPE_2D,
                                     width,
                                     height,
                                     VK_FORMAT_R8G8B8A8_UNORM,
                                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        uint32_t mipCount = m_textureImage->getMipCount();
         m_textureImage->allocateImageMemory();
 
-        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        m_logicalDevice.executeCommand(
+            [&](const VulkanCommandBuffer& commandBuffer)
+            {
+                // transition layout to dst optimal
+                m_textureImage->transitionImageLayout(commandBuffer,
+                                                      VK_FORMAT_R8G8B8A8_UNORM,
+                                                      VK_IMAGE_LAYOUT_UNDEFINED,
+                                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                      0);
+                // copy buffer to image
+                m_textureImage->copyBufferToImage(commandBuffer, *stagingBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-        // copy buffer to image
+                if (mipCount == 1)
+                {
+                    m_textureImage->transitionImageLayout(commandBuffer,
+                                                          VK_FORMAT_R8G8B8A8_UNORM,
+                                                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                          0);
+                }
+                else
+                {
+                    m_textureImage->transitionImageLayout(commandBuffer,
+                                                          VK_FORMAT_UNDEFINED,
+                                                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                          VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                          0);
+                }
+            });
+
+        // destroy staging buffer
+        SAFE_DELETE(stagingBuffer);
+
+        if (mipCount > 1)
         {
             m_logicalDevice.executeCommand(
                 [&](const VulkanCommandBuffer& commandBuffer)
                 {
-                    VkBufferImageCopy region;
-                    region.bufferOffset = 0;
-                    region.bufferRowLength = 0;
-                    region.bufferImageHeight = 0;
+                    for (uint32_t i = 1; i < mipCount; ++i)
+                    {
+                        VkImageBlit imageBlit{};
 
-                    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                    region.imageSubresource.mipLevel = 0;
-                    region.imageSubresource.baseArrayLayer = 0;
-                    region.imageSubresource.layerCount = 1;
+                        // source
+                        imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                        imageBlit.srcSubresource.layerCount = 1;
+                        imageBlit.srcSubresource.mipLevel = i - 1;
+                        imageBlit.srcOffsets[1].x = static_cast<int32_t>(width >> (i - 1));
+                        imageBlit.srcOffsets[1].y = static_cast<int32_t>(height >> (i - 1));
+                        imageBlit.srcOffsets[1].z = 1;
 
-                    region.imageOffset = {0, 0, 0};
-                    region.imageExtent = {(uint32_t)width, (uint32_t)height, 1};
+                        // destination
+                        imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                        imageBlit.dstSubresource.layerCount = 1;
+                        imageBlit.dstSubresource.mipLevel = i;
+                        imageBlit.dstOffsets[1].x = static_cast<int32_t>(width >> i);
+                        imageBlit.dstOffsets[1].y = static_cast<int32_t>(height >> i);
+                        imageBlit.dstOffsets[1].z = 1;
 
-                    vkCmdCopyBufferToImage(commandBuffer, *stagingBuffer, *m_textureImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                        // prepare current mip level as image blit destination
+                        m_textureImage->transitionImageLayout(commandBuffer,
+                                                              VK_FORMAT_UNDEFINED,
+                                                              VK_IMAGE_LAYOUT_UNDEFINED,
+                                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                              i);
+
+                        vkCmdBlitImage(commandBuffer,
+                                       *m_textureImage,
+                                       VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                       *m_textureImage,
+                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                       1,
+                                       &imageBlit,
+                                       VK_FILTER_LINEAR);
+
+                        // prepare current mip level as image libt sorce for next level
+                        m_textureImage->transitionImageLayout(commandBuffer,
+                                                              VK_FORMAT_UNDEFINED,
+                                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                              VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                              i);
+                    }
+
+                    m_textureImage->transitionImageLayout(commandBuffer,
+                                                          VK_FORMAT_R8G8B8A8_UNORM,
+                                                          VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                          0,
+                                                          mipCount);
                 });
         }
-
-        m_textureImage->transitionImageLayout(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-        // destroy staging buffer
-        SAFE_DELETE(stagingBuffer);
 
         return m_textureImage;
     }
@@ -156,8 +229,8 @@ namespace blink
         samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.anisotropyEnable = VK_TRUE;
-        samplerInfo.maxAnisotropy = 16;
+        samplerInfo.anisotropyEnable = VK_FALSE;
+        samplerInfo.maxAnisotropy = 1.0f;
         samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
         samplerInfo.unnormalizedCoordinates = VK_FALSE;
         samplerInfo.compareEnable = VK_FALSE;
@@ -165,7 +238,7 @@ namespace blink
         samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
         samplerInfo.mipLodBias = 0.0f;
         samplerInfo.minLod = 0.0f;
-        samplerInfo.maxLod = 0.0f;
+        samplerInfo.maxLod = static_cast<float>(m_textureImage->getMipCount());
         vkCreateSampler(m_logicalDevice, &samplerInfo, nullptr, &m_textureSampler);
 
         return m_textureSampler;

@@ -35,6 +35,7 @@ bool GltfViewerApp::initializeRenderSystems()
 
 void GltfViewerApp::onGui()
 {
+    ImGui::ShowDemoWindow();
     DrawHierarchyWindow();
     DrawPropertyWindow();
 }
@@ -456,7 +457,7 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
             auto texInfo = GetOrLoadTextureFromFile(texturePath);
             if (texInfo)
             {
-                ImGui::Image(texInfo->ds, {256, 256});
+                ImGui::ImageButton("image", texInfo->ds, {128, 128});
             }
         }
     }

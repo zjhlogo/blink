@@ -47,8 +47,8 @@ namespace blink
                                 std::size_t offsetUv0,
                                 std::size_t offsetIndices) = 0;
 
-        uint32_t getNumVertices() const { return m_numVertices; };
-        uint32_t getNumIndices() const { return m_numIndices; };
+        uint32_t getNumVertices() const { return m_numVertices; }
+        uint32_t getNumIndices() const { return m_numIndices; }
 
         bool hasVertexAttrs(VertexAttrs requiredVertexAttrs) const;
         PrimitiveTopology getTopology() const { return m_topology; }
