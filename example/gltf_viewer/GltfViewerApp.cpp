@@ -319,6 +319,9 @@ void GltfViewerApp::DrawSceneProperty(const tinygltf::Model& model, int sceneInd
 {
     const auto& scene = model.scenes[sceneIndex];
     ImGui::ReadOnlyText("name##scene", &scene.name);
+
+    int numNodes = scene.nodes.size();
+    ImGui::InputInt("num_nodes", &numNodes);
 }
 
 void GltfViewerApp::DrawNodeProperty(const tinygltf::Model& model, int nodeIndex)
@@ -381,6 +384,17 @@ void GltfViewerApp::DrawMeshProperty(const tinygltf::Model& model, int meshIndex
                 ImGui::ReadOnlyText(fmt::format("attribute {}", kvp.second).c_str(), &kvp.first, ImGuiInputTextFlags_ReadOnly);
             }
         }
+
+        int materialIndex = primitive.material;
+        ImGui::InputInt("material", &materialIndex);
+
+        int indices = primitive.indices;
+        ImGui::InputInt("indices", &indices);
+
+        ImGui::DrawPrimitiveMode("mode", primitive.mode);
+
+        int numTargets = primitive.targets.size();
+        ImGui::InputInt("targets", &numTargets);
     }
 }
 
@@ -420,6 +434,56 @@ void GltfViewerApp::DrawMaterialProperty(const tinygltf::Model& model, int mater
 
         double roughnessFactor = material.pbrMetallicRoughness.roughnessFactor;
         ImGui::InputDouble("roughnessFactor", &roughnessFactor);
+    }
+
+    if (ImGui::CollapsingHeader("normalTexture"))
+    {
+        const auto& image = model.images[material.normalTexture.index];
+        auto texturePath = m_modelPath.replaceFileName(image.uri);
+        auto texInfo = ImGuiExt::createTexture(texturePath);
+        if (texInfo)
+        {
+            ImGui::ImageButton("image##normal", texInfo->getDs(), {128, 128});
+        }
+
+        int texCoord = material.normalTexture.texCoord;
+        ImGui::InputInt("texCoord", &texCoord);
+
+        double scale = material.normalTexture.scale;
+        ImGui::InputDouble("scale", &scale);
+        ImGui::HelpMarker("scaledNormal = normalize((<sampled normal texture value> * 2.0 - 1.0) * vec3(<normal scale>, <normal scale>, 1.0))");
+    }
+
+    if (ImGui::CollapsingHeader("occlusionTexture"))
+    {
+        const auto& image = model.images[material.occlusionTexture.index];
+        auto texturePath = m_modelPath.replaceFileName(image.uri);
+        auto texInfo = ImGuiExt::createTexture(texturePath);
+        if (texInfo)
+        {
+            ImGui::ImageButton("image##occlusion", texInfo->getDs(), {128, 128});
+        }
+
+        int texCoord = material.occlusionTexture.texCoord;
+        ImGui::InputInt("texCoord", &texCoord);
+
+        double strength = material.occlusionTexture.strength;
+        ImGui::InputDouble("strength", &strength);
+        ImGui::HelpMarker("occludedColor = lerp(color, color * <sampled occlusion texture value>, <occlusion strength>)");
+    }
+
+    if (ImGui::CollapsingHeader("emissiveTexture"))
+    {
+        const auto& image = model.images[material.emissiveTexture.index];
+        auto texturePath = m_modelPath.replaceFileName(image.uri);
+        auto texInfo = ImGuiExt::createTexture(texturePath);
+        if (texInfo)
+        {
+            ImGui::ImageButton("image##emissive", texInfo->getDs(), {128, 128});
+        }
+
+        int texCoord = material.emissiveTexture.texCoord;
+        ImGui::InputInt("texCoord", &texCoord);
     }
 }
 
@@ -474,7 +538,7 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
             auto bits = image.bits;
             ImGui::InputInt("bits", &bits);
 
-            DrawComponentType("pixel_type", image.pixel_type);
+            ImGui::DrawComponentType("pixel_type", image.pixel_type);
 
             ImGui::ReadOnlyText("mineType", &image.mimeType, ImGuiInputTextFlags_ReadOnly);
             ImGui::ReadOnlyText("uri", &image.uri, ImGuiInputTextFlags_ReadOnly);
@@ -486,31 +550,6 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
                 ImGui::ImageButton("image", texInfo->getDs(), {128, 128});
             }
         }
-    }
-}
-
-void GltfViewerApp::DrawComponentType(const char* label, int componentType)
-{
-    static const std::map<int, const char*> s_itemValueTextMap = {{TINYGLTF_COMPONENT_TYPE_BYTE, "BYTE"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE, "UNSIGNED_BYTE"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_SHORT, "SHORT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT, "UNSIGNED_SHORT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_INT, "INT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT, "UNSIGNED_INT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_FLOAT, "FLOAT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_DOUBLE, "DOUBLE"}};
-
-    auto it = s_itemValueTextMap.find(componentType);
-
-    if (ImGui::BeginCombo(label, it == s_itemValueTextMap.end() ? "UNKNOWN" : it->second))
-    {
-        for (auto kvp : s_itemValueTextMap)
-        {
-            bool isSelected = (kvp.first == componentType);
-            ImGui::Selectable(kvp.second, isSelected);
-            if (isSelected) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
     }
 }
 

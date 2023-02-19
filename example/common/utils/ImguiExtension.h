@@ -23,6 +23,14 @@ namespace ImGui
                       ImGuiInputTextFlags flags = 0,
                       ImGuiInputTextCallback callback = nullptr,
                       void* userData = nullptr);
+
+    // Helper to display a little (?) mark which shows a tooltip when hovered.
+    // In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+    void HelpMarker(const char* desc);
+
+    void DrawComponentType(const char* label, int componentType);
+    void DrawPrimitiveMode(const char* label, int primitiveMode);
+
 } // namespace ImGui
 
 class ImGuiTextureInfo

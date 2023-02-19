@@ -57,8 +57,6 @@ private:
     void DrawMaterialProperty(const tinygltf::Model& model, int materialIndex);
     void DrawTextureProperty(const tinygltf::Model& model, int textureIndex);
 
-    void DrawComponentType(const char* label, int componentType);
-
 private:
     blink::PathParser m_modelPath;
     blink::MeshBuilder m_meshBuilder;
