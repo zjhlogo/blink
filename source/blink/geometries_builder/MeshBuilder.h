@@ -10,6 +10,7 @@
 **/
 #pragma once
 
+#include "../utils/GltfUtil.h"
 #include "IGeometryBuilder.h"
 
 namespace blink
@@ -19,12 +20,16 @@ namespace blink
     class MeshBuilder : public IGeometryBuilder
     {
     public:
-        MeshBuilder& filePath(const tstring& filePath);
+        MeshBuilder& loadModel(const tstring& filePath);
+        void reset();
+
+        const tinygltf::Model& getModel() const { return m_model; }
 
         virtual tstring getUniqueId() const;
         IGeometry* build(bool buildNormal = true, bool buildUv = true, glm::mat3* inertiaTensorOut = nullptr) const;
 
     private:
         tstring m_filePath;
+        tinygltf::Model m_model;
     };
 } // namespace blink

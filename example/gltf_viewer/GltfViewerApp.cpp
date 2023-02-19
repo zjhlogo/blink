@@ -8,21 +8,17 @@
 #include "GltfViewerApp.h"
 
 #include <blink/blink.h>
+#include <blink/components/Components.h>
+#include <core/components/Components.h>
 #include <core/modules/IResModule.h>
 #include <fmt/format.h>
-#include <foundation/PathParser.h>
-#include <imgui/backends/imgui_impl_vulkan.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_stdlib.h>
 #include <render_systems/ImguiRenderSystem.h>
-#include <render_vulkan/VulkanImage.h>
-#include <render_vulkan/resources/VulkanTexture.h>
 #include <utils/ImguiExtension.h>
+#include <utils/SceneEntityUtil.h>
 
 bool GltfViewerApp::initializeLogicalSystems()
 {
-    loadModel("resource/models/damaged_helmet/DamagedHelmet.gltf");
-
+    SceneEntityUtil::initializeCommonLogicalSystems(this);
     return true;
 }
 
@@ -40,75 +36,103 @@ void GltfViewerApp::onGui()
     DrawPropertyWindow();
 }
 
+bool GltfViewerApp::initialize()
+{
+    if (!IApp::initialize()) return false;
+
+    if (!SceneEntityUtil::initializeCommonSceneEntities(getEcsWorld())) return false;
+
+    if (!loadModel("resource/models/damaged_helmet/DamagedHelmet.gltf")) return false;
+
+    auto& world = getEcsWorld().getWorld();
+    auto resModule = blink::getResModule();
+
+    // model
+    auto material = resModule->createMaterial("resource/materials/simple_lit.mtl");
+    auto entityModel = world.entity("model")
+                           .set<blink::Position>({glm::zero<glm::vec3>()})
+                           .set<blink::Rotation>({glm::identity<glm::quat>()})
+                           .set<blink::StaticModel>({m_modelGeometry, material})
+                           .set<blink::Renderable>({blink::RenderLayers::NORMAL});
+
+    return true;
+}
+
+void GltfViewerApp::terminate()
+{
+    unloadModel();
+    IApp::terminate();
+}
+
 bool GltfViewerApp::loadModel(const blink::tstring& modelFilePath)
 {
     if (m_modelPath.isValid()) return false;
-
-    if (!blink::GltfUtil::loadFromFile(m_model, modelFilePath)) return false;
     m_modelPath.parse(modelFilePath);
+
+    if (m_modelGeometry != nullptr) return false;
+
+    m_modelGeometry = m_meshBuilder.loadModel(modelFilePath).build();
+    if (!m_modelGeometry) return false;
 
     return true;
 }
 
 void GltfViewerApp::unloadModel()
 {
-    for (const auto& kvp : m_textureMap)
-    {
-        auto texInfo = kvp.second;
-        ImGui_ImplVulkan_RemoveTexture(texInfo->ds);
-        SAFE_RELEASE(texInfo->vulkanTexture);
-        SAFE_DELETE(texInfo);
-    }
-    m_textureMap.clear();
+    SAFE_RELEASE(m_modelGeometry);
+    m_meshBuilder.reset();
+
+    ImGuiExt::recycleUnusedTexture();
 
     m_selCategory = Category::Unknown;
     m_selIndex = -1;
     m_modelPath.reset();
-    m_model = {};
 }
 
 void GltfViewerApp::DrawHierarchyWindow()
 {
+    const auto& model = m_meshBuilder.getModel();
+
     // draw hierarchy
     ImGui::Begin("Hierarchy");
 
     if (ImGui::CollapsingHeader("Summory", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::ReadOnlyText("version", &m_model.asset.version);
-        ImGui::ReadOnlyText("generator", &m_model.asset.generator);
-        ImGui::ReadOnlyText("minVersion", &m_model.asset.minVersion);
-        ImGui::ReadOnlyText("copyright", &m_model.asset.copyright);
+        ImGui::ReadOnlyText("version", &model.asset.version);
+        ImGui::ReadOnlyText("generator", &model.asset.generator);
+        ImGui::ReadOnlyText("minVersion", &model.asset.minVersion);
+        ImGui::ReadOnlyText("copyright", &model.asset.copyright);
     }
 
     if (ImGui::CollapsingHeader("Scene List"))
     {
-        for (int i = 0; i < m_model.scenes.size(); ++i)
+        for (int i = 0; i < model.scenes.size(); ++i)
         {
-            DrawSceneHierarchy(m_model, i);
+            DrawSceneHierarchy(model, i);
         }
     }
 
     if (ImGui::CollapsingHeader("Mesh List"))
     {
-        for (int i = 0; i < m_model.meshes.size(); ++i)
+        for (int i = 0; i < model.meshes.size(); ++i)
         {
-            DrawMesh(m_model, i);
+            DrawMesh(model, i);
         }
     }
 
     if (ImGui::CollapsingHeader("Material List"))
     {
-        for (int i = 0; i < m_model.materials.size(); ++i)
+        for (int i = 0; i < model.materials.size(); ++i)
         {
-            DrawMaterial(m_model, i);
+            DrawMaterial(model, i);
         }
     }
 
     if (ImGui::CollapsingHeader("Texture List"))
     {
-        for (int i = 0; i < m_model.textures.size(); ++i)
+        for (int i = 0; i < model.textures.size(); ++i)
         {
-            DrawTexture(m_model, i);
+            DrawTexture(model, i);
         }
     }
 
@@ -117,25 +141,27 @@ void GltfViewerApp::DrawHierarchyWindow()
 
 void GltfViewerApp::DrawPropertyWindow()
 {
+    const auto& model = m_meshBuilder.getModel();
+
     // draw property
     ImGui::Begin("Property");
 
     switch (m_selCategory)
     {
     case GltfViewerApp::Category::Scene:
-        DrawSceneProperty(m_model, m_selIndex);
+        DrawSceneProperty(model, m_selIndex);
         break;
     case GltfViewerApp::Category::Node:
-        DrawNodeProperty(m_model, m_selIndex);
+        DrawNodeProperty(model, m_selIndex);
         break;
     case GltfViewerApp::Category::Mesh:
-        DrawMeshProperty(m_model, m_selIndex);
+        DrawMeshProperty(model, m_selIndex);
         break;
     case GltfViewerApp::Category::Material:
-        DrawMaterialProperty(m_model, m_selIndex);
+        DrawMaterialProperty(model, m_selIndex);
         break;
     case GltfViewerApp::Category::Texture:
-        DrawTextureProperty(m_model, m_selIndex);
+        DrawTextureProperty(model, m_selIndex);
         break;
     default:
         break;
@@ -269,12 +295,12 @@ void GltfViewerApp::DrawMaterial(const tinygltf::Model& model, int materialIndex
 
 void GltfViewerApp::DrawTexture(const tinygltf::Model& model, int textureIndex)
 {
-    const auto& texture = model.textures[textureIndex];
+    const auto& m_texture = model.textures[textureIndex];
 
     blink::tstring textureName;
-    if (!texture.name.empty())
+    if (!m_texture.name.empty())
     {
-        textureName = fmt::format("{}##texture{}", texture.name, textureIndex);
+        textureName = fmt::format("{}##texture{}", m_texture.name, textureIndex);
     }
     else
     {
@@ -399,11 +425,11 @@ void GltfViewerApp::DrawMaterialProperty(const tinygltf::Model& model, int mater
 
 void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textureIndex)
 {
-    const auto& texture = model.textures[textureIndex];
+    const auto& m_texture = model.textures[textureIndex];
 
-    ImGui::ReadOnlyText("name##texture", &texture.name, ImGuiInputTextFlags_ReadOnly);
+    ImGui::ReadOnlyText("name##texture", &m_texture.name, ImGuiInputTextFlags_ReadOnly);
 
-    int samplerIndex = texture.sampler;
+    int samplerIndex = m_texture.sampler;
     if (samplerIndex == -1)
     {
         ImGui::InputInt("sampler", &samplerIndex);
@@ -428,11 +454,11 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
         }
     }
 
-    if (texture.source != -1)
+    if (m_texture.source != -1)
     {
-        const auto image = model.images[texture.source];
+        const auto image = model.images[m_texture.source];
 
-        if (ImGui::CollapsingHeader(fmt::format("image {}", texture.source).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::CollapsingHeader(fmt::format("image {}", m_texture.source).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImGui::ReadOnlyText("name##image", &image.name, ImGuiInputTextFlags_ReadOnly);
 
@@ -454,10 +480,10 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
             ImGui::ReadOnlyText("uri", &image.uri, ImGuiInputTextFlags_ReadOnly);
 
             auto texturePath = m_modelPath.replaceFileName(image.uri);
-            auto texInfo = GetOrLoadTextureFromFile(texturePath);
+            auto texInfo = ImGuiExt::createTexture(texturePath);
             if (texInfo)
             {
-                ImGui::ImageButton("image", texInfo->ds, {128, 128});
+                ImGui::ImageButton("image", texInfo->getDs(), {128, 128});
             }
         }
     }
@@ -486,25 +512,6 @@ void GltfViewerApp::DrawComponentType(const char* label, int componentType)
         }
         ImGui::EndCombo();
     }
-}
-
-const GltfViewerApp::ImGuiTextureInfo* GltfViewerApp::GetOrLoadTextureFromFile(const blink::tstring& path)
-{
-    auto it = m_textureMap.find(path);
-    if (it != m_textureMap.end()) return it->second;
-
-    // load texture
-    auto resModule = blink::getResModule();
-    auto texture = resModule->createTexture2d(path);
-    if (!texture) return nullptr;
-
-    auto vulkanTexture = dynamic_cast<blink::VulkanTexture*>(texture);
-    auto ds = ImGui_ImplVulkan_AddTexture(vulkanTexture->getTextureSampler(),
-                                          vulkanTexture->getTextureImage()->getImageView(),
-                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    auto texInfo = new ImGuiTextureInfo{path, vulkanTexture, ds};
-    m_textureMap.emplace(path, texInfo);
-    return texInfo;
 }
 
 int main(int argc, char** argv)

@@ -10,7 +10,6 @@
 **/
 
 #include "MeshBuilder.h"
-#include "../utils/GltfUtil.h"
 
 #include <core/modules/IResModule.h>
 #include <foundation/File.h>
@@ -18,10 +17,10 @@
 
 namespace blink
 {
-    MeshBuilder& MeshBuilder::filePath(const tstring& filePath)
+    void MeshBuilder::reset()
     {
-        m_filePath = filePath;
-        return *this;
+        m_model = {};
+        m_filePath.clear();
     }
 
     tstring MeshBuilder::getUniqueId() const
@@ -30,27 +29,33 @@ namespace blink
         return fmt::format("file_{0}", m_filePath);
     }
 
-    IGeometry* MeshBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
+    MeshBuilder& MeshBuilder::loadModel(const tstring& filePath)
     {
+        m_filePath = filePath;
+
         tstring fileContent;
         if (!File::readFileIntoString(fileContent, m_filePath))
         {
             LOGE("Open file failed {0}", m_filePath);
-            return nullptr;
+            return *this;
         }
 
-        tinygltf::Model model;
-        if (!GltfUtil::loadFromFile(model, m_filePath))
+        if (!GltfUtil::loadFromFile(m_model, m_filePath))
         {
-            return nullptr;
+            return *this;
         }
 
-        if (model.meshes.empty())
+        return *this;
+    }
+
+    IGeometry* MeshBuilder::build(bool buildNormal, bool buildUv, glm::mat3* inertiaTensorOut) const
+    {
+        if (m_model.meshes.empty())
         {
             LOGE("Empty mesh {0}", m_filePath);
             return nullptr;
         }
-        const auto& mesh = model.meshes[0];
+        const auto& mesh = m_model.meshes[0];
 
         if (mesh.primitives.empty())
         {
@@ -73,15 +78,15 @@ namespace blink
             return nullptr;
         }
 
-        const auto& accessorPos = model.accessors[itPos->second];
-        const auto& accessorNormal = model.accessors[itNormal->second];
-        const auto& accessorUv0 = model.accessors[itUv0->second];
-        const auto& accessorIndices = model.accessors[primitive.indices];
+        const auto& accessorPos = m_model.accessors[itPos->second];
+        const auto& accessorNormal = m_model.accessors[itNormal->second];
+        const auto& accessorUv0 = m_model.accessors[itUv0->second];
+        const auto& accessorIndices = m_model.accessors[primitive.indices];
 
-        const auto& buffViewPos = model.bufferViews[accessorPos.bufferView];
-        const auto& buffViewNormal = model.bufferViews[accessorNormal.bufferView];
-        const auto& buffViewUv0 = model.bufferViews[accessorUv0.bufferView];
-        const auto& buffViewIndices = model.bufferViews[accessorIndices.bufferView];
+        const auto& buffViewPos = m_model.bufferViews[accessorPos.bufferView];
+        const auto& buffViewNormal = m_model.bufferViews[accessorNormal.bufferView];
+        const auto& buffViewUv0 = m_model.bufferViews[accessorUv0.bufferView];
+        const auto& buffViewIndices = m_model.bufferViews[accessorIndices.bufferView];
 
         if (buffViewPos.buffer != buffViewNormal.buffer || buffViewPos.buffer != buffViewUv0.buffer || buffViewPos.buffer != buffViewIndices.buffer)
         {
@@ -89,7 +94,7 @@ namespace blink
             return nullptr;
         }
 
-        const auto& buffer = model.buffers[buffViewPos.buffer];
+        const auto& buffer = m_model.buffers[buffViewPos.buffer];
 
         auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(buffer.data.data(),

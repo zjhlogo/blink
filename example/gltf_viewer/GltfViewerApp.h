@@ -8,15 +8,14 @@
 #pragma once
 
 #include <blink/app.h>
-#include <blink/utils/GltfUtil.h>
+#include <blink/geometries_builder/MeshBuilder.h>
 #include <foundation/PathParser.h>
 #include <guis/IGuiWindow.h>
-#include <render_vulkan/VulkanBase.h>
 
 namespace blink
 {
-    class VulkanTexture;
-}
+    class IGeometry;
+} // namespace blink
 
 class GltfViewerApp : public blink::IApp, public IGuiWindow
 {
@@ -31,15 +30,11 @@ public:
         Texture,
     };
 
-    struct ImGuiTextureInfo
-    {
-        blink::tstring path;
-        blink::VulkanTexture* vulkanTexture;
-        VkDescriptorSet ds;
-    };
-
 public:
     virtual void onGui() override;
+
+    bool initialize() override;
+    void terminate() override;
 
     bool loadModel(const blink::tstring& modelFilePath);
     void unloadModel();
@@ -64,14 +59,11 @@ private:
 
     void DrawComponentType(const char* label, int componentType);
 
-    const ImGuiTextureInfo* GetOrLoadTextureFromFile(const blink::tstring& path);
-
 private:
-    tinygltf::Model m_model;
     blink::PathParser m_modelPath;
+    blink::MeshBuilder m_meshBuilder;
+    blink::IGeometry* m_modelGeometry{};
 
     Category m_selCategory{Category::Unknown};
     int m_selIndex{-1};
-
-    std::map<blink::tstring, ImGuiTextureInfo*> m_textureMap;
 };

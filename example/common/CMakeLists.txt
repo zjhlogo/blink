@@ -5,10 +5,15 @@ project(libcommon)
 
 set(SOURCE_FILES
 guis/IGuiWindow.h
+common_components/LockTargetCameraData.h
+logical_systems/LockTargetCameraControllerSystem.cpp
+logical_systems/LockTargetCameraControllerSystem.h
 render_systems/ImguiRenderSystem.cpp
 render_systems/ImguiRenderSystem.h
 utils/ImguiExtension.cpp
 utils/ImguiExtension.h
+utils/SceneEntityUtil.cpp
+utils/SceneEntityUtil.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

@@ -24,9 +24,7 @@ namespace blink
         destroy();
     }
 
-    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16_t>& indices,
-                                                const std::vector<glm::vec3>& positions,
-                                                const std::vector<Color>& colors)
+    bool VulkanGeometryTriangleList::uploadData(const std::vector<uint16_t>& indices, const std::vector<glm::vec3>& positions, const std::vector<Color>& colors)
     {
         assert(false && "not support");
         return false;
@@ -55,8 +53,7 @@ namespace blink
 
         m_buffer = new VulkanBuffer(m_logicalDevice);
         m_buffer->createBuffer(m_offsetUvs + sizeUv0s,
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
-                               | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(
@@ -96,8 +93,7 @@ namespace blink
 
         m_buffer = new VulkanBuffer(m_logicalDevice);
         m_buffer->createBuffer(dataSize,
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
-                               | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                VK_SHARING_MODE_EXCLUSIVE);
 
         m_buffer->uploadBuffer(data, dataSize);
@@ -109,9 +105,18 @@ namespace blink
 
     VkDeviceSize VulkanGeometryTriangleList::getVertexInputOffset(VertexAttrs vertexAttrs) const
     {
-        if (vertexAttrs == VertexAttrs::Position) { return m_offsetPositions; }
-        else if (vertexAttrs == VertexAttrs::Normal) { return m_offsetNormals; }
-        else if (vertexAttrs == VertexAttrs::Uv0) { return m_offsetUvs; }
+        if (vertexAttrs == VertexAttrs::Position)
+        {
+            return m_offsetPositions;
+        }
+        else if (vertexAttrs == VertexAttrs::Normal)
+        {
+            return m_offsetNormals;
+        }
+        else if (vertexAttrs == VertexAttrs::Uv0)
+        {
+            return m_offsetUvs;
+        }
 
         return 0;
     }

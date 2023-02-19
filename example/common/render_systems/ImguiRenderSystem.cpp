@@ -7,6 +7,7 @@
  *********************************************************************/
 
 #include "ImguiRenderSystem.h"
+#include "../utils/ImguiExtension.h"
 
 #include <foundation/Log.h>
 #include <imgui/backends/imgui_impl_glfw.h>
@@ -147,6 +148,9 @@ void ImguiRenderSystem::render()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuiExt::lastFrameMouseWheel = io.MouseWheel;
+    ImGuiExt::lastFrameMouseWheelH = io.MouseWheelH;
 
     for (auto window : m_allWindows)
     {
@@ -164,7 +168,6 @@ void ImguiRenderSystem::render()
         ImGui_ImplVulkan_RenderDrawData(main_draw_data, renderModule->getCommandBuffer());
     }
 
-    ImGuiIO& io = ImGui::GetIO();
     // Update and Render additional Platform Windows
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
