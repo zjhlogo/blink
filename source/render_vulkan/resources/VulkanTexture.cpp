@@ -46,7 +46,7 @@ namespace blink
             return false;
         }
 
-        stbi_uc* pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        stbi_uc* pixels = stbi_load_from_memory(buffer.data(), static_cast<int>(buffer.size()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         if (!pixels)
         {
             return false;

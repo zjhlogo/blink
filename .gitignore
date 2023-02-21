@@ -10,4 +10,4 @@ CTestTestfile.cmake
 /build
 /bin/*
 !/bin/assets
-bin/assets/shaders/compiled
+/bin/assets/shaders/compiled/*.spv
