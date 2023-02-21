@@ -42,5 +42,5 @@ void PbrApp::onGui()
 int main(int argc, char** argv)
 {
     PbrApp app;
-    return blink::run(app);
+    return blink::run(argc, argv, app);
 }

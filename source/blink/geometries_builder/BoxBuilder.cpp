@@ -1,18 +1,14 @@
-/**
-
-    @file      BoxBuilder.cpp
-    @brief
-    @details   ~
-    @author    zjhlogo
-    @date      5.11.2021
-    @copyright Copyright zjhlogo, 2021. All right reserved.
-
-**/
-
+/*********************************************************************
+ * \file   BoxBuilder.cpp
+ * \brief  
+ * 
+ * \author zjhlogo
+ * \date   February 2023
+ *********************************************************************/
 #include "BoxBuilder.h"
 #include "PlaneBuilder.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <foundation/BuiltinFormatter.h>
 
 namespace blink
@@ -94,7 +90,7 @@ namespace blink
             .translate(glm::vec3(0.5f * m_size.x, 0.0f, 0.0f))
             .generateData(vertsPos, indices, pVertsNormal, pVertsUv0);
 
-        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
+        auto geometry = getResourceModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_RELEASE(geometry);

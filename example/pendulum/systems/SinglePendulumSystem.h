@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <core/ILogicalSystem.h>
+#include <core/systems/ILogicalSystem.h>
 
 class SinglePendulumSystem final : public blink::ILogicalSystem
 {

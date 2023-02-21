@@ -1,4 +1,3 @@
-
 /*********************************************************************
  * \file   IGeometry.cpp
  * \brief
@@ -7,14 +6,14 @@
  * \date   04/21/2022
  *********************************************************************/
 #include "IGeometry.h"
-#include "../modules/IResModule.h"
+#include "../modules/IResourceModule.h"
 
 namespace blink
 {
     void IGeometry::release()
     {
         //
-        getResModule()->releaseGeometry(this);
+        getResourceModule()->releaseGeometry(this);
     }
 
     bool IGeometry::hasVertexAttrs(VertexAttrs requiredVertexAttrs) const

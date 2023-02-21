@@ -7,9 +7,12 @@
  *
  */
 #include "File.h"
+#include "PathParser.h"
 
 namespace blink
 {
+    tstring File::m_rootDir;
+
     File::File(const tstring& filePath, int flag /*= AM_READ*/)
     {
         //
@@ -42,6 +45,15 @@ namespace blink
         auto fileSize = file.fileSize();
         dataOut.resize(fileSize);
         file.read((void*)dataOut.data(), fileSize);
+
+        return true;
+    }
+
+    bool File::initializeRoot(const tstring& rootDir)
+    {
+        PathParser parser;
+        parser.parse(rootDir);
+        m_rootDir = parser.getDirectory();
 
         return true;
     }

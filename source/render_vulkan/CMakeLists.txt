@@ -42,8 +42,8 @@ VulkanRenderModule.cpp
 VulkanRenderModule.h
 VulkanRenderPass.cpp
 VulkanRenderPass.h
-VulkanResModule.cpp
-VulkanResModule.h
+VulkanResourceModule.cpp
+VulkanResourceModule.h
 VulkanSemaphore.cpp
 VulkanSemaphore.h
 VulkanSwapchain.cpp

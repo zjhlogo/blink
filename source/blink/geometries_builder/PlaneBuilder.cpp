@@ -11,7 +11,7 @@
 
 #include "PlaneBuilder.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
@@ -65,19 +65,31 @@ namespace blink
 
         std::vector<glm::vec3>* pVertsNormal = nullptr;
         std::vector<glm::vec2>* pVertsUv0 = nullptr;
-        if (buildNormal) pVertsNormal = &vertsNormal;
-        if (buildUv) pVertsUv0 = &vertsUv0;
+        if (buildNormal)
+        {
+            pVertsNormal = &vertsNormal;
+        }
+        if (buildUv)
+        {
+            pVertsUv0 = &vertsUv0;
+        }
 
-        if (!generateData(vertsPos, indices, pVertsNormal, pVertsUv0)) return nullptr;
+        if (!generateData(vertsPos, indices, pVertsNormal, pVertsUv0))
+        {
+            return nullptr;
+        }
 
-        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
+        auto geometry = getResourceModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_RELEASE(geometry);
             return nullptr;
         }
 
-        if (inertiaTensorOut) { *inertiaTensorOut = CalculateInertiaTensor(vertsPos.data(), vertsPos.size()); }
+        if (inertiaTensorOut)
+        {
+            *inertiaTensorOut = CalculateInertiaTensor(vertsPos.data(), vertsPos.size());
+        }
 
         return geometry;
     }
@@ -108,8 +120,14 @@ namespace blink
                 currUv.x = x * delta.x * uvRange.x + m_uvMin.x;
 
                 positionsOut.push_back(glm::rotate(m_orientation, currPos) + m_translation);
-                if (normalsOut) normalsOut->push_back(normal);
-                if (uvsOut) uvsOut->push_back(currUv);
+                if (normalsOut)
+                {
+                    normalsOut->push_back(normal);
+                }
+                if (uvsOut)
+                {
+                    uvsOut->push_back(currUv);
+                }
             }
         }
 

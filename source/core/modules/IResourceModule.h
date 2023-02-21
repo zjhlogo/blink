@@ -1,5 +1,5 @@
 /*********************************************************************
- * \file   IResModule.h
+ * \file   IResourceModule.h
  * \brief
  *
  * \author zjhlogo
@@ -13,16 +13,16 @@
 
 namespace blink
 {
-    class IResModule
+    class IResourceModule
     {
     public:
-        IResModule() = default;
-        virtual ~IResModule() = default;
+        IResourceModule() = default;
+        virtual ~IResourceModule() = default;
 
-        IResModule(const IResModule&) = delete;
-        IResModule(IResModule&&) = delete;
-        IResModule& operator=(const IResModule&) = delete;
-        IResModule& operator=(IResModule&&) = delete;
+        IResourceModule(const IResourceModule&) = delete;
+        IResourceModule(IResourceModule&&) = delete;
+        IResourceModule& operator=(const IResourceModule&) = delete;
+        IResourceModule& operator=(IResourceModule&&) = delete;
 
         virtual bool initialize() = 0;
         virtual void terminate() = 0;
@@ -37,5 +37,5 @@ namespace blink
         virtual void releaseMaterial(IMaterial* material) = 0;
     };
 
-    IResModule* getResModule();
+    IResourceModule* getResourceModule();
 } // namespace blink

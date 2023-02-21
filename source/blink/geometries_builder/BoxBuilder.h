@@ -1,13 +1,10 @@
-/**
-
-    @file      BoxBuilder.h
-    @brief
-    @details   ~
-    @author    zjhlogo
-    @date      5.11.2021
-    @copyright Copyright zjhlogo, 2021. All right reserved.
-
-**/
+/*********************************************************************
+ * \file   BoxBuilder.h
+ * \brief
+ *
+ * \author zjhlogo
+ * \date   February 2023
+ *********************************************************************/
 #pragma once
 
 #include "IGeometryBuilder.h"

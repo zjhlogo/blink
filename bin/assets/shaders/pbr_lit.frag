@@ -10,6 +10,8 @@ layout(set = 0, binding = 2) uniform MaterialUniforms
     float metallic;
 } mu;
 
+layout(set = 0, binding = 3) uniform sampler2D texMetallicRoughness;
+
 const float PI = 3.14159265359;
 
 layout(location = 0) in vec3 fragNormal;
@@ -67,8 +69,10 @@ void main()
     vec3 V = normalize(cu.cameraPos - fragWorldPos);
     vec3 L = normalize(fu.lightPos - fragWorldPos);
 
+    vec3 mr = texture(texMetallicRoughness, fragTexCoord).xyz;
+
     vec3 Lo = vec3(0.0);
-    Lo += BRDF(L, V, N, mu.metallic, mu.roughness);
+    Lo += BRDF(L, V, N, mu.metallic * mr.r, mu.roughness * mr.g);
 
     vec3 color = mu.color * 0.02;
     color += Lo;

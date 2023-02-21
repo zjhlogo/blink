@@ -1,5 +1,5 @@
 /*********************************************************************
- * \file   VulkanResModule.h
+ * \file   VulkanResourceModule.h
  * \brief
  *
  * \author zjhlogo
@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 
 #include <unordered_map>
 
@@ -16,13 +16,13 @@ namespace blink
     class VulkanLogicalDevice;
     class VulkanRenderPass;
 
-    class VulkanResModule final : public IResModule
+    class VulkanResourceModule final : public IResourceModule
     {
     public:
         static const tstring DEFAULT_TEXTURE;
 
     public:
-        VulkanResModule() = default;
+        VulkanResourceModule() = default;
 
         bool initialize() override;
         void terminate() override;

@@ -18,7 +18,7 @@
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
 #include <core/modules/IRenderModule.h>
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <imgui/imgui.h>
 #include <physics/components/Components.h>
 
@@ -26,7 +26,7 @@ bool EntityCreationSystem::initialize()
 {
     auto& world = m_ecsWorld->getWorld();
     auto prefabSystem = m_ecsWorld->findSystem<PrefabInitializeSystem>();
-    auto resModule = blink::getResModule();
+    auto resModule = blink::getResourceModule();
     auto renderModule = blink::getRenderModule();
 
     const auto& surfaceSize = renderModule->getSurfaceSize();

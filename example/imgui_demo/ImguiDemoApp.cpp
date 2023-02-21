@@ -31,5 +31,5 @@ bool ImguiDemoApp::initializeRenderSystems()
 int main(int argc, char** argv)
 {
     ImguiDemoApp app;
-    return blink::run(app);
+    return blink::run(argc, argv, app);
 }

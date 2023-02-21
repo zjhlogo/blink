@@ -11,7 +11,7 @@
 #include <blink/components/Components.h>
 #include <core/components/Components.h>
 #include <core/modules/IRenderModule.h>
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 
 bool SceneEntityUtil::initializeCommonLogicalSystems(blink::IApp* app)
 {
@@ -22,7 +22,7 @@ bool SceneEntityUtil::initializeCommonLogicalSystems(blink::IApp* app)
 bool SceneEntityUtil::initializeCommonSceneEntities(blink::EcsWorld& ecsWorld)
 {
     auto& world = ecsWorld.getWorld();
-    auto resModule = blink::getResModule();
+    auto resModule = blink::getResourceModule();
     auto renderModule = blink::getRenderModule();
     const auto& surfaceSize = renderModule->getSurfaceSize();
 

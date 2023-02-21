@@ -31,8 +31,22 @@ namespace blink
     {
         reset();
 
+        int beginPos = 0;
         // check if the path start with '/' or '\\', if so mark root flag
-        if (path.length() > 0 && (path[0] == '/' || path[0] == '\\')) root = "/";
+        if (path.length() > 0 && (path[0] == '/' || path[0] == '\\'))
+        {
+            root = "/";
+        }
+        // check if is the window style path
+        else if (path.length() > 1 && path[1] == ':')
+        {
+            char lowerLetter = path[0] | 0x20;
+            if (lowerLetter >= 'a' && lowerLetter <= 'z')
+            {
+                root = fmt::format("{}:/", lowerLetter);
+                beginPos = 2;
+            }
+        }
 
         // find out the name parts and directory parts
         tstring dirPart;
@@ -43,7 +57,7 @@ namespace blink
 
         if (pos != tstring::npos)
         {
-            dirPart = path.substr(0, pos + 1);
+            dirPart = path.substr(beginPos, pos - beginPos + 1);
             namePart = path.substr(pos + 1);
         }
         else
@@ -135,7 +149,10 @@ namespace blink
 
     bool PathParser::matchFileExtensions(const tstring& filePath, const std::set<tstring>& exts, bool caseSensitive /*= false*/)
     {
-        if (exts.size() <= 0) return true;
+        if (exts.size() <= 0)
+        {
+            return true;
+        }
 
         PathParser pp;
         pp.parse(filePath);
@@ -153,11 +170,17 @@ namespace blink
                 lowerExts.insert(lowerExt);
             }
 
-            if (lowerExts.find(lowerFileExt) != lowerExts.end()) return true;
+            if (lowerExts.find(lowerFileExt) != lowerExts.end())
+            {
+                return true;
+            }
         }
         else
         {
-            if (exts.find(pp.extension) != exts.end()) return true;
+            if (exts.find(pp.extension) != exts.end())
+            {
+                return true;
+            }
         }
 
         return false;
@@ -177,10 +200,20 @@ namespace blink
             const char lastChar = path1[path1.length() - 1];
             if (lastChar == '/' || lastChar == '\\')
             {
+                if (path2.length() > 0 && (path2[0] == '/' || path2[0] == '\\'))
+                {
+                    return (path1 + path2.substr(1));
+                }
+
                 return (path1 + path2);
             }
             else
             {
+                if (path2.length() > 0 && (path2[0] == '/' || path2[0] == '\\'))
+                {
+                    return (path1 + path2);
+                }
+
                 return (path1 + '/') + path2;
             }
         }
@@ -190,9 +223,34 @@ namespace blink
         }
     }
 
+    tstring PathParser::getAbsolutePath(const tstring& path, const tstring& referenceDir)
+    {
+        PathParser parser;
+        parser.parse(path);
+
+        if (!parser.root.empty())
+        {
+            return parser.getFullPath();
+        }
+
+        PathParser parser2;
+        parser2.parse(referenceDir);
+        return PathParser::combinePath(parser2.getDirectory(), parser.getFullPath());
+    }
+
+    tstring PathParser::formatPath(const tstring& path)
+    {
+        PathParser parser;
+        parser.parse(path);
+        return parser.getFullPath();
+    }
+
     void PathParser::appendSubDir(std::vector<tstring>& dirList, const tstring& subDir)
     {
-        if (subDir.empty() || subDir == ".") return;
+        if (subDir.empty() || subDir == ".")
+        {
+            return;
+        }
 
         if (subDir == "..")
         {

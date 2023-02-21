@@ -19,7 +19,7 @@
 #include "VulkanWindow.h"
 #include "utils/VulkanUtils.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <tracy-0.8.2/Tracy.hpp>
 
 #define GLFW_INCLUDE_VULKAN
@@ -36,33 +36,63 @@ namespace blink
     bool VulkanRenderModule::createDevice(const glm::ivec2& deviceSize)
     {
         /* Initialize the library */
-        if (!glfwInit()) return false;
+        if (!glfwInit())
+        {
+            return false;
+        }
 
         m_window = new VulkanWindow();
-        if (!m_window->create(deviceSize)) return false;
+        if (!m_window->create(deviceSize))
+        {
+            return false;
+        }
 
         m_context = new VulkanContext(m_window);
-        if (!m_context->create()) return false;
+        if (!m_context->create())
+        {
+            return false;
+        }
 
         m_logicalDevice = new VulkanLogicalDevice(m_context);
-        if (!m_logicalDevice->create()) return false;
+        if (!m_logicalDevice->create())
+        {
+            return false;
+        }
 
         m_renderPass = new VulkanRenderPass(*m_logicalDevice);
-        if (!m_renderPass->create()) return false;
+        if (!m_renderPass->create())
+        {
+            return false;
+        }
 
         m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice, *m_renderPass);
-        if (!m_swapchain->create()) return false;
+        if (!m_swapchain->create())
+        {
+            return false;
+        }
 
         m_commandBuffer = new VulkanCommandBuffer(*m_logicalDevice, m_logicalDevice->getCommandPool());
-        if (!m_commandBuffer->create()) return false;
+        if (!m_commandBuffer->create())
+        {
+            return false;
+        }
 
         m_perFrameUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
-        if (!m_perFrameUniformBuffer->create()) return false;
+        if (!m_perFrameUniformBuffer->create())
+        {
+            return false;
+        }
 
         m_perMaterialUniformBuffer = new VulkanUniformBuffer(*m_logicalDevice);
-        if (!m_perMaterialUniformBuffer->create()) return false;
+        if (!m_perMaterialUniformBuffer->create())
+        {
+            return false;
+        }
 
-        if (!createSyncObjects()) return false;
+        if (!createSyncObjects())
+        {
+            return false;
+        }
 
         return true;
     }
@@ -182,7 +212,10 @@ namespace blink
         VkViewport viewport{0.0f, static_cast<float>(extent.height), static_cast<float>(extent.width), -static_cast<float>(extent.height), 0.0f, 1.0f};
         vkCmdSetViewport(*m_commandBuffer, 0, 1, &viewport);
 
-        VkRect2D rect{{0, 0}, extent};
+        VkRect2D rect{
+            {0, 0},
+            extent
+        };
         m_commandBuffer->beginRenderPass(*m_renderPass, m_swapchain->getCurrentActiveFrameBuffer(), rect);
 
         return true;

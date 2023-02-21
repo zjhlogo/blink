@@ -1,6 +1,6 @@
 {
-    "vertex_shader" : "resource/shaders/compiled/pbr_lit.vert.spv",
-    "fragment_shader" : "resource/shaders/compiled/pbr_lit.frag.spv",
+    "vertex_shader" : "/shaders/compiled/pbr_lit.vert.spv",
+    "fragment_shader" : "/shaders/compiled/pbr_lit.frag.spv",
     "uniforms" : [
         {
             "name" : "roughness",

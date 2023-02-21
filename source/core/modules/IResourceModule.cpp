@@ -1,18 +1,15 @@
 /*********************************************************************
- * \file   IMaterial.cpp
+ * \file   IResourceModule.cpp
  * \brief
  *
  * \author zjhlogo
  * \date   04/21/2022
  *********************************************************************/
-#include "IMaterial.h"
-#include "../modules/IResourceModule.h"
+#include "IResourceModule.h"
+
+#include <foundation/PathParser.h>
 
 namespace blink
 {
-    void IMaterial::release()
-    {
-        //
-        getResourceModule()->releaseMaterial(this);
-    }
+
 } // namespace blink

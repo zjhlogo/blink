@@ -10,7 +10,7 @@
 **/
 #include "SphereUvBuilder.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
@@ -52,8 +52,14 @@ namespace blink
 
         std::vector<glm::vec3>* pVertsNormal = nullptr;
         std::vector<glm::vec2>* pVertsUv0 = nullptr;
-        if (buildNormal) pVertsNormal = &vertsNormal;
-        if (buildUv) pVertsUv0 = &vertsUv0;
+        if (buildNormal)
+        {
+            pVertsNormal = &vertsNormal;
+        }
+        if (buildUv)
+        {
+            pVertsUv0 = &vertsUv0;
+        }
 
         float const R = 1.0f / (m_rings - 1);
         float const S = 1.0f / m_sections;
@@ -69,8 +75,14 @@ namespace blink
                 float const z = cos(glm::two_pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
 
                 vertsPos.push_back({x * m_radius + m_center.x, y * m_radius + m_center.y, z * m_radius + m_center.z});
-                if (pVertsNormal) pVertsNormal->push_back({x, y, z});
-                if (pVertsUv0) pVertsUv0->push_back({s * S, r * R});
+                if (pVertsNormal)
+                {
+                    pVertsNormal->push_back({x, y, z});
+                }
+                if (pVertsUv0)
+                {
+                    pVertsUv0->push_back({s * S, r * R});
+                }
             }
         }
 
@@ -92,7 +104,7 @@ namespace blink
             }
         }
 
-        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
+        auto geometry = getResourceModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_RELEASE(geometry);

@@ -9,7 +9,7 @@
 #include "../common_components/LockTargetCameraData.h"
 
 #include <blink/components/Components.h>
-#include <core/ILogicalSystem.h>
+#include <core/systems/ILogicalSystem.h>
 #include <core/components/Components.h>
 
 class LockTargetCameraControllerSystem : public blink::ILogicalSystem

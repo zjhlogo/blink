@@ -31,6 +31,6 @@ configure_library(${PROJECT_NAME} "example")
 add_custom_command(TARGET ${PROJECT_NAME}
     PRE_BUILD
     COMMAND compile.bat
-    WORKING_DIRECTORY ${RESOURCE_ROOT}/shaders
+    WORKING_DIRECTORY ${ASSETS_ROOT}/shaders
     USES_TERMINAL
     COMMENT "start compile shaders")

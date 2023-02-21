@@ -36,7 +36,10 @@ namespace blink
 
     VkImage VulkanImage::createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
     {
-        if (m_image != VK_NULL_HANDLE) return m_image;
+        if (m_image != VK_NULL_HANDLE)
+        {
+            return m_image;
+        }
 
         if (m_generateMipmap)
         {

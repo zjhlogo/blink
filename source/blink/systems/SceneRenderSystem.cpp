@@ -49,47 +49,48 @@ void SceneRenderSystem::render()
         frameRenderData.time = std::fmodf(world.time(), 3600.0f);
         frameRenderData.screenResolution = surfaceSize;
         static auto lightDataQuery = world.query_builder<const blink::Position, const blink::LightData>().build();
-        lightDataQuery.each(
-            [&frameRenderData](flecs::entity e, const blink::Position& pos, const blink::LightData& light)
-            {
-                frameRenderData.lightPos = pos.value;
-                frameRenderData.lightColor = light.color;
-                frameRenderData.lightIntensity = light.intensity;
-            });
+        lightDataQuery.each([&frameRenderData](flecs::entity e, const blink::Position& pos, const blink::LightData& light) {
+            frameRenderData.lightPos = pos.value;
+            frameRenderData.lightColor = light.color;
+            frameRenderData.lightIntensity = light.intensity;
+        });
     }
 
     // collect camera data into cameraGroups
     std::vector<RenderDataUploader::CameraRenderData> cameraRenderDatas;
     {
         static auto cameraDataQuery = world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
-        cameraDataQuery.each(
-            [&cameraRenderDatas](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera)
-            {
-                // setup perFrame uniforms
-                RenderDataUploader::CameraRenderData cameraRenderData{};
+        cameraDataQuery.each([&cameraRenderDatas](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera) {
+            // setup perFrame uniforms
+            RenderDataUploader::CameraRenderData cameraRenderData{};
 
-                cameraRenderData.cameraPos = pos.value;
-                cameraRenderData.cameraRot = rot.value;
-                cameraRenderData.matCameraToProjection = camera.matCameraToProjection;
-                cameraRenderData.cameraId = 0;
+            cameraRenderData.cameraPos = pos.value;
+            cameraRenderData.cameraRot = rot.value;
+            cameraRenderData.matCameraToProjection = camera.matCameraToProjection;
+            cameraRenderData.cameraId = 0;
 
-                cameraRenderDatas.push_back(cameraRenderData);
-            });
+            cameraRenderDatas.push_back(cameraRenderData);
+        });
     }
 
     // group render object by materials
     std::unordered_map<blink::IMaterial*, RenderDataUploader::MaterialRenderData> materialGroups;
     {
-        static auto renderObjQuery = world.query_builder<const blink::Position, const blink::Rotation, const blink::Renderable, const blink::StaticModel>()
-                                         .build();
+        static auto renderObjQuery =
+            world.query_builder<const blink::Position, const blink::Rotation, const blink::Renderable, const blink::StaticModel>().build();
         renderObjQuery.each(
-            [&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::Renderable& renderable, const blink::StaticModel& model)
-            {
+            [&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::Renderable& renderable, const blink::StaticModel& model) {
                 auto material = model.material;
-                if (!material) return;
+                if (!material)
+                {
+                    return;
+                }
 
                 auto geometry = model.geometry;
-                if (!geometry) return;
+                if (!geometry)
+                {
+                    return;
+                }
 
                 auto findIt = materialGroups.find(material);
                 if (findIt != materialGroups.end())
@@ -110,19 +111,17 @@ void SceneRenderSystem::render()
     std::map<int, blink::RenderFeature> featureGroups;
     {
         static auto renderFeatureQuery = world.query_builder<const blink::RenderFeature>().build();
-        renderFeatureQuery.each(
-            [&](flecs::entity e, const blink::RenderFeature& renderFeature)
+        renderFeatureQuery.each([&](flecs::entity e, const blink::RenderFeature& renderFeature) {
+            auto findIt = featureGroups.find(renderFeature.order);
+            if (findIt != featureGroups.end())
             {
-                auto findIt = featureGroups.find(renderFeature.order);
-                if (findIt != featureGroups.end())
-                {
-                    LOGE("duplicate render feature order {0}", renderFeature.order);
-                }
-                else
-                {
-                    featureGroups.emplace(renderFeature.order, renderFeature);
-                }
-            });
+                LOGE("duplicate render feature order {0}", renderFeature.order);
+            }
+            else
+            {
+                featureGroups.emplace(renderFeature.order, renderFeature);
+            }
+        });
     }
 
     // start rendering
@@ -157,7 +156,10 @@ void SceneRenderSystem::render()
 
                     for (auto& entityRenderData : materialRenderData.entityRenderData)
                     {
-                        if ((entityRenderData.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+                        if ((entityRenderData.renderLayer & renderFeatureData.renderLayer) == 0)
+                        {
+                            continue;
+                        }
 
                         RenderDataUploader::uploadEntityPushConstant(entityRenderData, cameraId, vulkanMaterial, commandBuffer);
 
@@ -185,7 +187,10 @@ void SceneRenderSystem::render()
                 {
                     for (auto& entityRenderData : kvpMaterial.second.entityRenderData)
                     {
-                        if ((entityRenderData.renderLayer & renderFeatureData.renderLayer) == 0) continue;
+                        if ((entityRenderData.renderLayer & renderFeatureData.renderLayer) == 0)
+                        {
+                            continue;
+                        }
 
                         RenderDataUploader::uploadEntityPushConstant(entityRenderData, cameraId, vulkanMaterial, commandBuffer);
 

@@ -44,5 +44,5 @@ void LineArtApp::onGui()
 int main(int argc, char** argv)
 {
     LineArtApp app;
-    return blink::run(app);
+    return blink::run(argc, argv, app);
 }

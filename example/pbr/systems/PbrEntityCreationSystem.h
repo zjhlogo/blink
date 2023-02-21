@@ -9,7 +9,7 @@
 #pragma once
 
 #include <blink/components/Components.h>
-#include <core/ILogicalSystem.h>
+#include <core/systems/ILogicalSystem.h>
 
 class PbrEntityCreationSystem : public blink::ILogicalSystem
 {

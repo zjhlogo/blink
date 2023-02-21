@@ -10,7 +10,7 @@
 **/
 #include "TetrahedronBuilder.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <foundation/BuiltinFormatter.h>
 #include <glm/gtx/quaternion.hpp>
 
@@ -45,8 +45,14 @@ namespace blink
 
         std::vector<glm::vec3>* pVertsNormal = nullptr;
         std::vector<glm::vec2>* pVertsUv0 = nullptr;
-        if (buildNormal) pVertsNormal = &vertsNormal;
-        if (buildUv) pVertsUv0 = &vertsUv0;
+        if (buildNormal)
+        {
+            pVertsNormal = &vertsNormal;
+        }
+        if (buildUv)
+        {
+            pVertsUv0 = &vertsUv0;
+        }
 
         // build vertex
         glm::vec3 p0(m_radius, 0.0f, -m_radius / sqrtf(2.0f));
@@ -93,7 +99,7 @@ namespace blink
         indices.push_back(startIndex + 2);
         indices.push_back(startIndex + 3);
 
-        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
+        auto geometry = getResourceModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(indices, vertsPos, vertsNormal, vertsUv0))
         {
             SAFE_RELEASE(geometry);

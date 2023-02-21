@@ -9,7 +9,7 @@
 
 #include "../app.h"
 
-#include <core/IRenderSystem.h>
+#include <core/systems/IRenderSystem.h>
 
 class SceneRenderSystem final : public blink::IRenderSystem
 {

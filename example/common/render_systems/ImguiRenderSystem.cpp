@@ -25,9 +25,15 @@
 
 static void imguiCheckVkResult(VkResult err)
 {
-    if (err == 0) return;
+    if (err == 0)
+    {
+        return;
+    }
     LOGE("[vulkan] Error: VkResult = {0}", err);
-    if (err < 0) abort();
+    if (err < 0)
+    {
+        abort();
+    }
 }
 
 ImguiRenderSystem::~ImguiRenderSystem()
@@ -113,12 +119,10 @@ bool ImguiRenderSystem::initialize()
     // Upload Fonts
     {
         // Use any command queue
-        logicalDevice.executeCommand(
-            [](const blink::VulkanCommandBuffer& commandBuffer)
-            {
-                //
-                ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
-            });
+        logicalDevice.executeCommand([](const blink::VulkanCommandBuffer& commandBuffer) {
+            //
+            ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
+        });
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
@@ -139,7 +143,10 @@ void ImguiRenderSystem::terminate()
 
 void ImguiRenderSystem::render()
 {
-    if (m_allWindows.empty()) return;
+    if (m_allWindows.empty())
+    {
+        return;
+    }
 
     auto renderModule = dynamic_cast<blink::VulkanRenderModule*>(blink::getRenderModule());
 

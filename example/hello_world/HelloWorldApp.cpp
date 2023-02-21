@@ -1,7 +1,7 @@
 /*********************************************************************
  * \file   HelloWorldApp.cpp
- * \brief  
- * 
+ * \brief
+ *
  * \author zjhlogo
  * \date   February 2023
  *********************************************************************/
@@ -22,5 +22,5 @@ bool HelloWorldApp::initializeRenderSystems()
 int main(int argc, char** argv)
 {
     HelloWorldApp app;
-    return blink::run(app);
+    return blink::run(argc, argv, app);
 }

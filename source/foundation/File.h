@@ -54,9 +54,14 @@ namespace blink
         static bool readFileIntoString(tstring& strOut, const tstring& filePath);
         static bool readFileIntoBuffer(std::vector<uint8_t>& dataOut, const tstring& filePath);
 
+        static bool initializeRoot(const tstring& rootDir);
+
     private:
         void* m_fileHandler{};
         int64_t m_fileSize{};
         int m_mode{AM_READ};
+
+        static tstring m_rootDir;
+
     };
 } // namespace blink

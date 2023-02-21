@@ -9,7 +9,7 @@
 
 #include "../geometries_builder/LineListBuilder.h"
 
-#include <core/ILogicalSystem.h>
+#include <core/systems/ILogicalSystem.h>
 #include <core/resources/IGeometry.h>
 #include <core/resources/IMaterial.h>
 #include <core/types/Color.h>

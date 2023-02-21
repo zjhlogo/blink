@@ -10,15 +10,15 @@
 #include <blink/components/Components.h>
 #include <core/EcsWorld.h>
 #include <core/components/Components.h>
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 
 namespace blink
 {
     bool DebugLineSystem::initialize()
     {
-        auto resModule = getResModule();
-        m_debugMaterial = resModule->createMaterial("resource/materials/debug_line.mtl");
-        m_debugGeometry = resModule->createGeometry(m_lineListBuilder.getUniqueId(), PrimitiveTopology::LineList);
+        auto resourceModule = getResourceModule();
+        m_debugMaterial = resourceModule->createMaterial("/materials/debug_line.mtl");
+        m_debugGeometry = resourceModule->createGeometry(m_lineListBuilder.getUniqueId(), PrimitiveTopology::LineList);
 
         auto& world = m_ecsWorld->getWorld();
 

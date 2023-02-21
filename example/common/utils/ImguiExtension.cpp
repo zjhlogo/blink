@@ -7,7 +7,7 @@
  *********************************************************************/
 #include "ImguiExtension.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 #include <render_vulkan/VulkanImage.h>
 #include <render_vulkan/resources/VulkanTexture.h>
@@ -15,22 +15,26 @@
 
 namespace ImGui
 {
-    static const std::map<int, const char*> g_componentTypeMap = {{TINYGLTF_COMPONENT_TYPE_BYTE, "BYTE"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE, "UNSIGNED_BYTE"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_SHORT, "SHORT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT, "UNSIGNED_SHORT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_INT, "INT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT, "UNSIGNED_INT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_FLOAT, "FLOAT"},
-                                                                  {TINYGLTF_COMPONENT_TYPE_DOUBLE, "DOUBLE"}};
+    static const std::map<int, const char*> g_componentTypeMap = {
+        {          TINYGLTF_COMPONENT_TYPE_BYTE,           "BYTE"},
+        { TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE,  "UNSIGNED_BYTE"},
+        {         TINYGLTF_COMPONENT_TYPE_SHORT,          "SHORT"},
+        {TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT, "UNSIGNED_SHORT"},
+        {           TINYGLTF_COMPONENT_TYPE_INT,            "INT"},
+        {  TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT,   "UNSIGNED_INT"},
+        {         TINYGLTF_COMPONENT_TYPE_FLOAT,          "FLOAT"},
+        {        TINYGLTF_COMPONENT_TYPE_DOUBLE,         "DOUBLE"}
+    };
 
-    static const std::map<int, const char*> g_primitiveModeMap = {{TINYGLTF_MODE_POINTS, "POINTS"},
-                                                                  {TINYGLTF_MODE_LINE, "LINE"},
-                                                                  {TINYGLTF_MODE_LINE_LOOP, "LINE_LOOP"},
-                                                                  {TINYGLTF_MODE_LINE_STRIP, "LINE_STRIP"},
-                                                                  {TINYGLTF_MODE_TRIANGLES, "TRIANGLES"},
-                                                                  {TINYGLTF_MODE_TRIANGLE_STRIP, "TRIANGLE_STRIP"},
-                                                                  {TINYGLTF_MODE_TRIANGLE_FAN, "TRIANGLE_FAN"}};
+    static const std::map<int, const char*> g_primitiveModeMap = {
+        {        TINYGLTF_MODE_POINTS,         "POINTS"},
+        {          TINYGLTF_MODE_LINE,           "LINE"},
+        {     TINYGLTF_MODE_LINE_LOOP,      "LINE_LOOP"},
+        {    TINYGLTF_MODE_LINE_STRIP,     "LINE_STRIP"},
+        {     TINYGLTF_MODE_TRIANGLES,      "TRIANGLES"},
+        {TINYGLTF_MODE_TRIANGLE_STRIP, "TRIANGLE_STRIP"},
+        {  TINYGLTF_MODE_TRIANGLE_FAN,   "TRIANGLE_FAN"}
+    };
 
     struct ReadOnlyTextCallback_UserData
     {
@@ -92,7 +96,10 @@ namespace ImGui
             {
                 bool isSelected = (kvp.first == key);
                 ImGui::Selectable(kvp.second, isSelected);
-                if (isSelected) ImGui::SetItemDefaultFocus();
+                if (isSelected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
             ImGui::EndCombo();
         }
@@ -115,9 +122,12 @@ public:
     ImGuiTextureInfoImpl(const blink::tstring& path)
     {
         // load texture
-        auto resModule = blink::getResModule();
+        auto resModule = blink::getResourceModule();
         m_texture = resModule->createTexture2d(path);
-        if (!m_texture) return;
+        if (!m_texture)
+        {
+            return;
+        }
 
         auto vulkanTexture = dynamic_cast<blink::VulkanTexture*>(m_texture);
         m_ds = ImGui_ImplVulkan_AddTexture(vulkanTexture->getTextureSampler(),
@@ -142,10 +152,16 @@ std::map<blink::tstring, std::shared_ptr<ImGuiTextureInfo>> ImGuiExt::m_cachedTe
 std::shared_ptr<ImGuiTextureInfo> ImGuiExt::createTexture(const blink::tstring& path)
 {
     auto it = m_cachedTexInfo.find(path);
-    if (it != m_cachedTexInfo.end()) return it->second;
+    if (it != m_cachedTexInfo.end())
+    {
+        return it->second;
+    }
 
     std::shared_ptr<ImGuiTextureInfo> texInfo = std::make_shared<ImGuiTextureInfoImpl>(path);
-    if (!texInfo->getTexture()) return nullptr;
+    if (!texInfo->getTexture())
+    {
+        return nullptr;
+    }
 
     m_cachedTexInfo.emplace(path, texInfo);
     return texInfo;

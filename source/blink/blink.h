@@ -14,5 +14,5 @@
 
 namespace blink
 {
-    int run(IApp& app);
+    int run(int argc, char** argv, IApp& app);
 }

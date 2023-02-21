@@ -19,20 +19,18 @@ TEST(PathParserTestCase, parseTest)
     ASSERT_EQ(pp.extension, "");
 
     pp.parse("c:\\windows/system.32\\filename.txt.log");
-    ASSERT_EQ(pp.root, "");
-    ASSERT_EQ(pp.subDirectories.size(), 3);
-    ASSERT_EQ(pp.subDirectories[0], "c:");
-    ASSERT_EQ(pp.subDirectories[1], "windows");
-    ASSERT_EQ(pp.subDirectories[2], "system.32");
+    ASSERT_EQ(pp.root, "c:/");
+    ASSERT_EQ(pp.subDirectories.size(), 2);
+    ASSERT_EQ(pp.subDirectories[0], "windows");
+    ASSERT_EQ(pp.subDirectories[1], "system.32");
     ASSERT_EQ(pp.filename, "filename.txt");
     ASSERT_EQ(pp.extension, "log");
 
-    pp.parse("c:\\windows\\./.\\name\\test/../");
-    ASSERT_EQ(pp.root, "");
-    ASSERT_EQ(pp.subDirectories.size(), 3);
-    ASSERT_EQ(pp.subDirectories[0], "c:");
-    ASSERT_EQ(pp.subDirectories[1], "windows");
-    ASSERT_EQ(pp.subDirectories[2], "name");
+    pp.parse("C:\\windows\\./.\\name\\test/../");
+    ASSERT_EQ(pp.root, "c:/");
+    ASSERT_EQ(pp.subDirectories.size(), 2);
+    ASSERT_EQ(pp.subDirectories[0], "windows");
+    ASSERT_EQ(pp.subDirectories[1], "name");
     ASSERT_EQ(pp.filename, "");
     ASSERT_EQ(pp.extension, "");
 

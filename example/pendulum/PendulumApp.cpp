@@ -60,5 +60,5 @@ void PendulumApp::onGui()
 int main(int argc, char** argv)
 {
     PendulumApp app;
-    return blink::run(app);
+    return blink::run(argc, argv, app);
 }

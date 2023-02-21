@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <core/ILogicalSystem.h>
+#include <core/systems/ILogicalSystem.h>
 
 class UserCommandSystem final : public blink::ILogicalSystem
 {

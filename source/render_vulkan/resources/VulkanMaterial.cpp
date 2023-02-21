@@ -10,15 +10,18 @@
 #include "../VulkanImage.h"
 #include "../VulkanLogicalDevice.h"
 #include "../VulkanRenderPass.h"
-#include "../VulkanResModule.h"
+#include "../VulkanResourceModule.h"
 #include "../VulkanUniformBuffer.h"
 #include "VulkanTexture.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <core/resources/IGeometry.h>
 #include <foundation/File.h>
 #include <foundation/Log.h>
+#include <foundation/PathParser.h>
 #include <tinygltf/json.hpp>
+
+#include <filesystem>
 
 namespace blink
 {
@@ -45,8 +48,14 @@ namespace blink
     {
         // check validation
         auto pipelineVertexAttrs = m_pipeline->getVertexAttrFlags();
-        if (!geometry->hasVertexAttrs(pipelineVertexAttrs)) return false;
-        if (m_topology != geometry->getTopology()) return false;
+        if (!geometry->hasVertexAttrs(pipelineVertexAttrs))
+        {
+            return false;
+        }
+        if (m_topology != geometry->getTopology())
+        {
+            return false;
+        }
 
         // set line width when necessary
         if (m_topology == PrimitiveTopology::LineList)
@@ -98,8 +107,8 @@ namespace blink
 
         auto j = nlohmann::json::parse(fileContent);
 
-        m_vertexShader = j["vertex_shader"].get<tstring>();
-        m_fragmentShader = j["fragment_shader"].get<tstring>();
+        m_vertexShader = PathParser::getAbsolutePath(j["vertex_shader"].get<tstring>(), filePath);
+        m_fragmentShader = PathParser::getAbsolutePath(j["fragment_shader"].get<tstring>(), filePath);
 
         // wireframe
         {
@@ -240,7 +249,7 @@ namespace blink
                 {
                     TextureInfo texInfo{};
                     texInfo.name = jTexture["name"].get<tstring>();
-                    texInfo.path = jTexture["path"].get<tstring>();
+                    texInfo.path = PathParser::getAbsolutePath(jTexture["path"].get<tstring>(), filePath);
                     m_textureInfoMap.insert({texInfo.name, texInfo});
                 }
             }
@@ -283,7 +292,10 @@ namespace blink
     bool VulkanMaterial::getUniform(void* dataOut, const tstring& memberName, UniformType type)
     {
         auto uniformBlock = m_pipeline->getUniformBlock(UniformBinding::Material);
-        if (!uniformBlock->isReady()) return false;
+        if (!uniformBlock->isReady())
+        {
+            return false;
+        }
 
         switch (type)
         {
@@ -330,19 +342,28 @@ namespace blink
 
     bool VulkanMaterial::loadTextures()
     {
-        auto resModule = getResModule();
+        auto resourceModule = getResourceModule();
 
         // create texture and setup descriptor
         const auto& textureWriteSetIndexMap = m_pipeline->getTextureWriteSetIndexMap();
         for (const auto& kvp : textureWriteSetIndexMap)
         {
             auto it = m_textureInfoMap.find(kvp.first);
-            if (it == m_textureInfoMap.end()) continue;
+            if (it == m_textureInfoMap.end())
+            {
+                continue;
+            }
             auto& texInfo = it->second;
 
-            auto texture = resModule->createTexture2d(texInfo.path);
-            if (!texture) texture = resModule->createTexture2d(VulkanResModule::DEFAULT_TEXTURE);
-            if (!texture) continue;
+            auto texture = resourceModule->createTexture2d(texInfo.path);
+            if (!texture)
+            {
+                texture = resourceModule->createTexture2d(VulkanResourceModule::DEFAULT_TEXTURE);
+            }
+            if (!texture)
+            {
+                continue;
+            }
 
             auto vulkanTexture = dynamic_cast<VulkanTexture*>(texture);
             texInfo.texture = vulkanTexture;

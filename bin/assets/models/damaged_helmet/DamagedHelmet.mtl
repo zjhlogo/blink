@@ -1,0 +1,29 @@
+{
+    "vertex_shader" : "/shaders/compiled/pbr_lit.vert.spv",
+    "fragment_shader" : "/shaders/compiled/pbr_lit.frag.spv",
+    "uniforms" : [
+        {
+            "name" : "roughness",
+            "type" : "float",
+            "value" : 1
+        },
+        {
+            "name" : "metallic",
+            "type" : "float",
+            "value" : 1
+        },
+        {
+            "name" : "color",
+            "type" : "vec3",
+            "value" : [1, 1, 1]
+        }
+    ],
+
+    "textures" : [
+        {
+            "name" : "texMetallicRoughness",
+            "path" : "Default_metalRoughness.jpg"
+        }
+    ]
+
+}

@@ -12,18 +12,25 @@
 #include "blink.h"
 
 #include <core/modules/IRenderModule.h>
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
+#include <foundation/File.h>
+#include <foundation/PathParser.h>
 
 namespace blink
 {
-    int run(IApp& app)
+    int run(int argc, char** argv, IApp& app)
     {
+        PathParser parser;
+        parser.parse(argv[0]);
+
+        File::initializeRoot(PathParser::combinePath(parser.getDirectory(), "assets/"));
+
         auto renderModule = getRenderModule();
-        auto resModule = getResModule();
+        auto resourceModule = getResourceModule();
 
         if (renderModule->createDevice({1280, 720}))
         {
-            if (resModule->initialize())
+            if (resourceModule->initialize())
             {
                 if (app.initialize())
                 {
@@ -39,7 +46,7 @@ namespace blink
                 app.terminate();
             }
 
-            resModule->terminate();
+            resourceModule->terminate();
         }
 
         renderModule->destroyDevice();

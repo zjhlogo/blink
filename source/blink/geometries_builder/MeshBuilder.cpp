@@ -11,7 +11,7 @@
 
 #include "MeshBuilder.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <foundation/File.h>
 #include <foundation/Log.h>
 
@@ -96,7 +96,7 @@ namespace blink
 
         const auto& buffer = m_model.buffers[buffViewPos.buffer];
 
-        auto geometry = getResModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
+        auto geometry = getResourceModule()->createGeometry(getUniqueId(), PrimitiveTopology::TriangleList);
         if (!geometry->uploadData(buffer.data.data(),
                                   buffer.data.size(),
                                   static_cast<uint32_t>(accessorPos.count),

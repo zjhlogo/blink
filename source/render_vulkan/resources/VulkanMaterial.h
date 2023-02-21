@@ -35,10 +35,10 @@ namespace blink
         VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass);
         ~VulkanMaterial() override;
 
-        VulkanMaterial(const VulkanMaterial& material) = delete;
-        VulkanMaterial(VulkanMaterial&& material) = delete;
-        VulkanMaterial& operator=(const VulkanMaterial& material) = delete;
-        VulkanMaterial& operator=(VulkanMaterial&& material) = delete;
+        VulkanMaterial(const VulkanMaterial&) = delete;
+        VulkanMaterial(VulkanMaterial&&) = delete;
+        VulkanMaterial& operator=(const VulkanMaterial&) = delete;
+        VulkanMaterial& operator=(VulkanMaterial&&) = delete;
 
         bool create(const tstring& filePath);
         void destroy();

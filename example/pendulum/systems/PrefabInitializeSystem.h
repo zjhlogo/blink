@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <core/ILogicalSystem.h>
+#include <core/systems/ILogicalSystem.h>
 
 class PrefabInitializeSystem final : public blink::ILogicalSystem
 {

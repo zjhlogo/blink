@@ -8,13 +8,13 @@
  *********************************************************************/
 #include "ITexture2d.h"
 
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 
 namespace blink
 {
     void ITexture2d::release()
     {
         //
-        getResModule()->releaseTexture2d(this);
+        getResourceModule()->releaseTexture2d(this);
     }
 } // namespace blink

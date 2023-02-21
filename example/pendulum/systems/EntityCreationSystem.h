@@ -11,7 +11,7 @@
 #pragma once
 
 #include <blink/components/Components.h>
-#include <core/ILogicalSystem.h>
+#include <core/systems/ILogicalSystem.h>
 
 class EntityCreationSystem final : public blink::ILogicalSystem
 {

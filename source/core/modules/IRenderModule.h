@@ -6,7 +6,7 @@
  * \date   04/21/2022
  *********************************************************************/
 #pragma once
-#include "../IRenderSystem.h"
+#include "../systems/IRenderSystem.h"
 
 #include <glm/glm.hpp>
 
@@ -21,10 +21,10 @@ namespace blink
         IRenderModule() = default;
         virtual ~IRenderModule() = default;
 
-        IRenderModule(const IRenderModule& renderModule) = delete;
-        IRenderModule(IRenderModule&& renderModule) = delete;
-        IRenderModule& operator=(const IRenderModule& renderModule) = delete;
-        IRenderModule& operator=(IRenderModule&& renderModule) = delete;
+        IRenderModule(const IRenderModule&) = delete;
+        IRenderModule(IRenderModule&&) = delete;
+        IRenderModule& operator=(const IRenderModule&) = delete;
+        IRenderModule& operator=(IRenderModule&&) = delete;
 
         virtual bool createDevice(const glm::ivec2& deviceSize) = 0;
         virtual void destroyDevice() = 0;

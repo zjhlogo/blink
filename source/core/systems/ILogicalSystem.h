@@ -10,7 +10,7 @@
 **/
 #pragma once
 
-#include "EcsWorld.h"
+#include "../EcsWorld.h"
 
 #include <flecs/flecs.h>
 #include <foundation/BaseTypesGlm.h>

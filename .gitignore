@@ -9,5 +9,5 @@ compile_commands.json
 CTestTestfile.cmake
 /build
 /bin/*
-!/bin/resource
-bin/resource/shaders/compiled
+!/bin/assets
+bin/assets/shaders/compiled

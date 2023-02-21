@@ -10,7 +10,7 @@
 #include <blink/blink.h>
 #include <blink/components/Components.h>
 #include <core/components/Components.h>
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <fmt/format.h>
 #include <render_systems/ImguiRenderSystem.h>
 #include <utils/ImguiExtension.h>
@@ -31,29 +31,38 @@ bool GltfViewerApp::initializeRenderSystems()
 
 void GltfViewerApp::onGui()
 {
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
     DrawHierarchyWindow();
     DrawPropertyWindow();
 }
 
 bool GltfViewerApp::initialize()
 {
-    if (!IApp::initialize()) return false;
+    if (!IApp::initialize())
+    {
+        return false;
+    }
 
-    if (!SceneEntityUtil::initializeCommonSceneEntities(getEcsWorld())) return false;
+    if (!SceneEntityUtil::initializeCommonSceneEntities(getEcsWorld()))
+    {
+        return false;
+    }
 
-    if (!loadModel("resource/models/damaged_helmet/DamagedHelmet.gltf")) return false;
+    if (!loadModel("/models/damaged_helmet/DamagedHelmet.gltf"))
+    {
+        return false;
+    }
 
     auto& world = getEcsWorld().getWorld();
-    auto resModule = blink::getResModule();
+    auto resModule = blink::getResourceModule();
 
     // model
-    auto material = resModule->createMaterial("resource/materials/simple_lit.mtl");
-    auto entityModel = world.entity("model")
-                           .set<blink::Position>({glm::zero<glm::vec3>()})
-                           .set<blink::Rotation>({glm::identity<glm::quat>()})
-                           .set<blink::StaticModel>({m_modelGeometry, material})
-                           .set<blink::Renderable>({blink::RenderLayers::NORMAL});
+    auto material = resModule->createMaterial("/models/damaged_helmet/DamagedHelmet.mtl");
+    auto entityModel = world.entity("model");
+    entityModel.set<blink::Position>({glm::zero<glm::vec3>()});
+    entityModel.set<blink::Rotation>({glm::identity<glm::quat>()});
+    entityModel.set<blink::StaticModel>({m_modelGeometry, material});
+    entityModel.set<blink::Renderable>({blink::RenderLayers::NORMAL});
 
     return true;
 }
@@ -66,13 +75,22 @@ void GltfViewerApp::terminate()
 
 bool GltfViewerApp::loadModel(const blink::tstring& modelFilePath)
 {
-    if (m_modelPath.isValid()) return false;
+    if (m_modelPath.isValid())
+    {
+        return false;
+    }
     m_modelPath.parse(modelFilePath);
 
-    if (m_modelGeometry != nullptr) return false;
+    if (m_modelGeometry != nullptr)
+    {
+        return false;
+    }
 
     m_modelGeometry = m_meshBuilder.loadModel(modelFilePath).build();
-    if (!m_modelGeometry) return false;
+    if (!m_modelGeometry)
+    {
+        return false;
+    }
 
     return true;
 }
@@ -320,7 +338,7 @@ void GltfViewerApp::DrawSceneProperty(const tinygltf::Model& model, int sceneInd
     const auto& scene = model.scenes[sceneIndex];
     ImGui::ReadOnlyText("name##scene", &scene.name);
 
-    int numNodes = scene.nodes.size();
+    int numNodes = static_cast<int>(scene.nodes.size());
     ImGui::InputInt("num_nodes", &numNodes);
 }
 
@@ -393,7 +411,7 @@ void GltfViewerApp::DrawMeshProperty(const tinygltf::Model& model, int meshIndex
 
         ImGui::DrawPrimitiveMode("mode", primitive.mode);
 
-        int numTargets = primitive.targets.size();
+        int numTargets = static_cast<int>(primitive.targets.size());
         ImGui::InputInt("targets", &numTargets);
     }
 }
@@ -556,5 +574,5 @@ void GltfViewerApp::DrawTextureProperty(const tinygltf::Model& model, int textur
 int main(int argc, char** argv)
 {
     GltfViewerApp app;
-    return blink::run(app);
+    return blink::run(argc, argv, app);
 }

@@ -7,7 +7,7 @@
  * \date   04/07/2022
  *********************************************************************/
 #include "EcsWorld.h"
-#include "ILogicalSystem.h"
+#include "systems/ILogicalSystem.h"
 
 #include <flecs/flecs_os_api_stdcpp.h>
 
@@ -37,7 +37,10 @@ namespace blink
     {
         for (auto sys : m_logicalSystems)
         {
-            if (!sys->initialize()) return false;
+            if (!sys->initialize())
+            {
+                return false;
+            }
         }
 
         return true;

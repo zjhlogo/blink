@@ -14,6 +14,8 @@
 #include "../VulkanLogicalDevice.h"
 #include "../utils/VulkanUtils.h"
 
+#include <foundation/File.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <tinygltf/stb_image.h>
 
@@ -37,8 +39,18 @@ namespace blink
         int texHeight = 0;
         int texChannels = 0;
 
-        stbi_uc* pixels = stbi_load(texFile.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        if (!pixels) return false;
+        std::vector<uint8_t> buffer;
+        if (!File::readFileIntoBuffer(buffer, texFile))
+        {
+            LOGE("Open file failed {0}", texFile);
+            return false;
+        }
+
+        stbi_uc* pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        if (!pixels)
+        {
+            return false;
+        }
 
         bool success = createTexture2D(pixels, texWidth, texHeight, true);
         stbi_image_free(pixels);
@@ -48,14 +60,20 @@ namespace blink
 
     bool VulkanTexture::createTexture2D(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap)
     {
-        if (!createTextureImage(pixels, width, height, generateMipMap)) return false;
+        if (!createTextureImage(pixels, width, height, generateMipMap))
+        {
+            return false;
+        }
 
         if (m_textureImage->createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT) == VK_NULL_HANDLE)
         {
             return false;
         }
 
-        if (!createTextureSampler()) return false;
+        if (!createTextureSampler())
+        {
+            return false;
+        }
 
         return true;
     }
@@ -73,20 +91,18 @@ namespace blink
         m_textureImage = new VulkanImage(m_logicalDevice, false);
         m_textureImage->createImage(VK_IMAGE_TYPE_2D, width, height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
         m_textureImage->allocateImageMemory();
-        m_logicalDevice.executeCommand(
-            [&](const VulkanCommandBuffer& commandBuffer)
-            {
-                // transition to depth stencil attachment layout
-                m_textureImage->transitionImageLayout(commandBuffer,
-                                                      depthFormat,
-                                                      VK_IMAGE_LAYOUT_UNDEFINED,
-                                                      VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-                                                      0,
-                                                      VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-                                                      VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                                                      VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-                                                      0);
-            });
+        m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer) {
+            // transition to depth stencil attachment layout
+            m_textureImage->transitionImageLayout(commandBuffer,
+                                                  depthFormat,
+                                                  VK_IMAGE_LAYOUT_UNDEFINED,
+                                                  VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                                                  0,
+                                                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                                                  VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+                                                  0);
+        });
 
         m_textureImage->createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 
@@ -122,36 +138,93 @@ namespace blink
         uint32_t mipCount = m_textureImage->getMipCount();
         m_textureImage->allocateImageMemory();
 
-        m_logicalDevice.executeCommand(
-            [&](const VulkanCommandBuffer& commandBuffer)
+        m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer) {
+            // transition layout to dst optimal
+            m_textureImage->transitionImageLayout(commandBuffer,
+                                                  VK_FORMAT_R8G8B8A8_UNORM,
+                                                  VK_IMAGE_LAYOUT_UNDEFINED,
+                                                  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                  0,
+                                                  VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                  VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                                  VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                  0);
+            // copy buffer to image
+            m_textureImage->copyBufferToImage(commandBuffer, *stagingBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+            if (mipCount == 1)
             {
-                // transition layout to dst optimal
                 m_textureImage->transitionImageLayout(commandBuffer,
                                                       VK_FORMAT_R8G8B8A8_UNORM,
-                                                      VK_IMAGE_LAYOUT_UNDEFINED,
                                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                      0,
+                                                      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                                       VK_ACCESS_TRANSFER_WRITE_BIT,
-                                                      VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                                      VK_ACCESS_SHADER_READ_BIT,
+                                                      VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                      VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                                                      0);
+            }
+            else
+            {
+                m_textureImage->transitionImageLayout(commandBuffer,
+                                                      VK_FORMAT_UNDEFINED,
+                                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                      VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                      VK_ACCESS_TRANSFER_READ_BIT,
+                                                      VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                       VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                       0);
-                // copy buffer to image
-                m_textureImage->copyBufferToImage(commandBuffer, *stagingBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            }
+        });
 
-                if (mipCount == 1)
+        // destroy staging buffer
+        SAFE_DELETE(stagingBuffer);
+
+        if (mipCount > 1)
+        {
+            m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer) {
+                for (uint32_t i = 1; i < mipCount; ++i)
                 {
+                    VkImageBlit imageBlit{};
+
+                    // source
+                    imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    imageBlit.srcSubresource.layerCount = 1;
+                    imageBlit.srcSubresource.mipLevel = i - 1;
+                    imageBlit.srcOffsets[1].x = static_cast<int32_t>(width >> (i - 1));
+                    imageBlit.srcOffsets[1].y = static_cast<int32_t>(height >> (i - 1));
+                    imageBlit.srcOffsets[1].z = 1;
+
+                    // destination
+                    imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    imageBlit.dstSubresource.layerCount = 1;
+                    imageBlit.dstSubresource.mipLevel = i;
+                    imageBlit.dstOffsets[1].x = static_cast<int32_t>(width >> i);
+                    imageBlit.dstOffsets[1].y = static_cast<int32_t>(height >> i);
+                    imageBlit.dstOffsets[1].z = 1;
+
+                    // prepare current mip level as image blit destination
                     m_textureImage->transitionImageLayout(commandBuffer,
-                                                          VK_FORMAT_R8G8B8A8_UNORM,
+                                                          VK_FORMAT_UNDEFINED,
+                                                          VK_IMAGE_LAYOUT_UNDEFINED,
                                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                          0,
                                                           VK_ACCESS_TRANSFER_WRITE_BIT,
-                                                          VK_ACCESS_SHADER_READ_BIT,
                                                           VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                                                          0);
-                }
-                else
-                {
+                                                          VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                          i);
+                    // blit image
+                    vkCmdBlitImage(commandBuffer,
+                                   *m_textureImage,
+                                   VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                   *m_textureImage,
+                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                   1,
+                                   &imageBlit,
+                                   VK_FILTER_LINEAR);
+
+                    // prepare current mip level as image libt sorce for next level
                     m_textureImage->transitionImageLayout(commandBuffer,
                                                           VK_FORMAT_UNDEFINED,
                                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -160,81 +233,20 @@ namespace blink
                                                           VK_ACCESS_TRANSFER_READ_BIT,
                                                           VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                           VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                          0);
+                                                          i);
                 }
+
+                m_textureImage->transitionImageLayout(commandBuffer,
+                                                      VK_FORMAT_R8G8B8A8_UNORM,
+                                                      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                      VK_ACCESS_TRANSFER_READ_BIT,
+                                                      VK_ACCESS_SHADER_READ_BIT,
+                                                      VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                      VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                                                      0,
+                                                      mipCount);
             });
-
-        // destroy staging buffer
-        SAFE_DELETE(stagingBuffer);
-
-        if (mipCount > 1)
-        {
-            m_logicalDevice.executeCommand(
-                [&](const VulkanCommandBuffer& commandBuffer)
-                {
-                    for (uint32_t i = 1; i < mipCount; ++i)
-                    {
-                        VkImageBlit imageBlit{};
-
-                        // source
-                        imageBlit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                        imageBlit.srcSubresource.layerCount = 1;
-                        imageBlit.srcSubresource.mipLevel = i - 1;
-                        imageBlit.srcOffsets[1].x = static_cast<int32_t>(width >> (i - 1));
-                        imageBlit.srcOffsets[1].y = static_cast<int32_t>(height >> (i - 1));
-                        imageBlit.srcOffsets[1].z = 1;
-
-                        // destination
-                        imageBlit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                        imageBlit.dstSubresource.layerCount = 1;
-                        imageBlit.dstSubresource.mipLevel = i;
-                        imageBlit.dstOffsets[1].x = static_cast<int32_t>(width >> i);
-                        imageBlit.dstOffsets[1].y = static_cast<int32_t>(height >> i);
-                        imageBlit.dstOffsets[1].z = 1;
-
-                        // prepare current mip level as image blit destination
-                        m_textureImage->transitionImageLayout(commandBuffer,
-                                                              VK_FORMAT_UNDEFINED,
-                                                              VK_IMAGE_LAYOUT_UNDEFINED,
-                                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                              0,
-                                                              VK_ACCESS_TRANSFER_WRITE_BIT,
-                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                              i);
-                        // blit image
-                        vkCmdBlitImage(commandBuffer,
-                                       *m_textureImage,
-                                       VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                       *m_textureImage,
-                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                       1,
-                                       &imageBlit,
-                                       VK_FILTER_LINEAR);
-
-                        // prepare current mip level as image libt sorce for next level
-                        m_textureImage->transitionImageLayout(commandBuffer,
-                                                              VK_FORMAT_UNDEFINED,
-                                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                              VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                                              VK_ACCESS_TRANSFER_WRITE_BIT,
-                                                              VK_ACCESS_TRANSFER_READ_BIT,
-                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                              VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                              i);
-                    }
-
-                    m_textureImage->transitionImageLayout(commandBuffer,
-                                                          VK_FORMAT_R8G8B8A8_UNORM,
-                                                          VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                                          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                                                          VK_ACCESS_TRANSFER_READ_BIT,
-                                                          VK_ACCESS_SHADER_READ_BIT,
-                                                          VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                                                          0,
-                                                          mipCount);
-                });
         }
 
         return m_textureImage;

@@ -10,13 +10,13 @@
 #include <blink/geometries_builder/PlaneBuilder.h>
 #include <core/components/Components.h>
 #include <core/modules/IRenderModule.h>
-#include <core/modules/IResModule.h>
+#include <core/modules/IResourceModule.h>
 #include <imgui/imgui.h>
 
 bool LineArtEntityCreationSystem::initialize()
 {
     auto& world = m_ecsWorld->getWorld();
-    auto resModule = blink::getResModule();
+    auto resModule = blink::getResourceModule();
     auto renderModule = blink::getRenderModule();
     const auto& surfaceSize = renderModule->getSurfaceSize();
 
