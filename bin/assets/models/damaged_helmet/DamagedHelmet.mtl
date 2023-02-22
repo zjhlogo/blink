@@ -21,6 +21,10 @@
 
     "textures" : [
         {
+            "name" : "texAlbedo",
+            "path" : "Default_albedo.jpg"
+        },
+        {
             "name" : "texMetallicRoughness",
             "path" : "Default_metalRoughness.jpg"
         }

@@ -88,13 +88,12 @@ bool EntityCreationSystem::initialize()
 
         blink::SphereUvBuilder builder;
         auto geometry = builder.radius(1.5f).build(true, true, &inertiaTensor);
-        auto material = resModule->createMaterial("resource/materials/simple_lit.mtl");
+        auto material = resModule->createMaterial("/materials/simple_lit.mtl");
         m_sphere.set<blink::StaticModel>({geometry, material});
         m_sphere.set<blink::PhysicsVelocity>({startVelocity, glm::vec3(0.0f, 0.0f, 0.0f)});
         m_sphere.set<blink::PhysicsDamping>({0.95f, 0.95f});
         m_sphere.set<blink::PhysicsMass>(blink::PhysicsMass(1.0f, inertiaTensor));
-        m_sphere.set<SinglePendulum>(
-            {anchorPos, startPos, startVelocity, glm::length(startPos - anchorPos), glm::vec3(0.0f, -980.0f, 0.0f)});
+        m_sphere.set<SinglePendulum>({anchorPos, startPos, startVelocity, glm::length(startPos - anchorPos), glm::vec3(0.0f, -980.0f, 0.0f)});
     }
 
     //// load tetrahedron
@@ -137,30 +136,36 @@ void EntityCreationSystem::renderLightPropertyUi()
 {
     if (ImGui::CollapsingHeader("light property", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (ImGui::ColorEdit3("color1", reinterpret_cast<float*>(&m_lightData.color))) { m_lightDataDirty = true; }
-        if (ImGui::SliderFloat("intensity", &m_lightData.intensity, 0.0f, 1000.0f, "intensity = %.3f")) { m_lightDataDirty = true; }
+        if (ImGui::ColorEdit3("color1", reinterpret_cast<float*>(&m_lightData.color)))
+        {
+            m_lightDataDirty = true;
+        }
+        if (ImGui::SliderFloat("intensity", &m_lightData.intensity, 0.0f, 1000.0f, "intensity = %.3f"))
+        {
+            m_lightDataDirty = true;
+        }
     }
 }
 
 void EntityCreationSystem::renderMaterialPropertyUi()
 {
-    //if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
+    // if (ImGui::CollapsingHeader("material property", ImGuiTreeNodeFlags_DefaultOpen))
     //{
-    //    blink::IMaterial* material = m_sphere.get<blink::StaticModel>()->material;
-    //    auto roughness = material->getRoughness();
-    //    if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
-    //    {
-    //        material->setRoughness(roughness);
-    //    }
-    //    auto metallic = material->getMetallic();
-    //    if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
-    //    {
-    //        material->setMetallic(metallic);
-    //    }
-    //    glm::vec3 color = material->getColor();
-    //    if (ImGui::ColorEdit3("color2", (float*)&color))
-    //    {
-    //        material->setColor(color);
-    //    }
-    //}
+    //     blink::IMaterial* material = m_sphere.get<blink::StaticModel>()->material;
+    //     auto roughness = material->getRoughness();
+    //     if (ImGui::SliderFloat("roughness", &roughness, 0.0f, 1.0f, "roughness = %.3f"))
+    //     {
+    //         material->setRoughness(roughness);
+    //     }
+    //     auto metallic = material->getMetallic();
+    //     if (ImGui::SliderFloat("metallic", &metallic, 0.0f, 1.0f, "metallic = %.3f"))
+    //     {
+    //         material->setMetallic(metallic);
+    //     }
+    //     glm::vec3 color = material->getColor();
+    //     if (ImGui::ColorEdit3("color2", (float*)&color))
+    //     {
+    //         material->setColor(color);
+    //     }
+    // }
 }

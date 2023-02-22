@@ -10,7 +10,8 @@ layout(set = 0, binding = 2) uniform MaterialUniforms
     float metallic;
 } mu;
 
-layout(set = 0, binding = 3) uniform sampler2D texMetallicRoughness;
+layout(set = 0, binding = 3) uniform sampler2D texAlbedo;
+layout(set = 0, binding = 4) uniform sampler2D texMetallicRoughness;
 
 const float PI = 3.14159265359;
 
@@ -20,64 +21,57 @@ layout(location = 2) in vec3 fragWorldPos;
 
 layout(location = 0) out vec4 outColor;
 
-float D_GGX(float dotNH, float roughness)
+float D_GGX(float nh, float roughness)
 {
-    //float alpha = roughness * roughness;
-    float alpha2 = roughness * roughness;
-    float denom = dotNH * dotNH * (alpha2 - 1.0) + 1.0;
-    return (alpha2) / (PI * denom * denom);
+    float squareRoughness = roughness * roughness;
+    float denom = nh * nh * (squareRoughness - 1.0) + 1.0;
+    return (squareRoughness) / (PI * denom * denom);
 }
 
-float G_SchlicksmithGGX(float dotNL, float dotNV, float roughness)
+float G_SchlicksmithGGX(float nl, float nv, float roughness)
 {
-    float r = (roughness + 1.0);
-    float k = (r * r) / 8.0;
-    float GL = dotNL / (dotNL * (1.0 - k) + k);
-    float GV = dotNV / (dotNV * (1.0 - k) + k);
-    return GL * GV;
+    float k = pow(roughness + 1, 2) / 8.0;
+    float gl = nl / mix(nl, 1, k);
+    float gr = nv / mix(nv, 1, k);
+    return gl * gr;
 }
 
-vec3 F_Schlick(float cosTheta, float metallic)
+vec3 F_UE(vec3 albedo, float vh, float metallic)
 {
-    vec3 F0 = mix(vec3(0.04), mu.color, metallic);
-    vec3 F = F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+    vec3 F0 = mix(vec3(0.04), albedo, metallic);
+    vec3 F = F0 + (1.0 - F0) * exp2((-5.55473 * vh - 6.98316) * vh);
     return F;
-}
-
-vec3 BRDF(vec3 L, vec3 V, vec3 N, float metallic, float roughness)
-{
-    vec3 H = normalize(V + L);
-    float dotNV = clamp(dot(N, V), 0.001, 1.0);
-    float dotNL = clamp(dot(N, L), 0.001, 1.0);
-    float dotLH = clamp(dot(L, H), 0.001, 1.0);
-    float dotNH = clamp(dot(N, H), 0.001, 1.0);
-
-    vec3 color = vec3(0.0);
-
-    float D = D_GGX(dotNH, roughness);
-    float G = G_SchlicksmithGGX(dotNL, dotNV, roughness);
-    vec3 F = F_Schlick(dotNV, metallic);
-    vec3 spec = D * F * G / (4.0 * dotNL * dotNV);
-    color += spec * dotNL * fu.lightColor;
-
-    return color;
 }
 
 void main()
 {
-    vec3 N = normalize(fragNormal);
-    vec3 V = normalize(cu.cameraPos - fragWorldPos);
-    vec3 L = normalize(fu.lightPos - fragWorldPos);
+    vec3 normalDir = normalize(fragNormal);
+    vec3 viewDir = normalize(cu.cameraPos - fragWorldPos);
+    vec3 lightDir = normalize(fu.lightPos);
+    vec3 halfDir = normalize(viewDir + lightDir);
 
+    float nl = clamp(dot(normalDir, lightDir), 0.0001, 1.0);
+    float nv = clamp(dot(normalDir, viewDir), 0.0001, 1.0);
+    float vh = clamp(dot(viewDir, halfDir), 0.0001, 1.0);
+    float lh = clamp(dot(lightDir, halfDir), 0.0001, 1.0);
+    float nh = clamp(dot(normalDir, halfDir), 0.0001, 1.0);
     vec3 mr = texture(texMetallicRoughness, fragTexCoord).xyz;
 
-    vec3 Lo = vec3(0.0);
-    Lo += BRDF(L, V, N, mu.metallic * mr.r, mu.roughness * mr.g);
+    vec3 albedo = texture(texAlbedo, vec2(fragTexCoord.x, 1.0 - fragTexCoord.y)).xyz;
 
-    vec3 color = mu.color * 0.02;
-    color += Lo;
+    // normal distribution
+    float D = D_GGX(nh, mr.y);
 
-    color = pow(color, vec3(0.4545));
+    // geometry
+    float G = G_SchlicksmithGGX(nl, nv, mr.y);
 
-    outColor = vec4(color, 1.0);
+    // fresnel
+    vec3 F = F_UE(albedo, vh, mr.x);
+
+    // specular
+    vec3 specular = ((D * G * F * 0.25) / (nv * nl)) * fu.lightColor * nl;
+
+    vec3 kd = (1 - F) * (1 - mr.x);
+    vec3 diffuse = kd * (albedo / PI) * fu.lightColor * nl;
+    outColor = vec4(diffuse + specular, 1.0);
 }

@@ -27,17 +27,22 @@ bool SceneEntityUtil::initializeCommonSceneEntities(blink::EcsWorld& ecsWorld)
     const auto& surfaceSize = renderModule->getSurfaceSize();
 
     // camera
-    auto entityCamera = world.entity("main_camera")
-                            .set<blink::Position>({glm::vec3(0.0f, 0.0f, 10.0f)})
-                            .set<blink::Rotation>({glm::quatLookAt(glm::forward(), glm::up())})
-                            .set<blink::CameraData>({glm::perspective(glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f)})
-                            .set<LockTargetCameraData>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>(), 10.0f, 0.01f});
+    auto entityCamera = world.entity("main_camera");
+    entityCamera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 10.0f)});
+    entityCamera.set<blink::Rotation>({glm::quatLookAt(glm::forward(), glm::up())});
+    entityCamera.set<blink::CameraData>({glm::perspective(glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f)});
+    entityCamera.set<LockTargetCameraData>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>(), 10.0f, 0.01f});
 
     // light
-    auto entityLight =
-        world.entity("main_light").set<blink::Position>({glm::vec3(200.0f, 200.0f, -200.0f)}).set<blink::LightData>({glm::one<glm::vec3>(), 100.0f});
+    auto entityLight = world.entity("main_light");
+    entityLight.set<blink::Position>({glm::vec3(1.0f, 1.0f, -1.0f)});
+    entityLight.set<blink::Rotation>({glm::identity<glm::quat>()});
+    entityLight.set<blink::LightData>({glm::one<glm::vec3>(), 100.0f});
+    entityLight.set<blink::DebugDrawing>({1.0f});
 
-    world.entity().set<blink::RenderFeature>({blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
+    // add default render feature
+    auto entityRenderFeature = world.entity();
+    entityRenderFeature.set<blink::RenderFeature>({blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
 
     return true;
 }

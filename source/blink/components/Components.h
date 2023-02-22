@@ -46,4 +46,9 @@ namespace blink
         uint32_t renderLayer; // see RenderLayers
         IMaterial* overrideMaterial;
     };
+
+    struct DebugDrawing
+    {
+        float lineLength;
+    };
 } // namespace blink

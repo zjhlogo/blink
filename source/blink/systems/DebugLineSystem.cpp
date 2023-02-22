@@ -23,12 +23,12 @@ namespace blink
         auto& world = m_ecsWorld->getWorld();
 
         // create debug entity
-        m_debug = world.entity("debug");
-        m_debug.set<Position>({glm::zero<glm::vec3>()});
-        m_debug.set<Rotation>({glm::identity<glm::quat>()});
-        m_debug.set<Renderable>({RenderLayers::DEBUG});
-        m_debug.set<StaticModel>({m_debugGeometry, m_debugMaterial});
-        m_debug.set<RenderFeature>({RenderOrders::STATIC_OPAQUE, RenderLayers::DEBUG, m_debugMaterial});
+        m_debugEntity = world.entity("debug");
+        m_debugEntity.set<Position>({glm::zero<glm::vec3>()});
+        m_debugEntity.set<Rotation>({glm::identity<glm::quat>()});
+        m_debugEntity.set<Renderable>({RenderLayers::DEBUG});
+        m_debugEntity.set<StaticModel>({m_debugGeometry, m_debugMaterial});
+        m_debugEntity.set<RenderFeature>({RenderOrders::STATIC_OPAQUE, RenderLayers::DEBUG, m_debugMaterial});
 
         return true;
     }
@@ -41,6 +41,21 @@ namespace blink
 
     void DebugLineSystem::framePostUpdate()
     {
+        auto& world = m_ecsWorld->getWorld();
+
+        {
+            static auto debugDrawingQuery = world.query_builder<const Position, const Rotation, const DebugDrawing>().build();
+            debugDrawingQuery.each([&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const DebugDrawing& debug) {
+                auto up = glm::rotate(rot.value, glm::up());
+                auto forward = glm::rotate(rot.value, glm::forward());
+                auto right = glm::rotate(rot.value, glm::right());
+
+                m_lineListBuilder.addLine(pos.value, pos.value + up * debug.lineLength, Color::GREEN);
+                m_lineListBuilder.addLine(pos.value, pos.value + forward * debug.lineLength, Color::BLUE);
+                m_lineListBuilder.addLine(pos.value, pos.value + right * debug.lineLength, Color::RED);
+            });
+        }
+
         // flush debug geometry
         m_lineListBuilder.build(m_debugGeometry);
 

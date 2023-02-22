@@ -9,9 +9,9 @@
 
 #include "../geometries_builder/LineListBuilder.h"
 
-#include <core/systems/ILogicalSystem.h>
 #include <core/resources/IGeometry.h>
 #include <core/resources/IMaterial.h>
+#include <core/systems/ILogicalSystem.h>
 #include <core/types/Color.h>
 
 namespace blink
@@ -28,7 +28,7 @@ namespace blink
         void addLine(const glm::vec3& p1, const glm::vec3& p2, const Color& color);
 
     private:
-        flecs::entity m_debug;
+        flecs::entity m_debugEntity;
 
         LineListBuilder m_lineListBuilder;
         IMaterial* m_debugMaterial{};

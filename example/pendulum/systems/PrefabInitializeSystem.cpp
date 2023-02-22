@@ -28,13 +28,13 @@ bool PrefabInitializeSystem::initialize()
 
     // rigid body prefab
     prefabRigidBody = world.prefab("rigid_body")
-                           .set_override<blink::Position>({glm::zero<glm::vec3>()})
-                           .set_override<blink::Rotation>({glm::identity<glm::quat>()})
-                           .set_override<blink::PhysicsVelocity>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>()})
-                           .set_override<blink::PhysicsMass>(blink::PhysicsMass(1.0f, glm::identity<glm::mat3>()))
-                           .set_override<blink::PhysicsDamping>({0.9f, 0.9f})
-                           .set_override<blink::PhysicsAccumulate>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>()})
-                           .set_override<blink::Renderable>({blink::RenderLayers::NORMAL});
+                          .set_override<blink::Position>({glm::zero<glm::vec3>()})
+                          .set_override<blink::Rotation>({glm::identity<glm::quat>()})
+                          .set_override<blink::PhysicsVelocity>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>()})
+                          .set_override<blink::PhysicsMass>(blink::PhysicsMass(1.0f, glm::identity<glm::mat3>()))
+                          .set_override<blink::PhysicsDamping>({0.9f, 0.9f})
+                          .set_override<blink::PhysicsAccumulate>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>()})
+                          .set_override<blink::Renderable>({blink::RenderLayers::NORMAL});
 
     return true;
 }

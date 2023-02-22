@@ -14,13 +14,14 @@
 
 bool UserCommandSystem::initialize()
 {
-    m_ecsWorld->getWorld().system<blink::PhysicsAccumulate>().each(
-        [&](flecs::entity e, blink::PhysicsAccumulate& pa)
+    m_ecsWorld->getWorld().system<blink::PhysicsAccumulate>().each([&](flecs::entity e, blink::PhysicsAccumulate& pa) {
+        if (!m_pushMeClicked)
         {
-            if (!m_pushMeClicked) return;
+            return;
+        }
 
-            pa.torqueAccum += blink::randomVec3Normalized() * 1000.0f;
-        });
+        pa.torqueAccum += blink::randomVec3Normalized() * 1000.0f;
+    });
 
     return true;
 }
@@ -35,6 +36,15 @@ void UserCommandSystem::framePreUpdate()
     //
 }
 
-void UserCommandSystem::framePostUpdate() { m_pushMeClicked = false; }
+void UserCommandSystem::framePostUpdate()
+{
+    m_pushMeClicked = false;
+}
 
-void UserCommandSystem::onGui() { if (ImGui::Button("Push Me", ImVec2(-1.0f, 0.0f))) { m_pushMeClicked = true; } }
+void UserCommandSystem::onGui()
+{
+    if (ImGui::Button("Push Me", ImVec2(-1.0f, 0.0f)))
+    {
+        m_pushMeClicked = true;
+    }
+}
