@@ -9,6 +9,8 @@
 
 #include <blink/blink.h>
 #include <blink/components/Components.h>
+#include <blink/geometries_builder/BoxBuilder.h>
+#include <blink/geometries_builder/PlaneBuilder.h>
 #include <core/components/Components.h>
 #include <core/modules/IResourceModule.h>
 #include <fmt/format.h>
@@ -54,15 +56,41 @@ bool GltfViewerApp::initialize()
     }
 
     auto& world = getEcsWorld().getWorld();
-    auto resModule = blink::getResourceModule();
+    auto resourceMoudle = blink::getResourceModule();
 
     // model
-    auto material = resModule->createMaterial("/models/damaged_helmet/DamagedHelmet.mtl");
-    auto entityModel = world.entity("model");
-    entityModel.set<blink::Position>({glm::zero<glm::vec3>()});
-    entityModel.set<blink::Rotation>({glm::identity<glm::quat>()});
-    entityModel.set<blink::StaticModel>({m_modelGeometry, material});
-    entityModel.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+    {
+        auto material = resourceMoudle->createMaterial("/models/damaged_helmet/DamagedHelmet.mtl");
+        auto entityModel = world.entity("model");
+        entityModel.set<blink::Position>({glm::zero<glm::vec3>()});
+        entityModel.set<blink::Rotation>({glm::identity<glm::quat>()});
+        entityModel.set<blink::StaticModel>({m_modelGeometry, material});
+        entityModel.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+    }
+
+    //// plane
+    //{
+    //    auto material2 = resourceMoudle->createMaterial("/materials/unlit.mtl");
+    //    blink::PlaneBuilder builder;
+    //    auto geometry2 = builder.size(20, 10).build();
+    //    auto entityPlane = world.entity("plane");
+    //    entityPlane.set<blink::Position>({glm::zero<glm::vec3>()});
+    //    entityPlane.set<blink::Rotation>({glm::identity<glm::quat>()});
+    //    entityPlane.set<blink::StaticModel>({geometry2, material2});
+    //    entityPlane.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+    //}
+
+    // box
+    {
+        auto material3 = resourceMoudle->createMaterial("/materials/equirectangular.mtl");
+        blink::BoxBuilder builder2;
+        auto geometry3 = builder2.size(20, 20, 20).build();
+        auto entityBox = world.entity("box");
+        entityBox.set<blink::Position>({glm::zero<glm::vec3>()});
+        entityBox.set<blink::Rotation>({glm::identity<glm::quat>()});
+        entityBox.set<blink::StaticModel>({geometry3, material3});
+        entityBox.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+    }
 
     return true;
 }

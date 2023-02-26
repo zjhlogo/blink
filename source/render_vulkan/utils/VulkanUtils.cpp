@@ -34,7 +34,10 @@ namespace blink
                 }
             }
 
-            if (!extensionFound) return false;
+            if (!extensionFound)
+            {
+                return false;
+            }
         }
         return true;
     }
@@ -61,7 +64,10 @@ namespace blink
                 }
             }
 
-            if (!layerFound) return false;
+            if (!layerFound)
+            {
+                return false;
+            }
         }
         return true;
     }
@@ -180,14 +186,23 @@ namespace blink
         for (int i = 0; i < size; ++i)
         {
             const auto& queueFamily = queueFamilyProperties[i];
-            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) graphicsFamily = i;
+            if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            {
+                graphicsFamily = i;
+            }
 
             VkBool32 support = VK_FALSE;
             vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &support);
 
-            if (queueFamily.queueCount > 0 && support) presentFamily = i;
+            if (queueFamily.queueCount > 0 && support)
+            {
+                presentFamily = i;
+            }
 
-            if (graphicsFamily != -1 && presentFamily != -1) return true;
+            if (graphicsFamily != -1 && presentFamily != -1)
+            {
+                return true;
+            }
         }
 
         return false;
@@ -197,7 +212,10 @@ namespace blink
     {
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
         {
-            if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) return i;
+            if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+            {
+                return i;
+            }
         }
 
         LOGE("can not find memory type");
@@ -227,8 +245,14 @@ namespace blink
             VkFormatProperties props{};
             vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
 
-            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) return format;
-            if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) return format;
+            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+            {
+                return format;
+            }
+            if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+            {
+                return format;
+            }
         }
 
         return VK_FORMAT_D24_UNORM_S8_UINT;

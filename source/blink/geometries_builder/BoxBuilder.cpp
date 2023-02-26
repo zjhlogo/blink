@@ -1,7 +1,7 @@
 /*********************************************************************
  * \file   BoxBuilder.cpp
- * \brief  
- * 
+ * \brief
+ *
  * \author zjhlogo
  * \date   February 2023
  *********************************************************************/
@@ -44,8 +44,14 @@ namespace blink
 
         std::vector<glm::vec3>* pVertsNormal = nullptr;
         std::vector<glm::vec2>* pVertsUv0 = nullptr;
-        if (buildNormal) pVertsNormal = &vertsNormal;
-        if (buildUv) pVertsUv0 = &vertsUv0;
+        if (buildNormal)
+        {
+            pVertsNormal = &vertsNormal;
+        }
+        if (buildUv)
+        {
+            pVertsUv0 = &vertsUv0;
+        }
 
         PlaneBuilder builder;
 

@@ -65,7 +65,6 @@ namespace blink
         float const S = 1.0f / m_sections;
 
         // calculate the vertex position
-        uint16_t startIndex = static_cast<uint16_t>(vertsPos.size());
         for (uint16_t r = 0; r < m_rings; ++r)
         {
             float const y = sin(-glm::half_pi<float>() + glm::pi<float>() * r * R);

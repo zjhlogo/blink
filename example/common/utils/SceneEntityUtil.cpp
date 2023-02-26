@@ -22,7 +22,6 @@ bool SceneEntityUtil::initializeCommonLogicalSystems(blink::IApp* app)
 bool SceneEntityUtil::initializeCommonSceneEntities(blink::EcsWorld& ecsWorld)
 {
     auto& world = ecsWorld.getWorld();
-    auto resModule = blink::getResourceModule();
     auto renderModule = blink::getRenderModule();
     const auto& surfaceSize = renderModule->getSurfaceSize();
 
@@ -31,7 +30,7 @@ bool SceneEntityUtil::initializeCommonSceneEntities(blink::EcsWorld& ecsWorld)
     entityCamera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 10.0f)});
     entityCamera.set<blink::Rotation>({glm::quatLookAt(glm::forward(), glm::up())});
     entityCamera.set<blink::CameraData>({glm::perspective(glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f)});
-    entityCamera.set<LockTargetCameraData>({glm::zero<glm::vec3>(), glm::zero<glm::vec3>(), 10.0f, 0.01f});
+    entityCamera.set<LockTargetCameraData>({{glm::zero<glm::vec3>()}, glm::zero<glm::vec3>(), 10.0f, 0.01f});
 
     // light
     auto entityLight = world.entity("main_light");

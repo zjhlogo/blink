@@ -7,7 +7,6 @@
  *
  */
 #pragma once
-
 #include <core/resources/ITexture2d.h>
 #include <foundation/BaseTypesGlm.h>
 #include <vulkan/vulkan.h>
@@ -30,7 +29,8 @@ namespace blink
         VulkanTexture& operator=(VulkanTexture&&) = delete;
 
         bool createTexture2D(const tstring& texFile);
-        bool createTexture2D(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap);
+        bool
+        createTexture2D(const void* pixels, VkFormat format, uint32_t width, uint32_t height, uint32_t channels, uint32_t bytesPerChannel, bool generateMipMap);
         bool createDepthTexture(uint32_t width, uint32_t height);
 
         void destroy();
@@ -39,7 +39,13 @@ namespace blink
         VkSampler getTextureSampler() { return m_textureSampler; }
 
     private:
-        VulkanImage* createTextureImage(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap);
+        VulkanImage* createTextureImage(const void* pixels,
+                                        VkFormat format,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        uint32_t channels,
+                                        uint32_t bytesPerChannel,
+                                        bool generateMipMap);
         void destroyTextureImage();
 
         VkSampler createTextureSampler();

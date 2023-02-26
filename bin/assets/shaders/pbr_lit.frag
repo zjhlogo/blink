@@ -12,6 +12,7 @@ layout(set = 0, binding = 2) uniform MaterialUniforms
 
 layout(set = 0, binding = 3) uniform sampler2D texAlbedo;
 layout(set = 0, binding = 4) uniform sampler2D texMetallicRoughness;
+layout(set = 0, binding = 5) uniform sampler2D texIrradiance;
 
 const float PI = 3.14159265359;
 
@@ -43,6 +44,14 @@ vec3 F_UE(vec3 albedo, float vh, float metallic)
     return F;
 }
 
+vec2 sampleSphericalMap(vec3 v)
+{
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv *= vec2(0.1591, 0.3183);
+    uv += 0.5;
+    return uv;
+}
+
 void main()
 {
     vec3 normalDir = normalize(fragNormal);
@@ -58,6 +67,7 @@ void main()
     vec3 mr = texture(texMetallicRoughness, fragTexCoord).xyz;
 
     vec3 albedo = texture(texAlbedo, vec2(fragTexCoord.x, 1.0 - fragTexCoord.y)).xyz;
+    vec3 irradiance = texture(texIrradiance, sampleSphericalMap(normalDir)).rgb;
 
     // normal distribution
     float D = D_GGX(nh, mr.y);
@@ -72,6 +82,6 @@ void main()
     vec3 specular = ((D * G * F * 0.25) / (nv * nl)) * fu.lightColor * nl;
 
     vec3 kd = (1 - F) * (1 - mr.x);
-    vec3 diffuse = kd * (albedo / PI) * fu.lightColor * nl;
+    vec3 diffuse = kd * (albedo * irradiance / PI) * fu.lightColor * nl;
     outColor = vec4(diffuse + specular, 1.0);
 }

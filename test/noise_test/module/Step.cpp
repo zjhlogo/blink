@@ -44,7 +44,7 @@ void Step::addStep(double step, double value)
 
 double Step::getStepValue(double step) const
 {
-    for (auto& it = m_stepInfoList.rbegin(); it != m_stepInfoList.rend(); ++it)
+    for (auto it = m_stepInfoList.rbegin(); it != m_stepInfoList.rend(); ++it)
     {
         if (step >= it->step) return it->value;
     }

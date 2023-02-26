@@ -27,7 +27,10 @@
         {
             "name" : "texMetallicRoughness",
             "path" : "Default_metalRoughness.jpg"
+        },
+        {
+            "name" : "texIrradiance",
+            "path" : "/models/Arche_E_PineTree_Env/Arches_E_PineTree_Env.hdr"
         }
     ]
-
 }

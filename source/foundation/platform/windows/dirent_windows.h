@@ -183,18 +183,14 @@ struct _WDIR {
 typedef struct _WDIR _WDIR;
 
 static _WDIR *_wopendir (const wchar_t *dirname);
-static struct _wdirent *_wreaddir (_WDIR *dirp);
 static int _wclosedir (_WDIR *dirp);
-static void _wrewinddir (_WDIR* dirp);
 
 
 /* For compatibility with Symbian */
 #define wdirent _wdirent
 #define WDIR _WDIR
 #define wopendir _wopendir
-#define wreaddir _wreaddir
 #define wclosedir _wclosedir
-#define wrewinddir _wrewinddir
 
 
 /* Multi-byte character versions */
@@ -216,7 +212,6 @@ typedef struct DIR DIR;
 static DIR *opendir (const char *dirname);
 static struct dirent *readdir (DIR *dirp);
 static int closedir (DIR *dirp);
-static void rewinddir (DIR* dirp);
 
 
 /* Internal utility functions */
@@ -338,67 +333,6 @@ _wopendir(
 }
 
 /*
- * Read next directory entry.  The directory entry is returned in dirent
- * structure in the d_name field.  Individual directory entries returned by
- * this function include regular files, sub-directories, pseudo-directories
- * "." and ".." as well as volume labels, hidden files and system files.
- */
-static struct _wdirent*
-_wreaddir(
-    _WDIR *dirp)
-{
-    WIN32_FIND_DATAW *datap;
-    struct _wdirent *entp;
-
-    /* Read next directory entry */
-    datap = dirent_next (dirp);
-    if (datap) {
-        size_t n;
-        DWORD attr;
-        
-        /* Pointer to directory entry to return */
-        entp = &dirp->ent;
-
-        /* 
-         * Copy file name as wide-character string.  If the file name is too
-         * long to fit in to the destination buffer, then truncate file name
-         * to PATH_MAX characters and zero-terminate the buffer.
-         */
-        n = 0;
-        while (n + 1 < PATH_MAX  &&  datap->cFileName[n] != 0) {
-            entp->d_name[n] = datap->cFileName[n];
-            n++;
-        }
-        dirp->ent.d_name[n] = 0;
-
-        /* Length of file name excluding zero terminator */
-        entp->d_namlen = n;
-
-        /* File type */
-        attr = datap->dwFileAttributes;
-        if ((attr & FILE_ATTRIBUTE_DEVICE) != 0) {
-            entp->d_type = DT_CHR;
-        } else if ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) {
-            entp->d_type = DT_DIR;
-        } else {
-            entp->d_type = DT_REG;
-        }
-
-        /* Reset dummy fields */
-        entp->d_ino = 0;
-        entp->d_reclen = sizeof (struct _wdirent);
-
-    } else {
-
-        /* Last directory entry read */
-        entp = NULL;
-
-    }
-
-    return entp;
-}
-
-/*
  * Close directory stream opened by opendir() function.  This invalidates the
  * DIR structure as well as any directory entry read previously by
  * _wreaddir().
@@ -432,25 +366,6 @@ _wclosedir(
         ok = /*failure*/-1;
     }
     return ok;
-}
-
-/*
- * Rewind directory stream such that _wreaddir() returns the very first
- * file name again.
- */
-static void
-_wrewinddir(
-    _WDIR* dirp)
-{
-    if (dirp) {
-        /* Release existing search handle */
-        if (dirp->handle != INVALID_HANDLE_VALUE) {
-            FindClose (dirp->handle);
-        }
-
-        /* Open new search handle */
-        dirent_first (dirp);
-    }
 }
 
 /* Get first directory entry (internal) */
@@ -693,17 +608,6 @@ closedir(
 
     }
     return ok;
-}
-
-/*
- * Rewind directory stream to beginning.
- */
-static void
-rewinddir(
-    DIR* dirp) 
-{
-    /* Rewind wide-character string directory stream */
-    _wrewinddir (dirp->wdirp);
 }
 
 /* Convert multi-byte string to wide character string */

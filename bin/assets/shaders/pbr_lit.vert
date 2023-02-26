@@ -17,7 +17,7 @@ void main()
     
     fragWorldPos = worldPos.xyz;
     fragNormal = pushData.matLocalToWorldInvT * inNormal;
-    fragTexCoord = vec2(inTexCoord.x, 1.0 - inTexCoord.y); // flip y for vulkan
+    fragTexCoord = vec2(inTexCoord.x, inTexCoord.y);
 
     gl_Position = cu.matWorldToProjection * worldPos;
 }

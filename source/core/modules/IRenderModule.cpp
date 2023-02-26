@@ -5,7 +5,6 @@
  * \author zjhlogo
  * \date   04/21/2022
  *********************************************************************/
-#pragma once
 #include "IRenderModule.h"
 
 #include <foundation/PreDefineMacro.h>

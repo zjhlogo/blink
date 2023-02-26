@@ -35,10 +35,6 @@ namespace blink
 
     bool VulkanTexture::createTexture2D(const tstring& texFile)
     {
-        int texWidth = 0;
-        int texHeight = 0;
-        int texChannels = 0;
-
         std::vector<uint8_t> buffer;
         if (!File::readFileIntoBuffer(buffer, texFile))
         {
@@ -46,26 +42,74 @@ namespace blink
             return false;
         }
 
-        stbi_uc* pixels = stbi_load_from_memory(buffer.data(), static_cast<int>(buffer.size()), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        if (!pixels)
-        {
-            return false;
-        }
+        int texWidth = 0;
+        int texHeight = 0;
+        int texChannels = 0;
+        bool success = false;
 
-        bool success = createTexture2D(pixels, texWidth, texHeight, true);
-        stbi_image_free(pixels);
+        if (stbi_is_hdr_from_memory(buffer.data(), static_cast<int>(buffer.size())))
+        {
+            // load hdr texture
+            int finalChannels = STBI_rgb_alpha;
+            stbi_set_flip_vertically_on_load(true);
+            float* pixels = stbi_loadf_from_memory(buffer.data(), static_cast<int>(buffer.size()), &texWidth, &texHeight, &texChannels, finalChannels);
+            if (!pixels)
+            {
+                return false;
+            }
+
+            success = createTexture2D(pixels, VK_FORMAT_R32G32B32A32_SFLOAT, texWidth, texHeight, finalChannels, 4, true);
+            stbi_image_free(pixels);
+        }
+        else
+        {
+            // load ldr texture
+            stbi_set_flip_vertically_on_load(true);
+            stbi_info_from_memory(buffer.data(), static_cast<int>(buffer.size()), &texWidth, &texHeight, &texChannels);
+
+            int finalChannels = STBI_default;
+            VkFormat format = VK_FORMAT_UNDEFINED;
+            if (texChannels == 1)
+            {
+                format = VK_FORMAT_R8_UNORM;
+            }
+            else if (texChannels == 2)
+            {
+                format = VK_FORMAT_R8G8_UNORM;
+            }
+            else if (texChannels == 3 || texChannels == 4)
+            {
+                format = VK_FORMAT_R8G8B8A8_UNORM;
+                finalChannels = STBI_rgb_alpha;
+            }
+
+            stbi_uc* pixels = stbi_load_from_memory(buffer.data(), static_cast<int>(buffer.size()), &texWidth, &texHeight, &texChannels, finalChannels);
+            if (!pixels)
+            {
+                return false;
+            }
+
+            success = createTexture2D(pixels, format, texWidth, texHeight, finalChannels, 1, true);
+            stbi_image_free(pixels);
+        }
 
         return success;
     }
 
-    bool VulkanTexture::createTexture2D(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap)
+    bool VulkanTexture::createTexture2D(const void* pixels,
+                                        VkFormat format,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        uint32_t channels,
+                                        uint32_t bytesPerChannel,
+                                        bool generateMipMap)
     {
-        if (!createTextureImage(pixels, width, height, generateMipMap))
+        if (!createTextureImage(pixels, format, width, height, channels, bytesPerChannel, generateMipMap))
         {
             return false;
         }
 
-        if (m_textureImage->createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT) == VK_NULL_HANDLE)
+        if (m_textureImage->createImageView(format, VK_IMAGE_ASPECT_COLOR_BIT) == VK_NULL_HANDLE)
         {
             return false;
         }
@@ -82,10 +126,7 @@ namespace blink
     {
         destroyTextureImage();
 
-        VkFormat depthFormat = VulkanUtils::findSupportedFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice(),
-                                                                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-                                                                VK_IMAGE_TILING_OPTIMAL,
-                                                                VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        VkFormat depthFormat = VulkanUtils::findDepthFormat(m_logicalDevice.getContext()->getPickedPhysicalDevice());
 
         // create depth image
         m_textureImage = new VulkanImage(m_logicalDevice, false);
@@ -115,11 +156,17 @@ namespace blink
         destroyTextureImage();
     }
 
-    VulkanImage* VulkanTexture::createTextureImage(const void* pixels, uint32_t width, uint32_t height, bool generateMipMap)
+    VulkanImage* VulkanTexture::createTextureImage(const void* pixels,
+                                                   VkFormat format,
+                                                   uint32_t width,
+                                                   uint32_t height,
+                                                   uint32_t channels,
+                                                   uint32_t bytesPerChannel,
+                                                   bool generateMipMap)
     {
         destroyTextureImage();
 
-        VkDeviceSize imageSize = 4ull * width * height;
+        VkDeviceSize imageSize = width * height * channels * bytesPerChannel;
 
         // create staging buffer
         auto stagingBuffer = new VulkanBuffer(m_logicalDevice);
@@ -133,7 +180,7 @@ namespace blink
         m_textureImage->createImage(VK_IMAGE_TYPE_2D,
                                     width,
                                     height,
-                                    VK_FORMAT_R8G8B8A8_UNORM,
+                                    format,
                                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
         uint32_t mipCount = m_textureImage->getMipCount();
         m_textureImage->allocateImageMemory();
@@ -141,7 +188,7 @@ namespace blink
         m_logicalDevice.executeCommand([&](const VulkanCommandBuffer& commandBuffer) {
             // transition layout to dst optimal
             m_textureImage->transitionImageLayout(commandBuffer,
-                                                  VK_FORMAT_R8G8B8A8_UNORM,
+                                                  format,
                                                   VK_IMAGE_LAYOUT_UNDEFINED,
                                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                   0,
@@ -155,7 +202,7 @@ namespace blink
             if (mipCount == 1)
             {
                 m_textureImage->transitionImageLayout(commandBuffer,
-                                                      VK_FORMAT_R8G8B8A8_UNORM,
+                                                      format,
                                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                                       VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -237,7 +284,7 @@ namespace blink
                 }
 
                 m_textureImage->transitionImageLayout(commandBuffer,
-                                                      VK_FORMAT_R8G8B8A8_UNORM,
+                                                      format,
                                                       VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                                       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                                       VK_ACCESS_TRANSFER_READ_BIT,

@@ -1,0 +1,11 @@
+{
+    "vertex_shader" : "/shaders/compiled/equirectangular.vert.spv",
+    "fragment_shader" : "/shaders/compiled/equirectangular.frag.spv",
+    
+    "textures" : [
+        {
+            "name" : "texSampler",
+            "path" : "Arches_E_PineTree_Env.hdr"
+        }
+    ]
+}

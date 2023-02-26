@@ -12,6 +12,7 @@ flecs_os_api_stdcpp.h
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
+target_compile_definitions(${PROJECT_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS)
 
 group_sources("${SOURCE_FILES}")
 configure_library(${PROJECT_NAME} "external")
