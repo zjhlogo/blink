@@ -29,7 +29,7 @@ namespace blink
         VulkanLogicalDevice& operator=(const VulkanLogicalDevice&) = delete;
         VulkanLogicalDevice& operator=(VulkanLogicalDevice&&) = delete;
 
-        operator VkDevice() const { return m_logicalDevice; }
+        explicit operator VkDevice() const { return m_logicalDevice; }
 
         bool create();
         void destroy();
@@ -40,16 +40,16 @@ namespace blink
         void resetDescriptorPool();
         void executeCommand(std::function<void(VulkanCommandBuffer& commandBuffer)>&& cb);
 
-        int getGraphicsFamilyIndex() const { return m_graphicsFamilyIndex; }
-        int getPresentFamilyIndex() const { return m_presentFamilyIndex; }
+        [[nodiscard]] int getGraphicsFamilyIndex() const { return m_graphicsFamilyIndex; }
+        [[nodiscard]] int getPresentFamilyIndex() const { return m_presentFamilyIndex; }
 
-        VulkanContext* getContext() const { return m_context; }
-        VkQueue getGraphicsQueue() const { return m_graphicsQueue; }
-        VkQueue getPresentQueue() const { return m_presentQueue; }
-        VulkanCommandPool& getCommandPool() const { return *m_commandPool; }
-        VulkanDescriptorPool& getDescriptorPool() const { return *m_descriptorPool; }
+        [[nodiscard]] VulkanContext* getContext() const { return m_context; }
+        [[nodiscard]] VkQueue getGraphicsQueue() const { return m_graphicsQueue; }
+        [[nodiscard]] VkQueue getPresentQueue() const { return m_presentQueue; }
+        [[nodiscard]] VulkanCommandPool& getCommandPool() const { return *m_commandPool; }
+        [[nodiscard]] VulkanDescriptorPool& getDescriptorPool() const { return *m_descriptorPool; }
 
-        VkDeviceSize getMinUniformBufferOffsetAlignment() const { return m_minUniformBufferOffsetAlignment; }
+        [[nodiscard]] VkDeviceSize getMinUniformBufferOffsetAlignment() const { return m_minUniformBufferOffsetAlignment; }
 
     private:
         bool createLogicalDevice();

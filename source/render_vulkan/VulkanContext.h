@@ -31,18 +31,18 @@ namespace blink
 
         uint32_t findMemoryType(VkMemoryPropertyFlags typeFilter, VkMemoryPropertyFlags properties);
 
-        VkInstance getInstance() const { return m_instance; }
-        VulkanWindow* getWindow() const { return m_window; }
-        const std::vector<VkPhysicalDevice>& getPhysicalDevices() const { return m_physicalDevices; }
+        [[nodiscard]] VkInstance getInstance() const { return m_instance; }
+        [[nodiscard]] VulkanWindow* getWindow() const { return m_window; }
+        [[nodiscard]] const std::vector<VkPhysicalDevice>& getPhysicalDevices() const { return m_physicalDevices; }
 
-        VkPhysicalDevice getPickedPhysicalDevice() const { return m_pickedPhysicalDevice; }
-        VkSurfaceKHR getVkSurface() const { return m_surface; }
+        [[nodiscard]] VkPhysicalDevice getPickedPhysicalDevice() const { return m_pickedPhysicalDevice; }
+        [[nodiscard]] VkSurfaceKHR getVkSurface() const { return m_surface; }
 
-        const VkPhysicalDeviceProperties& getProperties() const { return m_properties; }
-        const VkPhysicalDeviceMemoryProperties& getMemoryProperties() const { return m_memoryProperties; }
-        const std::vector<VkQueueFamilyProperties>& getQueueFamilyProperties() const { return m_queueFamilyProperties; }
-        const std::vector<VkLayerProperties>& getLayerProperties() const { return m_layerProperties; }
-        const std::vector<VkExtensionProperties>& getExtensionProperties() const { return m_extensionProperties; }
+        [[nodiscard]] const VkPhysicalDeviceProperties& getProperties() const { return m_properties; }
+        [[nodiscard]] const VkPhysicalDeviceMemoryProperties& getMemoryProperties() const { return m_memoryProperties; }
+        [[nodiscard]] const std::vector<VkQueueFamilyProperties>& getQueueFamilyProperties() const { return m_queueFamilyProperties; }
+        [[nodiscard]] const std::vector<VkLayerProperties>& getLayerProperties() const { return m_layerProperties; }
+        [[nodiscard]] const std::vector<VkExtensionProperties>& getExtensionProperties() const { return m_extensionProperties; }
 
     private:
         bool createInstance();

@@ -25,7 +25,7 @@ namespace blink
         VulkanRenderPass& operator=(const VulkanRenderPass&) = delete;
         VulkanRenderPass& operator=(VulkanRenderPass&&) = delete;
 
-        operator VkRenderPass() const { return m_renderPass; }
+        explicit operator VkRenderPass() const { return m_renderPass; }
 
         bool create();
 

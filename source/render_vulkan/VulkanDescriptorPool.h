@@ -22,12 +22,12 @@ namespace blink
         explicit VulkanDescriptorPool(VulkanLogicalDevice& logicalDevice);
         ~VulkanDescriptorPool();
 
-        VulkanDescriptorPool(const VulkanDescriptorPool& pool) = delete;
-        VulkanDescriptorPool(VulkanDescriptorPool&& pool) = delete;
-        VulkanDescriptorPool& operator=(const VulkanDescriptorPool& pool) = delete;
-        VulkanDescriptorPool& operator=(VulkanDescriptorPool&& pool) = delete;
+        VulkanDescriptorPool(const VulkanDescriptorPool&) = delete;
+        VulkanDescriptorPool(VulkanDescriptorPool&&) = delete;
+        VulkanDescriptorPool& operator=(const VulkanDescriptorPool&) = delete;
+        VulkanDescriptorPool& operator=(VulkanDescriptorPool&&) = delete;
 
-        operator VkDescriptorPool() const { return m_descriptorPool; }
+        explicit operator VkDescriptorPool() const { return m_descriptorPool; }
 
         bool create(uint32_t count = DEFAULT_DESCRIPTOR_COUNT);
         void destroy();

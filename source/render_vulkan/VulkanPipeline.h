@@ -45,22 +45,22 @@ namespace blink
         VulkanPipeline& operator=(const VulkanPipeline&) = delete;
         VulkanPipeline& operator=(VulkanPipeline&&) = delete;
 
-        operator VkPipeline() const { return m_pipeline; }
+        explicit operator VkPipeline() const { return m_pipeline; }
 
         bool create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology);
         void destroy();
 
         bool bindDescriptorSets(const VulkanCommandBuffer& commandBuffer, const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList);
 
-        VkDescriptorSetLayout getDescriptorSetLayout() const { return m_descriptorSetLayout; }
-        VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; }
-        VertexAttrs getVertexAttrFlags() const { return m_vertexAttrs; }
+        [[nodiscard]] VkDescriptorSetLayout getDescriptorSetLayout() const { return m_descriptorSetLayout; }
+        [[nodiscard]] VkPipelineLayout getPipelineLayout() const { return m_pipelineLayout; }
+        [[nodiscard]] VertexAttrs getVertexAttrFlags() const { return m_vertexAttrs; }
 
-        std::size_t getWriteSetCount() const { return m_writeSets.size(); }
+        [[nodiscard]] std::size_t getWriteSetCount() const { return m_writeSets.size(); }
         VulkanUniformBlock* getUniformBlock(UniformBinding binding);
         int getUniformWriteSetIndexFromBinding(UniformBinding binding);
-        const std::unordered_map<uint32_t, int>& getUniformWriteSetIndexMap() const { return m_uniformWriteSetIndexMap; }
-        const std::unordered_map<tstring, int>& getTextureWriteSetIndexMap() const { return m_textureWriteSetIndexMap; }
+        [[nodiscard]] const std::unordered_map<uint32_t, int>& getUniformWriteSetIndexMap() const { return m_uniformWriteSetIndexMap; }
+        [[nodiscard]] const std::unordered_map<tstring, int>& getTextureWriteSetIndexMap() const { return m_textureWriteSetIndexMap; }
 
     private:
         VkDescriptorSetLayout createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings);

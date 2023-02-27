@@ -1,12 +1,12 @@
 /*!
- * \file VulkanSwapchain.cpp
+ * \file VulkanSwapChain.cpp
  *
  * \author zjhlogo
  * \date 2020/04/11
  *
  *
  */
-#include "VulkanSwapchain.h"
+#include "VulkanSwapChain.h"
 #include "VulkanContext.h"
 #include "VulkanFrameBuffer.h"
 #include "VulkanImage.h"
@@ -21,7 +21,7 @@
 
 namespace blink
 {
-    VulkanSwapchain::VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass)
+    VulkanSwapChain::VulkanSwapChain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass)
         : m_window(window)
         , m_logicalDevice(logicalDevice)
         , m_renderPass(renderPass)
@@ -29,34 +29,49 @@ namespace blink
         //
     }
 
-    VulkanSwapchain::~VulkanSwapchain()
+    VulkanSwapChain::~VulkanSwapChain()
     {
         destroyFrameBuffers();
         destroySwapChain();
     }
 
-    bool VulkanSwapchain::create()
+    bool VulkanSwapChain::create()
     {
-        if (m_swapChain != VK_NULL_HANDLE) return true;
+        if (m_swapChain != VK_NULL_HANDLE)
+        {
+            return true;
+        }
 
-        if (!createSwapChain()) return false;
-        if (!createFrameBuffers()) return false;
+        if (!createSwapChain())
+        {
+            return false;
+        }
+        if (!createFrameBuffers())
+        {
+            return false;
+        }
 
         return true;
     }
 
-    bool VulkanSwapchain::recreate()
+    bool VulkanSwapChain::recreate()
     {
         destroyFrameBuffers();
         destroySwapChain();
 
-        if (!createSwapChain()) return false;
-        if (!createFrameBuffers()) return false;
+        if (!createSwapChain())
+        {
+            return false;
+        }
+        if (!createFrameBuffers())
+        {
+            return false;
+        }
 
         return true;
     }
 
-    bool VulkanSwapchain::createSwapChain()
+    bool VulkanSwapChain::createSwapChain()
     {
         auto context = m_logicalDevice.getContext();
         auto physicalDevice = context->getPickedPhysicalDevice();
@@ -141,14 +156,14 @@ namespace blink
         createInfo.presentMode = selPresentMode;
         createInfo.clipped = VK_TRUE;
 
-        VK_CHECK_RESULT(vkCreateSwapchainKHR(m_logicalDevice, &createInfo, nullptr, &m_swapChain))
+        VK_CHECK_RESULT_BOOL(vkCreateSwapchainKHR((VkDevice)m_logicalDevice, &createInfo, nullptr, &m_swapChain))
 
         std::vector<VkImage> swapChainImages;
         uint32_t swapchainImageCount = 0;
-        vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &swapchainImageCount, nullptr);
+        vkGetSwapchainImagesKHR((VkDevice)m_logicalDevice, m_swapChain, &swapchainImageCount, nullptr);
 
         swapChainImages.resize(swapchainImageCount);
-        vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &swapchainImageCount, swapChainImages.data());
+        vkGetSwapchainImagesKHR((VkDevice)m_logicalDevice, m_swapChain, &swapchainImageCount, swapChainImages.data());
         m_swapChainImageFormat = selFormat.format;
         m_swapChainExtent = selExtent;
 
@@ -163,7 +178,7 @@ namespace blink
         return true;
     }
 
-    void VulkanSwapchain::destroySwapChain()
+    void VulkanSwapChain::destroySwapChain()
     {
         for (auto image : m_images)
         {
@@ -172,13 +187,16 @@ namespace blink
         }
         m_images.clear();
 
-        vkDestroySwapchainKHR(m_logicalDevice, m_swapChain, nullptr);
+        vkDestroySwapchainKHR((VkDevice)m_logicalDevice, m_swapChain, nullptr);
     }
 
-    bool VulkanSwapchain::createFrameBuffers()
+    bool VulkanSwapChain::createFrameBuffers()
     {
         m_depthTexture = new VulkanTexture(m_logicalDevice);
-        if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height)) return false;
+        if (!m_depthTexture->createDepthTexture(m_swapChainExtent.width, m_swapChainExtent.height))
+        {
+            return false;
+        }
 
         std::vector<VulkanImage*> attachments;
         auto count = m_images.size();
@@ -201,7 +219,7 @@ namespace blink
         return true;
     }
 
-    void VulkanSwapchain::destroyFrameBuffers()
+    void VulkanSwapChain::destroyFrameBuffers()
     {
         for (auto framebuffer : m_swapChainFrameBuffers)
         {

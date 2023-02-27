@@ -19,12 +19,12 @@ namespace blink
         explicit VulkanFence(VulkanLogicalDevice& logicalDevice);
         ~VulkanFence();
 
-        VulkanFence(const VulkanFence& fence) = delete;
-        VulkanFence(VulkanFence&& fence) = delete;
-        VulkanFence& operator=(const VulkanFence& fence) = delete;
-        VulkanFence& operator=(VulkanFence&& fence) = delete;
+        VulkanFence(const VulkanFence&) = delete;
+        VulkanFence(VulkanFence&&) = delete;
+        VulkanFence& operator=(const VulkanFence&) = delete;
+        VulkanFence& operator=(VulkanFence&&) = delete;
 
-        operator VkFence() { return m_fence; }
+        explicit operator VkFence() { return m_fence; }
 
         bool create(bool signaled = false);
         void destroy();

@@ -29,7 +29,7 @@ namespace blink
         VulkanImage& operator=(const VulkanImage&) = delete;
         VulkanImage& operator=(VulkanImage&&) = delete;
 
-        operator VkImage() { return m_image; }
+        explicit operator VkImage() { return m_image; }
 
         VkImage createImage(VkImageType type, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
         void destroyImage();
@@ -50,10 +50,10 @@ namespace blink
                                    VkPipelineStageFlags dstStage,
                                    uint32_t mipIndex,
                                    uint32_t levelCount = 1);
-        void copyBufferToImage(const VulkanCommandBuffer& commandBuffer, const VulkanBuffer& stagingBuffer, VkImageLayout mipIndex);
+        void copyBufferToImage(const VulkanCommandBuffer& commandBuffer, const VulkanBuffer& stagingBuffer, [[maybe_unused]] VkImageLayout mipIndex);
 
-        VkImageView getImageView() const { return m_imageView; }
-        uint32_t getMipCount() const { return m_mipCount; }
+        [[nodiscard]] VkImageView getImageView() const { return m_imageView; }
+        [[nodiscard]] uint32_t getMipCount() const { return m_mipCount; }
 
     private:
         VulkanLogicalDevice& m_logicalDevice;

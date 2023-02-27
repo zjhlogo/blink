@@ -24,12 +24,12 @@ namespace blink
         explicit VulkanMemory(VulkanLogicalDevice& logicalDevice);
         ~VulkanMemory();
 
-        VulkanMemory(const VulkanMemory& memory) = delete;
-        VulkanMemory(VulkanMemory&& memory) = delete;
-        VulkanMemory& operator=(const VulkanMemory& memory) = delete;
-        VulkanMemory& operator=(VulkanMemory&& memory) = delete;
+        VulkanMemory(const VulkanMemory&) = delete;
+        VulkanMemory(VulkanMemory&&) = delete;
+        VulkanMemory& operator=(const VulkanMemory&) = delete;
+        VulkanMemory& operator=(VulkanMemory&&) = delete;
 
-        operator VkDeviceMemory() { return m_memory; }
+        explicit operator VkDeviceMemory() { return m_memory; }
 
         bool allocateMemory(VkMemoryPropertyFlags memoryProperties, const VkMemoryRequirements& requirement);
         void freeMemory();

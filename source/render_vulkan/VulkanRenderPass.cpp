@@ -40,7 +40,10 @@ namespace blink
 
     VkRenderPass VulkanRenderPass::createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
     {
-        if (m_renderPass != VK_NULL_HANDLE) return m_renderPass;
+        if (m_renderPass != VK_NULL_HANDLE)
+        {
+            return m_renderPass;
+        }
 
         // color attachment
         VkAttachmentDescription colorAttachment{};
@@ -98,7 +101,7 @@ namespace blink
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        VK_CHECK_RESULT(vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass))
+        VK_CHECK_RESULT(vkCreateRenderPass((VkDevice)m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass))
         return m_renderPass;
     }
 
@@ -106,7 +109,7 @@ namespace blink
     {
         if (m_renderPass != VK_NULL_HANDLE)
         {
-            vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
+            vkDestroyRenderPass((VkDevice)m_logicalDevice, m_renderPass, nullptr);
             m_renderPass = VK_NULL_HANDLE;
         }
     }

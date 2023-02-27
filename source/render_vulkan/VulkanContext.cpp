@@ -16,9 +16,9 @@
 namespace blink
 {
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                                        VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                        [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
                                                         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                                        void* pUserData)
+                                                        [[maybe_unused]] void* pUserData)
     {
         if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         {
@@ -54,10 +54,22 @@ namespace blink
 
     bool VulkanContext::create()
     {
-        if (!createInstance()) return false;
-        if (!setupDebugMessenger()) return false;
-        if (!createSurface()) return false;
-        if (!pickPhysicalDevice()) return false;
+        if (!createInstance())
+        {
+            return false;
+        }
+        if (!setupDebugMessenger())
+        {
+            return false;
+        }
+        if (!createSurface())
+        {
+            return false;
+        }
+        if (!pickPhysicalDevice())
+        {
+            return false;
+        }
 
         return true;
     }
@@ -110,7 +122,7 @@ namespace blink
             createInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
-        VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &m_instance))
+        VK_CHECK_RESULT_BOOL(vkCreateInstance(&createInfo, nullptr, &m_instance))
         VulkanUtils::enumeratePhysicalDevices(m_physicalDevices, m_instance);
         return true;
     }
@@ -128,13 +140,13 @@ namespace blink
     {
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
-                                     | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
-                                 | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        createInfo.messageSeverity =
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        createInfo.messageType =
+            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
 
-        VK_CHECK_RESULT(VulkanUtils::createDebugUtilsMessengerExt(m_instance, &createInfo, nullptr, &m_debugMessenger))
+        VK_CHECK_RESULT_BOOL(VulkanUtils::createDebugUtilsMessengerExt(m_instance, &createInfo, nullptr, &m_debugMessenger))
         return true;
     }
 
@@ -146,7 +158,7 @@ namespace blink
 
     bool VulkanContext::createSurface()
     {
-        VK_CHECK_RESULT(glfwCreateWindowSurface(m_instance, m_window->m_window, nullptr, &m_surface))
+        VK_CHECK_RESULT_BOOL(glfwCreateWindowSurface(m_instance, m_window->m_window, nullptr, &m_surface))
         return true;
     }
 
@@ -214,7 +226,7 @@ namespace blink
                 swapChainAdequate = (surfaceFormatCount > 0) && (presentModeCount > 0);
             }
 
-            if (graphicsFamilyIndex != -1 && presentFamilyIndex != -1 && extensionsSupported == true && swapChainAdequate == true
+            if (graphicsFamilyIndex != -1 && presentFamilyIndex != -1 && extensionsSupported && swapChainAdequate
                 && supportedFeatures.samplerAnisotropy == VK_TRUE && supportedFeatures.fillModeNonSolid == VK_TRUE)
             {
                 return index;

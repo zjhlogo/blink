@@ -32,11 +32,11 @@ namespace blink
     {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = m_commandPool;
+        allocInfo.commandPool = (VkCommandPool)m_commandPool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
 
-        VK_CHECK_RESULT(vkAllocateCommandBuffers(m_logicalDevice, &allocInfo, &m_commandBuffer))
+        VK_CHECK_RESULT(vkAllocateCommandBuffers((VkDevice)m_logicalDevice, &allocInfo, &m_commandBuffer))
         return true;
     }
 
@@ -44,7 +44,7 @@ namespace blink
     {
         if (m_commandBuffer != nullptr)
         {
-            vkFreeCommandBuffers(m_logicalDevice, m_commandPool, 1, &m_commandBuffer);
+            vkFreeCommandBuffers((VkDevice)m_logicalDevice, (VkCommandPool)m_commandPool, 1, &m_commandBuffer);
             m_commandBuffer = nullptr;
         }
     }

@@ -19,12 +19,12 @@ namespace blink
         explicit VulkanCommandPool(VulkanLogicalDevice& logicalDevice);
         ~VulkanCommandPool();
 
-        VulkanCommandPool(const VulkanCommandPool& pool) = delete;
-        VulkanCommandPool(VulkanCommandPool&& pool) = delete;
-        VulkanCommandPool& operator=(const VulkanCommandPool& pool) = delete;
-        VulkanCommandPool& operator=(VulkanCommandPool&& pool) = delete;
+        VulkanCommandPool(const VulkanCommandPool&) = delete;
+        VulkanCommandPool(VulkanCommandPool&&) = delete;
+        VulkanCommandPool& operator=(const VulkanCommandPool&) = delete;
+        VulkanCommandPool& operator=(VulkanCommandPool&&) = delete;
 
-        operator VkCommandPool() { return m_commandPool; }
+        explicit operator VkCommandPool() { return m_commandPool; }
 
         bool create();
         void destroy();

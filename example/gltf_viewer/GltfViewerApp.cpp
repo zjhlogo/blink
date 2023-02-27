@@ -23,7 +23,6 @@ bool GltfViewerApp::initializeLogicalSystems()
     SceneEntityUtil::initializeCommonLogicalSystems(this);
     return true;
 }
-
 bool GltfViewerApp::initializeRenderSystems()
 {
     auto guiRenderSystem = addRenderSystem(new ImguiRenderSystem());

@@ -30,7 +30,7 @@ namespace blink
         bool create();
         void destroy();
 
-        operator VkFramebuffer() const { return m_frameBuffer; }
+        explicit operator VkFramebuffer() const { return m_frameBuffer; }
 
     private:
         VulkanLogicalDevice& m_logicalDevice;

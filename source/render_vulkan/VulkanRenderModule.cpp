@@ -7,19 +7,17 @@
  *
  */
 #include "VulkanRenderModule.h"
-#include "VulkanBuffer.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanContext.h"
 #include "VulkanFence.h"
 #include "VulkanFrameBuffer.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanRenderPass.h"
-#include "VulkanSwapchain.h"
+#include "VulkanSwapChain.h"
 #include "VulkanUniformBuffer.h"
 #include "VulkanWindow.h"
 #include "utils/VulkanUtils.h"
 
-#include <core/modules/IResourceModule.h>
 #include <tracy-0.8.2/Tracy.hpp>
 
 #define GLFW_INCLUDE_VULKAN
@@ -65,8 +63,8 @@ namespace blink
             return false;
         }
 
-        m_swapchain = new VulkanSwapchain(*m_window, *m_logicalDevice, *m_renderPass);
-        if (!m_swapchain->create())
+        m_swapChain = new VulkanSwapChain(*m_window, *m_logicalDevice, *m_renderPass);
+        if (!m_swapChain->create())
         {
             return false;
         }
@@ -108,7 +106,7 @@ namespace blink
         SAFE_DELETE(m_perMaterialUniformBuffer);
         SAFE_DELETE(m_perFrameUniformBuffer);
         SAFE_DELETE(m_commandBuffer);
-        SAFE_DELETE(m_swapchain);
+        SAFE_DELETE(m_swapChain);
         SAFE_DELETE(m_renderPass);
         SAFE_DELETE(m_logicalDevice);
         SAFE_DELETE(m_context);
@@ -120,7 +118,7 @@ namespace blink
     bool VulkanRenderModule::processEvent()
     {
         /* Loop until the user closes the window */
-        if (glfwWindowShouldClose(*m_window))
+        if (glfwWindowShouldClose((GLFWwindow*)*m_window))
         {
             return false;
         }
@@ -135,19 +133,24 @@ namespace blink
     {
         // acquire an image and wait for it became ready to use
         uint32_t imageIndex{};
-        auto result = vkAcquireNextImageKHR(*m_logicalDevice, *m_swapchain, UINT64_MAX, VK_NULL_HANDLE, *m_acquireImageFence, &imageIndex);
+        auto result = vkAcquireNextImageKHR((VkDevice)*m_logicalDevice,
+                                            (VkSwapchainKHR)*m_swapChain,
+                                            UINT64_MAX,
+                                            VK_NULL_HANDLE,
+                                            (VkFence)*m_acquireImageFence,
+                                            &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
             m_window->updateFrameBufferSize();
             m_logicalDevice->waitDeviceIdle();
-            m_swapchain->recreate();
+            m_swapChain->recreate();
             return false;
         }
         m_acquireImageFence->wait();
         m_acquireImageFence->reset();
 
-        m_swapchain->setCurrentActiveImageIndex(imageIndex);
+        m_swapChain->setCurrentActiveImageIndex(imageIndex);
 
         // wait graphics queue idle
         m_logicalDevice->waitGraphicsQueueIdle();
@@ -177,48 +180,46 @@ namespace blink
         submitInfo.pWaitSemaphores = nullptr;
         submitInfo.pWaitDstStageMask = nullptr;
         submitInfo.commandBufferCount = 1;
-        VkCommandBuffer commandBuffer = *m_commandBuffer;
+        auto commandBuffer = (VkCommandBuffer)*m_commandBuffer;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE));
+        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE))
 
-        auto imageIndex = m_swapchain->getCurrentActiveImageIndex();
+        auto imageIndex = m_swapChain->getCurrentActiveImageIndex();
 
         // present queue
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        VkSwapchainKHR swapChains[] = {*m_swapchain};
+        VkSwapchainKHR swapChains[] = {(VkSwapchainKHR)*m_swapChain};
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &imageIndex;
 
         auto result = vkQueuePresentKHR(m_logicalDevice->getPresentQueue(), &presentInfo);
 
-        FrameMark;
+        FrameMark
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+            if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
         {
             // rebuild swap chain
             m_window->updateFrameBufferSize();
             m_logicalDevice->waitDeviceIdle();
-            m_swapchain->recreate();
+            m_swapChain->recreate();
         }
     }
 
-    bool VulkanRenderModule::beginRenderPass()
+    void VulkanRenderModule::beginRenderPass()
     {
-        // using negative height to flip the y axis
-        const auto& extent = m_swapchain->getImageExtent();
+        // using negative height to flip the y-axis
+        const auto& extent = m_swapChain->getImageExtent();
         VkViewport viewport{0.0f, static_cast<float>(extent.height), static_cast<float>(extent.width), -static_cast<float>(extent.height), 0.0f, 1.0f};
-        vkCmdSetViewport(*m_commandBuffer, 0, 1, &viewport);
+        vkCmdSetViewport((VkCommandBuffer)*m_commandBuffer, 0, 1, &viewport);
 
         VkRect2D rect{
             {0, 0},
             extent
         };
-        m_commandBuffer->beginRenderPass(*m_renderPass, m_swapchain->getCurrentActiveFrameBuffer(), rect);
-
-        return true;
+        m_commandBuffer->beginRenderPass((VkRenderPass)*m_renderPass, (VkFramebuffer)m_swapChain->getCurrentActiveFrameBuffer(), rect);
     }
 
     void VulkanRenderModule::endRenderPass()
@@ -230,15 +231,12 @@ namespace blink
     {
         if (beginRender())
         {
-            if (beginRenderPass())
+            beginRenderPass();
+            for (auto sys : m_renderSystems)
             {
-                for (auto sys : m_renderSystems)
-                {
-                    sys->render();
-                }
-
-                endRenderPass();
+                sys->render();
             }
+            endRenderPass();
 
             endRender();
         }
@@ -255,16 +253,14 @@ namespace blink
 
     glm::vec2 VulkanRenderModule::getSurfaceSize() const
     {
-        const auto& ext = m_swapchain->getImageExtent();
+        const auto& ext = m_swapChain->getImageExtent();
         return {ext.width, ext.height};
     }
 
     bool VulkanRenderModule::createSyncObjects()
     {
         m_acquireImageFence = new VulkanFence(*m_logicalDevice);
-        m_acquireImageFence->create(false);
-
-        return true;
+        return m_acquireImageFence->create(false);
     }
 
     void VulkanRenderModule::destroySyncObjects()

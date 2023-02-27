@@ -16,7 +16,7 @@ namespace blink
     class VulkanContext;
     class VulkanLogicalDevice;
     class VulkanRenderPass;
-    class VulkanSwapchain;
+    class VulkanSwapChain;
     class VulkanCommandBuffer;
     class VulkanUniformBuffer;
     class VulkanSemaphore;
@@ -33,16 +33,16 @@ namespace blink
 
         void waitIdle() override;
 
-        glm::vec2 getSurfaceSize() const override;
+        [[nodiscard]] glm::vec2 getSurfaceSize() const override;
 
-        VulkanContext& getContext() const { return *m_context; }
-        VulkanLogicalDevice& getLogicalDevice() const { return *m_logicalDevice; }
-        VulkanRenderPass& getRenderPass() const { return *m_renderPass; }
-        VulkanSwapchain& getSwapchain() const { return *m_swapchain; }
+        [[nodiscard]] VulkanContext& getContext() const { return *m_context; }
+        [[nodiscard]] VulkanLogicalDevice& getLogicalDevice() const { return *m_logicalDevice; }
+        [[nodiscard]] VulkanRenderPass& getRenderPass() const { return *m_renderPass; }
+        [[nodiscard]] VulkanSwapChain& getSwapChain() const { return *m_swapChain; }
 
-        VulkanCommandBuffer& getCommandBuffer() const { return *m_commandBuffer; }
-        VulkanUniformBuffer& getPerFrameUniformBuffer() const { return *m_perFrameUniformBuffer; }
-        VulkanUniformBuffer& getPerMaterialUniformBuffer() const { return *m_perMaterialUniformBuffer; }
+        [[nodiscard]] VulkanCommandBuffer& getCommandBuffer() const { return *m_commandBuffer; }
+        [[nodiscard]] VulkanUniformBuffer& getPerFrameUniformBuffer() const { return *m_perFrameUniformBuffer; }
+        [[nodiscard]] VulkanUniformBuffer& getPerMaterialUniformBuffer() const { return *m_perMaterialUniformBuffer; }
 
     private:
         bool createSyncObjects();
@@ -51,7 +51,7 @@ namespace blink
         bool beginRender();
         void endRender();
 
-        bool beginRenderPass();
+        void beginRenderPass();
         void endRenderPass();
 
     private:
@@ -60,7 +60,7 @@ namespace blink
         VulkanLogicalDevice* m_logicalDevice{};
         VulkanFence* m_acquireImageFence{};
         VulkanRenderPass* m_renderPass{};
-        VulkanSwapchain* m_swapchain{};
+        VulkanSwapChain* m_swapChain{};
 
         VulkanCommandBuffer* m_commandBuffer{};
         VulkanUniformBuffer* m_perFrameUniformBuffer{};

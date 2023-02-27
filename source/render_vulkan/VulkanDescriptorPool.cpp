@@ -42,7 +42,7 @@ namespace blink
 
         poolInfo.maxSets = count;
 
-        VK_CHECK_RESULT(vkCreateDescriptorPool(m_logicalDevice, &poolInfo, nullptr, &m_descriptorPool))
+        VK_CHECK_RESULT_BOOL(vkCreateDescriptorPool((VkDevice)m_logicalDevice, &poolInfo, nullptr, &m_descriptorPool))
         return true;
     }
 
@@ -52,7 +52,7 @@ namespace blink
 
         if (m_descriptorPool != VK_NULL_HANDLE)
         {
-            vkDestroyDescriptorPool(m_logicalDevice, m_descriptorPool, nullptr);
+            vkDestroyDescriptorPool((VkDevice)m_logicalDevice, m_descriptorPool, nullptr);
             m_descriptorPool = VK_NULL_HANDLE;
         }
     }
@@ -61,7 +61,7 @@ namespace blink
     {
         if (m_descriptorPool != VK_NULL_HANDLE)
         {
-            vkResetDescriptorPool(m_logicalDevice, m_descriptorPool, 0);
+            vkResetDescriptorPool((VkDevice)m_logicalDevice, m_descriptorPool, 0);
         }
     }
 
@@ -74,7 +74,7 @@ namespace blink
         allocInfo.pSetLayouts = &layout;
 
         VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, &descriptorSet))
+        VK_CHECK_RESULT(vkAllocateDescriptorSets((VkDevice)m_logicalDevice, &allocInfo, &descriptorSet))
         return descriptorSet;
     }
 } // namespace blink

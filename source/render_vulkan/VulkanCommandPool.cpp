@@ -32,7 +32,7 @@ namespace blink
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         poolInfo.queueFamilyIndex = static_cast<uint32_t>(m_logicalDevice.getGraphicsFamilyIndex());
 
-        VK_CHECK_RESULT(vkCreateCommandPool(m_logicalDevice, &poolInfo, nullptr, &m_commandPool))
+        VK_CHECK_RESULT_BOOL(vkCreateCommandPool((VkDevice)m_logicalDevice, &poolInfo, nullptr, &m_commandPool))
         return true;
     }
 
@@ -40,7 +40,7 @@ namespace blink
     {
         if (m_commandPool != VK_NULL_HANDLE)
         {
-            vkDestroyCommandPool(m_logicalDevice, m_commandPool, nullptr);
+            vkDestroyCommandPool((VkDevice)m_logicalDevice, m_commandPool, nullptr);
             m_commandPool = VK_NULL_HANDLE;
         }
     }

@@ -27,9 +27,12 @@ namespace blink
     {
         VkFenceCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        if (signaled) info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        if (signaled)
+        {
+            info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        }
 
-        VK_CHECK_RESULT(vkCreateFence(m_logicalDevice, &info, nullptr, &m_fence))
+        VK_CHECK_RESULT(vkCreateFence((VkDevice)m_logicalDevice, &info, nullptr, &m_fence))
         return true;
     }
 
@@ -37,7 +40,7 @@ namespace blink
     {
         if (m_fence != VK_NULL_HANDLE)
         {
-            vkDestroyFence(m_logicalDevice, m_fence, nullptr);
+            vkDestroyFence((VkDevice)m_logicalDevice, m_fence, nullptr);
             m_fence = VK_NULL_HANDLE;
         }
     }
@@ -45,12 +48,12 @@ namespace blink
     void VulkanFence::wait()
     {
         //
-        vkWaitForFences(m_logicalDevice, 1, &m_fence, VK_TRUE, UINT64_MAX);
+        vkWaitForFences((VkDevice)m_logicalDevice, 1, &m_fence, VK_TRUE, UINT64_MAX);
     }
 
     void VulkanFence::reset()
     {
         //
-        vkResetFences(m_logicalDevice, 1, &m_fence);
+        vkResetFences((VkDevice)m_logicalDevice, 1, &m_fence);
     }
 } // namespace blink

@@ -65,7 +65,7 @@ namespace blink
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-        VK_CHECK_RESULT(vkCreateImage(m_logicalDevice, &imageInfo, nullptr, &m_image));
+        VK_CHECK_RESULT(vkCreateImage((VkDevice)m_logicalDevice, &imageInfo, nullptr, &m_image))
         m_ownedImage = true;
         return m_image;
     }
@@ -78,7 +78,7 @@ namespace blink
 
         if (m_ownedImage && m_image != VK_NULL_HANDLE)
         {
-            vkDestroyImage(m_logicalDevice, m_image, nullptr);
+            vkDestroyImage((VkDevice)m_logicalDevice, m_image, nullptr);
         }
         m_image = VK_NULL_HANDLE;
     }
@@ -108,7 +108,7 @@ namespace blink
         viewInfo.subresourceRange.levelCount = m_mipCount;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
-        VK_CHECK_RESULT(vkCreateImageView(m_logicalDevice, &viewInfo, nullptr, &m_imageView))
+        VK_CHECK_RESULT(vkCreateImageView((VkDevice)m_logicalDevice, &viewInfo, nullptr, &m_imageView))
 
         m_format = format;
         m_aspectFlags = aspectFlags;
@@ -119,7 +119,7 @@ namespace blink
     {
         if (m_imageView != VK_NULL_HANDLE)
         {
-            vkDestroyImageView(m_logicalDevice, m_imageView, nullptr);
+            vkDestroyImageView((VkDevice)m_logicalDevice, m_imageView, nullptr);
             m_imageView = VK_NULL_HANDLE;
         }
 
@@ -135,12 +135,12 @@ namespace blink
         }
 
         VkMemoryRequirements memRequirements{};
-        vkGetImageMemoryRequirements(m_logicalDevice, m_image, &memRequirements);
+        vkGetImageMemoryRequirements((VkDevice)m_logicalDevice, m_image, &memRequirements);
 
         m_imageMemory = new VulkanMemory(m_logicalDevice);
         m_imageMemory->allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, memRequirements);
 
-        VK_CHECK_RESULT(vkBindImageMemory(m_logicalDevice, m_image, *m_imageMemory, 0));
+        VK_CHECK_RESULT(vkBindImageMemory((VkDevice)m_logicalDevice, (VkImage)m_image, (VkDeviceMemory)*m_imageMemory, 0))
         return m_imageMemory;
     }
 
@@ -190,15 +190,15 @@ namespace blink
         barrier.srcAccessMask = srcAccessMask;
         barrier.dstAccessMask = dstAccessMask;
 
-        vkCmdPipelineBarrier(commandBuffer, srcStage, dstStage, {}, 0, nullptr, 0, nullptr, 1, &barrier);
+        vkCmdPipelineBarrier((VkCommandBuffer)commandBuffer, srcStage, dstStage, {}, 0, nullptr, 0, nullptr, 1, &barrier);
     }
 
-    void VulkanImage::copyBufferToImage(const VulkanCommandBuffer& commandBuffer, const VulkanBuffer& stagingBuffer, VkImageLayout imageLayout)
+    void VulkanImage::copyBufferToImage(const VulkanCommandBuffer& commandBuffer, const VulkanBuffer& stagingBuffer, [[maybe_unused]] VkImageLayout imageLayout)
     {
         VkBufferImageCopy region{};
         region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
         region.imageExtent = m_imageExtent;
 
-        vkCmdCopyBufferToImage(commandBuffer, stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        vkCmdCopyBufferToImage((VkCommandBuffer)commandBuffer, (VkBuffer)stagingBuffer, m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     }
 } // namespace blink

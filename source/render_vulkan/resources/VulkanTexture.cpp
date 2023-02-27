@@ -262,16 +262,16 @@ namespace blink
                                                           VK_PIPELINE_STAGE_TRANSFER_BIT,
                                                           i);
                     // blit image
-                    vkCmdBlitImage(commandBuffer,
-                                   *m_textureImage,
+                    vkCmdBlitImage((VkCommandBuffer)commandBuffer,
+                                   (VkImage)*m_textureImage,
                                    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                   *m_textureImage,
+                                   (VkImage)*m_textureImage,
                                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                    1,
                                    &imageBlit,
                                    VK_FILTER_LINEAR);
 
-                    // prepare current mip level as image libt sorce for next level
+                    // prepare current mip level as image blit source for next level
                     m_textureImage->transitionImageLayout(commandBuffer,
                                                           VK_FORMAT_UNDEFINED,
                                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -326,7 +326,7 @@ namespace blink
         samplerInfo.mipLodBias = 0.0f;
         samplerInfo.minLod = 0.0f;
         samplerInfo.maxLod = static_cast<float>(m_textureImage->getMipCount());
-        vkCreateSampler(m_logicalDevice, &samplerInfo, nullptr, &m_textureSampler);
+        vkCreateSampler((VkDevice)m_logicalDevice, &samplerInfo, nullptr, &m_textureSampler);
 
         return m_textureSampler;
     }
@@ -335,7 +335,7 @@ namespace blink
     {
         if (m_textureSampler != VK_NULL_HANDLE)
         {
-            vkDestroySampler(m_logicalDevice, m_textureSampler, nullptr);
+            vkDestroySampler((VkDevice)m_logicalDevice, m_textureSampler, nullptr);
             m_textureSampler = VK_NULL_HANDLE;
         }
     }

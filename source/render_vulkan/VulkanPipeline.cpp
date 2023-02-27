@@ -35,7 +35,10 @@ namespace blink
 
     bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology)
     {
-        if (m_pipeline != VK_NULL_HANDLE) return true;
+        if (m_pipeline != VK_NULL_HANDLE)
+        {
+            return true;
+        }
 
         m_vertexShader = vertexShader;
         m_fragmentShader = fragmentShader;
@@ -51,10 +54,16 @@ namespace blink
         }
 
         std::vector<uint8_t> vertexShaderCode;
-        if (!File::readFileIntoBuffer(vertexShaderCode, m_vertexShader)) return false;
+        if (!File::readFileIntoBuffer(vertexShaderCode, m_vertexShader))
+        {
+            return false;
+        }
 
         std::vector<uint8_t> fragmentShaderCode;
-        if (!File::readFileIntoBuffer(fragmentShaderCode, m_fragmentShader)) return false;
+        if (!File::readFileIntoBuffer(fragmentShaderCode, m_fragmentShader))
+        {
+            return false;
+        }
 
         // generate vertex input desc
         std::vector<VkVertexInputBindingDescription> vertexInputBindings;
@@ -125,9 +134,9 @@ namespace blink
             }
         }
 
-        vkUpdateDescriptorSets(m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
+        vkUpdateDescriptorSets((VkDevice)m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+        vkCmdBindDescriptorSets((VkCommandBuffer)commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
         return true;
     }
@@ -135,7 +144,10 @@ namespace blink
     VulkanUniformBlock* VulkanPipeline::getUniformBlock(UniformBinding binding)
     {
         auto it = m_uniformBlocks.find(static_cast<uint32_t>(binding));
-        if (it == m_uniformBlocks.end()) return nullptr;
+        if (it == m_uniformBlocks.end())
+        {
+            return nullptr;
+        }
 
         return &it->second;
     }
@@ -143,7 +155,10 @@ namespace blink
     int VulkanPipeline::getUniformWriteSetIndexFromBinding(UniformBinding binding)
     {
         auto it = m_uniformWriteSetIndexMap.find(static_cast<uint32_t>(binding));
-        if (it == m_uniformWriteSetIndexMap.end()) return -1;
+        if (it == m_uniformWriteSetIndexMap.end())
+        {
+            return -1;
+        }
 
         return it->second;
     }
@@ -152,14 +167,17 @@ namespace blink
     {
         destroyDescriptorSetLayout();
 
-        if (layoutBindings.empty()) return VK_NULL_HANDLE;
+        if (layoutBindings.empty())
+        {
+            return VK_NULL_HANDLE;
+        }
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
-        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout))
+        VK_CHECK_RESULT(vkCreateDescriptorSetLayout((VkDevice)m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout))
         return m_descriptorSetLayout;
     }
 
@@ -167,7 +185,7 @@ namespace blink
     {
         if (m_descriptorSetLayout != VK_NULL_HANDLE)
         {
-            vkDestroyDescriptorSetLayout(m_logicalDevice, m_descriptorSetLayout, nullptr);
+            vkDestroyDescriptorSetLayout((VkDevice)m_logicalDevice, m_descriptorSetLayout, nullptr);
             m_descriptorSetLayout = VK_NULL_HANDLE;
         }
     }
@@ -195,7 +213,7 @@ namespace blink
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
+        VK_CHECK_RESULT(vkCreatePipelineLayout((VkDevice)m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
 
         VkShaderModule vertShaderModule = createShaderModule(vertexShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
@@ -230,7 +248,10 @@ namespace blink
 
         // viewport state
         VkViewport viewport{0.0f, 0.0f, static_cast<float>(surfaceSize.x), static_cast<float>(surfaceSize.y), 0.0f, 1.0f};
-        VkRect2D scissor{{0, 0}, {static_cast<uint32_t>(surfaceSize.x), static_cast<uint32_t>(surfaceSize.y)}};
+        VkRect2D scissor{
+            {                                   0,                                    0},
+            {static_cast<uint32_t>(surfaceSize.x), static_cast<uint32_t>(surfaceSize.y)}
+        };
         VkPipelineViewportStateCreateInfo viewportState{};
         viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportState.viewportCount = 1;
@@ -297,12 +318,12 @@ namespace blink
         pipelineInfo.pColorBlendState = &colorBlending;
         pipelineInfo.pDynamicState = &dynamicState;
         pipelineInfo.layout = m_pipelineLayout;
-        pipelineInfo.renderPass = m_renderPass;
+        pipelineInfo.renderPass = (VkRenderPass)m_renderPass;
         pipelineInfo.subpass = 0;
 
-        VK_CHECK_RESULT(vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline))
-        vkDestroyShaderModule(m_logicalDevice, fragShaderModule, nullptr);
-        vkDestroyShaderModule(m_logicalDevice, vertShaderModule, nullptr);
+        VK_CHECK_RESULT(vkCreateGraphicsPipelines((VkDevice)m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline))
+        vkDestroyShaderModule((VkDevice)m_logicalDevice, fragShaderModule, nullptr);
+        vkDestroyShaderModule((VkDevice)m_logicalDevice, vertShaderModule, nullptr);
 
         return m_pipeline;
     }
@@ -311,13 +332,13 @@ namespace blink
     {
         if (m_pipeline != VK_NULL_HANDLE)
         {
-            vkDestroyPipeline(m_logicalDevice, m_pipeline, nullptr);
+            vkDestroyPipeline((VkDevice)m_logicalDevice, m_pipeline, nullptr);
             m_pipeline = VK_NULL_HANDLE;
         }
 
         if (m_pipelineLayout != VK_NULL_HANDLE)
         {
-            vkDestroyPipelineLayout(m_logicalDevice, m_pipelineLayout, nullptr);
+            vkDestroyPipelineLayout((VkDevice)m_logicalDevice, m_pipelineLayout, nullptr);
             m_pipelineLayout = VK_NULL_HANDLE;
         }
     }
@@ -330,7 +351,7 @@ namespace blink
         createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
         VkShaderModule shaderModule{};
-        VK_CHECK_RESULT(vkCreateShaderModule(m_logicalDevice, &createInfo, nullptr, &shaderModule))
+        VK_CHECK_RESULT(vkCreateShaderModule((VkDevice)m_logicalDevice, &createInfo, nullptr, &shaderModule))
         return shaderModule;
     }
 

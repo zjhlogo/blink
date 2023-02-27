@@ -34,7 +34,10 @@ namespace blink
         template <typename T> bool setUniformMember(const tstring& memberName, const T* value)
         {
             auto it = m_nameToIndexMap.find(memberName);
-            if (it == m_nameToIndexMap.end()) return false;
+            if (it == m_nameToIndexMap.end())
+            {
+                return false;
+            }
 
             return setUniformMember(it->second, value);
         }
@@ -42,7 +45,10 @@ namespace blink
         template <typename T> bool setUniformMember(int memberIndex, const T* value)
         {
             const auto& memberInfo = m_memberInfoList[memberIndex];
-            if (getUniformType<T>() != memberInfo.type) return false;
+            if (getUniformType<T>() != memberInfo.type)
+            {
+                return false;
+            }
 
             T* pData = reinterpret_cast<T*>(m_bufferData.data() + memberInfo.offset);
             *pData = *value;
@@ -52,7 +58,10 @@ namespace blink
         template <typename T> bool getUniformMember(T* valueOut, const tstring& memberName)
         {
             auto it = m_nameToIndexMap.find(memberName);
-            if (it == m_nameToIndexMap.end()) return false;
+            if (it == m_nameToIndexMap.end())
+            {
+                return false;
+            }
 
             return getUniformMember(valueOut, it->second);
         }
@@ -60,21 +69,24 @@ namespace blink
         template <typename T> bool getUniformMember(T* valueOut, int memberIndex)
         {
             const auto& memberInfo = m_memberInfoList[memberIndex];
-            if (getUniformType<T>() != memberInfo.type) return false;
+            if (getUniformType<T>() != memberInfo.type)
+            {
+                return false;
+            }
 
             *valueOut = *reinterpret_cast<T*>(m_bufferData.data() + memberInfo.offset);
             return true;
         }
 
-        const tstring& getMemberName(int memberIndex) const;
-        UniformType getMemberType(int memberIndex) const;
-        int getMemberCount() const { return static_cast<int>(m_memberInfoList.size()); }
-        const void* getBufferData() const { return m_bufferData.data(); }
-        uint32_t getBufferSize() const { return m_uniformStructSize; }
+        [[nodiscard]] const tstring& getMemberName(int memberIndex) const;
+        [[nodiscard]] UniformType getMemberType(int memberIndex) const;
+        [[nodiscard]] int getMemberCount() const { return static_cast<int>(m_memberInfoList.size()); }
+        [[nodiscard]] const void* getBufferData() const { return m_bufferData.data(); }
+        [[nodiscard]] uint32_t getBufferSize() const { return m_uniformStructSize; }
 
     private:
         static uint32_t calculateSize(UniformType type);
-        uint32_t calculateOffset(UniformType type) const;
+        [[nodiscard]] uint32_t calculateOffset(UniformType type) const;
 
     private:
         uint32_t m_uniformStructSize{};

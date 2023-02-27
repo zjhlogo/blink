@@ -18,7 +18,7 @@
 #include <render_vulkan/VulkanLogicalDevice.h>
 #include <render_vulkan/VulkanRenderModule.h>
 #include <render_vulkan/VulkanRenderPass.h>
-#include <render_vulkan/VulkanSwapchain.h>
+#include <render_vulkan/VulkanSwapChain.h>
 #include <render_vulkan/VulkanWindow.h>
 
 #include <algorithm>
@@ -48,28 +48,30 @@ bool ImguiRenderSystem::initialize()
     auto& context = renderModule->getContext();
     auto& logicalDevice = renderModule->getLogicalDevice();
     auto& renderPass = renderModule->getRenderPass();
-    auto& swapchain = renderModule->getSwapchain();
+    auto& swapchain = renderModule->getSwapChain();
 
     // Create Descriptor Pool
     {
-        VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-                                             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-                                             {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-                                             {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-                                             {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-                                             {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-                                             {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+        VkDescriptorPoolSize pool_sizes[] = {
+            {               VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+            {         VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+            {         VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+            {  VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+            {  VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+            {        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+            {        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+            {      VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
+        };
         VkDescriptorPoolCreateInfo pool_info = {};
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
         pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
         pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
         pool_info.pPoolSizes = pool_sizes;
-        vkCreateDescriptorPool(logicalDevice, &pool_info, nullptr, &m_imguiPool);
+        vkCreateDescriptorPool((VkDevice)logicalDevice, &pool_info, nullptr, &m_imguiPool);
     }
 
     // Setup Dear ImGui context
@@ -97,13 +99,13 @@ bool ImguiRenderSystem::initialize()
     }
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForVulkan(*context.getWindow(), true);
+    ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)*context.getWindow(), true);
 
     // this initializes imgui for Vulkan
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = context.getInstance();
     init_info.PhysicalDevice = context.getPickedPhysicalDevice();
-    init_info.Device = logicalDevice;
+    init_info.Device = (VkDevice)logicalDevice;
     init_info.QueueFamily = logicalDevice.getGraphicsFamilyIndex();
     init_info.Queue = logicalDevice.getGraphicsQueue();
     init_info.PipelineCache = VK_NULL_HANDLE;
@@ -114,14 +116,14 @@ bool ImguiRenderSystem::initialize()
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.Allocator = VK_NULL_HANDLE;
     init_info.CheckVkResultFn = imguiCheckVkResult;
-    ImGui_ImplVulkan_Init(&init_info, renderPass);
+    ImGui_ImplVulkan_Init(&init_info, (VkRenderPass)renderPass);
 
     // Upload Fonts
     {
         // Use any command queue
         logicalDevice.executeCommand([](const blink::VulkanCommandBuffer& commandBuffer) {
             //
-            ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
+            ImGui_ImplVulkan_CreateFontsTexture((VkCommandBuffer)commandBuffer);
         });
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
@@ -138,7 +140,7 @@ void ImguiRenderSystem::terminate()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    vkDestroyDescriptorPool(logicalDevice, m_imguiPool, nullptr);
+    vkDestroyDescriptorPool((VkDevice)logicalDevice, m_imguiPool, nullptr);
 }
 
 void ImguiRenderSystem::render()
@@ -172,7 +174,7 @@ void ImguiRenderSystem::render()
 
     if (!main_is_minimized)
     {
-        ImGui_ImplVulkan_RenderDrawData(main_draw_data, renderModule->getCommandBuffer());
+        ImGui_ImplVulkan_RenderDrawData(main_draw_data, (VkCommandBuffer)renderModule->getCommandBuffer());
     }
 
     // Update and Render additional Platform Windows

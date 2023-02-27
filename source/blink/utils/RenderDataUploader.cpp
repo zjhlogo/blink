@@ -85,11 +85,11 @@ void RenderDataUploader::uploadEntityPushConstant(EntityRenderData& entityRender
 
     auto& pipeline = material->getPipeline();
 
-    blink::VulkanPipeline::PushConstantData pushConstantData;
+    blink::VulkanPipeline::PushConstantData pushConstantData{};
     pushConstantData.localToWorld = glm::translate(glm::identity<glm::mat4>(), entityRenderData.pos) * glm::mat4_cast(entityRenderData.rot);
     pushConstantData.localToWorldInvT = glm::transpose(glm::inverse(glm::mat3(pushConstantData.localToWorld)));
 
-    vkCmdPushConstants(commandBuffer,
+    vkCmdPushConstants((VkCommandBuffer)commandBuffer,
                        pipeline.getPipelineLayout(),
                        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                        0,

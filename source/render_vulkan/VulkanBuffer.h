@@ -21,26 +21,26 @@ namespace blink
         explicit VulkanBuffer(VulkanLogicalDevice& logicalDevice);
         ~VulkanBuffer();
 
-        VulkanBuffer(const VulkanBuffer& buffer) = delete;
-        VulkanBuffer(VulkanBuffer&& buffer) = delete;
-        VulkanBuffer& operator=(const VulkanBuffer& buffer) = delete;
-        VulkanBuffer& operator=(VulkanBuffer&& buffer) = delete;
+        VulkanBuffer(const VulkanBuffer&) = delete;
+        VulkanBuffer(VulkanBuffer&&) = delete;
+        VulkanBuffer& operator=(const VulkanBuffer&) = delete;
+        VulkanBuffer& operator=(VulkanBuffer&&) = delete;
 
-        operator VkBuffer() const { return m_buffer; }
+        explicit operator VkBuffer() const { return m_buffer; }
 
         VkBuffer createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
         void destroyBuffer();
 
         VkBuffer createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
         void uploadBuffer(const void* data, VkDeviceSize bufferSize);
-        void uploadBuffer(VulkanMemory::CustomCopyCb cb);
+        void uploadBuffer(const VulkanMemory::CustomCopyCb& cb);
         void copyBuffer(const VulkanBuffer* src) const;
 
         VulkanMemory* allocateBufferMemory(VkMemoryPropertyFlags memProperties);
         void destroyBufferMemory();
 
-        VulkanMemory* getBufferMemory() const { return m_bufferMemory; }
-        VkDeviceSize getBufferSize() const { return m_bufferSize; }
+        [[nodiscard]] VulkanMemory* getBufferMemory() const { return m_bufferMemory; }
+        [[nodiscard]] VkDeviceSize getBufferSize() const { return m_bufferSize; }
 
     protected:
         VulkanLogicalDevice& m_logicalDevice;

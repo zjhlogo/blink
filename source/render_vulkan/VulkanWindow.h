@@ -28,8 +28,8 @@ namespace blink
         VulkanWindow& operator=(const VulkanWindow&) = delete;
         VulkanWindow& operator=(VulkanWindow&&) = delete;
 
-        operator GLFWwindow*() { return m_window; }
-        const glm::ivec2& getFrameBufferSize() const { return m_frameBufferSize; }
+        explicit operator GLFWwindow*() { return m_window; }
+        [[nodiscard]] const glm::ivec2& getFrameBufferSize() const { return m_frameBufferSize; }
 
         bool create(const glm::ivec2& windowSize);
         void destroy();

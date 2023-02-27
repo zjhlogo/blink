@@ -16,29 +16,29 @@ namespace blink
 {
     static void frameBufferResizeCallback(GLFWwindow* window, int width, int height)
     {
-        //
+        // TODO:
         // auto renderModule = static_cast<VulkanRenderModule*>(glfwGetWindowUserPointer(window));
         // renderModule->setFrameBufferResized(true);
     }
 
     static void mousePositionCallback(GLFWwindow* window, double xPos, double yPos)
     {
-        //
+        // TODO:
     }
 
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     {
-        //
+        // TODO:
     }
 
     static void mouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
     {
-        //
+        // TODO:
     }
 
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-        //
+        // TODO:
     }
 
     VulkanWindow::~VulkanWindow()
@@ -49,7 +49,10 @@ namespace blink
 
     bool VulkanWindow::create(const glm::ivec2& windowSize)
     {
-        if (!createWindow(windowSize)) return false;
+        if (!createWindow(windowSize))
+        {
+            return false;
+        }
         return true;
     }
 
@@ -81,7 +84,10 @@ namespace blink
 
         /* Create a windowed mode window and its OpenGL context */
         m_window = glfwCreateWindow(windowSize.x, windowSize.y, "blink", nullptr, nullptr);
-        if (!m_window) return false;
+        if (!m_window)
+        {
+            return false;
+        }
 
         glfwSetWindowUserPointer(m_window, this);
         glfwSetFramebufferSizeCallback(m_window, frameBufferResizeCallback);

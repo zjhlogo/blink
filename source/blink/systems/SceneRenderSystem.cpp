@@ -164,9 +164,9 @@ void SceneRenderSystem::render()
                         RenderDataUploader::uploadEntityPushConstant(entityRenderData, cameraId, vulkanMaterial, commandBuffer);
 
                         // update vertex input and uniform buffers
-                        vulkanMaterial->updateBufferInfos(commandBuffer, static_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
+                        vulkanMaterial->updateBufferInfos(commandBuffer, dynamic_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
 
-                        vkCmdDrawIndexed(commandBuffer, entityRenderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed((VkCommandBuffer)commandBuffer, entityRenderData.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
                 }
             }
@@ -195,9 +195,9 @@ void SceneRenderSystem::render()
                         RenderDataUploader::uploadEntityPushConstant(entityRenderData, cameraId, vulkanMaterial, commandBuffer);
 
                         // update vertex input and uniform buffers
-                        vulkanMaterial->updateBufferInfos(commandBuffer, static_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
+                        vulkanMaterial->updateBufferInfos(commandBuffer, dynamic_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
 
-                        vkCmdDrawIndexed(commandBuffer, entityRenderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed((VkCommandBuffer)commandBuffer, entityRenderData.geometry->getNumIndices(), 1, 0, 0, 0);
                     }
                 }
             }

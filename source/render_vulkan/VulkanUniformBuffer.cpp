@@ -15,7 +15,8 @@
 
 namespace blink
 {
-    VulkanUniformBuffer::VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice) : m_logicalDevice(logicalDevice)
+    VulkanUniformBuffer::VulkanUniformBuffer(VulkanLogicalDevice& logicalDevice)
+        : m_logicalDevice(logicalDevice)
     {
         //
     }
@@ -26,19 +27,19 @@ namespace blink
         destroy();
     }
 
-    VulkanUniformBuffer::operator VkBuffer() const
-    {
-        //
-        return *m_gpuBuffer;
-    }
-
     bool VulkanUniformBuffer::create(VkDeviceSize size)
     {
         destroy();
 
         m_gpuBuffer = new VulkanBuffer(m_logicalDevice);
-        if (!m_gpuBuffer->createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_SHARING_MODE_EXCLUSIVE)) return false;
-        if (!m_gpuBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) return false;
+        if (!m_gpuBuffer->createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_SHARING_MODE_EXCLUSIVE))
+        {
+            return false;
+        }
+        if (!m_gpuBuffer->allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+        {
+            return false;
+        }
 
         m_memBuffer.resize(size);
         m_currentPos = 0;
@@ -68,13 +69,16 @@ namespace blink
 
     bool VulkanUniformBuffer::appendData(const void* data, VkDeviceSize size, VkDescriptorBufferInfo* bufferInfoOut)
     {
-        if (size + m_currentPos > m_memBuffer.size()) return false;
+        if (size + m_currentPos > m_memBuffer.size())
+        {
+            return false;
+        }
 
         std::memcpy(&m_memBuffer[m_currentPos], data, size);
 
         if (bufferInfoOut != nullptr)
         {
-            bufferInfoOut->buffer = *m_gpuBuffer;
+            bufferInfoOut->buffer = (VkBuffer)*m_gpuBuffer;
             bufferInfoOut->offset = m_currentPos;
             bufferInfoOut->range = size;
         }
@@ -88,7 +92,10 @@ namespace blink
     {
         auto align = m_logicalDevice.getMinUniformBufferOffsetAlignment();
         auto newPos = ((m_currentPos + align - 1) / align) * align;
-        if (newPos >= m_memBuffer.size()) return false;
+        if (newPos >= m_memBuffer.size())
+        {
+            return false;
+        }
 
         m_currentPos = newPos;
         return true;

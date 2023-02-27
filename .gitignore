@@ -11,3 +11,5 @@ CTestTestfile.cmake
 /bin/*
 !/bin/assets
 /bin/assets/shaders/compiled/*.spv
+cmake-build-debug-visual-studio
+cmake-build-release-visual-studio

@@ -21,8 +21,6 @@
 #include <foundation/PathParser.h>
 #include <tinygltf/json.hpp>
 
-#include <filesystem>
-
 namespace blink
 {
     VulkanMaterial::VulkanMaterial(VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass)
@@ -41,7 +39,7 @@ namespace blink
     void VulkanMaterial::bindPipeline(const VulkanCommandBuffer& commandBuffer)
     {
         //
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipeline);
+        vkCmdBindPipeline((VkCommandBuffer)commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, (VkPipeline)*m_pipeline);
     }
 
     bool VulkanMaterial::updateBufferInfos(const VulkanCommandBuffer& commandBuffer, const VulkanGeometry* geometry)
@@ -60,23 +58,23 @@ namespace blink
         // set line width when necessary
         if (m_topology == PrimitiveTopology::LineList)
         {
-            vkCmdSetLineWidth(commandBuffer, 1.0f);
+            vkCmdSetLineWidth((VkCommandBuffer)commandBuffer, 1.0f);
         }
 
         // setup vertex buffer
-        VkBuffer buffer = *geometry->getVulkanBuffer();
+        auto buffer = (VkBuffer)*geometry->getVulkanBuffer();
         for (int i = 0; i < VertexAttrs::count_; ++i)
         {
             VertexAttrs::underlying_type currVertexAttr = 1 << i;
             if (pipelineVertexAttrs.contains(currVertexAttr))
             {
                 auto offset = geometry->getVertexInputOffset(currVertexAttr);
-                vkCmdBindVertexBuffers(commandBuffer, i, 1, &buffer, &offset);
+                vkCmdBindVertexBuffers((VkCommandBuffer)commandBuffer, i, 1, &buffer, &offset);
             }
         }
 
         // setup index buffer
-        vkCmdBindIndexBuffer(commandBuffer, buffer, geometry->getIndicesOffset(), VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer((VkCommandBuffer)commandBuffer, buffer, geometry->getIndicesOffset(), VK_INDEX_TYPE_UINT16);
 
         // bind uniforms
         return m_pipeline->bindDescriptorSets(commandBuffer, m_descriptorInfoList);

@@ -1,5 +1,5 @@
 /*!
- * \file VulkanSwapchain.h
+ * \file VulkanSwapChain.h
  *
  * \author zjhlogo
  * \date 2020/04/11
@@ -20,28 +20,28 @@ namespace blink
     class VulkanRenderPass;
     class VulkanFrameBuffer;
 
-    class VulkanSwapchain
+    class VulkanSwapChain
     {
     public:
-        VulkanSwapchain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass);
-        ~VulkanSwapchain();
+        VulkanSwapChain(VulkanWindow& window, VulkanLogicalDevice& logicalDevice, VulkanRenderPass& renderPass);
+        ~VulkanSwapChain();
 
-        VulkanSwapchain(const VulkanSwapchain&) = delete;
-        VulkanSwapchain(VulkanSwapchain&&) = delete;
-        VulkanSwapchain& operator=(const VulkanSwapchain&) = delete;
-        VulkanSwapchain& operator=(VulkanSwapchain&&) = delete;
+        VulkanSwapChain(const VulkanSwapChain&) = delete;
+        VulkanSwapChain(VulkanSwapChain&&) = delete;
+        VulkanSwapChain& operator=(const VulkanSwapChain&) = delete;
+        VulkanSwapChain& operator=(VulkanSwapChain&&) = delete;
 
         bool create();
         bool recreate();
 
-        operator VkSwapchainKHR() const { return m_swapChain; }
-        VkFormat getImageFormat() const { return m_swapChainImageFormat; }
-        const VkExtent2D& getImageExtent() const { return m_swapChainExtent; }
-        std::size_t getImageCount() const { return m_images.size(); }
+        explicit operator VkSwapchainKHR() const { return m_swapChain; }
+        [[nodiscard]] VkFormat getImageFormat() const { return m_swapChainImageFormat; }
+        [[nodiscard]] const VkExtent2D& getImageExtent() const { return m_swapChainExtent; }
+        [[nodiscard]] std::size_t getImageCount() const { return m_images.size(); }
         VulkanFrameBuffer& getCurrentActiveFrameBuffer() { return *m_swapChainFrameBuffers[m_activeImageIndex]; }
 
         void setCurrentActiveImageIndex(uint32_t imageIndex) { m_activeImageIndex = imageIndex; }
-        uint32_t getCurrentActiveImageIndex() { return m_activeImageIndex; }
+        [[nodiscard]] uint32_t getCurrentActiveImageIndex() const { return m_activeImageIndex; }
 
     private:
         bool createSwapChain();

@@ -29,14 +29,14 @@ namespace blink
         VulkanUniformBuffer& operator=(const VulkanUniformBuffer& buffer) = delete;
         VulkanUniformBuffer& operator=(VulkanUniformBuffer&& buffer) = delete;
 
-        operator VkBuffer() const;
+        explicit operator VkBuffer() const { return (VkBuffer)*m_gpuBuffer; }
 
         bool create(VkDeviceSize size = DEFAULT_UBO_SIZE);
         void destroy();
         void reset();
         void flushBuffer();
 
-        size_t getCurrentPos() const { return m_currentPos; }
+        [[nodiscard]] size_t getCurrentPos() const { return m_currentPos; }
         bool appendData(const void* data, VkDeviceSize size, VkDescriptorBufferInfo* bufferInfoOut = nullptr);
 
     private:

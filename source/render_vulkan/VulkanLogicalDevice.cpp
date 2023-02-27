@@ -31,13 +31,22 @@ namespace blink
 
     bool VulkanLogicalDevice::create()
     {
-        if (!createLogicalDevice()) return false;
+        if (!createLogicalDevice())
+        {
+            return false;
+        }
 
         m_commandPool = new VulkanCommandPool(*this);
-        if (!m_commandPool->create()) return false;
+        if (!m_commandPool->create())
+        {
+            return false;
+        }
 
         m_descriptorPool = new VulkanDescriptorPool(*this);
-        if (!m_descriptorPool->create()) return false;
+        if (!m_descriptorPool->create())
+        {
+            return false;
+        }
 
         return true;
     }

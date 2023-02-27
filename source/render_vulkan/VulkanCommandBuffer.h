@@ -20,15 +20,15 @@ namespace blink
         VulkanCommandBuffer(VulkanLogicalDevice& logicalDevice, VulkanCommandPool& commandPool);
         ~VulkanCommandBuffer();
 
-        VulkanCommandBuffer(const VulkanCommandBuffer& buffer) = delete;
-        VulkanCommandBuffer(VulkanCommandBuffer&& buffer) = delete;
-        VulkanCommandBuffer& operator=(const VulkanCommandBuffer& buffer) = delete;
-        VulkanCommandBuffer& operator=(VulkanCommandBuffer&& buffer) = delete;
+        VulkanCommandBuffer(const VulkanCommandBuffer&) = delete;
+        VulkanCommandBuffer(VulkanCommandBuffer&&) = delete;
+        VulkanCommandBuffer& operator=(const VulkanCommandBuffer&) = delete;
+        VulkanCommandBuffer& operator=(VulkanCommandBuffer&&) = delete;
 
         bool create();
         void destroy();
 
-        operator VkCommandBuffer() const { return m_commandBuffer; }
+        explicit operator VkCommandBuffer() const { return m_commandBuffer; }
 
         void submitCommand();
 

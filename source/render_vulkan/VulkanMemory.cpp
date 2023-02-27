@@ -33,7 +33,7 @@ namespace blink
         allocInfo.allocationSize = requirement.size;
         allocInfo.memoryTypeIndex = m_logicalDevice.getContext()->findMemoryType(requirement.memoryTypeBits, memoryProperties);
 
-        VK_CHECK_RESULT(vkAllocateMemory(m_logicalDevice, &allocInfo, nullptr, &m_memory))
+        VK_CHECK_RESULT_BOOL(vkAllocateMemory((VkDevice)m_logicalDevice, &allocInfo, nullptr, &m_memory))
         return true;
     }
 
@@ -41,31 +41,37 @@ namespace blink
     {
         if (m_memory != VK_NULL_HANDLE)
         {
-            vkFreeMemory(m_logicalDevice, m_memory, nullptr);
+            vkFreeMemory((VkDevice)m_logicalDevice, m_memory, nullptr);
             m_memory = VK_NULL_HANDLE;
         }
     }
 
     bool VulkanMemory::uploadData(const void* srcData, VkDeviceSize srcDataSize, VkDeviceSize destOffset)
     {
-        if (srcDataSize <= 0) return false;
+        if (srcDataSize <= 0)
+        {
+            return false;
+        }
 
         void* mappedBuffer{};
-        vkMapMemory(m_logicalDevice, m_memory, destOffset, srcDataSize, 0, &mappedBuffer);
+        vkMapMemory((VkDevice)m_logicalDevice, m_memory, destOffset, srcDataSize, 0, &mappedBuffer);
         memcpy(mappedBuffer, srcData, srcDataSize);
-        vkUnmapMemory(m_logicalDevice, m_memory);
+        vkUnmapMemory((VkDevice)m_logicalDevice, m_memory);
 
         return true;
     }
 
     bool VulkanMemory::uploadData(VkDeviceSize destOffset, VkDeviceSize destDataSize, const CustomCopyCb& cb)
     {
-        if (destDataSize <= 0) return false;
+        if (destDataSize <= 0)
+        {
+            return false;
+        }
 
         void* mappedBuffer{};
-        vkMapMemory(m_logicalDevice, m_memory, destOffset, destDataSize, 0, &mappedBuffer);
+        vkMapMemory((VkDevice)m_logicalDevice, m_memory, destOffset, destDataSize, 0, &mappedBuffer);
         cb(mappedBuffer, destDataSize);
-        vkUnmapMemory(m_logicalDevice, m_memory);
+        vkUnmapMemory((VkDevice)m_logicalDevice, m_memory);
 
         return true;
     }

@@ -46,8 +46,8 @@ VulkanResourceModule.cpp
 VulkanResourceModule.h
 VulkanSemaphore.cpp
 VulkanSemaphore.h
-VulkanSwapchain.cpp
-VulkanSwapchain.h
+        VulkanSwapChain.cpp
+        VulkanSwapChain.h
 VulkanUniformBlock.cpp
 VulkanUniformBlock.h
 VulkanUniformBuffer.cpp

@@ -47,7 +47,7 @@ namespace blink
         bool uploadUniformDescriptorBufferInfo(UniformBinding binding, const VkDescriptorBufferInfo& bufferInfo);
         bool updateBufferInfos(const VulkanCommandBuffer& commandBuffer, const VulkanGeometry* geometry);
 
-        VulkanPipeline& getPipeline() const { return *m_pipeline; }
+        [[nodiscard]] VulkanPipeline& getPipeline() const { return *m_pipeline; }
 
     protected:
         bool setUniform(const tstring& memberName, UniformType type, const void* data) override;

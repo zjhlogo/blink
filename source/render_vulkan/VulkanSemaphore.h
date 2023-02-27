@@ -19,12 +19,12 @@ namespace blink
         explicit VulkanSemaphore(VulkanLogicalDevice& logicalDevice);
         ~VulkanSemaphore();
 
-        VulkanSemaphore(const VulkanSemaphore& semaphore) = delete;
-        VulkanSemaphore(VulkanSemaphore&& semaphore) = delete;
-        VulkanSemaphore& operator=(const VulkanSemaphore& semaphore) = delete;
-        VulkanSemaphore& operator=(VulkanSemaphore&& semaphore) = delete;
+        VulkanSemaphore(const VulkanSemaphore&) = delete;
+        VulkanSemaphore(VulkanSemaphore&&) = delete;
+        VulkanSemaphore& operator=(const VulkanSemaphore&) = delete;
+        VulkanSemaphore& operator=(VulkanSemaphore&&) = delete;
 
-        operator VkSemaphore() { return m_semaphore; }
+        explicit operator VkSemaphore() { return m_semaphore; }
 
         bool create();
         void destroy();
