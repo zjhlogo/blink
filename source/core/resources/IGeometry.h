@@ -29,9 +29,7 @@ namespace blink
     public:
         void release() override;
 
-        virtual bool uploadData(const std::vector<uint16_t>& indices,
-                                const std::vector<glm::vec3>& positions,
-                                const std::vector<Color>& colors) = 0;
+        virtual bool uploadData(const std::vector<uint16_t>& indices, const std::vector<glm::vec3>& positions, const std::vector<Color>& colors) = 0;
 
         virtual bool uploadData(const std::vector<uint16_t>& indices,
                                 const std::vector<glm::vec3>& positions,
@@ -47,11 +45,11 @@ namespace blink
                                 std::size_t offsetUv0,
                                 std::size_t offsetIndices) = 0;
 
-        uint32_t getNumVertices() const { return m_numVertices; }
-        uint32_t getNumIndices() const { return m_numIndices; }
+        [[nodiscard]] uint32_t getNumVertices() const { return m_numVertices; }
+        [[nodiscard]] uint32_t getNumIndices() const { return m_numIndices; }
 
-        bool hasVertexAttrs(VertexAttrs requiredVertexAttrs) const;
-        PrimitiveTopology getTopology() const { return m_topology; }
+        [[nodiscard]] bool hasVertexAttrs(VertexAttrs requiredVertexAttrs) const;
+        [[nodiscard]] PrimitiveTopology getTopology() const { return m_topology; }
 
     protected:
         uint32_t m_numVertices{};

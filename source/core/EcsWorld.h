@@ -45,7 +45,7 @@ namespace blink
         void step();
 
         flecs::world& getWorld() { return m_world; };
-        uint32_t getFrameTick() const { return m_frameTick; }
+        [[nodiscard]] uint32_t getFrameTick() const { return m_frameTick; }
 
     private:
         flecs::world m_world;

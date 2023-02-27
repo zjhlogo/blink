@@ -15,10 +15,10 @@ namespace blink
     class IResource
     {
     public:
-        const tstring& getId() const { return m_id; };
+        [[nodiscard]] const tstring& getId() const { return m_id; };
         void setId(const tstring& id) { m_id = id; };
 
-        int getRef() { return m_ref; };
+        [[nodiscard]] int getRef() const { return m_ref; };
         int incRef() { return ++m_ref; };
         int decRef() { return --m_ref; };
 

@@ -17,7 +17,7 @@ namespace blink
     class VulkanRenderPass
     {
     public:
-        VulkanRenderPass(VulkanLogicalDevice& logicalDevice);
+        explicit VulkanRenderPass(VulkanLogicalDevice& logicalDevice);
         ~VulkanRenderPass();
 
         VulkanRenderPass(const VulkanRenderPass&) = delete;

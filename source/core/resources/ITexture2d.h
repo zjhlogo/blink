@@ -14,7 +14,7 @@ namespace blink
     class ITexture2d : public ITexture
     {
     public:
-        virtual void release() override;
+        void release() override;
 
     };
 } // namespace blink

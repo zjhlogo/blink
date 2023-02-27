@@ -32,7 +32,7 @@ namespace blink
         virtual bool processEvent() = 0;
         virtual void render() = 0;
 
-        virtual glm::vec2 getSurfaceSize() const = 0;
+        [[nodiscard]] virtual glm::vec2 getSurfaceSize() const = 0;
 
         virtual void waitIdle() = 0;
 

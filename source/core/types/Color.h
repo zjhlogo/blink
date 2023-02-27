@@ -22,7 +22,7 @@ namespace blink
             uint8_t a;
         };
 
-        Color(uint32_t c)
+        explicit Color(uint32_t c)
         {
             // 
             value = c;
@@ -36,7 +36,7 @@ namespace blink
             this->a = a;
         }
 
-        inline glm::vec4 operator()(const Color& color)
+        inline glm::vec4 operator()(const Color& color) const
         {
             //
             return glm::vec4(r, g, b, a) * 0.00392f;

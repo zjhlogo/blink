@@ -10,7 +10,6 @@
 #include "VulkanImage.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanWindow.h"
-#include "resources/VulkanTexture.h"
 #include "utils/VulkanUtils.h"
 
 namespace blink
