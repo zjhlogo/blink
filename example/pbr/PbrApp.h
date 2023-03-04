@@ -8,8 +8,8 @@
  *********************************************************************/
 #pragma once
 
-#include <blink/app.h>
-#include <guis/IGuiWindow.h>
+#include "blink/app.h"
+#include "common/guis/IGuiWindow.h"
 
 class PbrApp : public blink::IApp, public IGuiWindow
 {
@@ -17,6 +17,9 @@ public:
     virtual void onGui() override;
 
 protected:
+    bool startup() override;
+    void shutdown() override;
+
     bool initializeLogicalSystems() override;
     bool initializeRenderSystems() override;
 };

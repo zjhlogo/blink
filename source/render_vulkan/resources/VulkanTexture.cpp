@@ -64,7 +64,7 @@ namespace blink
         else
         {
             // load ldr texture
-            stbi_set_flip_vertically_on_load(true);
+            stbi_set_flip_vertically_on_load(false);
             stbi_info_from_memory(buffer.data(), static_cast<int>(buffer.size()), &texWidth, &texHeight, &texChannels);
 
             int finalChannels = STBI_default;

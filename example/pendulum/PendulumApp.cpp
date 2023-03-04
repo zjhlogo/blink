@@ -16,7 +16,7 @@
 
 #include <blink/blink.h>
 #include <imgui/imgui.h>
-#include <render_systems/ImguiRenderSystem.h>
+#include <common/render_systems/ImguiRenderSystem.h>
 
 bool PendulumApp::initializeLogicalSystems()
 {

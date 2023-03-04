@@ -6,6 +6,7 @@
  * \date   4/15 2022
  *********************************************************************/
 #include "DebugLineSystem.h"
+#include "../geometries_builder/LineListBuilder.h"
 
 #include <blink/components/Components.h>
 #include <core/EcsWorld.h>
@@ -16,9 +17,11 @@ namespace blink
 {
     bool DebugLineSystem::initialize()
     {
+        m_lineListBuilder = new LineListBuilder();
+
         auto resourceModule = getResourceModule();
         m_debugMaterial = resourceModule->createMaterial("/materials/debug_line.mtl");
-        m_debugGeometry = resourceModule->createGeometry(m_lineListBuilder.getUniqueId(), PrimitiveTopology::LineList);
+        m_debugGeometry = resourceModule->createGeometry(m_lineListBuilder->getUniqueId(), PrimitiveTopology::LineList);
 
         auto& world = m_ecsWorld->getWorld();
 
@@ -26,6 +29,7 @@ namespace blink
         m_debugEntity = world.entity("debug");
         m_debugEntity.set<Position>({glm::zero<glm::vec3>()});
         m_debugEntity.set<Rotation>({glm::identity<glm::quat>()});
+        m_debugEntity.set<Scale>({glm::one<glm::vec3>()});
         m_debugEntity.set<Renderable>({RenderLayers::DEBUG});
         m_debugEntity.set<StaticModel>({m_debugGeometry, m_debugMaterial});
         m_debugEntity.set<RenderFeature>({RenderOrders::STATIC_OPAQUE, RenderLayers::DEBUG, m_debugMaterial});
@@ -37,6 +41,7 @@ namespace blink
     {
         SAFE_RELEASE(m_debugGeometry);
         SAFE_RELEASE(m_debugMaterial);
+        SAFE_DELETE(m_lineListBuilder);
     }
 
     void DebugLineSystem::framePostUpdate()
@@ -50,22 +55,22 @@ namespace blink
                 auto forward = glm::rotate(rot.value, glm::forward());
                 auto right = glm::rotate(rot.value, glm::right());
 
-                m_lineListBuilder.addLine(pos.value, pos.value + up * debug.lineLength, Color::GREEN);
-                m_lineListBuilder.addLine(pos.value, pos.value + forward * debug.lineLength, Color::BLUE);
-                m_lineListBuilder.addLine(pos.value, pos.value + right * debug.lineLength, Color::RED);
+                m_lineListBuilder->addLine(pos.value, pos.value + up * debug.lineLength, Color::GREEN);
+                m_lineListBuilder->addLine(pos.value, pos.value + forward * debug.lineLength, Color::BLUE);
+                m_lineListBuilder->addLine(pos.value, pos.value + right * debug.lineLength, Color::RED);
             });
         }
 
         // flush debug geometry
-        m_lineListBuilder.build(m_debugGeometry);
+        m_lineListBuilder->build(m_debugGeometry);
 
         // reset debug lines
-        m_lineListBuilder.reset();
+        m_lineListBuilder->reset();
     }
 
     void DebugLineSystem::addLine(const glm::vec3& p1, const glm::vec3& p2, const Color& color)
     {
         //
-        m_lineListBuilder.addLine(p1, p2, color);
+        m_lineListBuilder->addLine(p1, p2, color);
     }
 } // namespace blink

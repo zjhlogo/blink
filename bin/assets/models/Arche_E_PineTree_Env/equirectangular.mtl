@@ -5,7 +5,7 @@
     "textures" : [
         {
             "name" : "texSampler",
-            "path" : "Arches_E_PineTree_Env.hdr"
+            "path" : "Arches_E_PineTree_3k.hdr"
         }
     ]
 }

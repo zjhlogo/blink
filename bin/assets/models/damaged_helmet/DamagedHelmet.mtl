@@ -25,8 +25,20 @@
             "path" : "Default_albedo.jpg"
         },
         {
+            "name" : "texNormal",
+            "path" : "Default_normal.jpg"
+        },
+        {
             "name" : "texMetallicRoughness",
             "path" : "Default_metalRoughness.jpg"
+        },
+        {
+            "name" : "texAmbientOcclusion",
+            "path" : "Default_AO.jpg"
+        },
+        {
+            "name" : "texEmissive",
+            "path" : "Default_emissive.jpg"
         },
         {
             "name" : "texIrradiance",

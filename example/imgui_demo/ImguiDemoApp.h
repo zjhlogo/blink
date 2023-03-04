@@ -8,7 +8,7 @@
 #pragma once
 
 #include <blink/app.h>
-#include <guis/IGuiWindow.h>
+#include <common/guis/IGuiWindow.h>
 
 class ImguiDemoApp final : public blink::IApp
 {

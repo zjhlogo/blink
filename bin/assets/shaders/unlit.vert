@@ -11,5 +11,5 @@ layout(location = 0) out vec2 fragTexCoord;
 void main()
 {
     gl_Position = cu.matWorldToProjection * pushData.matLocalToWorld * vec4(inPosition, 1.0);
-    fragTexCoord = vec2(inTexCoord.x, inTexCoord.y);
+    fragTexCoord = inTexCoord;
 }

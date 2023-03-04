@@ -10,7 +10,7 @@
 #include <blink/app.h>
 #include <blink/geometries_builder/MeshBuilder.h>
 #include <foundation/PathParser.h>
-#include <guis/IGuiWindow.h>
+#include <common/guis/IGuiWindow.h>
 
 namespace blink
 {
@@ -33,13 +33,13 @@ public:
 public:
     virtual void onGui() override;
 
-    bool initialize() override;
-    void terminate() override;
-
     bool loadModel(const blink::tstring& modelFilePath);
     void unloadModel();
 
 protected:
+    bool startup() override;
+    void shutdown() override;
+
     bool initializeLogicalSystems() override;
     bool initializeRenderSystems() override;
 

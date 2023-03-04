@@ -22,7 +22,10 @@ void RenderDataUploader::uploadFrameUniforms(FrameRenderData& frameRenderData, b
 
     auto& pipeline = material->getPipeline();
     auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Frame);
-    if (!uniformBlock) return;
+    if (!uniformBlock)
+    {
+        return;
+    }
 
     // upload per frame uniforms
     uniformBlock->prepareBuffer();
@@ -50,7 +53,10 @@ void RenderDataUploader::uploadCameraUniforms(CameraRenderData& cameraRenderData
 
     auto& pipeline = material->getPipeline();
     auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Camera);
-    if (!uniformBlock) return;
+    if (!uniformBlock)
+    {
+        return;
+    }
 
     auto cameraDir = glm::rotate(cameraRenderData.cameraRot, glm::forward());
     auto up = glm::rotate(cameraRenderData.cameraRot, glm::up());
@@ -86,7 +92,8 @@ void RenderDataUploader::uploadEntityPushConstant(EntityRenderData& entityRender
     auto& pipeline = material->getPipeline();
 
     blink::VulkanPipeline::PushConstantData pushConstantData{};
-    pushConstantData.localToWorld = glm::translate(glm::identity<glm::mat4>(), entityRenderData.pos) * glm::mat4_cast(entityRenderData.rot);
+    pushConstantData.localToWorld = glm::translate(glm::identity<glm::mat4>(), entityRenderData.pos) * glm::mat4_cast(entityRenderData.rot)
+                                    * glm::scale(glm::identity<glm::mat4>(), entityRenderData.scale);
     pushConstantData.localToWorldInvT = glm::transpose(glm::inverse(glm::mat3(pushConstantData.localToWorld)));
 
     vkCmdPushConstants((VkCommandBuffer)commandBuffer,
@@ -113,7 +120,10 @@ void RenderDataUploader::uploadMaterialUniforms(MaterialRenderData& materialRend
 
     auto& pipeline = material->getPipeline();
     auto uniformBlock = pipeline.getUniformBlock(blink::UniformBinding::Material);
-    if (!uniformBlock) return;
+    if (!uniformBlock)
+    {
+        return;
+    }
 
     if (uniformBlock->getBufferData() != nullptr)
     {

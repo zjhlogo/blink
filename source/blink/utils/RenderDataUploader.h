@@ -41,6 +41,7 @@ public:
     {
         glm::vec3 pos;
         glm::quat rot;
+        glm::vec3 scale;
         blink::IGeometry* geometry;
         uint32_t renderLayer;
         int cameraId;

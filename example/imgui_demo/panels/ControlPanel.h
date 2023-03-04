@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <guis/IGuiWindow.h>
+#include <common/guis/IGuiWindow.h>
 
 class ControlPanel final : public IGuiWindow
 {

@@ -10,6 +10,7 @@
 **/
 
 #include "blink.h"
+#include "blink/utils/BuiltinResource.h"
 
 #include <core/modules/IRenderModule.h>
 #include <core/modules/IResourceModule.h>
@@ -32,18 +33,21 @@ namespace blink
         {
             if (resourceModule->initialize())
             {
-                if (app.initialize())
+                if (BuiltinResource::initialize())
                 {
-                    while (renderModule->processEvent())
+                    if (app.initialize())
                     {
-                        app.stepEcsWorld();
-                        renderModule->render();
+                        while (renderModule->processEvent())
+                        {
+                            app.stepEcsWorld();
+                            renderModule->render();
+                        }
+                        renderModule->waitIdle();
                     }
 
-                    renderModule->waitIdle();
+                    app.terminate();
                 }
-
-                app.terminate();
+                BuiltinResource::terminate();
             }
 
             resourceModule->terminate();

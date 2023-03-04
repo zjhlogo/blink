@@ -77,34 +77,38 @@ void SceneRenderSystem::render()
     std::unordered_map<blink::IMaterial*, RenderDataUploader::MaterialRenderData> materialGroups;
     {
         static auto renderObjQuery =
-            world.query_builder<const blink::Position, const blink::Rotation, const blink::Renderable, const blink::StaticModel>().build();
-        renderObjQuery.each(
-            [&](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::Renderable& renderable, const blink::StaticModel& model) {
-                auto material = model.material;
-                if (!material)
-                {
-                    return;
-                }
+            world.query_builder<const blink::Position, const blink::Rotation, const blink::Scale, const blink::Renderable, const blink::StaticModel>().build();
+        renderObjQuery.each([&](flecs::entity e,
+                                const blink::Position& pos,
+                                const blink::Rotation& rot,
+                                const blink::Scale& scale,
+                                const blink::Renderable& renderable,
+                                const blink::StaticModel& model) {
+            auto material = model.material;
+            if (!material)
+            {
+                return;
+            }
 
-                auto geometry = model.geometry;
-                if (!geometry)
-                {
-                    return;
-                }
+            auto geometry = model.geometry;
+            if (!geometry)
+            {
+                return;
+            }
 
-                auto findIt = materialGroups.find(material);
-                if (findIt != materialGroups.end())
-                {
-                    findIt->second.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0});
-                }
-                else
-                {
-                    RenderDataUploader::MaterialRenderData materialRenderData{};
-                    materialRenderData.cameraId = 0;
-                    materialRenderData.entityRenderData.push_back({pos.value, rot.value, geometry, renderable.renderLayer, 0});
-                    materialGroups.emplace(material, materialRenderData);
-                }
-            });
+            auto findIt = materialGroups.find(material);
+            if (findIt != materialGroups.end())
+            {
+                findIt->second.entityRenderData.push_back({pos.value, rot.value, scale.value, geometry, renderable.renderLayer, 0});
+            }
+            else
+            {
+                RenderDataUploader::MaterialRenderData materialRenderData{};
+                materialRenderData.cameraId = 0;
+                materialRenderData.entityRenderData.push_back({pos.value, rot.value, scale.value, geometry, renderable.renderLayer, 0});
+                materialGroups.emplace(material, materialRenderData);
+            }
+        });
     }
 
     // group render features, must ordered

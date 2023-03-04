@@ -1,0 +1,11 @@
+{
+    "vertex_shader" : "/shaders/compiled/unlit.vert.spv",
+    "fragment_shader" : "/shaders/compiled/unlit.frag.spv",
+    
+    "textures" : [
+        {
+            "name" : "texSampler",
+            "path" : "/textures/white.png"
+        }
+    ]
+}

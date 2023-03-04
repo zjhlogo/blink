@@ -6,7 +6,7 @@
  * \date   February 2023
  *********************************************************************/
 #pragma once
-#include <guis/IGuiWindow.h>
+#include <common/guis/IGuiWindow.h>
 
 class MainMenuBar final : public IGuiWindow
 {

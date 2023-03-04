@@ -23,4 +23,9 @@ namespace blink
     {
         glm::quat value;
     };
+
+    struct Scale
+    {
+        glm::vec3 value;
+    };
 } // namespace blink

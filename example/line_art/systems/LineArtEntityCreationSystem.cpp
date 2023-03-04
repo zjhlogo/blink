@@ -35,6 +35,7 @@ bool LineArtEntityCreationSystem::initialize()
         auto plane = world.entity("plane");
         plane.set<blink::Position>({glm::zero<glm::vec3>()});
         plane.set<blink::Rotation>({glm::identity<glm::quat>()});
+        plane.set<blink::Scale>({glm::one<glm::vec3>()});
         plane.set<blink::Renderable>({blink::RenderLayers::NORMAL});
 
         blink::PlaneBuilder builder;
@@ -55,8 +56,6 @@ bool LineArtEntityCreationSystem::initialize()
 
         plane.set<blink::StaticModel>({geometry, m_material});
     }
-
-    world.entity().set<blink::RenderFeature>({blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
 
     return true;
 }

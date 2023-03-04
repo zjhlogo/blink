@@ -6,15 +6,13 @@
  * \date   04/24/2022
  *********************************************************************/
 #include "PbrApp.h"
-#include "systems/PbrEntityCreationSystem.h"
-
-#include <blink/blink.h>
-#include <imgui/imgui.h>
-#include <render_systems/ImguiRenderSystem.h>
+#include "blink/blink.h"
+#include "common/render_systems/ImguiRenderSystem.h"
+#include "common/utils/SceneEntityUtil.h"
 
 bool PbrApp::initializeLogicalSystems()
 {
-    addLogicSystem(new PbrEntityCreationSystem());
+    SceneEntityUtil::initializeCommonLogicalSystems(this);
     return true;
 }
 
@@ -27,16 +25,21 @@ bool PbrApp::initializeRenderSystems()
 
 void PbrApp::onGui()
 {
-    const auto& ecsWorld = getEcsWorld();
-    auto* entityCreation = ecsWorld.findSystem<PbrEntityCreationSystem>();
+}
 
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x, 0.0f), 0, ImVec2(1.0f, 0.0f));
-    ImGui::Begin("Properties", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
+bool PbrApp::startup()
+{
+    auto& ecsWorld = getEcsWorld();
+    if (!SceneEntityUtil::initializeCommonSceneEntities(ecsWorld))
+    {
+        return false;
+    }
 
-    // material property
-    entityCreation->renderMaterialPropertyUi();
+    return true;
+}
 
-    ImGui::End();
+void PbrApp::shutdown()
+{
 }
 
 int main(int argc, char** argv)

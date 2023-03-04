@@ -25,7 +25,4 @@ private:
     bool updateLeftMouseDelta(glm::vec2& mouseDeltaOut);
     bool updateMouseWheelDelta(float& wheelOut);
 
-private:
-    flecs::query<blink::Position, blink::Rotation, LockTargetCameraData> m_cameraQuery;
-
 };

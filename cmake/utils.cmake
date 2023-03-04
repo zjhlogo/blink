@@ -30,7 +30,7 @@ macro(configure_runtime PROJ_NAME OUTPUT_PATH FOLDER_NAME)
 	target_include_directories(${PROJ_NAME} PRIVATE
 		$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
 		$<BUILD_INTERFACE:${PROJECT_ROOT}/source>
-		$<BUILD_INTERFACE:${PROJECT_ROOT}/example/common>
+		$<BUILD_INTERFACE:${PROJECT_ROOT}/example>
 	)
 
 	target_compile_definitions(${PROJ_NAME} PUBLIC

@@ -7,9 +7,6 @@
  *********************************************************************/
 #include "IResourceModule.h"
 
-#include <foundation/PathParser.h>
-
 namespace blink
 {
-
 } // namespace blink

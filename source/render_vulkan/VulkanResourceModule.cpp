@@ -10,6 +10,7 @@
 #include "resources/VulkanGeometryTriangleList.h"
 #include "resources/VulkanMaterial.h"
 #include "resources/VulkanTexture.h"
+#include "core/modules/IResourceModule.h"
 
 #include <foundation/PathParser.h>
 #include <render_vulkan/VulkanCommandPool.h>
@@ -113,7 +114,7 @@ namespace blink
         }
         else
         {
-            LOGE("Unsupport topology of {}", topology);
+            LOGE("Unsupported topology of {}", topology);
             return nullptr;
         }
 

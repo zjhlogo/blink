@@ -7,15 +7,15 @@
  *********************************************************************/
 #pragma once
 
-#include "../geometries_builder/LineListBuilder.h"
-
-#include <core/resources/IGeometry.h>
-#include <core/resources/IMaterial.h>
 #include <core/systems/ILogicalSystem.h>
 #include <core/types/Color.h>
 
 namespace blink
 {
+    class LineListBuilder;
+    class IMaterial;
+    class IGeometry;
+
     class DebugLineSystem : public ILogicalSystem
     {
     public:
@@ -30,7 +30,7 @@ namespace blink
     private:
         flecs::entity m_debugEntity;
 
-        LineListBuilder m_lineListBuilder;
+        LineListBuilder* m_lineListBuilder{};
         IMaterial* m_debugMaterial{};
         IGeometry* m_debugGeometry{};
     };

@@ -4,9 +4,7 @@ include(${PROJECT_ROOT}/cmake/utils.cmake)
 project(pbr)
 
 set(SOURCE_FILES
-systems/PbrEntityCreationSystem.cpp
-systems/PbrEntityCreationSystem.h
-PbrApp.cpp
+        PbrApp.cpp
 PbrApp.h
 )
 

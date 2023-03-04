@@ -36,8 +36,8 @@ namespace blink
         m_vertsPos.push_back(start);
         m_vertsPos.push_back(end);
 
-        m_vertsColor.push_back(color.value);
-        m_vertsColor.push_back(color.value);
+        m_vertsColor.push_back(Color(color.value));
+        m_vertsColor.push_back(Color(color.value));
     }
 
     void LineListBuilder::reset()

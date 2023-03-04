@@ -11,10 +11,13 @@ layout(set = 0, binding = 2) uniform MaterialUniforms
 } mu;
 
 layout(set = 0, binding = 3) uniform sampler2D texAlbedo;
-layout(set = 0, binding = 4) uniform sampler2D texMetallicRoughness;
-layout(set = 0, binding = 5) uniform sampler2D texIrradiance;
+layout(set = 0, binding = 4) uniform sampler2D texNormal;
+layout(set = 0, binding = 5) uniform sampler2D texMetallicRoughness;
+layout(set = 0, binding = 6) uniform sampler2D texAmbientOcclusion;
+layout(set = 0, binding = 7) uniform sampler2D texEmissive;
+layout(set = 0, binding = 8) uniform sampler2D texIrradiance;
 
-const float PI = 3.14159265359;
+const float PI = 3.14159;
 
 layout(location = 0) in vec3 fragNormal;
 layout(location = 1) in vec2 fragTexCoord;
@@ -31,9 +34,9 @@ float D_GGX(float nh, float roughness)
 
 float G_SchlicksmithGGX(float nl, float nv, float roughness)
 {
-    float k = pow(roughness + 1, 2) / 8.0;
-    float gl = nl / mix(nl, 1, k);
-    float gr = nv / mix(nv, 1, k);
+    float k = pow(roughness + 1.0, 2.0) / 8.0;
+    float gl = nl / mix(nl, 1.0, k);
+    float gr = nv / mix(nv, 1.0, k);
     return gl * gr;
 }
 
@@ -66,8 +69,10 @@ void main()
     float nh = clamp(dot(normalDir, halfDir), 0.0001, 1.0);
     vec3 mr = texture(texMetallicRoughness, fragTexCoord).xyz;
 
-    vec3 albedo = texture(texAlbedo, vec2(fragTexCoord.x, 1.0 - fragTexCoord.y)).xyz;
+    vec3 albedo = texture(texAlbedo, fragTexCoord).xyz;
     vec3 irradiance = texture(texIrradiance, sampleSphericalMap(normalDir)).rgb;
+//    vec3 reflectDir = reflect(-viewDir, normalDir);
+//    outColor = textureLod(texIrradiance, sampleSphericalMap(reflectDir), 0.0);
 
     // normal distribution
     float D = D_GGX(nh, mr.y);

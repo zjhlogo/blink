@@ -40,6 +40,7 @@ bool EntityCreationSystem::initialize()
     // light
     m_light = world.entity("light");
     m_light.set<blink::Position>({glm::vec3(200.0f, 200.0f, -200.0f)});
+    m_light.set<blink::Scale>({glm::one<glm::vec3>()});
     m_light.set<blink::LightData>(m_lightData);
 
     glm::mat3 inertiaTensor;
@@ -112,8 +113,6 @@ bool EntityCreationSystem::initialize()
     // e2.set<blink::Position>({glm::vec3(0.5f, 0.0f, 0.0f)});
     // e2.set<blink::Rotation>({glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f))});
     // e2.set<blink::StaticModel>({m_geometry, m_wireframe });
-
-    world.entity().set<blink::RenderFeature>({blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
 
     return true;
 }

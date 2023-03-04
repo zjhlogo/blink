@@ -29,23 +29,38 @@ namespace blink
     bool IApp::initialize()
     {
         // initialize logical systems
-        if (!initializeLogicalSystems()) return false;
+        if (!initializeLogicalSystems())
+        {
+            return false;
+        }
         addLogicSystem(new DebugLineSystem());
-        if (!m_ecsWorld.initialize()) return false;
+        if (!m_ecsWorld.initialize())
+        {
+            return false;
+        }
 
         // initialize render systems
         m_renderModule = getRenderModule();
-        if (!m_renderModule) return false;
+        if (!m_renderModule)
+        {
+            return false;
+        }
         addRenderSystem(new SceneRenderSystem(this));
-        if (!initializeRenderSystems()) return false;
-        if (!m_renderModule->initializeRenderSystems()) return false;
+        if (!initializeRenderSystems())
+        {
+            return false;
+        }
+        if (!m_renderModule->initializeRenderSystems())
+        {
+            return false;
+        }
 
-
-        return true;
+        return startup();
     }
 
     void IApp::terminate()
     {
+        shutdown();
         m_renderModule->terminateRenderSystems();
         m_ecsWorld.terminate();
     }

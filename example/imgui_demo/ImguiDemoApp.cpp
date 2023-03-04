@@ -11,7 +11,7 @@
 #include "panels/MainMenuBar.h"
 
 #include <blink/blink.h>
-#include <render_systems/ImguiRenderSystem.h>
+#include <common/render_systems/ImguiRenderSystem.h>
 
 bool ImguiDemoApp::initializeLogicalSystems()
 {

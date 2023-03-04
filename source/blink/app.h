@@ -24,8 +24,8 @@ namespace blink
         IApp();
         virtual ~IApp();
 
-        virtual bool initialize();
-        virtual void terminate();
+        bool initialize();
+        void terminate();
 
         void stepEcsWorld();
         EcsWorld& getEcsWorld() { return m_ecsWorld; }
@@ -43,6 +43,9 @@ namespace blink
         }
 
     protected:
+        virtual bool startup() { return true; }
+        virtual void shutdown() {}
+
         virtual bool initializeLogicalSystems() = 0;
         virtual bool initializeRenderSystems() = 0;
 
