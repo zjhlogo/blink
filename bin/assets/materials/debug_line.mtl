@@ -1,6 +1,6 @@
 {
-    "vertex_shader" : "/shaders/compiled/debug_line.vert.spv",
-    "fragment_shader" : "/shaders/compiled/debug_line.frag.spv",
+    "vertex_shader" : "/shaders/debug_line.vert.spv",
+    "fragment_shader" : "/shaders/debug_line.frag.spv",
     
     "wireframe" : true,
     "line_list" : true,

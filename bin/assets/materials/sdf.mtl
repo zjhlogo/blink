@@ -1,4 +1,4 @@
 {
-    "vertex_shader" : "/shaders/compiled/sdf.vert.spv",
-    "fragment_shader" : "/shaders/compiled/sdf.frag.spv"
+    "vertex_shader" : "/shaders/sdf.vert.spv",
+    "fragment_shader" : "/shaders/sdf.frag.spv"
 }

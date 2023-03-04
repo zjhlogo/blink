@@ -49,18 +49,23 @@ void SceneRenderSystem::render()
         frameRenderData.time = std::fmodf(world.time(), 3600.0f);
         frameRenderData.screenResolution = surfaceSize;
         static auto lightDataQuery = world.query_builder<const blink::Position, const blink::LightData>().build();
-        lightDataQuery.each([&frameRenderData](flecs::entity e, const blink::Position& pos, const blink::LightData& light) {
-            frameRenderData.lightPos = pos.value;
-            frameRenderData.lightColor = light.color;
-            frameRenderData.lightIntensity = light.intensity;
-        });
+        lightDataQuery.each(
+            [&frameRenderData](flecs::entity e, const blink::Position& pos, const blink::LightData& light) {
+                frameRenderData.lightPos = pos.value;
+                frameRenderData.lightColor = light.color;
+                frameRenderData.lightIntensity = light.intensity;
+            });
     }
 
     // collect camera data into cameraGroups
     std::vector<RenderDataUploader::CameraRenderData> cameraRenderDatas;
     {
-        static auto cameraDataQuery = world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
-        cameraDataQuery.each([&cameraRenderDatas](flecs::entity e, const blink::Position& pos, const blink::Rotation& rot, const blink::CameraData& camera) {
+        static auto cameraDataQuery =
+            world.query_builder<const blink::Position, const blink::Rotation, const blink::CameraData>().build();
+        cameraDataQuery.each([&cameraRenderDatas](flecs::entity e,
+                                                  const blink::Position& pos,
+                                                  const blink::Rotation& rot,
+                                                  const blink::CameraData& camera) {
             // setup perFrame uniforms
             RenderDataUploader::CameraRenderData cameraRenderData{};
 
@@ -76,8 +81,13 @@ void SceneRenderSystem::render()
     // group render object by materials
     std::unordered_map<blink::IMaterial*, RenderDataUploader::MaterialRenderData> materialGroups;
     {
-        static auto renderObjQuery =
-            world.query_builder<const blink::Position, const blink::Rotation, const blink::Scale, const blink::Renderable, const blink::StaticModel>().build();
+        static auto renderObjQuery = world
+                                         .query_builder<const blink::Position,
+                                                        const blink::Rotation,
+                                                        const blink::Scale,
+                                                        const blink::Renderable,
+                                                        const blink::StaticModel>()
+                                         .build();
         renderObjQuery.each([&](flecs::entity e,
                                 const blink::Position& pos,
                                 const blink::Rotation& rot,
@@ -99,19 +109,21 @@ void SceneRenderSystem::render()
             auto findIt = materialGroups.find(material);
             if (findIt != materialGroups.end())
             {
-                findIt->second.entityRenderData.push_back({pos.value, rot.value, scale.value, geometry, renderable.renderLayer, 0});
+                findIt->second.entityRenderData.push_back(
+                    {pos.value, rot.value, scale.value, geometry, renderable.renderLayer, 0});
             }
             else
             {
                 RenderDataUploader::MaterialRenderData materialRenderData{};
                 materialRenderData.cameraId = 0;
-                materialRenderData.entityRenderData.push_back({pos.value, rot.value, scale.value, geometry, renderable.renderLayer, 0});
+                materialRenderData.entityRenderData.push_back(
+                    {pos.value, rot.value, scale.value, geometry, renderable.renderLayer, 0});
                 materialGroups.emplace(material, materialRenderData);
             }
         });
     }
 
-    // group render features, must ordered
+    // group render features, must order
     std::map<int, blink::RenderFeature> featureGroups;
     {
         static auto renderFeatureQuery = world.query_builder<const blink::RenderFeature>().build();
@@ -155,8 +167,14 @@ void SceneRenderSystem::render()
                     vulkanMaterial->bindPipeline(commandBuffer);
 
                     RenderDataUploader::uploadFrameUniforms(frameRenderData, vulkanMaterial, perFrameUniformBuffer);
-                    RenderDataUploader::uploadCameraUniforms(cameraRenderData, cameraId, vulkanMaterial, perFrameUniformBuffer);
-                    RenderDataUploader::uploadMaterialUniforms(materialRenderData, cameraId, vulkanMaterial, perMaterialUniformBuffer);
+                    RenderDataUploader::uploadCameraUniforms(cameraRenderData,
+                                                             cameraId,
+                                                             vulkanMaterial,
+                                                             perFrameUniformBuffer);
+                    RenderDataUploader::uploadMaterialUniforms(materialRenderData,
+                                                               cameraId,
+                                                               vulkanMaterial,
+                                                               perMaterialUniformBuffer);
 
                     for (auto& entityRenderData : materialRenderData.entityRenderData)
                     {
@@ -165,12 +183,22 @@ void SceneRenderSystem::render()
                             continue;
                         }
 
-                        RenderDataUploader::uploadEntityPushConstant(entityRenderData, cameraId, vulkanMaterial, commandBuffer);
+                        RenderDataUploader::uploadEntityPushConstant(entityRenderData,
+                                                                     cameraId,
+                                                                     vulkanMaterial,
+                                                                     commandBuffer);
 
                         // update vertex input and uniform buffers
-                        vulkanMaterial->updateBufferInfos(commandBuffer, dynamic_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
+                        vulkanMaterial->updateBufferInfos(
+                            commandBuffer,
+                            dynamic_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
 
-                        vkCmdDrawIndexed((VkCommandBuffer)commandBuffer, entityRenderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed((VkCommandBuffer)commandBuffer,
+                                         entityRenderData.geometry->getNumIndices(),
+                                         1,
+                                         0,
+                                         0,
+                                         0);
                     }
                 }
             }
@@ -182,9 +210,15 @@ void SceneRenderSystem::render()
                 vulkanMaterial->bindPipeline(commandBuffer);
 
                 RenderDataUploader::uploadFrameUniforms(frameRenderData, vulkanMaterial, perFrameUniformBuffer);
-                RenderDataUploader::uploadCameraUniforms(cameraRenderData, cameraId, vulkanMaterial, perFrameUniformBuffer);
+                RenderDataUploader::uploadCameraUniforms(cameraRenderData,
+                                                         cameraId,
+                                                         vulkanMaterial,
+                                                         perFrameUniformBuffer);
                 RenderDataUploader::MaterialRenderData materialRenderData{};
-                RenderDataUploader::uploadMaterialUniforms(materialRenderData, cameraId, vulkanMaterial, perMaterialUniformBuffer);
+                RenderDataUploader::uploadMaterialUniforms(materialRenderData,
+                                                           cameraId,
+                                                           vulkanMaterial,
+                                                           perMaterialUniformBuffer);
 
                 // render mesh group by material
                 for (auto& kvpMaterial : materialGroups)
@@ -196,12 +230,22 @@ void SceneRenderSystem::render()
                             continue;
                         }
 
-                        RenderDataUploader::uploadEntityPushConstant(entityRenderData, cameraId, vulkanMaterial, commandBuffer);
+                        RenderDataUploader::uploadEntityPushConstant(entityRenderData,
+                                                                     cameraId,
+                                                                     vulkanMaterial,
+                                                                     commandBuffer);
 
                         // update vertex input and uniform buffers
-                        vulkanMaterial->updateBufferInfos(commandBuffer, dynamic_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
+                        vulkanMaterial->updateBufferInfos(
+                            commandBuffer,
+                            dynamic_cast<blink::VulkanGeometry*>(entityRenderData.geometry));
 
-                        vkCmdDrawIndexed((VkCommandBuffer)commandBuffer, entityRenderData.geometry->getNumIndices(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed((VkCommandBuffer)commandBuffer,
+                                         entityRenderData.geometry->getNumIndices(),
+                                         1,
+                                         0,
+                                         0,
+                                         0);
                     }
                 }
             }

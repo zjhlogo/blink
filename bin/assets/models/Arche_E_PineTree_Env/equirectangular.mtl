@@ -1,6 +1,6 @@
 {
-    "vertex_shader" : "/shaders/compiled/equirectangular.vert.spv",
-    "fragment_shader" : "/shaders/compiled/equirectangular.frag.spv",
+    "vertex_shader" : "/shaders/equirectangular.vert.spv",
+    "fragment_shader" : "/shaders/equirectangular.frag.spv",
     
     "textures" : [
         {

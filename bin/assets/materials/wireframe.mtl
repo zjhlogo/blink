@@ -1,6 +1,6 @@
 {
-    "vertex_shader" : "/shaders/compiled/wireframe.vert.spv",
-    "fragment_shader" : "/shaders/compiled/wireframe.frag.spv",
+    "vertex_shader" : "/shaders/wireframe.vert.spv",
+    "fragment_shader" : "/shaders/wireframe.frag.spv",
     
     "wireframe" : true
 }

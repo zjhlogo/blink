@@ -32,7 +32,7 @@ BraceWrapping:
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Custom
 BreakConstructorInitializers: BeforeComma
-ColumnLimit: 160
+ColumnLimit: 120
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 IncludeBlocks: Regroup

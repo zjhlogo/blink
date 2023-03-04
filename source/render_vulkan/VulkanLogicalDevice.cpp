@@ -147,7 +147,7 @@ namespace blink
             deviceCreateInfo.ppEnabledExtensionNames = requiredExtensions.data();
         }
 
-        VK_CHECK_RESULT(vkCreateDevice(m_context->getPickedPhysicalDevice(), &deviceCreateInfo, nullptr, &m_logicalDevice))
+        VK_CHECK_RESULT_VOID(vkCreateDevice(m_context->getPickedPhysicalDevice(), &deviceCreateInfo, nullptr, &m_logicalDevice))
 
         // retrieving queue handles
         vkGetDeviceQueue(m_logicalDevice, m_graphicsFamilyIndex, 0, &m_graphicsQueue);

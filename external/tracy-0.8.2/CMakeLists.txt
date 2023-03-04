@@ -6,36 +6,36 @@ find_package(Threads REQUIRED)
 
 add_library(TracyClient TracyClient.cpp)
 target_compile_features(TracyClient PUBLIC cxx_std_11)
-target_include_directories(TracyClient SYSTEM PUBLIC 
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> 
-    $<INSTALL_INTERFACE:include>)
+target_include_directories(TracyClient SYSTEM PUBLIC
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+                           $<INSTALL_INTERFACE:include>)
 target_link_libraries(
     TracyClient
     PUBLIC
-        Threads::Threads
-        ${CMAKE_DL_LIBS}
+    Threads::Threads
+    ${CMAKE_DL_LIBS}
 )
 
 # Public dependency on some libraries required when using Mingw
-if(WIN32 AND ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+if (WIN32 AND ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
     target_link_libraries(TracyClient PUBLIC ws2_32 dbghelp)
-endif()
+endif ()
 
-if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+if (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     find_library(EXECINFO_LIBRARY NAMES execinfo REQUIRED)
     target_link_libraries(TracyClient PUBLIC ${EXECINFO_LIBRARY})
-endif()
+endif ()
 
 add_library(Tracy::TracyClient ALIAS TracyClient)
 
 macro(set_option option help value)
     option(${option} ${help} ${value})
-    if(${option})
+    if (${option})
         message(STATUS "${option}: ON")
         target_compile_definitions(TracyClient PUBLIC ${option})
-    else()
+    else ()
         message(STATUS "${option}: OFF")
-    endif()
+    endif ()
 endmacro()
 
 set_option(TRACY_ENABLE "Enable profiling" ON)
@@ -52,18 +52,18 @@ set_option(TRACY_NO_EXIT "Client executable does not exit until all profile data
 set_option(TRACY_NO_SAMPLING "Disable call stack sampling" OFF)
 set_option(TRACY_NO_VERIFY "Disable zone validation for C API" OFF)
 set_option(TRACY_NO_VSYNC_CAPTURE "Disable capture of hardware Vsync events" OFF)
-set_option(TRACY_NO_FRAME_IMAGE  "Disable the frame image support and its thread" OFF)
-set_option(TRACY_NO_SYSTEM_TRACING  "Disable systrace sampling" OFF)
+set_option(TRACY_NO_FRAME_IMAGE "Disable the frame image support and its thread" OFF)
+set_option(TRACY_NO_SYSTEM_TRACING "Disable systrace sampling" OFF)
 set_option(TRACY_DELAYED_INIT "Enable delayed initialization of the library (init on first call)" OFF)
 set_option(TRACY_MANUAL_LIFETIME "Enable the manual lifetime management of the profile" OFF)
 set_option(TRACY_FIBERS "Enable fibers support" OFF)
 set_option(TRACY_NO_CRASH_HANDLER "Disable crash handling" OFF)
 set_option(TRACY_TIMER_FALLBACK "Use lower resolution timers" OFF)
 
-if(BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
     target_compile_definitions(TracyClient PRIVATE TRACY_EXPORTS)
     target_compile_definitions(TracyClient PUBLIC TRACY_IMPORTS)
-endif()
+endif ()
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
@@ -117,9 +117,9 @@ set(common_includes
 
 install(TARGETS TracyClient
         EXPORT TracyConfig
-        RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${includes}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${client_includes}

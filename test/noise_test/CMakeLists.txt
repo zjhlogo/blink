@@ -4,14 +4,14 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/utils.cmake)
 project(noise_test)
 
 set(SOURCE_FILES
-module/Crop.cpp
-module/Crop.h
-module/Step.cpp
-module/Step.h
-main.cpp
-noiseutils.cpp
-noiseutils.h
-)
+    module/Crop.cpp
+    module/Crop.h
+    module/Step.cpp
+    module/Step.h
+    main.cpp
+    noiseutils.cpp
+    noiseutils.h
+    )
 
 group_sources("${SOURCE_FILES}")
 
@@ -22,14 +22,14 @@ set(FOLDER_NAME "test")
 add_executable(${PROJ_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJ_NAME} PRIVATE
-	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
-	$<BUILD_INTERFACE:${PROJECT_ROOT}/source>
-)
+                           $<BUILD_INTERFACE:${PROJECT_ROOT}/external>
+                           $<BUILD_INTERFACE:${PROJECT_ROOT}/source>
+                           )
 
 set(ALL_LIBRARIES
-libfoundation
-libnoise
-)
+    libfoundation
+    libnoise
+    )
 
 target_link_libraries(${PROJ_NAME} ${ALL_LIBRARIES})
 
@@ -40,5 +40,5 @@ set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${PROJ_NAME}_D)
 set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${PROJ_NAME})
 set_target_properties(${PROJ_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${OUTPUT_PATH})
 if (NOT ${FOLDER_NAME} STREQUAL "")
-	set_target_properties(${PROJ_NAME} PROPERTIES FOLDER ${FOLDER_NAME})
-endif()
+    set_target_properties(${PROJ_NAME} PROPERTIES FOLDER ${FOLDER_NAME})
+endif ()

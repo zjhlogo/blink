@@ -177,7 +177,7 @@ namespace blink
         layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
-        VK_CHECK_RESULT(vkCreateDescriptorSetLayout((VkDevice)m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout))
+        VK_CHECK_RESULT_VOID(vkCreateDescriptorSetLayout((VkDevice)m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout))
         return m_descriptorSetLayout;
     }
 
@@ -213,7 +213,7 @@ namespace blink
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout((VkDevice)m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
+        VK_CHECK_RESULT_VOID(vkCreatePipelineLayout((VkDevice)m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
 
         VkShaderModule vertShaderModule = createShaderModule(vertexShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
@@ -321,7 +321,7 @@ namespace blink
         pipelineInfo.renderPass = (VkRenderPass)m_renderPass;
         pipelineInfo.subpass = 0;
 
-        VK_CHECK_RESULT(vkCreateGraphicsPipelines((VkDevice)m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline))
+        VK_CHECK_RESULT_VOID(vkCreateGraphicsPipelines((VkDevice)m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline))
         vkDestroyShaderModule((VkDevice)m_logicalDevice, fragShaderModule, nullptr);
         vkDestroyShaderModule((VkDevice)m_logicalDevice, vertShaderModule, nullptr);
 
@@ -351,7 +351,7 @@ namespace blink
         createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
         VkShaderModule shaderModule{};
-        VK_CHECK_RESULT(vkCreateShaderModule((VkDevice)m_logicalDevice, &createInfo, nullptr, &shaderModule))
+        VK_CHECK_RESULT_VOID(vkCreateShaderModule((VkDevice)m_logicalDevice, &createInfo, nullptr, &shaderModule))
         return shaderModule;
     }
 

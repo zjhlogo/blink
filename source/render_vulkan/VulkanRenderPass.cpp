@@ -100,7 +100,7 @@ namespace blink
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        VK_CHECK_RESULT(vkCreateRenderPass((VkDevice)m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass))
+        VK_CHECK_RESULT_VOID(vkCreateRenderPass((VkDevice)m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass))
         return m_renderPass;
     }
 

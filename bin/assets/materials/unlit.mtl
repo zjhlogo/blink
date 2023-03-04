@@ -1,11 +1,11 @@
 {
-    "vertex_shader" : "/shaders/compiled/unlit.vert.spv",
-    "fragment_shader" : "/shaders/compiled/unlit.frag.spv",
+    "vertex_shader" : "/shaders/unlit.vert.spv",
+    "fragment_shader" : "/shaders/unlit.frag.spv",
     
     "textures" : [
         {
             "name" : "texSampler",
-            "path" : "/grid.png"
+            "path" : "/textures/grid.png"
         }
     ]
 }

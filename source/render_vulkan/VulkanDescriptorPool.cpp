@@ -74,7 +74,7 @@ namespace blink
         allocInfo.pSetLayouts = &layout;
 
         VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkAllocateDescriptorSets((VkDevice)m_logicalDevice, &allocInfo, &descriptorSet))
+        VK_CHECK_RESULT_VOID(vkAllocateDescriptorSets((VkDevice)m_logicalDevice, &allocInfo, &descriptorSet))
         return descriptorSet;
     }
 } // namespace blink

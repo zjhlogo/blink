@@ -140,13 +140,16 @@ namespace blink
     {
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        createInfo.messageSeverity =
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        createInfo.messageType =
-            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+                                     | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+                                     | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+                                 | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+                                 | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
 
-        VK_CHECK_RESULT_BOOL(VulkanUtils::createDebugUtilsMessengerExt(m_instance, &createInfo, nullptr, &m_debugMessenger))
+        VK_CHECK_RESULT_BOOL(
+            VulkanUtils::createDebugUtilsMessengerExt(m_instance, &createInfo, nullptr, &m_debugMessenger))
         return true;
     }
 
@@ -191,7 +194,8 @@ namespace blink
         return false;
     }
 
-    int VulkanContext::getBestFitPhysicalDeviceIndex(const std::vector<VkPhysicalDevice>& physicalDevices, VkSurfaceKHR surface)
+    int VulkanContext::getBestFitPhysicalDeviceIndex(const std::vector<VkPhysicalDevice>& physicalDevices,
+                                                     VkSurfaceKHR surface)
     {
         int index = 0;
         for (auto device : physicalDevices)
@@ -201,12 +205,17 @@ namespace blink
 
             int graphicsFamilyIndex{};
             int presentFamilyIndex{};
-            VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex, presentFamilyIndex, device, surface, queueFamilyProperties);
+            VulkanUtils::getBestFitQueueFamilyPropertyIndex(graphicsFamilyIndex,
+                                                            presentFamilyIndex,
+                                                            device,
+                                                            surface,
+                                                            queueFamilyProperties);
 
             std::vector<VkExtensionProperties> extensions;
             VulkanUtils::enumerateDeviceExtensionProperties(extensions, device);
 
-            bool extensionsSupported = VulkanUtils::checkExtensionsSupported(extensions, VulkanUtils::getRequiredDeviceExtensions());
+            bool extensionsSupported =
+                VulkanUtils::checkExtensionsSupported(extensions, VulkanUtils::getRequiredDeviceExtensions());
 
             VkPhysicalDeviceFeatures supportedFeatures;
             vkGetPhysicalDeviceFeatures(device, &supportedFeatures);

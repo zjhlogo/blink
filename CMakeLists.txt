@@ -20,7 +20,6 @@ option(TRACY_ON_DEMAND "" ON)
 
 add_subdirectory(external/flecs)
 add_subdirectory(external/fmt)
-add_subdirectory(external/glad)
 add_subdirectory(external/glfw3)
 add_subdirectory(external/glm)
 add_subdirectory(external/gtest)

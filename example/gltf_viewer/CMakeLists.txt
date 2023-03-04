@@ -4,9 +4,9 @@ include(${PROJECT_ROOT}/cmake/utils.cmake)
 project(gltf_viewer)
 
 set(SOURCE_FILES
-GltfViewerApp.cpp
-GltfViewerApp.h
-)
+    GltfViewerApp.cpp
+    GltfViewerApp.h
+    )
 
 group_sources("${SOURCE_FILES}")
 configure_runtime(${PROJECT_NAME} ${BIN_ROOT} "example")

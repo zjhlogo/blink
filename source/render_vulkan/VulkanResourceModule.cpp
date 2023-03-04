@@ -25,7 +25,7 @@ namespace blink
         return &vulkanResourceModule;
     }
 
-    const tstring VulkanResourceModule::DEFAULT_TEXTURE = "/pink.png";
+    const tstring VulkanResourceModule::DEFAULT_TEXTURE = "/textures/pink.png";
 
     bool VulkanResourceModule::initialize()
     {

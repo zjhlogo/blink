@@ -4,439 +4,439 @@ include(${PROJECT_ROOT}/cmake/utils.cmake)
 project(libglm)
 
 set(SOURCE_FILES
-detail/_features.hpp
-detail/_fixes.hpp
-detail/_noise.hpp
-detail/_swizzle.hpp
-detail/_swizzle_func.hpp
-detail/_vectorize.hpp
-detail/compute_common.hpp
-detail/compute_vector_relational.hpp
-detail/func_common.inl
-detail/func_common_simd.inl
-detail/func_exponential.inl
-detail/func_exponential_simd.inl
-detail/func_geometric.inl
-detail/func_geometric_simd.inl
-detail/func_integer.inl
-detail/func_integer_simd.inl
-detail/func_matrix.inl
-detail/func_matrix_simd.inl
-detail/func_packing.inl
-detail/func_packing_simd.inl
-detail/func_trigonometric.inl
-detail/func_trigonometric_simd.inl
-detail/func_vector_relational.inl
-detail/func_vector_relational_simd.inl
-detail/glm.cpp
-detail/qualifier.hpp
-detail/setup.hpp
-detail/type_float.hpp
-detail/type_half.hpp
-detail/type_half.inl
-detail/type_mat2x2.hpp
-detail/type_mat2x2.inl
-detail/type_mat2x3.hpp
-detail/type_mat2x3.inl
-detail/type_mat2x4.hpp
-detail/type_mat2x4.inl
-detail/type_mat3x2.hpp
-detail/type_mat3x2.inl
-detail/type_mat3x3.hpp
-detail/type_mat3x3.inl
-detail/type_mat3x4.hpp
-detail/type_mat3x4.inl
-detail/type_mat4x2.hpp
-detail/type_mat4x2.inl
-detail/type_mat4x3.hpp
-detail/type_mat4x3.inl
-detail/type_mat4x4.hpp
-detail/type_mat4x4.inl
-detail/type_mat4x4_simd.inl
-detail/type_quat.hpp
-detail/type_quat.inl
-detail/type_quat_simd.inl
-detail/type_vec1.hpp
-detail/type_vec1.inl
-detail/type_vec2.hpp
-detail/type_vec2.inl
-detail/type_vec3.hpp
-detail/type_vec3.inl
-detail/type_vec4.hpp
-detail/type_vec4.inl
-detail/type_vec4_simd.inl
-ext/matrix_clip_space.hpp
-ext/matrix_clip_space.inl
-ext/matrix_common.hpp
-ext/matrix_common.inl
-ext/matrix_double2x2.hpp
-ext/matrix_double2x2_precision.hpp
-ext/matrix_double2x3.hpp
-ext/matrix_double2x3_precision.hpp
-ext/matrix_double2x4.hpp
-ext/matrix_double2x4_precision.hpp
-ext/matrix_double3x2.hpp
-ext/matrix_double3x2_precision.hpp
-ext/matrix_double3x3.hpp
-ext/matrix_double3x3_precision.hpp
-ext/matrix_double3x4.hpp
-ext/matrix_double3x4_precision.hpp
-ext/matrix_double4x2.hpp
-ext/matrix_double4x2_precision.hpp
-ext/matrix_double4x3.hpp
-ext/matrix_double4x3_precision.hpp
-ext/matrix_double4x4.hpp
-ext/matrix_double4x4_precision.hpp
-ext/matrix_float2x2.hpp
-ext/matrix_float2x2_precision.hpp
-ext/matrix_float2x3.hpp
-ext/matrix_float2x3_precision.hpp
-ext/matrix_float2x4.hpp
-ext/matrix_float2x4_precision.hpp
-ext/matrix_float3x2.hpp
-ext/matrix_float3x2_precision.hpp
-ext/matrix_float3x3.hpp
-ext/matrix_float3x3_precision.hpp
-ext/matrix_float3x4.hpp
-ext/matrix_float3x4_precision.hpp
-ext/matrix_float4x2.hpp
-ext/matrix_float4x2_precision.hpp
-ext/matrix_float4x3.hpp
-ext/matrix_float4x3_precision.hpp
-ext/matrix_float4x4.hpp
-ext/matrix_float4x4_precision.hpp
-ext/matrix_int2x2.hpp
-ext/matrix_int2x2_sized.hpp
-ext/matrix_int2x3.hpp
-ext/matrix_int2x3_sized.hpp
-ext/matrix_int2x4.hpp
-ext/matrix_int2x4_sized.hpp
-ext/matrix_int3x2.hpp
-ext/matrix_int3x2_sized.hpp
-ext/matrix_int3x3.hpp
-ext/matrix_int3x3_sized.hpp
-ext/matrix_int3x4.hpp
-ext/matrix_int3x4_sized.hpp
-ext/matrix_int4x2.hpp
-ext/matrix_int4x2_sized.hpp
-ext/matrix_int4x3.hpp
-ext/matrix_int4x3_sized.hpp
-ext/matrix_int4x4.hpp
-ext/matrix_int4x4_sized.hpp
-ext/matrix_integer.hpp
-ext/matrix_integer.inl
-ext/matrix_projection.hpp
-ext/matrix_projection.inl
-ext/matrix_relational.hpp
-ext/matrix_relational.inl
-ext/matrix_transform.hpp
-ext/matrix_transform.inl
-ext/matrix_uint2x2.hpp
-ext/matrix_uint2x2_sized.hpp
-ext/matrix_uint2x3.hpp
-ext/matrix_uint2x3_sized.hpp
-ext/matrix_uint2x4.hpp
-ext/matrix_uint2x4_sized.hpp
-ext/matrix_uint3x2.hpp
-ext/matrix_uint3x2_sized.hpp
-ext/matrix_uint3x3.hpp
-ext/matrix_uint3x3_sized.hpp
-ext/matrix_uint3x4.hpp
-ext/matrix_uint3x4_sized.hpp
-ext/matrix_uint4x2.hpp
-ext/matrix_uint4x2_sized.hpp
-ext/matrix_uint4x3.hpp
-ext/matrix_uint4x3_sized.hpp
-ext/matrix_uint4x4.hpp
-ext/matrix_uint4x4_sized.hpp
-ext/quaternion_common.hpp
-ext/quaternion_common.inl
-ext/quaternion_common_simd.inl
-ext/quaternion_double.hpp
-ext/quaternion_double_precision.hpp
-ext/quaternion_exponential.hpp
-ext/quaternion_exponential.inl
-ext/quaternion_float.hpp
-ext/quaternion_float_precision.hpp
-ext/quaternion_geometric.hpp
-ext/quaternion_geometric.inl
-ext/quaternion_relational.hpp
-ext/quaternion_relational.inl
-ext/quaternion_transform.hpp
-ext/quaternion_transform.inl
-ext/quaternion_trigonometric.hpp
-ext/quaternion_trigonometric.inl
-ext/scalar_common.hpp
-ext/scalar_common.inl
-ext/scalar_constants.hpp
-ext/scalar_constants.inl
-ext/scalar_int_sized.hpp
-ext/scalar_integer.hpp
-ext/scalar_integer.inl
-ext/scalar_packing.hpp
-ext/scalar_packing.inl
-ext/scalar_reciprocal.hpp
-ext/scalar_reciprocal.inl
-ext/scalar_relational.hpp
-ext/scalar_relational.inl
-ext/scalar_uint_sized.hpp
-ext/scalar_ulp.hpp
-ext/scalar_ulp.inl
-ext/vector_bool1.hpp
-ext/vector_bool1_precision.hpp
-ext/vector_bool2.hpp
-ext/vector_bool2_precision.hpp
-ext/vector_bool3.hpp
-ext/vector_bool3_precision.hpp
-ext/vector_bool4.hpp
-ext/vector_bool4_precision.hpp
-ext/vector_common.hpp
-ext/vector_common.inl
-ext/vector_double1.hpp
-ext/vector_double1_precision.hpp
-ext/vector_double2.hpp
-ext/vector_double2_precision.hpp
-ext/vector_double3.hpp
-ext/vector_double3_precision.hpp
-ext/vector_double4.hpp
-ext/vector_double4_precision.hpp
-ext/vector_float1.hpp
-ext/vector_float1_precision.hpp
-ext/vector_float2.hpp
-ext/vector_float2_precision.hpp
-ext/vector_float3.hpp
-ext/vector_float3_precision.hpp
-ext/vector_float4.hpp
-ext/vector_float4_precision.hpp
-ext/vector_int1.hpp
-ext/vector_int1_sized.hpp
-ext/vector_int2.hpp
-ext/vector_int2_sized.hpp
-ext/vector_int3.hpp
-ext/vector_int3_sized.hpp
-ext/vector_int4.hpp
-ext/vector_int4_sized.hpp
-ext/vector_integer.hpp
-ext/vector_integer.inl
-ext/vector_packing.hpp
-ext/vector_packing.inl
-ext/vector_reciprocal.hpp
-ext/vector_reciprocal.inl
-ext/vector_relational.hpp
-ext/vector_relational.inl
-ext/vector_uint1.hpp
-ext/vector_uint1_sized.hpp
-ext/vector_uint2.hpp
-ext/vector_uint2_sized.hpp
-ext/vector_uint3.hpp
-ext/vector_uint3_sized.hpp
-ext/vector_uint4.hpp
-ext/vector_uint4_sized.hpp
-ext/vector_ulp.hpp
-ext/vector_ulp.inl
-gtc/bitfield.hpp
-gtc/bitfield.inl
-gtc/color_space.hpp
-gtc/color_space.inl
-gtc/constants.hpp
-gtc/constants.inl
-gtc/epsilon.hpp
-gtc/epsilon.inl
-gtc/integer.hpp
-gtc/integer.inl
-gtc/matrix_access.hpp
-gtc/matrix_access.inl
-gtc/matrix_integer.hpp
-gtc/matrix_inverse.hpp
-gtc/matrix_inverse.inl
-gtc/matrix_transform.hpp
-gtc/matrix_transform.inl
-gtc/noise.hpp
-gtc/noise.inl
-gtc/packing.hpp
-gtc/packing.inl
-gtc/quaternion.hpp
-gtc/quaternion.inl
-gtc/quaternion_simd.inl
-gtc/random.hpp
-gtc/random.inl
-gtc/reciprocal.hpp
-gtc/round.hpp
-gtc/round.inl
-gtc/type_aligned.hpp
-gtc/type_precision.hpp
-gtc/type_precision.inl
-gtc/type_ptr.hpp
-gtc/type_ptr.inl
-gtc/ulp.hpp
-gtc/ulp.inl
-gtc/vec1.hpp
-gtx/associated_min_max.hpp
-gtx/associated_min_max.inl
-gtx/bit.hpp
-gtx/bit.inl
-gtx/closest_point.hpp
-gtx/closest_point.inl
-gtx/color_encoding.hpp
-gtx/color_encoding.inl
-gtx/color_space.hpp
-gtx/color_space.inl
-gtx/color_space_YCoCg.hpp
-gtx/color_space_YCoCg.inl
-gtx/common.hpp
-gtx/common.inl
-gtx/compatibility.hpp
-gtx/compatibility.inl
-gtx/component_wise.hpp
-gtx/component_wise.inl
-gtx/dual_quaternion.hpp
-gtx/dual_quaternion.inl
-gtx/easing.hpp
-gtx/easing.inl
-gtx/euler_angles.hpp
-gtx/euler_angles.inl
-gtx/extend.hpp
-gtx/extend.inl
-gtx/extended_min_max.hpp
-gtx/extended_min_max.inl
-gtx/exterior_product.hpp
-gtx/exterior_product.inl
-gtx/fast_exponential.hpp
-gtx/fast_exponential.inl
-gtx/fast_square_root.hpp
-gtx/fast_square_root.inl
-gtx/fast_trigonometry.hpp
-gtx/fast_trigonometry.inl
-gtx/float_notmalize.inl
-gtx/functions.hpp
-gtx/functions.inl
-gtx/gradient_paint.hpp
-gtx/gradient_paint.inl
-gtx/handed_coordinate_space.hpp
-gtx/handed_coordinate_space.inl
-gtx/hash.hpp
-gtx/hash.inl
-gtx/integer.hpp
-gtx/integer.inl
-gtx/intersect.hpp
-gtx/intersect.inl
-gtx/io.hpp
-gtx/io.inl
-gtx/log_base.hpp
-gtx/log_base.inl
-gtx/matrix_cross_product.hpp
-gtx/matrix_cross_product.inl
-gtx/matrix_decompose.hpp
-gtx/matrix_decompose.inl
-gtx/matrix_factorisation.hpp
-gtx/matrix_factorisation.inl
-gtx/matrix_interpolation.hpp
-gtx/matrix_interpolation.inl
-gtx/matrix_major_storage.hpp
-gtx/matrix_major_storage.inl
-gtx/matrix_operation.hpp
-gtx/matrix_operation.inl
-gtx/matrix_query.hpp
-gtx/matrix_query.inl
-gtx/matrix_transform_2d.hpp
-gtx/matrix_transform_2d.inl
-gtx/mixed_product.hpp
-gtx/mixed_product.inl
-gtx/norm.hpp
-gtx/norm.inl
-gtx/normal.hpp
-gtx/normal.inl
-gtx/normalize_dot.hpp
-gtx/normalize_dot.inl
-gtx/number_precision.hpp
-gtx/number_precision.inl
-gtx/optimum_pow.hpp
-gtx/optimum_pow.inl
-gtx/orthonormalize.hpp
-gtx/orthonormalize.inl
-gtx/pca.hpp
-gtx/pca.inl
-gtx/perpendicular.hpp
-gtx/perpendicular.inl
-gtx/polar_coordinates.hpp
-gtx/polar_coordinates.inl
-gtx/projection.hpp
-gtx/projection.inl
-gtx/quaternion.hpp
-gtx/quaternion.inl
-gtx/range.hpp
-gtx/raw_data.hpp
-gtx/raw_data.inl
-gtx/rotate_normalized_axis.hpp
-gtx/rotate_normalized_axis.inl
-gtx/rotate_vector.hpp
-gtx/rotate_vector.inl
-gtx/scalar_multiplication.hpp
-gtx/scalar_relational.hpp
-gtx/scalar_relational.inl
-gtx/spline.hpp
-gtx/spline.inl
-gtx/std_based_type.hpp
-gtx/std_based_type.inl
-gtx/string_cast.hpp
-gtx/string_cast.inl
-gtx/texture.hpp
-gtx/texture.inl
-gtx/transform.hpp
-gtx/transform.inl
-gtx/transform2.hpp
-gtx/transform2.inl
-gtx/type_aligned.hpp
-gtx/type_aligned.inl
-gtx/type_trait.hpp
-gtx/type_trait.inl
-gtx/vec_swizzle.hpp
-gtx/vector_angle.hpp
-gtx/vector_angle.inl
-gtx/vector_query.hpp
-gtx/vector_query.inl
-gtx/wrap.hpp
-gtx/wrap.inl
-simd/common.h
-simd/exponential.h
-simd/geometric.h
-simd/integer.h
-simd/matrix.h
-simd/neon.h
-simd/packing.h
-simd/platform.h
-simd/trigonometric.h
-simd/vector_relational.h
-common.hpp
-exponential.hpp
-ext.hpp
-fwd.hpp
-geometric.hpp
-glm.hpp
-integer.hpp
-mat2x2.hpp
-mat2x3.hpp
-mat2x4.hpp
-mat3x2.hpp
-mat3x3.hpp
-mat3x4.hpp
-mat4x2.hpp
-mat4x3.hpp
-mat4x4.hpp
-matrix.hpp
-packing.hpp
-trigonometric.hpp
-vec2.hpp
-vec3.hpp
-vec4.hpp
-vector_relational.hpp
-)
+    detail/_features.hpp
+    detail/_fixes.hpp
+    detail/_noise.hpp
+    detail/_swizzle.hpp
+    detail/_swizzle_func.hpp
+    detail/_vectorize.hpp
+    detail/compute_common.hpp
+    detail/compute_vector_relational.hpp
+    detail/func_common.inl
+    detail/func_common_simd.inl
+    detail/func_exponential.inl
+    detail/func_exponential_simd.inl
+    detail/func_geometric.inl
+    detail/func_geometric_simd.inl
+    detail/func_integer.inl
+    detail/func_integer_simd.inl
+    detail/func_matrix.inl
+    detail/func_matrix_simd.inl
+    detail/func_packing.inl
+    detail/func_packing_simd.inl
+    detail/func_trigonometric.inl
+    detail/func_trigonometric_simd.inl
+    detail/func_vector_relational.inl
+    detail/func_vector_relational_simd.inl
+    detail/glm.cpp
+    detail/qualifier.hpp
+    detail/setup.hpp
+    detail/type_float.hpp
+    detail/type_half.hpp
+    detail/type_half.inl
+    detail/type_mat2x2.hpp
+    detail/type_mat2x2.inl
+    detail/type_mat2x3.hpp
+    detail/type_mat2x3.inl
+    detail/type_mat2x4.hpp
+    detail/type_mat2x4.inl
+    detail/type_mat3x2.hpp
+    detail/type_mat3x2.inl
+    detail/type_mat3x3.hpp
+    detail/type_mat3x3.inl
+    detail/type_mat3x4.hpp
+    detail/type_mat3x4.inl
+    detail/type_mat4x2.hpp
+    detail/type_mat4x2.inl
+    detail/type_mat4x3.hpp
+    detail/type_mat4x3.inl
+    detail/type_mat4x4.hpp
+    detail/type_mat4x4.inl
+    detail/type_mat4x4_simd.inl
+    detail/type_quat.hpp
+    detail/type_quat.inl
+    detail/type_quat_simd.inl
+    detail/type_vec1.hpp
+    detail/type_vec1.inl
+    detail/type_vec2.hpp
+    detail/type_vec2.inl
+    detail/type_vec3.hpp
+    detail/type_vec3.inl
+    detail/type_vec4.hpp
+    detail/type_vec4.inl
+    detail/type_vec4_simd.inl
+    ext/matrix_clip_space.hpp
+    ext/matrix_clip_space.inl
+    ext/matrix_common.hpp
+    ext/matrix_common.inl
+    ext/matrix_double2x2.hpp
+    ext/matrix_double2x2_precision.hpp
+    ext/matrix_double2x3.hpp
+    ext/matrix_double2x3_precision.hpp
+    ext/matrix_double2x4.hpp
+    ext/matrix_double2x4_precision.hpp
+    ext/matrix_double3x2.hpp
+    ext/matrix_double3x2_precision.hpp
+    ext/matrix_double3x3.hpp
+    ext/matrix_double3x3_precision.hpp
+    ext/matrix_double3x4.hpp
+    ext/matrix_double3x4_precision.hpp
+    ext/matrix_double4x2.hpp
+    ext/matrix_double4x2_precision.hpp
+    ext/matrix_double4x3.hpp
+    ext/matrix_double4x3_precision.hpp
+    ext/matrix_double4x4.hpp
+    ext/matrix_double4x4_precision.hpp
+    ext/matrix_float2x2.hpp
+    ext/matrix_float2x2_precision.hpp
+    ext/matrix_float2x3.hpp
+    ext/matrix_float2x3_precision.hpp
+    ext/matrix_float2x4.hpp
+    ext/matrix_float2x4_precision.hpp
+    ext/matrix_float3x2.hpp
+    ext/matrix_float3x2_precision.hpp
+    ext/matrix_float3x3.hpp
+    ext/matrix_float3x3_precision.hpp
+    ext/matrix_float3x4.hpp
+    ext/matrix_float3x4_precision.hpp
+    ext/matrix_float4x2.hpp
+    ext/matrix_float4x2_precision.hpp
+    ext/matrix_float4x3.hpp
+    ext/matrix_float4x3_precision.hpp
+    ext/matrix_float4x4.hpp
+    ext/matrix_float4x4_precision.hpp
+    ext/matrix_int2x2.hpp
+    ext/matrix_int2x2_sized.hpp
+    ext/matrix_int2x3.hpp
+    ext/matrix_int2x3_sized.hpp
+    ext/matrix_int2x4.hpp
+    ext/matrix_int2x4_sized.hpp
+    ext/matrix_int3x2.hpp
+    ext/matrix_int3x2_sized.hpp
+    ext/matrix_int3x3.hpp
+    ext/matrix_int3x3_sized.hpp
+    ext/matrix_int3x4.hpp
+    ext/matrix_int3x4_sized.hpp
+    ext/matrix_int4x2.hpp
+    ext/matrix_int4x2_sized.hpp
+    ext/matrix_int4x3.hpp
+    ext/matrix_int4x3_sized.hpp
+    ext/matrix_int4x4.hpp
+    ext/matrix_int4x4_sized.hpp
+    ext/matrix_integer.hpp
+    ext/matrix_integer.inl
+    ext/matrix_projection.hpp
+    ext/matrix_projection.inl
+    ext/matrix_relational.hpp
+    ext/matrix_relational.inl
+    ext/matrix_transform.hpp
+    ext/matrix_transform.inl
+    ext/matrix_uint2x2.hpp
+    ext/matrix_uint2x2_sized.hpp
+    ext/matrix_uint2x3.hpp
+    ext/matrix_uint2x3_sized.hpp
+    ext/matrix_uint2x4.hpp
+    ext/matrix_uint2x4_sized.hpp
+    ext/matrix_uint3x2.hpp
+    ext/matrix_uint3x2_sized.hpp
+    ext/matrix_uint3x3.hpp
+    ext/matrix_uint3x3_sized.hpp
+    ext/matrix_uint3x4.hpp
+    ext/matrix_uint3x4_sized.hpp
+    ext/matrix_uint4x2.hpp
+    ext/matrix_uint4x2_sized.hpp
+    ext/matrix_uint4x3.hpp
+    ext/matrix_uint4x3_sized.hpp
+    ext/matrix_uint4x4.hpp
+    ext/matrix_uint4x4_sized.hpp
+    ext/quaternion_common.hpp
+    ext/quaternion_common.inl
+    ext/quaternion_common_simd.inl
+    ext/quaternion_double.hpp
+    ext/quaternion_double_precision.hpp
+    ext/quaternion_exponential.hpp
+    ext/quaternion_exponential.inl
+    ext/quaternion_float.hpp
+    ext/quaternion_float_precision.hpp
+    ext/quaternion_geometric.hpp
+    ext/quaternion_geometric.inl
+    ext/quaternion_relational.hpp
+    ext/quaternion_relational.inl
+    ext/quaternion_transform.hpp
+    ext/quaternion_transform.inl
+    ext/quaternion_trigonometric.hpp
+    ext/quaternion_trigonometric.inl
+    ext/scalar_common.hpp
+    ext/scalar_common.inl
+    ext/scalar_constants.hpp
+    ext/scalar_constants.inl
+    ext/scalar_int_sized.hpp
+    ext/scalar_integer.hpp
+    ext/scalar_integer.inl
+    ext/scalar_packing.hpp
+    ext/scalar_packing.inl
+    ext/scalar_reciprocal.hpp
+    ext/scalar_reciprocal.inl
+    ext/scalar_relational.hpp
+    ext/scalar_relational.inl
+    ext/scalar_uint_sized.hpp
+    ext/scalar_ulp.hpp
+    ext/scalar_ulp.inl
+    ext/vector_bool1.hpp
+    ext/vector_bool1_precision.hpp
+    ext/vector_bool2.hpp
+    ext/vector_bool2_precision.hpp
+    ext/vector_bool3.hpp
+    ext/vector_bool3_precision.hpp
+    ext/vector_bool4.hpp
+    ext/vector_bool4_precision.hpp
+    ext/vector_common.hpp
+    ext/vector_common.inl
+    ext/vector_double1.hpp
+    ext/vector_double1_precision.hpp
+    ext/vector_double2.hpp
+    ext/vector_double2_precision.hpp
+    ext/vector_double3.hpp
+    ext/vector_double3_precision.hpp
+    ext/vector_double4.hpp
+    ext/vector_double4_precision.hpp
+    ext/vector_float1.hpp
+    ext/vector_float1_precision.hpp
+    ext/vector_float2.hpp
+    ext/vector_float2_precision.hpp
+    ext/vector_float3.hpp
+    ext/vector_float3_precision.hpp
+    ext/vector_float4.hpp
+    ext/vector_float4_precision.hpp
+    ext/vector_int1.hpp
+    ext/vector_int1_sized.hpp
+    ext/vector_int2.hpp
+    ext/vector_int2_sized.hpp
+    ext/vector_int3.hpp
+    ext/vector_int3_sized.hpp
+    ext/vector_int4.hpp
+    ext/vector_int4_sized.hpp
+    ext/vector_integer.hpp
+    ext/vector_integer.inl
+    ext/vector_packing.hpp
+    ext/vector_packing.inl
+    ext/vector_reciprocal.hpp
+    ext/vector_reciprocal.inl
+    ext/vector_relational.hpp
+    ext/vector_relational.inl
+    ext/vector_uint1.hpp
+    ext/vector_uint1_sized.hpp
+    ext/vector_uint2.hpp
+    ext/vector_uint2_sized.hpp
+    ext/vector_uint3.hpp
+    ext/vector_uint3_sized.hpp
+    ext/vector_uint4.hpp
+    ext/vector_uint4_sized.hpp
+    ext/vector_ulp.hpp
+    ext/vector_ulp.inl
+    gtc/bitfield.hpp
+    gtc/bitfield.inl
+    gtc/color_space.hpp
+    gtc/color_space.inl
+    gtc/constants.hpp
+    gtc/constants.inl
+    gtc/epsilon.hpp
+    gtc/epsilon.inl
+    gtc/integer.hpp
+    gtc/integer.inl
+    gtc/matrix_access.hpp
+    gtc/matrix_access.inl
+    gtc/matrix_integer.hpp
+    gtc/matrix_inverse.hpp
+    gtc/matrix_inverse.inl
+    gtc/matrix_transform.hpp
+    gtc/matrix_transform.inl
+    gtc/noise.hpp
+    gtc/noise.inl
+    gtc/packing.hpp
+    gtc/packing.inl
+    gtc/quaternion.hpp
+    gtc/quaternion.inl
+    gtc/quaternion_simd.inl
+    gtc/random.hpp
+    gtc/random.inl
+    gtc/reciprocal.hpp
+    gtc/round.hpp
+    gtc/round.inl
+    gtc/type_aligned.hpp
+    gtc/type_precision.hpp
+    gtc/type_precision.inl
+    gtc/type_ptr.hpp
+    gtc/type_ptr.inl
+    gtc/ulp.hpp
+    gtc/ulp.inl
+    gtc/vec1.hpp
+    gtx/associated_min_max.hpp
+    gtx/associated_min_max.inl
+    gtx/bit.hpp
+    gtx/bit.inl
+    gtx/closest_point.hpp
+    gtx/closest_point.inl
+    gtx/color_encoding.hpp
+    gtx/color_encoding.inl
+    gtx/color_space.hpp
+    gtx/color_space.inl
+    gtx/color_space_YCoCg.hpp
+    gtx/color_space_YCoCg.inl
+    gtx/common.hpp
+    gtx/common.inl
+    gtx/compatibility.hpp
+    gtx/compatibility.inl
+    gtx/component_wise.hpp
+    gtx/component_wise.inl
+    gtx/dual_quaternion.hpp
+    gtx/dual_quaternion.inl
+    gtx/easing.hpp
+    gtx/easing.inl
+    gtx/euler_angles.hpp
+    gtx/euler_angles.inl
+    gtx/extend.hpp
+    gtx/extend.inl
+    gtx/extended_min_max.hpp
+    gtx/extended_min_max.inl
+    gtx/exterior_product.hpp
+    gtx/exterior_product.inl
+    gtx/fast_exponential.hpp
+    gtx/fast_exponential.inl
+    gtx/fast_square_root.hpp
+    gtx/fast_square_root.inl
+    gtx/fast_trigonometry.hpp
+    gtx/fast_trigonometry.inl
+    gtx/float_notmalize.inl
+    gtx/functions.hpp
+    gtx/functions.inl
+    gtx/gradient_paint.hpp
+    gtx/gradient_paint.inl
+    gtx/handed_coordinate_space.hpp
+    gtx/handed_coordinate_space.inl
+    gtx/hash.hpp
+    gtx/hash.inl
+    gtx/integer.hpp
+    gtx/integer.inl
+    gtx/intersect.hpp
+    gtx/intersect.inl
+    gtx/io.hpp
+    gtx/io.inl
+    gtx/log_base.hpp
+    gtx/log_base.inl
+    gtx/matrix_cross_product.hpp
+    gtx/matrix_cross_product.inl
+    gtx/matrix_decompose.hpp
+    gtx/matrix_decompose.inl
+    gtx/matrix_factorisation.hpp
+    gtx/matrix_factorisation.inl
+    gtx/matrix_interpolation.hpp
+    gtx/matrix_interpolation.inl
+    gtx/matrix_major_storage.hpp
+    gtx/matrix_major_storage.inl
+    gtx/matrix_operation.hpp
+    gtx/matrix_operation.inl
+    gtx/matrix_query.hpp
+    gtx/matrix_query.inl
+    gtx/matrix_transform_2d.hpp
+    gtx/matrix_transform_2d.inl
+    gtx/mixed_product.hpp
+    gtx/mixed_product.inl
+    gtx/norm.hpp
+    gtx/norm.inl
+    gtx/normal.hpp
+    gtx/normal.inl
+    gtx/normalize_dot.hpp
+    gtx/normalize_dot.inl
+    gtx/number_precision.hpp
+    gtx/number_precision.inl
+    gtx/optimum_pow.hpp
+    gtx/optimum_pow.inl
+    gtx/orthonormalize.hpp
+    gtx/orthonormalize.inl
+    gtx/pca.hpp
+    gtx/pca.inl
+    gtx/perpendicular.hpp
+    gtx/perpendicular.inl
+    gtx/polar_coordinates.hpp
+    gtx/polar_coordinates.inl
+    gtx/projection.hpp
+    gtx/projection.inl
+    gtx/quaternion.hpp
+    gtx/quaternion.inl
+    gtx/range.hpp
+    gtx/raw_data.hpp
+    gtx/raw_data.inl
+    gtx/rotate_normalized_axis.hpp
+    gtx/rotate_normalized_axis.inl
+    gtx/rotate_vector.hpp
+    gtx/rotate_vector.inl
+    gtx/scalar_multiplication.hpp
+    gtx/scalar_relational.hpp
+    gtx/scalar_relational.inl
+    gtx/spline.hpp
+    gtx/spline.inl
+    gtx/std_based_type.hpp
+    gtx/std_based_type.inl
+    gtx/string_cast.hpp
+    gtx/string_cast.inl
+    gtx/texture.hpp
+    gtx/texture.inl
+    gtx/transform.hpp
+    gtx/transform.inl
+    gtx/transform2.hpp
+    gtx/transform2.inl
+    gtx/type_aligned.hpp
+    gtx/type_aligned.inl
+    gtx/type_trait.hpp
+    gtx/type_trait.inl
+    gtx/vec_swizzle.hpp
+    gtx/vector_angle.hpp
+    gtx/vector_angle.inl
+    gtx/vector_query.hpp
+    gtx/vector_query.inl
+    gtx/wrap.hpp
+    gtx/wrap.inl
+    simd/common.h
+    simd/exponential.h
+    simd/geometric.h
+    simd/integer.h
+    simd/matrix.h
+    simd/neon.h
+    simd/packing.h
+    simd/platform.h
+    simd/trigonometric.h
+    simd/vector_relational.h
+    common.hpp
+    exponential.hpp
+    ext.hpp
+    fwd.hpp
+    geometric.hpp
+    glm.hpp
+    integer.hpp
+    mat2x2.hpp
+    mat2x3.hpp
+    mat2x4.hpp
+    mat3x2.hpp
+    mat3x3.hpp
+    mat3x4.hpp
+    mat4x2.hpp
+    mat4x3.hpp
+    mat4x4.hpp
+    matrix.hpp
+    packing.hpp
+    trigonometric.hpp
+    vec2.hpp
+    vec3.hpp
+    vec4.hpp
+    vector_relational.hpp
+    )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-	$<BUILD_INTERFACE:${PROJECT_ROOT}/external>
-)
+                           $<BUILD_INTERFACE:${PROJECT_ROOT}/external>
+                           )
 
 group_sources("${SOURCE_FILES}")
 configure_library(${PROJECT_NAME} "external")

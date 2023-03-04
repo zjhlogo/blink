@@ -36,7 +36,7 @@ namespace blink
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
 
-        VK_CHECK_RESULT(vkAllocateCommandBuffers((VkDevice)m_logicalDevice, &allocInfo, &m_commandBuffer))
+        VK_CHECK_RESULT_VOID(vkAllocateCommandBuffers((VkDevice)m_logicalDevice, &allocInfo, &m_commandBuffer))
         return true;
     }
 

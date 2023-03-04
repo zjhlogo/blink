@@ -1,6 +1,6 @@
 {
-    "vertex_shader" : "/shaders/compiled/simple_lit.vert.spv",
-    "fragment_shader" : "/shaders/compiled/simple_lit.frag.spv",
+    "vertex_shader" : "/shaders/simple_lit.vert.spv",
+    "fragment_shader" : "/shaders/simple_lit.frag.spv",
 
     "uniforms" : [
         {
@@ -13,7 +13,7 @@
     "textures" : [
         {
             "name" : "texSampler",
-            "path" : "/grid.png"
+            "path" : "/textures/grid.png"
         }
     ]
 }

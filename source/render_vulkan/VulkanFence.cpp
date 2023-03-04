@@ -32,7 +32,7 @@ namespace blink
             info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
         }
 
-        VK_CHECK_RESULT(vkCreateFence((VkDevice)m_logicalDevice, &info, nullptr, &m_fence))
+        VK_CHECK_RESULT_VOID(vkCreateFence((VkDevice)m_logicalDevice, &info, nullptr, &m_fence))
         return true;
     }
 

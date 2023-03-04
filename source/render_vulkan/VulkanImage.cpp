@@ -65,7 +65,7 @@ namespace blink
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-        VK_CHECK_RESULT(vkCreateImage((VkDevice)m_logicalDevice, &imageInfo, nullptr, &m_image))
+        VK_CHECK_RESULT_VOID(vkCreateImage((VkDevice)m_logicalDevice, &imageInfo, nullptr, &m_image))
         m_ownedImage = true;
         return m_image;
     }
@@ -108,7 +108,7 @@ namespace blink
         viewInfo.subresourceRange.levelCount = m_mipCount;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
-        VK_CHECK_RESULT(vkCreateImageView((VkDevice)m_logicalDevice, &viewInfo, nullptr, &m_imageView))
+        VK_CHECK_RESULT_VOID(vkCreateImageView((VkDevice)m_logicalDevice, &viewInfo, nullptr, &m_imageView))
 
         m_format = format;
         m_aspectFlags = aspectFlags;
@@ -140,7 +140,7 @@ namespace blink
         m_imageMemory = new VulkanMemory(m_logicalDevice);
         m_imageMemory->allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, memRequirements);
 
-        VK_CHECK_RESULT(vkBindImageMemory((VkDevice)m_logicalDevice, (VkImage)m_image, (VkDeviceMemory)*m_imageMemory, 0))
+        VK_CHECK_RESULT_VOID(vkBindImageMemory((VkDevice)m_logicalDevice, (VkImage)m_image, (VkDeviceMemory)*m_imageMemory, 0))
         return m_imageMemory;
     }
 

@@ -31,7 +31,8 @@ namespace blink
         VkBuffer createBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
         void destroyBuffer();
 
-        VkBuffer createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
+        VkBuffer
+        createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode);
         void uploadBuffer(const void* data, VkDeviceSize bufferSize);
         void uploadBuffer(const VulkanMemory::CustomCopyCb& cb);
         void copyBuffer(const VulkanBuffer* src) const;

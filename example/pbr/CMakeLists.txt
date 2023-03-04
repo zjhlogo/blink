@@ -4,9 +4,9 @@ include(${PROJECT_ROOT}/cmake/utils.cmake)
 project(pbr)
 
 set(SOURCE_FILES
-        PbrApp.cpp
-PbrApp.h
-)
+    PbrApp.cpp
+    PbrApp.h
+    )
 
 group_sources("${SOURCE_FILES}")
 configure_runtime(${PROJECT_NAME} ${BIN_ROOT} "example")

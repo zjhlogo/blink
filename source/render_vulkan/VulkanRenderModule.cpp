@@ -183,7 +183,7 @@ namespace blink
         auto commandBuffer = (VkCommandBuffer)*m_commandBuffer;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        VK_CHECK_RESULT(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE))
+        VK_CHECK_RESULT_VOID(vkQueueSubmit(m_logicalDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE))
 
         auto imageIndex = m_swapChain->getCurrentActiveImageIndex();
 

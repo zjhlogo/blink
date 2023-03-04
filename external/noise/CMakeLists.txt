@@ -4,90 +4,90 @@ include(${PROJECT_ROOT}/cmake/utils.cmake)
 project(libnoise)
 
 set(SOURCE_FILES
-model/cylinder.cpp
-model/cylinder.h
-model/line.cpp
-model/line.h
-model/model.h
-model/plane.cpp
-model/plane.h
-model/sphere.cpp
-model/sphere.h
-module/abs.cpp
-module/abs.h
-module/add.cpp
-module/add.h
-module/billow.cpp
-module/billow.h
-module/blend.cpp
-module/blend.h
-module/cache.cpp
-module/cache.h
-module/checkerboard.cpp
-module/checkerboard.h
-module/clamp.cpp
-module/clamp.h
-module/const.cpp
-module/const.h
-module/curve.cpp
-module/curve.h
-module/cylinders.cpp
-module/cylinders.h
-module/displace.cpp
-module/displace.h
-module/exponent.cpp
-module/exponent.h
-module/gradient.cpp
-module/gradient.h
-module/invert.cpp
-module/invert.h
-module/max.cpp
-module/max.h
-module/min.cpp
-module/min.h
-module/module.h
-module/modulebase.cpp
-module/modulebase.h
-module/multiply.cpp
-module/multiply.h
-module/perlin.cpp
-module/perlin.h
-module/power.cpp
-module/power.h
-module/ridgedmulti.cpp
-module/ridgedmulti.h
-module/rotatedomain.cpp
-module/rotatedomain.h
-module/scalebias.cpp
-module/scalebias.h
-module/scaledomain.cpp
-module/scaledomain.h
-module/select.cpp
-module/select.h
-module/spheres.cpp
-module/spheres.h
-module/terrace.cpp
-module/terrace.h
-module/translatedomain.cpp
-module/translatedomain.h
-module/turbulence.cpp
-module/turbulence.h
-module/voronoi.cpp
-module/voronoi.h
-basictypes.h
-exception.h
-interp.h
-latlon.cpp
-latlon.h
-mathconsts.h
-misc.h
-noise.h
-noisegen.cpp
-noisegen.h
-scalarparameter.cpp
-scalarparameter.h
-vectortable.h
-)
+    model/cylinder.cpp
+    model/cylinder.h
+    model/line.cpp
+    model/line.h
+    model/model.h
+    model/plane.cpp
+    model/plane.h
+    model/sphere.cpp
+    model/sphere.h
+    module/abs.cpp
+    module/abs.h
+    module/add.cpp
+    module/add.h
+    module/billow.cpp
+    module/billow.h
+    module/blend.cpp
+    module/blend.h
+    module/cache.cpp
+    module/cache.h
+    module/checkerboard.cpp
+    module/checkerboard.h
+    module/clamp.cpp
+    module/clamp.h
+    module/const.cpp
+    module/const.h
+    module/curve.cpp
+    module/curve.h
+    module/cylinders.cpp
+    module/cylinders.h
+    module/displace.cpp
+    module/displace.h
+    module/exponent.cpp
+    module/exponent.h
+    module/gradient.cpp
+    module/gradient.h
+    module/invert.cpp
+    module/invert.h
+    module/max.cpp
+    module/max.h
+    module/min.cpp
+    module/min.h
+    module/module.h
+    module/modulebase.cpp
+    module/modulebase.h
+    module/multiply.cpp
+    module/multiply.h
+    module/perlin.cpp
+    module/perlin.h
+    module/power.cpp
+    module/power.h
+    module/ridgedmulti.cpp
+    module/ridgedmulti.h
+    module/rotatedomain.cpp
+    module/rotatedomain.h
+    module/scalebias.cpp
+    module/scalebias.h
+    module/scaledomain.cpp
+    module/scaledomain.h
+    module/select.cpp
+    module/select.h
+    module/spheres.cpp
+    module/spheres.h
+    module/terrace.cpp
+    module/terrace.h
+    module/translatedomain.cpp
+    module/translatedomain.h
+    module/turbulence.cpp
+    module/turbulence.h
+    module/voronoi.cpp
+    module/voronoi.h
+    basictypes.h
+    exception.h
+    interp.h
+    latlon.cpp
+    latlon.h
+    mathconsts.h
+    misc.h
+    noise.h
+    noisegen.cpp
+    noisegen.h
+    scalarparameter.cpp
+    scalarparameter.h
+    vectortable.h
+    )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 

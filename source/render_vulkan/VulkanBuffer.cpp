@@ -37,12 +37,15 @@ namespace blink
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = mode;
 
-        VK_CHECK_RESULT(vkCreateBuffer((VkDevice)m_logicalDevice, &bufferInfo, nullptr, &m_buffer))
+        VK_CHECK_RESULT_VOID(vkCreateBuffer((VkDevice)m_logicalDevice, &bufferInfo, nullptr, &m_buffer))
         m_bufferSize = bufferSize;
         return m_buffer;
     }
 
-    VkBuffer VulkanBuffer::createBufferAndUpload(const void* data, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VkSharingMode mode)
+    VkBuffer VulkanBuffer::createBufferAndUpload(const void* data,
+                                                 VkDeviceSize bufferSize,
+                                                 VkBufferUsageFlags usage,
+                                                 VkSharingMode mode)
     {
         createBuffer(bufferSize, usage, mode);
         uploadBuffer(data, bufferSize);
@@ -55,7 +58,8 @@ namespace blink
         VulkanBuffer stagingBuffer(m_logicalDevice);
         stagingBuffer.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
 
-        auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                                                             | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         stagingMem->uploadData(data, bufferSize, 0);
 
         allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -67,7 +71,8 @@ namespace blink
         VulkanBuffer stagingBuffer(m_logicalDevice);
         stagingBuffer.createBuffer(m_bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
 
-        auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        auto stagingMem = stagingBuffer.allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                                                             | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         stagingMem->uploadData(0, m_bufferSize, cb);
 
         allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -98,7 +103,7 @@ namespace blink
         m_bufferMemory = new VulkanMemory(m_logicalDevice);
         m_bufferMemory->allocateMemory(memProperties, memRequirements);
 
-        VK_CHECK_RESULT(vkBindBufferMemory((VkDevice)m_logicalDevice, m_buffer, (VkDeviceMemory)*m_bufferMemory, 0))
+        VK_CHECK_RESULT_VOID(vkBindBufferMemory((VkDevice)m_logicalDevice, m_buffer, (VkDeviceMemory)*m_bufferMemory, 0))
         return m_bufferMemory;
     }
 
