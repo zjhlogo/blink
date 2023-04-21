@@ -13,11 +13,21 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "")
 set(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 set(BIN_ROOT "${PROJECT_ROOT}/bin")
 set(ASSETS_ROOT "${BIN_ROOT}/assets")
-set(CMAKE_CXX_STANDARD 17)
 
+# Requires C++ 17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+#---------------------------------------------------------------------------
+# tracy
+#---------------------------------------------------------------------------
 option(TRACY_ENABLE "" ON)
 option(TRACY_ON_DEMAND "" ON)
 
+#---------------------------------------------------------------------------
+# sub modules
+#---------------------------------------------------------------------------
 add_subdirectory(external/flecs)
 add_subdirectory(external/fmt)
 add_subdirectory(external/glfw3)
@@ -27,6 +37,7 @@ add_subdirectory(external/imgui)
 add_subdirectory(external/noise)
 add_subdirectory(external/spirv-cross)
 add_subdirectory(external/tracy-0.8.2)
+add_subdirectory(external/jolt_physics)
 
 add_subdirectory(source/foundation)
 add_subdirectory(source/core)
@@ -41,6 +52,7 @@ add_subdirectory(example/line_art)
 add_subdirectory(example/pbr)
 add_subdirectory(example/gltf_viewer)
 add_subdirectory(example/imgui_demo)
+add_subdirectory(example/physics_demo)
 
 add_subdirectory(test/foundation_test)
 add_subdirectory(test/noise_test)

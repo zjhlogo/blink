@@ -25,6 +25,7 @@ namespace blink
         virtual void terminate() = 0;
 
         virtual void framePreUpdate(){};
+        virtual void frameUpdate(float dt){};
         virtual void framePostUpdate(){};
 
         void setEcsWorld(EcsWorld* ecsWorld) { m_ecsWorld = ecsWorld; };

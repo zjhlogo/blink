@@ -12,14 +12,16 @@ set(SOURCE_FILES
     systems/DynamicIntegrateSystem.h
     systems/EndPhysicsSimulationSystem.cpp
     systems/EndPhysicsSimulationSystem.h
-    )
+    JoltPhysicsSystem.cpp
+    JoltPhysicsSystem.h)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} libcore)
+target_link_libraries(${PROJECT_NAME} libcore libjolt_physics)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
                            $<BUILD_INTERFACE:${PROJECT_ROOT}/external>
+                           $<BUILD_INTERFACE:${PROJECT_ROOT}/external/jolt_physics>
                            $<BUILD_INTERFACE:${PROJECT_ROOT}/source>
                            )
 

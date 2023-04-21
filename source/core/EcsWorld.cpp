@@ -89,6 +89,10 @@ namespace blink
 
         //
         m_world.progress(FIXED_DT);
+        for (auto sys : m_logicalSystems)
+        {
+            sys->frameUpdate(FIXED_DT);
+        }
 
         for (auto sys : m_logicalSystems)
         {
