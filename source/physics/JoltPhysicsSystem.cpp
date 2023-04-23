@@ -2,6 +2,7 @@
 // Created by zjhlogo on 2023/4/21.
 //
 #include "JoltPhysicsSystem.h"
+#include "core/components/Components.h"
 
 #include <Jolt/Jolt.h>
 
@@ -161,9 +162,9 @@ namespace blink
         JPH::RegisterTypes();
 
         // Now we can create the actual physics system.
-        BPLayerInterfaceImpl broad_phase_layer_interface;
-        ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
-        ObjectLayerPairFilterImpl object_vs_object_layer_filter;
+        static BPLayerInterfaceImpl broad_phase_layer_interface;
+        static ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
+        static ObjectLayerPairFilterImpl object_vs_object_layer_filter;
 
         m_physicsSystem = new JPH::PhysicsSystem();
         m_physicsSystem->Init(65536,
@@ -173,6 +174,21 @@ namespace blink
                               broad_phase_layer_interface,
                               object_vs_broadphase_layer_filter,
                               object_vs_object_layer_filter);
+
+        // sync rigid body pos and rot
+        JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+        m_ecsWorld->getWorld().system<Position, Rotation, const PhysicsData>().each(
+            [&](flecs::entity e, Position& pos, Rotation& rot, const PhysicsData& pd) {
+                JPH::BodyID bodyId(pd.bodyId);
+
+                JPH::Vec3 phPos;
+                JPH::Quat phRot;
+                bodyInterface.GetPositionAndRotation(bodyId, phPos, phRot);
+
+                pos.value = glm::vec3(phPos.GetX(), phPos.GetY(), phPos.GetZ());
+                rot.value = glm::quat(phRot.GetX(), phRot.GetY(), phRot.GetZ(), phRot.GetW());
+            });
+
         return true;
     }
 
@@ -192,6 +208,69 @@ namespace blink
         static JPH::TempAllocatorImpl temp_allocator(10 * 1024 * 1024);
         static JPH::JobSystemThreadPool job_system(2048, 8, std::thread::hardware_concurrency() - 1);
 
+        if (m_needOptimizeBroadPhase)
+        {
+            m_needOptimizeBroadPhase = false;
+            m_physicsSystem->OptimizeBroadPhase();
+        }
+
         m_physicsSystem->Update(dt, 1, 1, &temp_allocator, &job_system);
     }
+
+    std::uint32_t JoltPhysicsSystem::CreateBox(const glm::vec3& size,
+                                               const glm::vec3& pos,
+                                               const glm::quat& rot,
+                                               PhysicsBodyType type)
+    {
+        JPH::ObjectLayer layer = Layers::NON_MOVING;
+        if (type != PhysicsBodyType::Static)
+        {
+            layer = Layers::MOVING;
+        }
+
+        JPH::BodyCreationSettings boxSetting(new JPH::BoxShape(JPH::Vec3(size.x, size.y, size.z) * 0.5f),
+                                             JPH::Vec3(pos.x, pos.y, pos.z),
+                                             JPH::Quat(rot.x, rot.y, rot.z, rot.w),
+                                             (JPH::EMotionType)type,
+                                             layer);
+
+        JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+        JPH::BodyID boxId = bodyInterface.CreateAndAddBody(boxSetting, JPH::EActivation::Activate);
+
+        m_needOptimizeBroadPhase = true;
+        return boxId.GetIndexAndSequenceNumber();
+    }
+
+    std::uint32_t
+    JoltPhysicsSystem::CreateSphere(float radius, const glm::vec3& pos, const glm::quat& rot, PhysicsBodyType type)
+    {
+        JPH::ObjectLayer layer = Layers::NON_MOVING;
+        if (type != PhysicsBodyType::Static)
+        {
+            layer = Layers::MOVING;
+        }
+
+        JPH::BodyCreationSettings sphereSetting(new JPH::SphereShape(radius),
+                                                JPH::Vec3(pos.x, pos.y, pos.z),
+                                                JPH::Quat(rot.x, rot.y, rot.z, rot.w),
+                                                (JPH::EMotionType)type,
+                                                layer);
+        sphereSetting.mRestitution = 0.5f;
+
+        JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+        JPH::BodyID sphereId = bodyInterface.CreateAndAddBody(sphereSetting, JPH::EActivation::Activate);
+
+        m_needOptimizeBroadPhase = true;
+        return sphereId.GetIndexAndSequenceNumber();
+    }
+
+    void JoltPhysicsSystem::DestroyBody(std::uint32_t bodyId)
+    {
+        JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+
+        JPH::BodyID phBodyId(bodyId);
+        bodyInterface.RemoveBody(phBodyId);
+        bodyInterface.DestroyBody(phBodyId);
+    }
+
 } // namespace blink

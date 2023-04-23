@@ -15,6 +15,7 @@ namespace blink
     {
     public:
         BoxBuilder& size(float width, float height, float depth);
+        BoxBuilder& size(const glm::vec3& sz);
         BoxBuilder& segment(uint16_t widthSegment, uint16_t heightSegment, uint16_t depthSegment);
 
         tstring getUniqueId() const override;

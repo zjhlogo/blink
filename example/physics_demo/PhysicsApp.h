@@ -7,11 +7,26 @@
  *********************************************************************/
 #pragma once
 
+#include "common/guis/IGuiWindow.h"
+
 #include <blink/app.h>
 
-class PhysicsApp final : public blink::IApp
+namespace blink
 {
+    class JoltPhysicsSystem;
+}
+
+class PhysicsApp final : public blink::IApp, public IGuiWindow
+{
+public:
+    void onGui() override;
+
 protected:
     bool initializeLogicalSystems() override;
     bool initializeRenderSystems() override;
+
+    bool startup() override;
+
+private:
+    blink::JoltPhysicsSystem* m_physicsSystem{};
 };

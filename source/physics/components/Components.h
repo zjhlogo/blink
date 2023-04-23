@@ -76,4 +76,16 @@ namespace blink
          */
         glm::vec3 torqueAccum;
     };
+
+    enum class PhysicsBodyType : std::uint8_t
+    {
+        Static,
+        Kinematic,
+        Dynamic
+    };
+
+    struct PhysicsData
+    {
+        std::uint32_t bodyId;
+    };
 } // namespace blink

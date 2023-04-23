@@ -29,12 +29,24 @@ bool SceneEntityUtil::initializeCommonSceneEntities(blink::EcsWorld& ecsWorld)
     const auto& surfaceSize = renderModule->getSurfaceSize();
 
     // camera
-    auto entityCamera = world.entity("main_camera");
-    entityCamera.set<blink::Position>({glm::vec3(0.0f, 0.0f, 10.0f)});
-    entityCamera.set<blink::Rotation>({glm::quatLookAt(glm::forward(), glm::up())});
-    entityCamera.set<blink::Scale>({glm::one<glm::vec3>()});
-    entityCamera.set<blink::CameraData>({glm::perspective(glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f)});
-    entityCamera.set<LockTargetCameraData>({{glm::zero<glm::vec3>()}, glm::zero<glm::vec3>(), 10.0f, 0.01f});
+    {
+        LockTargetCameraData lockTargetCameraData{};
+        lockTargetCameraData.cameraDistance = 10.0f;
+        lockTargetCameraData.rotateSensitive = 0.01f;
+        lockTargetCameraData.eulerRotation.x = -0.3f;
+
+        // calculate the new camera position and rotation
+        auto rot = glm::quat(lockTargetCameraData.eulerRotation);
+        auto pos = glm::rotate(rot, glm::vec3(0.0f, 0.0f, lockTargetCameraData.cameraDistance));
+
+        auto entity = world.entity("main_camera");
+        entity.set<blink::Position>({pos});
+        entity.set<blink::Rotation>({rot});
+        entity.set<blink::Scale>({glm::one<glm::vec3>()});
+        entity.set<blink::CameraData>(
+            {glm::perspective(glm::radians(45.0f), surfaceSize.x / surfaceSize.y, 0.1f, 1000.0f)});
+        entity.set<LockTargetCameraData>(lockTargetCameraData);
+    }
 
     // light
     auto entityLight = world.entity("main_light");
@@ -43,12 +55,14 @@ bool SceneEntityUtil::initializeCommonSceneEntities(blink::EcsWorld& ecsWorld)
     entityLight.set<blink::Scale>({glm::vec3(0.2f, 0.2f, 0.2f)});
     entityLight.set<blink::LightData>({glm::one<glm::vec3>(), 100.0f});
     //    entityLight.set<blink::DebugDrawing>({1.0f});
-    entityLight.set<blink::StaticModel>({blink::BuiltinResource::getSphereGeometry(), blink::BuiltinResource::getUnlitMaterial()});
+    entityLight.set<blink::StaticModel>(
+        {blink::BuiltinResource::getSphereGeometry(), blink::BuiltinResource::getUnlitMaterial()});
     entityLight.set<blink::Renderable>({blink::RenderLayers::STATIC});
 
     // add default render feature
     auto entityRenderFeature = world.entity();
-    entityRenderFeature.set<blink::RenderFeature>({blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
+    entityRenderFeature.set<blink::RenderFeature>(
+        {blink::RenderOrders::DYNAMIC_OPAQUE, blink::RenderLayers::ALL, nullptr});
 
     return true;
 }

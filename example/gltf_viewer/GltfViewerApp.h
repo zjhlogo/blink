@@ -31,7 +31,7 @@ public:
     };
 
 public:
-    virtual void onGui() override;
+    void onGui() override;
 
     bool loadModel(const blink::tstring& modelFilePath);
     void unloadModel();

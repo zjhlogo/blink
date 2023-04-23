@@ -21,6 +21,11 @@ namespace blink
         return *this;
     }
 
+    BoxBuilder& BoxBuilder::size(const glm::vec3& sz)
+    {
+        return size(sz.x, sz.y, sz.z);
+    }
+
     BoxBuilder& BoxBuilder::segment(uint16_t widthSegment, uint16_t heightSegment, uint16_t depthSegment)
     {
         m_segment.x = widthSegment < 1 ? 1 : widthSegment;
