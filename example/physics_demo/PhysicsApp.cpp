@@ -13,6 +13,7 @@
 #include "common/utils/SceneEntityUtil.h"
 #include "core/components/Components.h"
 #include "core/modules/IResourceModule.h"
+#include "fmt/format.h"
 #include "imgui/imgui.h"
 
 #include <blink/blink.h>
@@ -22,7 +23,7 @@ bool PhysicsApp::initializeLogicalSystems()
 {
     SceneEntityUtil::initializeCommonLogicalSystems(this);
 
-    m_physicsSystem = addLogicSystem(new blink::JoltPhysicsSystem());
+    m_physicsSystem = addLogicSystem(new blink::JoltPhysicsSystem(true));
 
     return true;
 }
@@ -88,7 +89,32 @@ bool PhysicsApp::startup()
 
 void PhysicsApp::onGui()
 {
-    ImGui::Begin("Test");
+    ImGui::Begin("Physics World Info");
+
+    auto tick = m_physicsSystem->getFrameTick();
+    ImGui::InputScalar("Frame Tick", ImGuiDataType_U32, &tick);
+
+    auto hash = m_physicsSystem->getFrameHash();
+    ImGui::InputScalar("Frame Hash", ImGuiDataType_U32, &hash);
+
+    if (ImGui::Button("Resume"))
+    {
+        m_physicsSystem->setPause(false);
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Pause"))
+    {
+        m_physicsSystem->setPause(true);
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Step"))
+    {
+        m_physicsSystem->setPause(false);
+        m_physicsSystem->setPauseFrameTick(m_physicsSystem->getFrameTick() + 1);
+    }
+
     ImGui::End();
 }
 

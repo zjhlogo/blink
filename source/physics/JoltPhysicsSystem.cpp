@@ -146,6 +146,11 @@ public:
 
 namespace blink
 {
+    JoltPhysicsSystem::JoltPhysicsSystem(bool pauseOnStartup)
+        : m_pause(pauseOnStartup)
+    {
+    }
+
     bool JoltPhysicsSystem::initialize()
     {
         // Register allocation hook
@@ -177,6 +182,7 @@ namespace blink
 
         // sync rigid body pos and rot
         JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+        std::uint32_t index = 0;
         m_ecsWorld->getWorld().system<Position, Rotation, const PhysicsData>().each(
             [&](flecs::entity e, Position& pos, Rotation& rot, const PhysicsData& pd) {
                 JPH::BodyID bodyId(pd.bodyId);
@@ -187,6 +193,18 @@ namespace blink
 
                 pos.value = glm::vec3(phPos.GetX(), phPos.GetY(), phPos.GetZ());
                 rot.value = glm::quat(phRot.GetX(), phRot.GetY(), phRot.GetZ(), phRot.GetW());
+
+                // dump frame hash
+                m_frameHash ^= index++;
+
+                m_frameHash ^= *(std::uint32_t*)&pos.value.x;
+                m_frameHash ^= *(std::uint32_t*)&pos.value.y;
+                m_frameHash ^= *(std::uint32_t*)&pos.value.z;
+
+                m_frameHash ^= *(std::uint32_t*)&rot.value.x;
+                m_frameHash ^= *(std::uint32_t*)&rot.value.y;
+                m_frameHash ^= *(std::uint32_t*)&rot.value.z;
+                m_frameHash ^= *(std::uint32_t*)&rot.value.w;
             });
 
         return true;
@@ -214,7 +232,18 @@ namespace blink
             m_physicsSystem->OptimizeBroadPhase();
         }
 
-        m_physicsSystem->Update(dt, 1, 1, &temp_allocator, &job_system);
+        m_frameHash = 0;
+
+        if (!m_pause)
+        {
+            ++m_frameTick;
+            m_physicsSystem->Update(dt, 1, 1, &temp_allocator, &job_system);
+        }
+
+        if (m_pauseFrameTick == m_frameTick)
+        {
+            m_pause = true;
+        }
     }
 
     std::uint32_t JoltPhysicsSystem::CreateBox(const glm::vec3& size,
@@ -272,5 +301,4 @@ namespace blink
         bodyInterface.RemoveBody(phBodyId);
         bodyInterface.DestroyBody(phBodyId);
     }
-
 } // namespace blink
