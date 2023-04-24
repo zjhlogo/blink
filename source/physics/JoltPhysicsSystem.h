@@ -38,6 +38,9 @@ namespace blink
 
         void setPauseFrameTick(std::uint32_t tick) { m_pauseFrameTick = tick; }
 
+        void saveState(const tstring& filePath);
+        void loadState(const tstring& filePath);
+
     private:
         JPH::PhysicsSystem* m_physicsSystem{};
         bool m_needOptimizeBroadPhase{};

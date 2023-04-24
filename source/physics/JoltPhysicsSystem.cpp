@@ -16,7 +16,9 @@
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/StateRecorderImpl.h>
 #include <Jolt/RegisterTypes.h>
+#include <foundation/File.h>
 #include <foundation/Log.h>
 
 #include <thread>
@@ -182,7 +184,6 @@ namespace blink
 
         // sync rigid body pos and rot
         JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
-        std::uint32_t index = 0;
         m_ecsWorld->getWorld().system<Position, Rotation, const PhysicsData>().each(
             [&](flecs::entity e, Position& pos, Rotation& rot, const PhysicsData& pd) {
                 JPH::BodyID bodyId(pd.bodyId);
@@ -192,10 +193,11 @@ namespace blink
                 bodyInterface.GetPositionAndRotation(bodyId, phPos, phRot);
 
                 pos.value = glm::vec3(phPos.GetX(), phPos.GetY(), phPos.GetZ());
-                rot.value = glm::quat(phRot.GetX(), phRot.GetY(), phRot.GetZ(), phRot.GetW());
+                rot.value = glm::quat(phRot.GetW(), phRot.GetX(), phRot.GetY(), phRot.GetZ());
 
                 // dump frame hash
-                m_frameHash ^= index++;
+                //LOGI("index={0}, ({1},{2},{3})", e.id(), pos.value.x, pos.value.y, pos.value.z);
+                m_frameHash ^= e.id();
 
                 m_frameHash ^= *(std::uint32_t*)&pos.value.x;
                 m_frameHash ^= *(std::uint32_t*)&pos.value.y;
@@ -205,6 +207,7 @@ namespace blink
                 m_frameHash ^= *(std::uint32_t*)&rot.value.y;
                 m_frameHash ^= *(std::uint32_t*)&rot.value.z;
                 m_frameHash ^= *(std::uint32_t*)&rot.value.w;
+
             });
 
         return true;
@@ -224,7 +227,8 @@ namespace blink
     void JoltPhysicsSystem::frameUpdate(float dt)
     {
         static JPH::TempAllocatorImpl temp_allocator(10 * 1024 * 1024);
-        static JPH::JobSystemThreadPool job_system(2048, 8, std::thread::hardware_concurrency() - 1);
+        //        static JPH::JobSystemThreadPool job_system(2048, 8, std::thread::hardware_concurrency() - 1);
+        static JPH::JobSystemThreadPool job_system(2048, 8, 0);
 
         if (m_needOptimizeBroadPhase)
         {
@@ -251,20 +255,29 @@ namespace blink
                                                const glm::quat& rot,
                                                PhysicsBodyType type)
     {
-        JPH::ObjectLayer layer = Layers::NON_MOVING;
+        auto layer = Layers::NON_MOVING;
+        auto activation = JPH::EActivation::DontActivate;
         if (type != PhysicsBodyType::Static)
         {
             layer = Layers::MOVING;
+            activation = JPH::EActivation::Activate;
         }
 
-        JPH::BodyCreationSettings boxSetting(new JPH::BoxShape(JPH::Vec3(size.x, size.y, size.z) * 0.5f),
+        JPH::BodyCreationSettings boxSetting(new JPH::BoxShape(0.5f * JPH::Vec3(size.x, size.y, size.z)),
                                              JPH::Vec3(pos.x, pos.y, pos.z),
                                              JPH::Quat(rot.x, rot.y, rot.z, rot.w),
                                              (JPH::EMotionType)type,
                                              layer);
 
+        //        if (type == PhysicsBodyType::Dynamic)
+        //        {
+        //            boxSetting.mRestitution = 0.7f;
+        //            boxSetting.mLinearDamping = 0.5f;
+        //            boxSetting.mAngularDamping = 0.5f;
+        //        }
+
         JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
-        JPH::BodyID boxId = bodyInterface.CreateAndAddBody(boxSetting, JPH::EActivation::Activate);
+        JPH::BodyID boxId = bodyInterface.CreateAndAddBody(boxSetting, activation);
 
         m_needOptimizeBroadPhase = true;
         return boxId.GetIndexAndSequenceNumber();
@@ -273,10 +286,12 @@ namespace blink
     std::uint32_t
     JoltPhysicsSystem::CreateSphere(float radius, const glm::vec3& pos, const glm::quat& rot, PhysicsBodyType type)
     {
-        JPH::ObjectLayer layer = Layers::NON_MOVING;
+        auto layer = Layers::NON_MOVING;
+        auto activation = JPH::EActivation::DontActivate;
         if (type != PhysicsBodyType::Static)
         {
             layer = Layers::MOVING;
+            activation = JPH::EActivation::Activate;
         }
 
         JPH::BodyCreationSettings sphereSetting(new JPH::SphereShape(radius),
@@ -284,10 +299,16 @@ namespace blink
                                                 JPH::Quat(rot.x, rot.y, rot.z, rot.w),
                                                 (JPH::EMotionType)type,
                                                 layer);
-        sphereSetting.mRestitution = 0.5f;
+
+        //        if (type == PhysicsBodyType::Dynamic)
+        //        {
+        //            sphereSetting.mRestitution = 0.7f;
+        //            sphereSetting.mLinearDamping = 0.5f;
+        //            sphereSetting.mAngularDamping = 0.5f;
+        //        }
 
         JPH::BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
-        JPH::BodyID sphereId = bodyInterface.CreateAndAddBody(sphereSetting, JPH::EActivation::Activate);
+        JPH::BodyID sphereId = bodyInterface.CreateAndAddBody(sphereSetting, activation);
 
         m_needOptimizeBroadPhase = true;
         return sphereId.GetIndexAndSequenceNumber();
@@ -300,5 +321,41 @@ namespace blink
         JPH::BodyID phBodyId(bodyId);
         bodyInterface.RemoveBody(phBodyId);
         bodyInterface.DestroyBody(phBodyId);
+    }
+
+    void JoltPhysicsSystem::saveState(const tstring& filePath)
+    {
+        JPH::StateRecorderImpl state;
+        state.Write(m_needOptimizeBroadPhase);
+        state.Write(m_pause);
+        state.Write(m_frameTick);
+        state.Write(m_pauseFrameTick);
+
+        m_physicsSystem->SaveState(state);
+
+        auto data = state.GetData();
+        std::size_t size = data.size();
+        blink::File file;
+        file.open(filePath, File::AM_WRITE);
+        file.write(data.data(), size);
+        file.close();
+    }
+
+    void JoltPhysicsSystem::loadState(const tstring& filePath)
+    {
+        JPH::StateRecorderImpl state;
+
+        std::vector<std::uint8_t> buffer;
+        File::readFileIntoBuffer(buffer, filePath);
+
+        state.WriteBytes(buffer.data(), buffer.size());
+
+        state.Rewind();
+        state.Read(m_needOptimizeBroadPhase);
+        state.Read(m_pause);
+        state.Read(m_frameTick);
+        state.Read(m_pauseFrameTick);
+
+        m_physicsSystem->RestoreState(state);
     }
 } // namespace blink

@@ -11,11 +11,15 @@
 
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
+#include <random>
 
 namespace blink
 {
-
     glm::vec3 randomVec3Normalized();
+    glm::vec3 randomVec3Normalized(std::default_random_engine& re);
+    float randomRange(std::default_random_engine& re, float min, float max);
+    float randomRadian(std::default_random_engine& re);
+    glm::quat randomQuat(std::default_random_engine& re);
 } // namespace blink
 
 namespace glm

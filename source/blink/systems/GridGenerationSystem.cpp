@@ -19,13 +19,34 @@ namespace blink
         m_gridGeometry = resourceModule->createGeometry(m_lineListBuilder->getUniqueId(), PrimitiveTopology::LineList);
         for (int i = -m_gridCount; i <= m_gridCount; ++i)
         {
-            m_lineListBuilder->addLine(glm::vec3(i * m_gridGap, 0.0f, -m_gridCount * m_gridGap),
-                                       glm::vec3(i * m_gridGap, 0.0f, m_gridCount * m_gridGap),
-                                       Color::WHITE);
-            m_lineListBuilder->addLine(glm::vec3(-m_gridCount * m_gridGap, 0.0f, i * m_gridGap),
-                                       glm::vec3(m_gridCount * m_gridGap, 0.0f, i * m_gridGap),
-                                       Color::WHITE);
+            if (i != 0)
+            {
+                m_lineListBuilder->addLine(glm::vec3(i * m_gridGap, 0.0f, -m_gridCount * m_gridGap),
+                                           glm::vec3(i * m_gridGap, 0.0f, m_gridCount * m_gridGap),
+                                           Color::WHITE);
+                m_lineListBuilder->addLine(glm::vec3(-m_gridCount * m_gridGap, 0.0f, i * m_gridGap),
+                                           glm::vec3(m_gridCount * m_gridGap, 0.0f, i * m_gridGap),
+                                           Color::WHITE);
+            }
+            else
+            {
+                m_lineListBuilder->addLine(glm::vec3(i * m_gridGap, 0.0f, -m_gridCount * m_gridGap),
+                                           glm::zero<glm::vec3>(),
+                                           Color::WHITE);
+                m_lineListBuilder->addLine(glm::vec3(-m_gridCount * m_gridGap, 0.0f, i * m_gridGap),
+                                           glm::zero<glm::vec3>(),
+                                           Color::WHITE);
+            }
         }
+
+        // x axis
+        m_lineListBuilder->addLine(glm::zero<glm::vec3>(), glm::vec3(m_gridCount * m_gridGap, 0.0f, 0.0f), Color::RED);
+        // y axis
+        m_lineListBuilder->addLine(glm::zero<glm::vec3>(),
+                                   glm::vec3(0.0f, m_gridCount * m_gridGap, 0.0f),
+                                   Color::GREEN);
+        // z axis
+        m_lineListBuilder->addLine(glm::zero<glm::vec3>(), glm::vec3(0.0f, 0.0f, m_gridCount * m_gridGap), Color::BLUE);
 
         m_lineListBuilder->build(m_gridGeometry);
 
