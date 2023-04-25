@@ -132,10 +132,28 @@ namespace blink
             }
         }
 
+        // z-test
+        {
+            auto jZTestEnable = j["z_test_enable"];
+            if (!jZTestEnable.is_null())
+            {
+                m_zTestEnable = jZTestEnable.get<bool>();
+            }
+        }
+
+        // z-write
+        {
+            auto jZWriteEnable = j["z_write_enable"];
+            if (!jZWriteEnable.is_null())
+            {
+                m_zWriteEnable = jZWriteEnable.get<bool>();
+            }
+        }
+
         m_filePath = filePath;
 
         m_pipeline = new VulkanPipeline(m_logicalDevice, m_renderPass);
-        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_polygonMode, m_topology))
+        if (!m_pipeline->create(m_vertexShader, m_fragmentShader, m_polygonMode, m_topology, m_zTestEnable, m_zWriteEnable))
         {
             return false;
         }

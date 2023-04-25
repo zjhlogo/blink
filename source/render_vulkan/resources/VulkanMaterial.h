@@ -66,6 +66,9 @@ namespace blink
         VkPolygonMode m_polygonMode{VK_POLYGON_MODE_FILL};
         PrimitiveTopology m_topology{PrimitiveTopology::TriangleList};
 
+        bool m_zTestEnable{true};
+        bool m_zWriteEnable{true};
+
         std::vector<VulkanPipeline::DescriptorInfo> m_descriptorInfoList;
         std::unordered_map<tstring, TextureInfo> m_textureInfoMap;
 

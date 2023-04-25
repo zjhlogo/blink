@@ -46,49 +46,33 @@ bool PhysicsApp::startup()
 
     auto& world = getEcsWorld().getWorld();
     auto resourceModule = blink::getResourceModule();
-
     auto mtlSimpleLit = resourceModule->createMaterial("/materials/simple_lit.mtl");
 
     // ground
-    {
-        blink::BoxBuilder builder;
-        auto boxSize = glm::vec3(1000.0f, 1.0f, 1000.0f);
-        auto geometry = builder.size(boxSize).build();
-        auto pos = glm::vec3(0.0f, -0.5f, 0.0f);
-        auto rot = glm::identity<glm::quat>();
-        auto scale = glm::one<glm::vec3>();
-        auto bodyId = m_physicsSystem->CreateBox(boxSize, pos, rot, blink::PhysicsBodyType::Static);
-        auto entity = world.entity("ground");
-        entity.set<blink::Position>({pos});
-        entity.set<blink::Rotation>({rot});
-        entity.set<blink::Scale>({scale});
-        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
-        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
-        entity.set<blink::PhysicsData>({bodyId});
-    }
+    createSandbox(100.0f, 4.0f, 100.0f, 2.0f);
 
     // sphere
     std::default_random_engine re;
     re.seed(9999);
-//    for (int i = 0; i < 100; ++i)
-//    {
-//        blink::SphereUvBuilder builder;
-//        auto radius = blink::randomRange(re, 0.5f, 1.0f);
-//        auto geometry = builder.radius(radius).build();
-//        auto pos = glm::vec3(blink::randomRange(re, -10.0f, 10.0f),
-//                             blink::randomRange(re, 10.0f, 30.0f),
-//                             blink::randomRange(re, -10.0f, 10.0f));
-//        auto rot = glm::identity<glm::quat>();
-//        auto scale = glm::one<glm::vec3>();
-//        auto bodyId = m_physicsSystem->CreateSphere(radius, pos, rot, blink::PhysicsBodyType::Dynamic);
-//        auto entity = world.entity();
-//        entity.set<blink::Position>({pos});
-//        entity.set<blink::Rotation>({rot});
-//        entity.set<blink::Scale>({scale});
-//        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
-//        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
-//        entity.set<blink::PhysicsData>({bodyId});
-//    }
+    //    for (int i = 0; i < 100; ++i)
+    //    {
+    //        blink::SphereUvBuilder builder;
+    //        auto radius = blink::randomRange(re, 0.5f, 1.0f);
+    //        auto geometry = builder.radius(radius).build();
+    //        auto pos = glm::vec3(blink::randomRange(re, -10.0f, 10.0f),
+    //                             blink::randomRange(re, 10.0f, 30.0f),
+    //                             blink::randomRange(re, -10.0f, 10.0f));
+    //        auto rot = glm::identity<glm::quat>();
+    //        auto scale = glm::one<glm::vec3>();
+    //        auto bodyId = m_physicsSystem->CreateSphere(radius, pos, rot, blink::PhysicsBodyType::Dynamic);
+    //        auto entity = world.entity();
+    //        entity.set<blink::Position>({pos});
+    //        entity.set<blink::Rotation>({rot});
+    //        entity.set<blink::Scale>({scale});
+    //        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
+    //        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+    //        entity.set<blink::PhysicsData>({bodyId});
+    //    }
 
     for (int i = 0; i < 100; ++i)
     {
@@ -160,6 +144,103 @@ void PhysicsApp::onGui()
     }
 
     ImGui::End();
+}
+
+void PhysicsApp::createSandbox(float width, float height, float depth, float thick)
+{
+    auto& world = getEcsWorld().getWorld();
+    auto resourceModule = blink::getResourceModule();
+    auto mtlSimpleLit = resourceModule->createMaterial("/materials/simple_lit.mtl");
+
+    // bottom
+    {
+        blink::BoxBuilder builder;
+        glm::vec3 geoSize(width + thick * 2.0f, thick, depth + thick * 2.0f);
+        auto geometry = builder.size(geoSize).build();
+        glm::vec3 pos(0.0f, -0.5f * thick, 0.0f);
+        auto rot = glm::identity<glm::quat>();
+        auto scale = glm::one<glm::vec3>();
+        auto bodyId = m_physicsSystem->CreateBox(geoSize, pos, rot, blink::PhysicsBodyType::Static);
+        auto entity = world.entity();
+        entity.set<blink::Position>({pos});
+        entity.set<blink::Rotation>({rot});
+        entity.set<blink::Scale>({scale});
+        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
+        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+        entity.set<blink::PhysicsData>({bodyId});
+    }
+
+    // left
+    {
+        blink::BoxBuilder builder;
+        glm::vec3 geoSize(thick, thick + height, depth + thick * 2.0f);
+        auto geometry = builder.size(geoSize).build();
+        glm::vec3 pos(-0.5f * (width + thick), 0.5f * (height - thick), 0.0f);
+        auto rot = glm::identity<glm::quat>();
+        auto scale = glm::one<glm::vec3>();
+        auto bodyId = m_physicsSystem->CreateBox(geoSize, pos, rot, blink::PhysicsBodyType::Static);
+        auto entity = world.entity();
+        entity.set<blink::Position>({pos});
+        entity.set<blink::Rotation>({rot});
+        entity.set<blink::Scale>({scale});
+        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
+        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+        entity.set<blink::PhysicsData>({bodyId});
+    }
+
+    // right
+    {
+        blink::BoxBuilder builder;
+        glm::vec3 geoSize(thick, thick + height, depth + thick * 2.0f);
+        auto geometry = builder.size(geoSize).build();
+        glm::vec3 pos(0.5f * (width + thick), 0.5f * (height - thick), 0.0f);
+        auto rot = glm::identity<glm::quat>();
+        auto scale = glm::one<glm::vec3>();
+        auto bodyId = m_physicsSystem->CreateBox(geoSize, pos, rot, blink::PhysicsBodyType::Static);
+        auto entity = world.entity();
+        entity.set<blink::Position>({pos});
+        entity.set<blink::Rotation>({rot});
+        entity.set<blink::Scale>({scale});
+        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
+        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+        entity.set<blink::PhysicsData>({bodyId});
+    }
+
+    // front
+    {
+        blink::BoxBuilder builder;
+        glm::vec3 geoSize(width + thick * 2.0f, thick + height, thick);
+        auto geometry = builder.size(geoSize).build();
+        glm::vec3 pos(0.0f, 0.5f * (height - thick), 0.5f * (depth + thick));
+        auto rot = glm::identity<glm::quat>();
+        auto scale = glm::one<glm::vec3>();
+        auto bodyId = m_physicsSystem->CreateBox(geoSize, pos, rot, blink::PhysicsBodyType::Static);
+        auto entity = world.entity();
+        entity.set<blink::Position>({pos});
+        entity.set<blink::Rotation>({rot});
+        entity.set<blink::Scale>({scale});
+        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
+        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+        entity.set<blink::PhysicsData>({bodyId});
+    }
+
+    // back
+    {
+        blink::BoxBuilder builder;
+        glm::vec3 geoSize(width + thick * 2.0f, thick + height, thick);
+        auto geometry = builder.size(geoSize).build();
+        glm::vec3 pos(0.0f, 0.5f * (height - thick), -0.5f * (depth + thick));
+        auto rot = glm::identity<glm::quat>();
+        auto scale = glm::one<glm::vec3>();
+        auto bodyId = m_physicsSystem->CreateBox(geoSize, pos, rot, blink::PhysicsBodyType::Static);
+        auto entity = world.entity();
+        entity.set<blink::Position>({pos});
+        entity.set<blink::Rotation>({rot});
+        entity.set<blink::Scale>({scale});
+        entity.set<blink::StaticModel>({geometry, mtlSimpleLit});
+        entity.set<blink::Renderable>({blink::RenderLayers::NORMAL});
+        entity.set<blink::PhysicsData>({bodyId});
+    }
 }
 
 int main(int argc, char** argv)

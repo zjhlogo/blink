@@ -33,7 +33,12 @@ namespace blink
         destroy();
     }
 
-    bool VulkanPipeline::create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology)
+    bool VulkanPipeline::create(const tstring& vertexShader,
+                                const tstring& fragmentShader,
+                                VkPolygonMode polygonMode,
+                                PrimitiveTopology topology,
+                                bool zTestEnable,
+                                bool zWriteEnable)
     {
         if (m_pipeline != VK_NULL_HANDLE)
         {
@@ -84,7 +89,15 @@ namespace blink
         const auto& surfaceSize = renderModule->getSurfaceSize();
 
         if (VK_NULL_HANDLE
-            == createGraphicsPipeline(vertexShaderCode, fragmentShaderCode, vertexInputBindings, vertexInputAttributes, m_polygonMode, m_topology, surfaceSize))
+            == createGraphicsPipeline(vertexShaderCode,
+                                      fragmentShaderCode,
+                                      vertexInputBindings,
+                                      vertexInputAttributes,
+                                      m_polygonMode,
+                                      m_topology,
+                                      surfaceSize,
+                                      zTestEnable,
+                                      zWriteEnable))
         {
             return false;
         }
@@ -104,7 +117,8 @@ namespace blink
         m_vertexAttrs = VertexAttrs::None;
     }
 
-    bool VulkanPipeline::bindDescriptorSets(const VulkanCommandBuffer& commandBuffer, const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList)
+    bool VulkanPipeline::bindDescriptorSets(const VulkanCommandBuffer& commandBuffer,
+                                            const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList)
     {
         assert(m_writeSets.size() == descriptorInfoList.size());
 
@@ -134,9 +148,20 @@ namespace blink
             }
         }
 
-        vkUpdateDescriptorSets((VkDevice)m_logicalDevice, static_cast<uint32_t>(m_writeSets.size()), m_writeSets.data(), 0, nullptr);
+        vkUpdateDescriptorSets((VkDevice)m_logicalDevice,
+                               static_cast<uint32_t>(m_writeSets.size()),
+                               m_writeSets.data(),
+                               0,
+                               nullptr);
 
-        vkCmdBindDescriptorSets((VkCommandBuffer)commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+        vkCmdBindDescriptorSets((VkCommandBuffer)commandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                m_pipelineLayout,
+                                0,
+                                1,
+                                &descriptorSet,
+                                0,
+                                nullptr);
 
         return true;
     }
@@ -163,7 +188,8 @@ namespace blink
         return it->second;
     }
 
-    VkDescriptorSetLayout VulkanPipeline::createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
+    VkDescriptorSetLayout
+    VulkanPipeline::createDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings)
     {
         destroyDescriptorSetLayout();
 
@@ -177,7 +203,8 @@ namespace blink
         layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
-        VK_CHECK_RESULT_VOID(vkCreateDescriptorSetLayout((VkDevice)m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout))
+        VK_CHECK_RESULT_VOID(
+            vkCreateDescriptorSetLayout((VkDevice)m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout))
         return m_descriptorSetLayout;
     }
 
@@ -196,7 +223,9 @@ namespace blink
                                                       const std::vector<VkVertexInputAttributeDescription>& attributes,
                                                       VkPolygonMode polygonMode,
                                                       VkPrimitiveTopology topology,
-                                                      const glm::ivec2& surfaceSize)
+                                                      const glm::ivec2& surfaceSize,
+                                                      bool zTestEnable,
+                                                      bool zWriteEnable)
     {
         destroyGraphicsPipeline();
 
@@ -213,7 +242,8 @@ namespace blink
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-        VK_CHECK_RESULT_VOID(vkCreatePipelineLayout((VkDevice)m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
+        VK_CHECK_RESULT_VOID(
+            vkCreatePipelineLayout((VkDevice)m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
 
         VkShaderModule vertShaderModule = createShaderModule(vertexShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
@@ -247,7 +277,12 @@ namespace blink
         inputAssembly.topology = topology;
 
         // viewport state
-        VkViewport viewport{0.0f, 0.0f, static_cast<float>(surfaceSize.x), static_cast<float>(surfaceSize.y), 0.0f, 1.0f};
+        VkViewport viewport{0.0f,
+                            0.0f,
+                            static_cast<float>(surfaceSize.x),
+                            static_cast<float>(surfaceSize.y),
+                            0.0f,
+                            1.0f};
         VkRect2D scissor{
             {                                   0,                                    0},
             {static_cast<uint32_t>(surfaceSize.x), static_cast<uint32_t>(surfaceSize.y)}
@@ -279,15 +314,16 @@ namespace blink
         // depth and stencil state
         VkPipelineDepthStencilStateCreateInfo depthStencil{};
         depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-        depthStencil.depthTestEnable = VK_TRUE;
-        depthStencil.depthWriteEnable = VK_TRUE;
-        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+        depthStencil.depthTestEnable = zTestEnable;
+        depthStencil.depthWriteEnable = zWriteEnable;
+        depthStencil.depthCompareOp = zTestEnable ? VK_COMPARE_OP_LESS : VK_COMPARE_OP_NEVER;
         depthStencil.depthBoundsTestEnable = VK_FALSE;
         depthStencil.stencilTestEnable = VK_FALSE;
 
         // color blending state
         VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        colorBlendAttachment.colorWriteMask =
+            VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         colorBlendAttachment.blendEnable = VK_FALSE;
 
         VkPipelineColorBlendStateCreateInfo colorBlending{};
@@ -321,7 +357,12 @@ namespace blink
         pipelineInfo.renderPass = (VkRenderPass)m_renderPass;
         pipelineInfo.subpass = 0;
 
-        VK_CHECK_RESULT_VOID(vkCreateGraphicsPipelines((VkDevice)m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline))
+        VK_CHECK_RESULT_VOID(vkCreateGraphicsPipelines((VkDevice)m_logicalDevice,
+                                                       VK_NULL_HANDLE,
+                                                       1,
+                                                       &pipelineInfo,
+                                                       nullptr,
+                                                       &m_pipeline))
         vkDestroyShaderModule((VkDevice)m_logicalDevice, fragShaderModule, nullptr);
         vkDestroyShaderModule((VkDevice)m_logicalDevice, vertShaderModule, nullptr);
 
@@ -389,7 +430,8 @@ namespace blink
                                                         std::vector<VkVertexInputAttributeDescription>& attributeDesc,
                                                         const std::vector<uint8_t>& vertexShaderCode)
     {
-        spirv_cross::CompilerGLSL glsl(reinterpret_cast<const uint32_t*>(vertexShaderCode.data()), vertexShaderCode.size() / sizeof(uint32_t));
+        spirv_cross::CompilerGLSL glsl(reinterpret_cast<const uint32_t*>(vertexShaderCode.data()),
+                                       vertexShaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
         bindingDesc.resize(resources.stage_inputs.size());
@@ -434,7 +476,8 @@ namespace blink
                                                      const std::vector<uint8_t>& shaderCode,
                                                      uint32_t shaderStageBits)
     {
-        spirv_cross::CompilerGLSL glsl(reinterpret_cast<const uint32_t*>(shaderCode.data()), shaderCode.size() / sizeof(uint32_t));
+        spirv_cross::CompilerGLSL glsl(reinterpret_cast<const uint32_t*>(shaderCode.data()),
+                                       shaderCode.size() / sizeof(uint32_t));
         auto resources = glsl.get_shader_resources();
 
         // uniform buffers

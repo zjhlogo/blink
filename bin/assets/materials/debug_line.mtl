@@ -1,15 +1,19 @@
 {
-    "vertex_shader" : "/shaders/debug_line.vert.spv",
-    "fragment_shader" : "/shaders/debug_line.frag.spv",
-    
-    "wireframe" : true,
-    "line_list" : true,
-
-        "uniforms" : [
+    "vertex_shader": "/shaders/debug_line.vert.spv",
+    "fragment_shader": "/shaders/debug_line.frag.spv",
+    "wireframe": true,
+    "line_list": true,
+    "z_test_enable": false,
+    "z_write_enable": false,
+    "uniforms": [
         {
-            "name" : "color",
-            "type" : "vec3",
-            "value" : [1, 1, 1]
+            "name": "color",
+            "type": "vec3",
+            "value": [
+                1,
+                1,
+                1
+            ]
         }
     ]
 }

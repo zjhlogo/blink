@@ -47,7 +47,7 @@ namespace blink
 
         explicit operator VkPipeline() const { return m_pipeline; }
 
-        bool create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology);
+        bool create(const tstring& vertexShader, const tstring& fragmentShader, VkPolygonMode polygonMode, PrimitiveTopology topology, bool zTestEnable, bool zWriteEnable);
         void destroy();
 
         bool bindDescriptorSets(const VulkanCommandBuffer& commandBuffer, const std::vector<VulkanPipeline::DescriptorInfo>& descriptorInfoList);
@@ -72,7 +72,9 @@ namespace blink
                                           const std::vector<VkVertexInputAttributeDescription>& attributes,
                                           VkPolygonMode polygonMode,
                                           VkPrimitiveTopology topology,
-                                          const glm::ivec2& surfaceSize);
+                                          const glm::ivec2& surfaceSize,
+                                          bool zTestEnable,
+                                          bool zWriteEnable);
         void destroyGraphicsPipeline();
 
         VkShaderModule createShaderModule(const std::vector<uint8_t>& shaderCode);

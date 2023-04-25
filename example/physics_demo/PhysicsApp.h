@@ -28,5 +28,8 @@ protected:
     bool startup() override;
 
 private:
+    void createSandbox(float width, float height, float depth, float thick);
+
+private:
     blink::JoltPhysicsSystem* m_physicsSystem{};
 };
